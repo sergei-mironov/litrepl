@@ -18,6 +18,7 @@ let
       hypothesis
       pytest
       pytest-mypy
+      lark-parser
     ]);
 
 
