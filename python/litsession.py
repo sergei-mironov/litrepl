@@ -9,6 +9,7 @@ import sys
 from select import select
 from os import environ, system
 from lark import Lark, Visitor, Transformer, Token, Tree
+from lark.visitors import Interpreter
 
 def mkre(prompt:str):
   return re.compile(f"(.*)(?={prompt})|{prompt}".encode('utf-8'),
@@ -17,7 +18,7 @@ def mkre(prompt:str):
 def readout(fdr, prompt=mkre('>>>'),timeout:Optional[int]=10)->str:
   acc:bytes=b''
   while select([fdr],[],[],timeout)[0] != []:
-    r=os.read(fdr, 1024);
+    r=os.read(fdr, 1024)
     if r==b'':
       return acc.decode('utf-8')
     acc+=r
@@ -61,8 +62,7 @@ def stop():
 
 
 grammar_md = r"""
-start: document
-document : snippet (snippet)*
+start: (snippet)*
 snippet : icodesection -> e_icodesection
         | ocodesection -> e_ocodesection
         | inlinesection -> e_inline
@@ -71,15 +71,27 @@ snippet : icodesection -> e_icodesection
 icodesection.1 : "```" "python" text "```"
 ocodesection.1 : "```" text "```"
 inlinesection : "`" text "`"
-word : /[^`]+/
-text : word*
+text : /[^`]+/s
 osecmarker : "`OUTPUT`"
 """
 
+class MdPrinter(Interpreter):
+  def text(self,tree):
+    print(tree.children[0].value, end='')
+  def icodesection(self,tree):
+    print(f"```python{tree.children[0].children[0].value}```", end='')
+  def ocodesection(self,tree):
+    print(f"```{tree.children[0].children[0].value}```", end='')
+  def inlinesection(self,tree):
+    print(f"`{tree.children[0].children[0].value}`", end='')
+
 def parse_md():
   parser = Lark(grammar_md)
-  print(parser)
-  print(parser.parse(sys.stdin.read()).pretty())
+  # print(parser)
+  tree=parser.parse(sys.stdin.read())
+  # print(tree.pretty())
+  v=MdPrinter()
+  v.visit(tree)
 
 
 if __name__=='__main__':

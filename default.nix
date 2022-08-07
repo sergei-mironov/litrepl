@@ -7,11 +7,13 @@ let
     callPackage = pkgs.lib.callPackageWith collection;
 
 
-    mypython = pkgs.python3.withPackages (
+    mypython = pkgs.python38.withPackages (
       pp: let
         pyls = pp.python-language-server.override { providers=["pycodestyle"]; };
         pyls-mypy = pp.pyls-mypy.override { python-language-server=pyls; };
       in with pp; [
+      pyls
+      pyls-mypy
       setuptools
       setuptools_scm
       ipython
