@@ -75,21 +75,24 @@ text : /[^`]+/s
 osecmarker : "`OUTPUT`"
 """
 
-class MdPrinter(Interpreter):
-  def text(self,tree):
-    print(tree.children[0].value, end='')
-  def icodesection(self,tree):
-    print(f"```python{tree.children[0].children[0].value}```", end='')
-  def ocodesection(self,tree):
-    print(f"```{tree.children[0].children[0].value}```", end='')
-  def inlinesection(self,tree):
-    print(f"`{tree.children[0].children[0].value}`", end='')
-
 def parse_md():
   parser = Lark(grammar_md)
   # print(parser)
   tree=parser.parse(sys.stdin.read())
   # print(tree.pretty())
+  return tree
+
+
+def print_md(tree):
+  class MdPrinter(Interpreter):
+    def text(self,tree):
+      print(tree.children[0].value, end='')
+    def icodesection(self,tree):
+      print(f"```python{tree.children[0].children[0].value}```", end='')
+    def ocodesection(self,tree):
+      print(f"```{tree.children[0].children[0].value}```", end='')
+    def inlinesection(self,tree):
+      print(f"`{tree.children[0].children[0].value}`", end='')
   v=MdPrinter()
   v.visit(tree)
 
@@ -102,8 +105,8 @@ if __name__=='__main__':
     stop()
   elif any([a in ['eval'] for a in argv]):
     process()
-  elif len(argv)==0 or any([a in ['parse-md'] for a in argv]):
-    parse_md()
+  elif any([a in ['parse-print'] for a in argv]):
+    print_md(parse_md())
   else:
     print('Unknown command')
 
