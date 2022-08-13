@@ -4,7 +4,7 @@ LiteREPL.vim
 **LiteREPL** is a VIM plugin and a Python library for literate programming and
 code evaluation right inside the editor.
 
-![demo](./demo.gif)
+<img src="./demo.gif" width="400"/>
 
 Requirements:
 
