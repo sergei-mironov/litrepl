@@ -1,20 +1,18 @@
-asdasd
+```python
+def hello(name):
+  print(f"Hello, {name}!")
 
-v=3
-3+3
-The inline `33=4` snippet
+hello("LitREPL")
+```
+
+```
+Hello, LitREPL!
+```
 
 ```python
-a=5
-print('Snippet 1', a+3)
+hello("World")
 ```
 
 ```
-zzzzzzzz
-```
-
-
-```python
-b=33
-print('Snippet 2', a+b)
+Hello, World!
 ```

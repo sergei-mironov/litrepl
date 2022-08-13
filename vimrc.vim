@@ -1,2 +1,2 @@
 let &runtimepath .= ','.expand('<sfile>:hp').'/vim'
-runtime plugin/literate.vim
+runtime plugin/literepl.vim

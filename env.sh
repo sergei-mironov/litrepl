@@ -14,5 +14,6 @@ alias ipython="sh $CWD/ipython.sh"
 
 unset vim
 unset VIMRUNTIME
-# export VIMRUNTIME=`vim -e -T dumb --cmd 'exe "set t_cm=\<C-M>"|echo $VIMRUNTIME|quit' | tr -d '\015'`
-# export VIMRUNTIME=$CWD/vim:$VIMRUNTIME
+
+python3 -c 'import lark' || echo "Warning: 'lark' python library not found" >&2
+# python -c 'import pylightnix' || echo "Warning: 'lark' python library not found" >&2
