@@ -19,8 +19,8 @@ Known limitations:
 * The plugin tweaks prompts of the Python interpreter
 * Read buffer is set to a constant `1024`
 
-*The plugin is currently is at the proof-of-concept stage. No code is packaged,
-use this repository to reproduce results*
+_Currently, the plugin is at the proof-of-concept stage. No code is packaged,
+clone this repository to reproduce the results!_
 
 Setup
 -----
