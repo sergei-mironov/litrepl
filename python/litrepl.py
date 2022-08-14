@@ -12,6 +12,7 @@ from os import environ, system
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
 from os.path import isfile
+from signal import signal, SIGINT
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs)
@@ -43,9 +44,21 @@ def interact(fdr, fdw, text:str)->str:
   return res
 
 def process(lines:str)->str:
+  pid=int(open('_pid.txt').read())
   fdw=os.open('_inp.pipe', os.O_WRONLY | os.O_SYNC)
   fdr=os.open('_out.pipe', os.O_RDONLY | os.O_SYNC)
-  return interact(fdr,fdw,lines)
+  def _handler(signum,frame):
+    pstderr(f'Sending SIGINT to {pid}')
+    os.kill(pid,SIGINT)
+  prev=signal(SIGINT,_handler)
+  try:
+    return interact(fdr,fdw,lines)
+  except KeyboardInterrupt:
+    return '<Session interrupted: Python interpreter is not responding>\n'
+  finally:
+    signal(SIGINT,prev)
+    os.close(fdr)
+    os.close(fdw)
 
 def start():
   if isfile('_pid.txt'):

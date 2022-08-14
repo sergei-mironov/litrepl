@@ -13,6 +13,12 @@ fun! s:SessionStop()
 endfun
 command! -nargs=0 LitStop call <SID>SessionStop()
 
+fun! s:SessionRestart()
+  call s:SessionStop()
+  call s:SessionStart()
+endfun
+command! -nargs=0 LitRestart call <SID>SessionRestart()
+
 fun! s:SessionParsePrint()
   execute "%! litrepl.py parse-print"
 endfun
