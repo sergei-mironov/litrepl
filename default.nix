@@ -37,6 +37,7 @@ let
       buildInputs = with pkgs; [
         cloc
         gnumake
+        socat
         ] ++ [
         mypython
         (let

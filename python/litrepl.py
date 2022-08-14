@@ -192,6 +192,8 @@ if __name__=='__main__':
     line=int(argv[argv.index('--line')+1])
     col=int(argv[argv.index('--col')+1])
     eval_section(parse_md(),line,col)
+  elif any([a in ['repl'] for a in argv]):
+    system("socat - 'PIPE:_out.pipe!!PIPE:_inp.pipe'")
   elif any([a in ['-h','--help'] for a in argv]):
     print('litrepl.py (start|stop|eval|parse-print|eval-section)')
   elif any([a in ['--version'] for a in argv]):
