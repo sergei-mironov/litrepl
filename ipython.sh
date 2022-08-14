@@ -1,7 +1,7 @@
 #!/bin/sh
 
-if ! test -d "$PROJECT_SOURCE" ; then
-  echo "PROJECT_SOURCE is not set"
+if ! test -d "$LITREPL_ROOT" ; then
+  echo "LITREPL_ROOT is not set"
   exit 1
 fi
 
@@ -11,8 +11,8 @@ fi
 #   alias ipython0='ipython --profile-dir=$CWD/.ipython-profile'
 # fi
 
-mkdir $PROJECT_SOURCE/.ipython-profile 2>/dev/null || true
-cat >$PROJECT_SOURCE/.ipython-profile/ipython_config.py <<EOF
+mkdir $LITREPL_ROOT/.ipython-profile 2>/dev/null || true
+cat >$LITREPL_ROOT/.ipython-profile/ipython_config.py <<EOF
 c = get_config()
 c.InteractiveShellApp.exec_lines = []
 c.InteractiveShellApp.exec_lines.append('%load_ext autoreload')
@@ -28,11 +28,11 @@ def tweak():
   except Exception as e:
     print("Failed to tweak numpy. Is it installed?")
 
-  try:
-    import ssl;
-    ssl._create_default_https_context = ssl._create_unverified_context
-  except Exception as e:
-    print("Failed to tweak ssl. Is it installed?")
+  # try:
+  #   import ssl;
+  #   ssl._create_default_https_context = ssl._create_unverified_context
+  # except Exception as e:
+  #   print("Failed to tweak ssl. Is it installed?")
 
   try:
     import matplotlib;
@@ -45,6 +45,6 @@ def tweak():
 tweak()
 EOF
 
-ipython3 --profile-dir=$PROJECT_SOURCE/.ipython-profile \
-         --logfile="$PROJECT_SOURCE/_ipython.log" -i "$@"
+ipython3 --profile-dir=$LITREPL_ROOT/.ipython-profile \
+         --logfile="$LITREPL_ROOT/_ipython.log" -i "$@"
 
