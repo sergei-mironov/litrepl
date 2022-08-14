@@ -136,7 +136,7 @@ def eval_section(tree,line,col):
     def icodesection(self,tree):
       t=tree.children[1].children[0].value
       print(f"```python{t}```", end='')
-      bm,em=tree.children[0],tree.children[2]
+      bm,em=tree.children[0].meta,tree.children[2].meta
       self.task=unindent(bm.column-1,t)
       self.result=None
       if cursor_within((line,col),(bm.line,bm.column),
@@ -144,7 +144,7 @@ def eval_section(tree,line,col):
         self.result=process(self.task)
 
     def ocodesection(self,tree):
-      bm,em=tree.children[0],tree.children[2]
+      bm,em=tree.children[0].meta,tree.children[2].meta
       if cursor_within((line,col),(bm.line,bm.column),
                          (em.end_line,em.end_column)) and self.task is not None:
         self.result=process(self.task)
@@ -176,6 +176,10 @@ if __name__=='__main__':
     line=int(argv[argv.index('--line')+1])
     col=int(argv[argv.index('--col')+1])
     eval_section(parse_md(),line,col)
+  elif any([a in ['-h','--help'] for a in argv]):
+    print('litrepl.py (start|stop|eval|parse-print|eval-section)')
+  elif any([a in ['--version'] for a in argv]):
+    print('litrepl.py development version')
   else:
     pstderr(f'Unknown arguments: {argv}')
     exit(1)

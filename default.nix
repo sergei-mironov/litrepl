@@ -20,7 +20,15 @@ let
       hypothesis
       pytest
       pytest-mypy
-      lark-parser
+      (lark-parser.overrideAttrs (o : rec {
+        version = "1.1.2";
+        src = pkgs.fetchFromGitHub {
+          owner = "lark-parser";
+          repo = "lark";
+          rev = version;
+          sha256 = "sha256:02sdg8zppdh2hlhmyn776bfqikxm42hg27c7jj9h5a37455c6mk3";
+        };
+      }))
     ]);
 
 

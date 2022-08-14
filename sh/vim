@@ -1,6 +1,0 @@
-#!/bin/sh
-ME=`dirname $0`
-set -x -e
-export PATH=`echo $PATH | cut -d':' -f2-`
-exec vim -S "$ME/../vimrc.vim" "$@"
-

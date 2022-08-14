@@ -1,7 +1,7 @@
-LiteREPL.vim
+LitREPL.vim
 ------------
 
-**LiteREPL** is a VIM plugin and a Python library for literate programming and
+**LitREPL** is a VIM plugin and a Python library for Litrate programming and
 code evaluation right inside the editor.
 
 <img src="./demo.gif" width="400"/>
@@ -16,6 +16,7 @@ Requirements:
 
 Known limitations:
 
+* Synchronous Python execution only
 * The plugin tweaks prompts of the Python interpreter
 * Read buffer is set to a constant `1024`
 
@@ -25,7 +26,7 @@ clone this repository to reproduce the results!_
 Setup
 -----
 
-1. `git clone --recursive <https://this_repo>; cd literepl.vim`
+1. `git clone --recursive <https://this_repo>; cd litrepl.vim`
 2. Enter the development environment
    * (For Nix/NixOS systems) `nix-shell`
    * (For other Linuxes) `. env.sh`
@@ -75,11 +76,11 @@ interpreter state. The result section next to the executable one will be
 updated.
 
 ```python
-print(W[:7]+"LiteREPL.vim!")
+print(W[:7]+"LitREPL.vim!")
 ```
 
 ```
-Hello, LiteREPL.vim!
+Hello, LitREPL.vim!
 ```
 
 ### Latex

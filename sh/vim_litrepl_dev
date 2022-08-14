@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# This is a small shell wrapper which adds LitREPL plugin from the current
+# repository to the VIM's runtime path.
+
+if ! test -f "$LITREPL_ROOT/vim/plugin/litrepl.vim" ; then
+  echo "'litrepl.vim' is not under the LITREPL_ROOT. Did you source 'env.sh'?"
+fi
+exec vim -c "
+let &runtimepath .= ',$LITREPL_ROOT/vim'
+runtime plugin/litrepl.vim
+" "$@"
+
