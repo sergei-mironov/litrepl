@@ -47,14 +47,12 @@ def process(lines:str)->str:
   pid=int(open('_pid.txt').read())
   fdw=os.open('_inp.pipe', os.O_WRONLY | os.O_SYNC)
   fdr=os.open('_out.pipe', os.O_RDONLY | os.O_SYNC)
+  prev=None
   def _handler(signum,frame):
-    pstderr(f'Sending SIGINT to {pid}')
     os.kill(pid,SIGINT)
   prev=signal(SIGINT,_handler)
   try:
     return interact(fdr,fdw,lines)
-  except KeyboardInterrupt:
-    return '<Session interrupted: Python interpreter is not responding>\n'
   finally:
     signal(SIGINT,prev)
     os.close(fdr)
@@ -71,6 +69,11 @@ def start():
             'os.open(\'_inp.pipe\',os.O_RDWR);'
             'os.open(\'_out.pipe\',os.O_RDWR);"'
             '<_inp.pipe >_out.pipe 2>&1 & echo $! >_pid.txt'))
+    open('_inp.pipe','w').write(
+      'import signal\n'
+      'def _handler(signum,frame):\n'
+      '  raise KeyboardInterrupt()\n\n'
+      '_=signal.signal(signal.SIGINT,_handler)\n')
     exit(0)
 
 def running()->bool:
