@@ -13,6 +13,7 @@ from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
 from os.path import isfile
 from signal import signal, SIGINT
+from time import sleep
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs)
@@ -75,6 +76,13 @@ def start():
       '  raise KeyboardInterrupt()\n\n'
       '_=signal.signal(signal.SIGINT,_handler)\n')
     exit(0)
+  else:
+    for i in range(10):
+      if isfile("_pid.txt"):
+        break
+      sleep(0.5)
+    if not isfile("_pid.txt"):
+      raise ValueError("Couldn't see '_pid.txt'. Did the fork fail?")
 
 def running()->bool:
   return 0==system("test -f _pid.txt && test -p _inp.pipe && test -p _out.pipe")
@@ -89,16 +97,21 @@ start: (snippet)*
 snippet : icodesection -> e_icodesection
         | ocodesection -> e_ocodesection
         | inlinesection -> e_inline
+        | oversection -> e_versection
         | text -> e_text
-icodesection.1 : blockbeginmarker "python" text blockendmarker
-ocodesection.1 : blockbeginmarker text blockendmarker
+icodesection.1 : codekbeginmarker "python" text codekendmarker
+ocodesection.1 : codekbeginmarker text codekendmarker
+oversection.1 : verbeginmarker text verendmarker
 inlinesection : inlinebeginmarker text inlinendmarker
-blockbeginmarker : "```"
-blockendmarker : "```"
+codekbeginmarker : "```"
+codekendmarker : "```"
+verbeginmarker : "<!--litrepl-->"
+verendmarker : "<!--litrepl-->"
 inlinebeginmarker : "`"
 inlinendmarker : "`"
-text : /[^`]+/s
+text : /(.(?!`|<\!--litrepl-->))*./s
 """
+# text : /[^`]+/s
 
 def parse_md():
   parser = Lark(grammar_md,propagate_positions=True)
@@ -118,6 +131,8 @@ def print_md(tree):
       print(f"```{tree.children[1].children[0].value}```", end='')
     def inlinesection(self,tree):
       print(f"`{tree.children[1].children[0].value}`", end='')
+    def oversection(self,tree):
+      print(f"<!--litrepl-->{tree.children[1].children[0].value}<!--litrepl-->", end='')
   C().visit(tree)
 
 
@@ -158,22 +173,27 @@ def eval_section(tree,line,col):
       if cursor_within((line,col),(bm.line,bm.column),
                        (em.end_line,em.end_column)):
         self.result=process(self.task)
-
     def ocodesection(self,tree):
+      self._result(tree,verbatim=False)
+    def oversection(self,tree):
+      self._result(tree,verbatim=True)
+    def _result(self,tree,verbatim:bool):
+      marker=f"<!--litrepl-->\n" if verbatim else "```\n"
       bm,em=tree.children[0].meta,tree.children[2].meta
       if cursor_within((line,col),(bm.line,bm.column),
                          (em.end_line,em.end_column)) and self.task is not None:
         self.result=process(self.task)
         self.task=None
       if self.result is not None:
-        print(f"```\n"+indent(bm.column-1,(
-              f"{self.result}"
+        print(marker +
+              indent(bm.column-1,(
+              f"{self.result}"+
               # f"============================\n"
               # f"cursor line {line} col {col}\n"
-              "```")),end='')
+              marker)),end='')
         self.result=None
       else:
-        print(f"```{tree.children[1].children[0].value}```", end='')
+        print(f"{marker}{tree.children[1].children[0].value}{marker}", end='')
     def inlinesection(self,tree):
       print(f"`{tree.children[1].children[0].value}`", end='')
   C().visit(tree)
@@ -184,8 +204,12 @@ if __name__=='__main__':
     start()
   elif any([a in ['stop'] for a in argv]):
     stop()
-  elif any([a in ['eval'] for a in argv]):
-    print(process(''.join(sys.stdin.readlines())),end='')
+  # elif any([a in ['eval'] for a in argv]):
+  #   print(process(''.join(sys.stdin.readlines())),end='')
+  elif any([a in ['parse'] for a in argv]):
+    t=parse_md()
+    # print(t)
+    print(t.pretty())
   elif any([a in ['parse-print'] for a in argv]):
     print_md(parse_md())
   elif any([a in ['eval-section'] for a in argv]):
