@@ -8,17 +8,22 @@ code evaluation right inside the editor.
 
 Requirements:
 
-* Unix-compatible OS. The plugin depends on unix pipes and certain shell commands.
-* More or less recent Vim
-* Python3 with the following libraries:
+* Linux-compatible OS. The plugin depends on UNIX pipes and certain shell
+  commands.
+* More or less recent `Vim`
+* `Python3` with the following libraries:
   - lark-parser
   - ~~pylightnix~~
+* `socat` application
 
 Known limitations:
 
-* Synchronous Python execution only
-* The plugin tweaks prompts of the Python interpreter
-* Read buffer is set to a constant `1024`
+* Python code blocks are evaluated synchronously.
+* No support for nested code sections.
+* No escaping: unlucky Python output could result in the invalid Markdown
+* Tweaking `os.ps1`/`os.ps2` prompts of the Python interpreter could break the
+  session.
+* ~~Background Python interpreter couldn't be interrupted~~
 
 _Currently, the plugin is at the proof-of-concept stage. No code is packaged,
 clone this repository to reproduce the results!_
@@ -34,56 +39,66 @@ Setup
    environment script will add `./sh` and `./python` folders to the current
    shell's PATH.  The former folder contains the back-end script, the latter one
    contains the back-end script.
-3. Open a Markdown file, put the cursor on the Python code section (see the
-   *Formatting* section below). Execute the `:LitEval1` command. The following
-   events should happen:
-   1. On the first run, the Python interpreter will be started in the
-      background. Its standard input and output will be redirected into UNIX
-      pipes in the current directory. Its PID will be saved into the
-      `./_pid.txt` file.
-   2. The code from the Markdown code section under the cursor will be piped
-      through the interpreter.
-   3. The result will be pasted into the Markdown section next after the current
-      one.
+3. Run the `vim_litrepl_dev` (a thin wrapper around Vim) to run the Vim with the
+   LitREPL plugin from the `./vim` folder.
 
-   The state of the Python interpreter is persistent. To restart the session,
-   use `:LitStop`/`:LitStart` commands
+Vim Commands
+------------
+
+* `:LitStart`/`:LitStop`/`:LitRestart` - Starts, stops or restarts the
+  background Python interpreter
+* `:LitEval1` - Execute the executable section under the cursor, or the
+  executable section of the result section under the cursor
 
 Formatting
 ----------
 
 ### Markdown
 
-Verbatim markdown sections with the `python` annotation are considered as
-executable sections. If the executable section is followed by a verbatim section
-without tags, this section is used for pasting the execution results. Examples
-are:
+````
+Executable sections are marked with "python" tag. Putting the cursor on it and
+typing the :LitEval1 command would execute it in a background Python
+interpreter.
 
 ```python
 W='Hello, world!'
 print(W)
 ```
 
-Put the cursor on the above section and run the `:LitEval1` command. The result
-should appear in the section below.
+Pure verbatim section next to an executable section is a result section. The
+execution result will be pasted here. The original contents would be replaced.
 
 ```
-Hello, world!
+PlAcEhOlDeR
 ```
 
-Now run the `:LitEval1` command again on the next section to re-use the
-interpreter state. The result section next to the executable one will be
-updated.
+The markdown comment with `litrepl` word is a special kind of result sections
+for verbatim results. This way you could generate parts of the markdown
+document.
 
-```python
-print(W[:7]+"LitREPL.vim!")
-```
+<!--litrepl-->
+PlAcEhOlDeR
+<!--litrepl-->
 
-```
-Hello, LitREPL.vim!
-```
+````
 
 ### Latex
 
 TODO
+
+Technical details
+-----------------
+
+The following events should normally happen upon typing the `LitEval1` command:
+
+1. On the first run, the Python interpreter will be started in the
+   background. Its standard input and output will be redirected into UNIX
+   pipes in the current directory. Its PID will be saved into the
+   `./_pid.txt` file.
+2. The code from the Markdown code section under the cursor will be piped
+   through the interpreter.
+3. The result will be pasted into the Markdown section next after the current
+   one.
+
+
 
