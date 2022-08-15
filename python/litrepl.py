@@ -178,14 +178,16 @@ def eval_section(tree,line,col):
     def oversection(self,tree):
       self._result(tree,verbatim=True)
     def _result(self,tree,verbatim:bool):
-      marker=f"<!--litrepl-->\n" if verbatim else "```\n"
+      marker=f"<!--litrepl-->" if verbatim else "```"
       bm,em=tree.children[0].meta,tree.children[2].meta
-      if cursor_within((line,col),(bm.line,bm.column),
-                         (em.end_line,em.end_column)) and self.task is not None:
+      if self.result is None and \
+         cursor_within((line,col),(bm.line,bm.column),
+                       (em.end_line,em.end_column)) and \
+         self.task is not None:
         self.result=process(self.task)
         self.task=None
       if self.result is not None:
-        print(marker +
+        print(marker + "\n" +
               indent(bm.column-1,(
               f"{self.result}"+
               # f"============================\n"

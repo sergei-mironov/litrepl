@@ -56,8 +56,8 @@ Formatting
 ### Markdown
 
 ````
-Executable sections are marked with "python" tag. Putting the cursor on it and
-typing the :LitEval1 command would execute it in a background Python
+Executable section is the one that marked with "python" tag. Putting the cursor
+on it and typing the :LitEval1 command would execute it in a background Python
 interpreter.
 
 ```python
@@ -66,15 +66,15 @@ print(W)
 ```
 
 Pure verbatim section next to an executable section is a result section. The
-execution result will be pasted here. The original contents would be replaced.
+output of the code from the executable section will be pasted here. The original
+contents would be replaced.
 
 ```
 PlAcEhOlDeR
 ```
 
-The markdown comment with `litrepl` word is a special kind of result sections
-for verbatim results. This way you could generate parts of the markdown
-document.
+Markdown comments with `litrepl` word marks a special kind of result section for
+verbatim results. This way we can generate parts of the markdown document.
 
 <!--litrepl-->
 PlAcEhOlDeR
