@@ -65,9 +65,9 @@ W='Hello, world!'
 print(W)
 ```
 
-Pure verbatim section next to an executable section is a result section. The
+Pure verbatim section next to the executable section is a result section. The
 output of the code from the executable section will be pasted here. The original
-contents would be replaced.
+content of the section will be replaced.
 
 ```
 PlAcEhOlDeR
