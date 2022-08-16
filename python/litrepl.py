@@ -15,6 +15,8 @@ from lark.visitors import Interpreter
 from os.path import isfile
 from signal import signal, SIGINT
 from time import sleep
+from dataclasses import dataclass
+from functools import partial
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs)
@@ -102,49 +104,105 @@ def stop():
   system('rm _inp.pipe _out.pipe _pid.txt')
 
 
-grammar_md = r"""
+@dataclass
+class SymbolsMarkdown:
+  icodebeginmarker="```python"
+  icodendmarker="```"
+  ocodebeginmarker="```"
+  ocodendmarker="```"
+  verbeginmarker="<!--litrepl-->"
+  verendmarker="<!--litrepl-->"
+
+symbols_md=SymbolsMarkdown()
+
+grammar_md = fr"""
 start: (snippet)*
 snippet : icodesection -> e_icodesection
         | ocodesection -> e_ocodesection
-        | inlinesection -> e_inline
         | oversection -> e_versection
         | text -> e_text
-icodesection.1 : codekbeginmarker "python" text codekendmarker
-ocodesection.1 : codekbeginmarker text codekendmarker
+//        | inlinesection -> e_inline
+icodesection.1 : icodebeginmarker text icodendmarker
+ocodesection.1 : ocodebeginmarker text ocodendmarker
 oversection.1 : verbeginmarker text verendmarker
-inlinesection : inlinebeginmarker text inlinendmarker
-codekbeginmarker : "```"
-codekendmarker : "```"
+// inlinesection : inlinebeginmarker text inlinendmarker
+icodebeginmarker : "{symbols_md.icodebeginmarker}"
+icodendmarker : "{symbols_md.icodendmarker}"
+ocodebeginmarker : "{symbols_md.ocodebeginmarker}"
+ocodendmarker : "{symbols_md.ocodendmarker}"
 verbeginmarker : "<!--litrepl-->"
 verendmarker : "<!--litrepl-->"
 inlinebeginmarker : "`"
 inlinendmarker : "`"
-text : /(.(?!`|<\!--litrepl-->))*./s
+text : /(.(?!```|<\!--litrepl-->))*./s
 """
-# text : /[^`]+/s
 
-def parse_md():
-  parser = Lark(grammar_md,propagate_positions=True)
+
+@dataclass
+class SymbolsLatex:
+  icodebeginmarker=r"\begin{lcode}"
+  icodendmarker=r"\end{lcode}"
+  ocodebeginmarker=r"\begin{lresult}"
+  ocodendmarker=r"\end{lresult}"
+  verbeginmarker=r"%\begin{lresult}"
+  verendmarker=r"%\end{lresult}"
+
+symbols_latex=SymbolsLatex()
+icodebeginmarkerE=r"\\begin\{lcode\}"
+icodendmarkerE=r"\\end\{lcode\}"
+ocodebeginmarkerE=r"\\begin\{lresult\}"
+ocodendmarkerE=r"\\end\{lresult\}"
+verbeginmarkerE=r"\%\\begin\{lresult\}"
+verendmarkerE=r"\%\\end\{lresult\}"
+
+grammar_latex = fr"""
+start: (snippet)*
+snippet : icodesection -> e_icodesection
+        | ocodesection -> e_ocodesection
+        | oversection -> e_versection
+        | topleveltext -> e_text
+        // | inlinesection -> e_inline
+icodesection.1 : icodebeginmarker innertext icodendmarker
+ocodesection.1 : ocodebeginmarker innertext ocodendmarker
+oversection.1 : verbeginmarker innertext verendmarker
+icodebeginmarker : "{symbols_latex.icodebeginmarker}"
+icodendmarker : "{symbols_latex.icodendmarker}"
+ocodebeginmarker : "{symbols_latex.ocodebeginmarker}"
+ocodendmarker : "{symbols_latex.ocodendmarker}"
+verbeginmarker : "{symbols_latex.verbeginmarker}"
+verendmarker : "{symbols_latex.verendmarker}"
+topleveltext : /(.(?!{icodebeginmarkerE}|{ocodebeginmarkerE}|{verbeginmarkerE}))*./s
+innertext : /(.(?!{icodendmarkerE}|{ocodendmarkerE}|{verendmarkerE}))*./s
+"""
+
+def parse_(grammar):
+  parser = Lark(grammar,propagate_positions=True)
   # print(parser)
   tree=parser.parse(sys.stdin.read())
   # print(tree.pretty())
   return tree
 
+def parse_md():
+  return parse_(grammar_md)
+def parse_latex():
+  return parse_(grammar_latex)
 
-def print_md(tree):
+def print_(tree,symbols):
   class C(Interpreter):
     def text(self,tree):
       print(tree.children[0].value, end='')
     def icodesection(self,tree):
-      print(f"```python{tree.children[1].children[0].value}```", end='')
+      print(f"{symbols.icodebeginmarker}{tree.children[1].children[0].value}{symbols.icodendmarker}", end='')
     def ocodesection(self,tree):
-      print(f"```{tree.children[1].children[0].value}```", end='')
-    def inlinesection(self,tree):
-      print(f"`{tree.children[1].children[0].value}`", end='')
+      print(f"{symbols.ocodebeginmarker}{tree.children[1].children[0].value}{symbols.ocodendmarker}", end='')
+    # def inlinesection(self,tree):
+    #   print(f"`{tree.children[1].children[0].value}`", end='')
     def oversection(self,tree):
-      print(f"<!--litrepl-->{tree.children[1].children[0].value}<!--litrepl-->", end='')
+      print(f"{symbols.verbeginmarker}{tree.children[1].children[0].value}{symbols.verendmarker}", end='')
   C().visit(tree)
 
+print_md=partial(print_,symbols=symbols_md)
+print_latex=partial(print_,symbols=symbols_latex)
 
 def cursor_within(pos, posA, posB)->bool:
   if pos[0]>posA[0] and pos[0]<posB[0]:
@@ -165,7 +223,7 @@ def unindent(col:int,lines:str)->str:
 def indent(col,lines:str)->str:
   return '\n'.join([' '*col+l for l in lines.split('\n')])
 
-def eval_section(tree,line,col):
+def eval_section_(tree,line,col,symbols):
   if not running():
     start()
   class C(Interpreter):
@@ -174,9 +232,13 @@ def eval_section(tree,line,col):
       self.result=None
     def text(self,tree):
       print(tree.children[0].value, end='')
+    def topleveltext(self,tree):
+      return self.text(tree)
+    def innertext(self,tree):
+      return self.text(tree)
     def icodesection(self,tree):
       t=tree.children[1].children[0].value
-      print(f"```python{t}```", end='')
+      print(f"{symbols.icodebeginmarker}{t}{symbols.icodendmarker}", end='')
       bm,em=tree.children[0].meta,tree.children[2].meta
       self.task=unindent(bm.column-1,t)
       self.result=None
@@ -188,7 +250,8 @@ def eval_section(tree,line,col):
     def oversection(self,tree):
       self._result(tree,verbatim=True)
     def _result(self,tree,verbatim:bool):
-      marker=f"<!--litrepl-->" if verbatim else "```"
+      bmarker=symbols.verbeginmarker if verbatim else symbols.ocodebeginmarker
+      emarker=symbols.verendmarker if verbatim else symbols.ocodendmarker
       bm,em=tree.children[0].meta,tree.children[2].meta
       if self.result is None and \
          cursor_within((line,col),(bm.line,bm.column),
@@ -197,18 +260,21 @@ def eval_section(tree,line,col):
         self.result=process(self.task)
         self.task=None
       if self.result is not None:
-        print(marker + "\n" +
+        print(bmarker + "\n" +
               indent(bm.column-1,(
               f"{self.result}"+
               # f"============================\n"
               # f"cursor line {line} col {col}\n"
-              marker)),end='')
+              emarker)),end='')
         self.result=None
       else:
-        print(f"{marker}{tree.children[1].children[0].value}{marker}", end='')
-    def inlinesection(self,tree):
-      print(f"`{tree.children[1].children[0].value}`", end='')
+        print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
+    # def inlinesection(self,tree):
+    #   print(f"`{tree.children[1].children[0].value}`", end='')
   C().visit(tree)
+
+eval_section_md=partial(eval_section_,symbols=symbols_md)
+eval_section_latex=partial(eval_section_,symbols=symbols_latex)
 
 if __name__=='__main__':
   argv=sys.argv[1:]
@@ -218,16 +284,25 @@ if __name__=='__main__':
     stop()
   # elif any([a in ['eval'] for a in argv]):
   #   print(process(''.join(sys.stdin.readlines())),end='')
-  elif any([a in ['parse'] for a in argv]):
+  elif any([a in ['parse-markdown'] for a in argv]):
     t=parse_md()
     # print(t)
     print(t.pretty())
-  elif any([a in ['parse-print'] for a in argv]):
+  elif any([a in ['parse-latex'] for a in argv]):
+    t=parse_latex()
+    print(t.pretty())
+  elif any([a in ['parse-print-markdown'] for a in argv]):
     print_md(parse_md())
-  elif any([a in ['eval-section'] for a in argv]):
+  elif any([a in ['parse-print-latex'] for a in argv]):
+    print_latex(parse_latex())
+  elif any([a in ['eval-section-markdown'] for a in argv]):
     line=int(argv[argv.index('--line')+1])
     col=int(argv[argv.index('--col')+1])
-    eval_section(parse_md(),line,col)
+    eval_section_md(parse_md(),line,col)
+  elif any([a in ['eval-section-tex'] for a in argv]):
+    line=int(argv[argv.index('--line')+1])
+    col=int(argv[argv.index('--col')+1])
+    eval_section_latex(parse_latex(),line,col)
   elif any([a in ['repl'] for a in argv]):
     system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
   elif any([a in ['-h','--help'] for a in argv]):

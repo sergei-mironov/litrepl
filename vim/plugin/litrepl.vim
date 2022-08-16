@@ -30,8 +30,9 @@ endfun
 command! -nargs=0 LitRepl call <SID>SessionRepl()
 
 fun! s:SessionEval1()
+  let ft = &filetype
   let p = getcharpos('.')
-  execute "%! litrepl.py eval-section --line ".p[1]." --col ".p[2]." 2>/tmp/vim.err"
+  execute "%! litrepl.py eval-section-".ft." --line ".p[1]." --col ".p[2]." 2>/tmp/vim.err"
   if getfsize('/tmp/vim.err')>0
     for l in readfile('/tmp/vim.err')
       echomsg l
@@ -40,5 +41,4 @@ fun! s:SessionEval1()
   call setcharpos('.',p)
 endfun
 command! -nargs=0 LitEval1 call <SID>SessionEval1()
-
 

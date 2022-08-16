@@ -2,7 +2,8 @@ LitREPL.vim
 ------------
 
 **LitREPL** is a VIM plugin and a Python library for Litrate programming and
-code evaluation right inside the editor.
+code evaluation right inside the editor. LaTex and Markdown formats are
+supported.
 
 <img src="./demo.gif" width="400"/>
 
@@ -18,15 +19,29 @@ Requirements:
 
 Known limitations:
 
-* Python code blocks are evaluated synchronously.
-* No support for nested code sections.
-* No escaping: unlucky Python output could result in the invalid Markdown
-* Tweaking `os.ps1`/`os.ps2` prompts of the Python interpreter could break the
-  session.
-* ~~Background Python interpreter couldn't be interrupted~~
+* Formatting: No support for nested code sections.
+* Formatting: Special symbols in the Python output could invalidate the document
+* Interpreter: Stdout and stderr are joined together.
+* Interpreter: Evaluation locks the background interpreter.
+* Interpreter: Tweaking `os.ps1`/`os.ps2` prompts of the Python interpreter
+  could break the session.
+* Interpreter: No asynchronous code execution.
+* ~~Interpreter: Background Python interpreter couldn't be interrupted~~
 
 _Currently, the plugin is at the proof-of-concept stage. No code is packaged,
 clone this repository to reproduce the results!_
+
+Contents
+--------
+
+1. [LitREPL.vim](#litrepl.vim)
+2. [Contents](#contents)
+3. [Setup](#setup)
+4. [Vim Commands](#vim-commands)
+5. [Formatting](#formatting)
+   * [Markdown](#markdown)
+   * [Latex](#latex)
+6. [Technical details](#technical-details)
 
 Setup
 -----
@@ -88,7 +103,44 @@ PlAcEhOlDeR
 
 ### Latex
 
-TODO
+````latex
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\begin{document}
+
+LitREPL for latex recognizes specifically named environments as code and result
+sections. It doesn't really evaluate Tex commands so renaming those environments
+wouldn't work. But we still need to introduce it to Latex so we start with some
+newenvironment declarations
+
+\newenvironment{lcode}{\begin{texttt}}{\end{texttt}}
+\newenvironment{lresult}{\begin{texttt}}{\end{texttt}}
+
+Executable section is inside the \texttt{lcode} environment. Putting the cursor
+on it and typing the \texttt{:LitEval1} command would execute it in a background
+Python interpreter.
+
+\begin{lcode}
+W='Hello, world!'
+print(W)
+\end{lcode}
+
+Pure verbatim section next to the executable section is a result section. The
+output of the code from the executable section will be pasted here. The original
+content of the section will be replaced.
+
+\begin{lresult}
+PlAcEhOlDeR
+\end{lresult}
+
+Commented \texttt{lresult} environmet is recognized as a section for verbatim
+results. This way users can generate parts of the latex document.
+
+%\begin{lresult}
+PlAcEhOlDeR
+%\end{lresult}
+\end{document}
+````
 
 Technical details
 -----------------

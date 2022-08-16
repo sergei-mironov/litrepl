@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\newenvironment{lcode}{\begin{texttt}}{\end{texttt}}
+\newenvironment{lresult}{\begin{texttt}}{\end{texttt}}
+
+\begin{document}
+
+\begin{lcode}
+def hello(name):
+  print(f"Hello, {name}!")
+
+hello("LitREPL")
+\end{lcode}
+
+Footext
+
+\begin{lresult}
+????????
+\end{lresult}
+
+Bartext
+
+\begin{itemize}
+  \item
+  \begin{lcode}
+  hello("World")
+  \end{lcode}
+
+  \item Gootext
+
+  \item
+  \begin{lresult}
+  ????????
+  \end{lresult}
+
+  \item
+  \begin{lcode}
+  hello("Verbose")
+  \end{lcode}
+
+  \item
+  %\begin{lresult}
+  hello("Verbose")
+  %\end{lresult}
+\end{itemize}
+
+\end{document}
