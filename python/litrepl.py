@@ -7,6 +7,7 @@ from re import search, match as re_match
 import re
 import os
 import sys
+import fcntl
 from select import select
 from os import environ, system
 from lark import Lark, Visitor, Transformer, Token, Tree
@@ -46,18 +47,27 @@ def interact(fdr, fdw, text:str)->str:
 
 def process(lines:str)->str:
   pid=int(open('_pid.txt').read())
-  fdw=os.open('_inp.pipe', os.O_WRONLY | os.O_SYNC)
-  fdr=os.open('_out.pipe', os.O_RDONLY | os.O_SYNC)
-  prev=None
-  def _handler(signum,frame):
-    os.kill(pid,SIGINT)
-  prev=signal(SIGINT,_handler)
+  fdr=0; fdw=0; prev=None
   try:
+    fdw=os.open('_inp.pipe', os.O_WRONLY | os.O_SYNC)
+    fdr=os.open('_out.pipe', os.O_RDONLY | os.O_SYNC)
+    if fdw<0 or fdr<0:
+      return f"ERROR: litrepl.py couldn't open session pipes\n"
+    def _handler(signum,frame):
+      os.kill(pid,SIGINT)
+    prev=signal(SIGINT,_handler)
+    fcntl.flock(fdw,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    fcntl.flock(fdr,fcntl.LOCK_EX|fcntl.LOCK_NB)
     return interact(fdr,fdw,lines)
+  except BlockingIOError:
+    return "ERROR: litrepl.py couldn't lock the sessions pipes\n"
   finally:
-    signal(SIGINT,prev)
-    os.close(fdr)
-    os.close(fdw)
+    if prev is not None:
+      signal(SIGINT,prev)
+    if fdr!=0:
+      os.close(fdr)
+    if fdw!=0:
+      os.close(fdw)
 
 def start():
   if isfile('_pid.txt'):
@@ -219,7 +229,7 @@ if __name__=='__main__':
     col=int(argv[argv.index('--col')+1])
     eval_section(parse_md(),line,col)
   elif any([a in ['repl'] for a in argv]):
-    system("socat - 'PIPE:_out.pipe!!PIPE:_inp.pipe'")
+    system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
   elif any([a in ['-h','--help'] for a in argv]):
     print('litrepl.py (start|stop|eval|parse-print|eval-section)')
   elif any([a in ['--version'] for a in argv]):
