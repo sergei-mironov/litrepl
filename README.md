@@ -74,7 +74,7 @@ Formatting
 
 ### Markdown
 
-````
+```` markdown
 Executable section is the one that marked with "python" tag. Putting the cursor
 on it and typing the :LitEval1 command would execute it in a background Python
 interpreter.
@@ -116,16 +116,16 @@ newenvironment declarations
 \newenvironment{lcode}{\begin{texttt}}{\end{texttt}}
 \newenvironment{lresult}{\begin{texttt}}{\end{texttt}}
 
-Executable section is inside the \texttt{lcode} environment. Putting the cursor
-on it and typing the \texttt{:LitEval1} command would execute it in a background
-Python interpreter.
+Executable section is the one inside the \texttt{lcode} environment. Putting the
+cursor on it and typing the \texttt{:LitEval1} command would execute it in a
+background Python interpreter.
 
 \begin{lcode}
 W='Hello, world!'
 print(W)
 \end{lcode}
 
-Pure verbatim section next to the executable section is a result section. The
+\texttt{lresult} section next to the executable section is a result section. The
 output of the code from the executable section will be pasted here. The original
 content of the section will be replaced.
 
