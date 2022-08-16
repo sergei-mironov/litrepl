@@ -49,6 +49,9 @@ Vim Commands
   background Python interpreter
 * `:LitEval1` - Execute the executable section under the cursor, or the
   executable section of the result section under the cursor
+* `:LitRepl` - Open the Vim terminal exclusively connected to the Python
+  interpreter via `socat` tool. This way user could inspect it's state. Note,
+  that standard Python prompts `>>>`/`...` are disabled.
 
 Formatting
 ----------
