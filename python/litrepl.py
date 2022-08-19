@@ -198,6 +198,10 @@ def print_(tree,symbols):
   class C(Interpreter):
     def text(self,tree):
       print(tree.children[0].value, end='')
+    def topleveltext(self,tree):
+      return self.text(tree)
+    def innertext(self,tree):
+      return self.text(tree)
     def icodesection(self,tree):
       print(f"{symbols.icodebeginmarker}{tree.children[1].children[0].value}{symbols.icodendmarker}", end='')
     def ocodesection(self,tree):
@@ -289,7 +293,6 @@ eval_section_md=partial(eval_section_,symbols=symbols_md)
 eval_section_latex=partial(eval_section_,symbols=symbols_latex)
 
 if __name__=='__main__':
-  argv=sys.argv[1:]
   ap=ArgumentParser(prog='litrepl.py')
   ap.add_argument('--filetype',metavar='STR',default='markdown',help='ft help')
   sps=ap.add_subparsers(help='command help', dest='command')
@@ -302,7 +305,7 @@ if __name__=='__main__':
   apes.add_argument('--col',type=int,default=None)
   apes.add_argument('--nsec',type=int,default=None)
   sps.add_parser('repl',help='repl help')
-  a=ap.parse_args(argv)
+  a=ap.parse_args(sys.argv[1:])
 
   if a.command=='start':
     start()

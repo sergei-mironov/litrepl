@@ -58,6 +58,7 @@ Setup
    contains the back-end script.
 3. Run the `vim_litrepl_dev` (a thin wrapper around Vim) to run the Vim with the
    LitREPL plugin from the `./vim` folder.
+4. (Optional) Run `test.sh`
 
 Vim Commands
 ------------
