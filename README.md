@@ -1,5 +1,5 @@
 LitREPL.vim
-------------
+-----------
 
 **LitREPL** is a VIM plugin and a Python library for Litrate programming and
 code evaluation right inside the editor. LaTex and Markdown formats are
@@ -19,10 +19,12 @@ Requirements:
 
 Known limitations:
 
-* Formatting: No support for nested code sections.
-* Formatting: Special symbols in the Python output could invalidate the document
+* Formatting: Nested code sections are not supported.
+* Formatting: Special symbols in the Python output could invalidate the
+  document.
+* Interpreter: Extra newline is required after Python function definitions.
 * Interpreter: Stdout and stderr are joined together.
-* Interpreter: Evaluation locks the background interpreter.
+* Interpreter: Evaluation of a code section locks the editor.
 * Interpreter: Tweaking `os.ps1`/`os.ps2` prompts of the Python interpreter
   could break the session.
 * Interpreter: No asynchronous code execution.

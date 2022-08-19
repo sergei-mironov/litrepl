@@ -2,7 +2,7 @@
 
 # from pylightnix import *
 
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from re import search, match as re_match
 import re
 import os
@@ -17,6 +17,7 @@ from signal import signal, SIGINT
 from time import sleep
 from dataclasses import dataclass
 from functools import partial
+from argparse import ArgumentParser
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs)
@@ -72,6 +73,8 @@ def process(lines:str)->str:
       os.close(fdw)
 
 def start():
+  """ Starts the background Python interpreter. Kill an existing interpreter if
+  any. Creates files `_inp.pipe`, `_out.pipt`, `_pid.txt`."""
   if isfile('_pid.txt'):
     system('kill $(cat _pid.txt) >/dev/null 2>&1')
   system('chmod -R +w _pylightnix 2>/dev/null && rm -rf _pylightnix')
@@ -97,9 +100,11 @@ def start():
       raise ValueError("Couldn't see '_pid.txt'. Did the fork fail?")
 
 def running()->bool:
+  """ Checks if the background session was run or not. """
   return 0==system("test -f _pid.txt && test -p _inp.pipe && test -p _out.pipe")
 
 def stop():
+  """ Stops the background Python session. """
   system('kill $(cat _pid.txt) >/dev/null 2>&1')
   system('rm _inp.pipe _out.pipe _pid.txt')
 
@@ -182,6 +187,8 @@ def parse_(grammar):
   # print(tree.pretty())
   return tree
 
+GRAMMARS={'markdown':grammar_md,'latex':grammar_latex}
+
 def parse_md():
   return parse_(grammar_md)
 def parse_latex():
@@ -203,6 +210,7 @@ def print_(tree,symbols):
 
 print_md=partial(print_,symbols=symbols_md)
 print_latex=partial(print_,symbols=symbols_latex)
+SYMBOLS={'markdown':symbols_md,'latex':symbols_latex}
 
 def cursor_within(pos, posA, posB)->bool:
   if pos[0]>posA[0] and pos[0]<posB[0]:
@@ -223,7 +231,11 @@ def unindent(col:int,lines:str)->str:
 def indent(col,lines:str)->str:
   return '\n'.join([' '*col+l for l in lines.split('\n')])
 
-def eval_section_(tree,line,col,symbols):
+def eval_section_(tree, symbols, cpos:Optional[Tuple[int,int]]=None,
+                  nsec:Optional[int]=None):
+  # TODO: nsec
+  assert cpos is not None
+  line,col=cpos if cpos is not None else (None,None)
   if not running():
     start()
   class C(Interpreter):
@@ -278,38 +290,35 @@ eval_section_latex=partial(eval_section_,symbols=symbols_latex)
 
 if __name__=='__main__':
   argv=sys.argv[1:]
-  if any([a in ['start'] for a in argv]):
+  ap=ArgumentParser(prog='litrepl.py')
+  ap.add_argument('--filetype',metavar='STR',default='markdown',help='ft help')
+  sps=ap.add_subparsers(help='command help', dest='command')
+  sps.add_parser('start',help='start help')
+  sps.add_parser('stop',help='stop help')
+  sps.add_parser('parse',help='parse help')
+  sps.add_parser('parse-print',help='parse-print help')
+  apes=sps.add_parser('eval-section',help='eval-section help')
+  apes.add_argument('--line',type=int,default=None)
+  apes.add_argument('--col',type=int,default=None)
+  apes.add_argument('--nsec',type=int,default=None)
+  sps.add_parser('repl',help='repl help')
+  a=ap.parse_args(argv)
+
+  if a.command=='start':
     start()
-  elif any([a in ['stop'] for a in argv]):
+  elif a.command=='stop':
     stop()
-  # elif any([a in ['eval'] for a in argv]):
-  #   print(process(''.join(sys.stdin.readlines())),end='')
-  elif any([a in ['parse-markdown'] for a in argv]):
-    t=parse_md()
-    # print(t)
+  elif a.command=='parse':
+    t=parse_(GRAMMARS[a.filetype])
     print(t.pretty())
-  elif any([a in ['parse-latex'] for a in argv]):
-    t=parse_latex()
-    print(t.pretty())
-  elif any([a in ['parse-print-markdown'] for a in argv]):
-    print_md(parse_md())
-  elif any([a in ['parse-print-latex'] for a in argv]):
-    print_latex(parse_latex())
-  elif any([a in ['eval-section-markdown'] for a in argv]):
-    line=int(argv[argv.index('--line')+1])
-    col=int(argv[argv.index('--col')+1])
-    eval_section_md(parse_md(),line,col)
-  elif any([a in ['eval-section-tex'] for a in argv]):
-    line=int(argv[argv.index('--line')+1])
-    col=int(argv[argv.index('--col')+1])
-    eval_section_latex(parse_latex(),line,col)
-  elif any([a in ['repl'] for a in argv]):
+  elif a.command=='parse-print':
+    print_(parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype])
+  elif a.command=='eval-section':
+    cpos=(a.line,a.col) if None not in [a.line,a.col] else None
+    eval_section_(parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype],cpos,a.nsec)
+  elif a.command=='repl':
     system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
-  elif any([a in ['-h','--help'] for a in argv]):
-    print('litrepl.py (start|stop|eval|parse-print|eval-section)')
-  elif any([a in ['--version'] for a in argv]):
-    print('litrepl.py development version')
   else:
-    pstderr(f'Unknown arguments: {argv}')
+    pstderr(f'Unknown command: {a.command}')
     exit(1)
 
