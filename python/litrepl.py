@@ -234,12 +234,7 @@ def parse_(grammar):
   # print(tree.pretty())
   return tree
 
-GRAMMARS={'markdown':grammar_md,'latex':grammar_latex}
-
-def parse_md():
-  return parse_(grammar_md)
-def parse_latex():
-  return parse_(grammar_latex)
+GRAMMARS={'markdown':grammar_md,'tex':grammar_latex,'latex':grammar_latex}
 
 def print_(tree,symbols):
   class C(Interpreter):
@@ -259,9 +254,7 @@ def print_(tree,symbols):
       print(f"{symbols.verbeginmarker}{tree.children[1].children[0].value}{symbols.verendmarker}", end='')
   C().visit(tree)
 
-print_md=partial(print_,symbols=symbols_md)
-print_latex=partial(print_,symbols=symbols_latex)
-SYMBOLS={'markdown':symbols_md,'latex':symbols_latex}
+SYMBOLS={'markdown':symbols_md,'tex':symbols_latex,'latex':symbols_latex}
 
 def cursor_within(pos, posA, posB)->bool:
   if pos[0]>posA[0] and pos[0]<posB[0]:
