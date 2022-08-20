@@ -101,98 +101,93 @@ EOF
 )} #}}}
 
 
-test_eval_md_1() {(
-mktest "_test_eval_md_1"
+test_eval_md() {(
+mktest "_test_eval_md"
 runlitrepl start
-runlitrepl eval-section --line 1 --col 1 >out.md <<"EOF"
+cat >source.md <<"EOF"
 ```python
 def hello(name):
   print(f"Hello, {name}!")
 
 hello('World')
 ```
+TXT
 ```
 PLACEHOLDER
 ```
+TXT
+* ```python
+  print("ABC"+"DEF")
+  ```
+* <!--litrepl-->
+  PLACEHOLDER
+  <!--litrepl-->
 EOF
-grep -q "Hello, World!" out.md
-grep -v -q "PLACEHOLDER" out.md
-runlitrepl stop
-)}
-
-test_eval_md_2() {(
-mktest "_test_eval_md_2"
-runlitrepl start
-runlitrepl eval-section --line 1 --col 1 >out.md <<"EOF"
+cat source.md | runlitrepl --filetype=markdown parse-print >out.md
+diff -u source.md out.md
+cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
+diff -u out.md - <<"EOF"
 ```python
-print("ABC"+"DEF")
+def hello(name):
+  print(f"Hello, {name}!")
+
+hello('World')
 ```
-<!--litrepl-->
-PLACEHOLDER
-<!--litrepl-->
+TXT
+```
+Hello, World!
+```
+TXT
+* ```python
+  print("ABC"+"DEF")
+  ```
+* <!--litrepl-->
+  ABCDEF
+  <!--litrepl-->
 EOF
-grep -q "ABCDEF" out.md
-grep -v -q "PLACEHOLDER" out.md
 runlitrepl stop
 )}
 
-test_eval_tex_1() {(
-mktest "_test_eval_tex_1"
+test_eval_tex() {(
+mktest "_test_eval_tex"
 runlitrepl start
 cat >source.tex <<"EOF"
 \begin{lcode}
 print("A"+"B")
 \end{lcode}
 Text
-%\begin{lresult}
-PLACEHOLDER
-%\end{lresult}
-EOF
-cat source.tex | runlitrepl --filetype=latex eval-section --line 1 --col 1 >out.tex
-grep -q "AB" out.tex
-grep -v -q "PLACEHOLDER" out.tex
-runlitrepl stop
-)}
-
-test_parse_print_tex_inline_1() {(
-mktest "_test_parse_print_tex_inline_1"
-# runlitrepl start
-cat >source.tex <<"EOF"
-111
+\begin{enumerate}
+\item
+  %\begin{lresult}
+  PLACEHOLDER
+  %\end{lresult}
+\end{enumerate}
+\begin{lresult}
+NOEVAL
+\end{lresult}
 \linline{"A"+"B"}
-{XX}
-222
+{XX}\linline{"C"+"D"}{}
 EOF
 cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
 diff -u source.tex out.tex
-# runlitrepl stop
-)}
-
-test_eval_tex_inline_1() {(
-mktest "_test_eval_tex_inline_1"
-runlitrepl start
-cat >source.tex <<"EOF"
-111
+cat source.tex | runlitrepl --filetype=latex eval-sections '0..$' >out.tex
+diff -u out.tex - <<"EOF"
+\begin{lcode}
+print("A"+"B")
+\end{lcode}
+Text
+\begin{enumerate}
+\item
+  %\begin{lresult}
+  AB
+  %\end{lresult}
+\end{enumerate}
+\begin{lresult}
+NOEVAL
+\end{lresult}
 \linline{"A"+"B"}
-{XX}
-222
+{AB}\linline{"C"+"D"}{CD}
 EOF
-cat source.tex | runlitrepl --filetype=latex eval-section --line 2 --col 1 >out.tex
-grep -q "AB" out.tex
-grep -v -q "XX" out.tex
-runlitrepl stop
-)}
-
-test_eval_tex_inline_2() {(
-mktest "_test_eval_tex_inline_2"
-runlitrepl start
-cat >source.tex <<"EOF"
-111
-\linline{"A"+"B"}{}
-222
-EOF
-cat source.tex | runlitrepl --filetype=latex eval-section --line 2 --col 1 >out.tex
-grep -q "AB" out.tex
 runlitrepl stop
 )}
 
@@ -203,12 +198,8 @@ if test "$(basename $0)" = "test.sh" ; then
     echo "Checking $I"
     LITREPL_INTERPRETER=$I
     test_parse_print
-    test_eval_md_1
-    test_eval_md_2
-    test_eval_tex_1
-    test_parse_print_tex_inline_1
-    test_eval_tex_inline_1
-    test_eval_tex_inline_2
+    test_eval_md
+    test_eval_tex
   done
   trap "" EXIT
   echo OK

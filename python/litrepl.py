@@ -2,7 +2,7 @@
 
 # from pylightnix import *
 
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Set, Dict
 from re import search, match as re_match
 import re
 import os
@@ -245,29 +245,6 @@ def parse_(grammar):
   return tree
 
 GRAMMARS={'markdown':grammar_md,'tex':grammar_latex,'latex':grammar_latex}
-
-def print_(tree,symbols):
-  class C(Interpreter):
-    def text(self,tree):
-      print(tree.children[0].value, end='')
-    def topleveltext(self,tree):
-      return self.text(tree)
-    def innertext(self,tree):
-      return self.text(tree)
-    def icodesection(self,tree):
-      print(f"{symbols.icodebeginmarker}{tree.children[1].children[0].value}{symbols.icodendmarker}", end='')
-    def ocodesection(self,tree):
-      print(f"{symbols.ocodebeginmarker}{tree.children[1].children[0].value}{symbols.ocodendmarker}", end='')
-    def oversection(self,tree):
-      print(f"{symbols.verbeginmarker}{tree.children[1].children[0].value}{symbols.verendmarker}", end='')
-    def inlinesection(self,tree):
-      code=tree.children[1].children[0].value
-      result=tree.children[3].children[0].value
-      spaces_obs=tree.children[2].children[0].value
-      im=symbols.inlinemarker
-      print(f"{im}{OBR}{code}{CBR}{spaces_obs}{result}{CBR}", end='')
-  C().visit(tree)
-
 SYMBOLS={'markdown':symbols_md,'tex':symbols_latex,'latex':symbols_latex}
 
 def cursor_within(pos, posA, posB)->bool:
@@ -289,17 +266,15 @@ def unindent(col:int,lines:str)->str:
 def indent(col,lines:str)->str:
   return '\n'.join([' '*col+l for l in lines.split('\n')])
 
-def eval_section_(a, tree, symbols, cpos:Optional[Tuple[int,int]]=None,
-                  nsec:Optional[int]=None):
-  # TODO: nsec
-  assert cpos is not None
-  line,col=cpos if cpos is not None else (None,None)
+def eval_section_(a, tree, symbols, nsecs:Set[int]):
   if not running():
     start(a)
+  ssrc:Dict[int,str]={}
+  sres:Dict[int,str]={}
   class C(Interpreter):
     def __init__(self):
-      self.task=None
-      self.result=None
+      self.nsec=-1
+      self.nosec=0
     def text(self,tree):
       print(tree.children[0].value, end='')
     def topleveltext(self,tree):
@@ -307,51 +282,132 @@ def eval_section_(a, tree, symbols, cpos:Optional[Tuple[int,int]]=None,
     def innertext(self,tree):
       return self.text(tree)
     def icodesection(self,tree):
+      self.nsec+=1
+      self.nosec=0
       t=tree.children[1].children[0].value
       print(f"{symbols.icodebeginmarker}{t}{symbols.icodendmarker}", end='')
       bm,em=tree.children[0].meta,tree.children[2].meta
-      self.task=unindent(bm.column-1,t)
-      self.result=None
-      if cursor_within((line,col),(bm.line,bm.column),
-                       (em.end_line,em.end_column)):
-        self.result=process(self.task)
+      t=unindent(bm.column-1,t)
+      ssrc[self.nsec]=t
+      if self.nsec in nsecs:
+        sres[self.nsec]=process(t)
     def _result(self,tree,verbatim:bool):
       bmarker=symbols.verbeginmarker if verbatim else symbols.ocodebeginmarker
       emarker=symbols.verendmarker if verbatim else symbols.ocodendmarker
       bm,em=tree.children[0].meta,tree.children[2].meta
-      if self.result is None and \
-         cursor_within((line,col),(bm.line,bm.column),
-                       (em.end_line,em.end_column)) and \
-         self.task is not None:
-        self.result=process(self.task)
-        self.task=None
-      if self.result is not None:
+      if self.nsec in nsecs and self.nosec<1:
+        assert self.nsec in sres
+        # pstderr(f'executing {self.nsec}')
         print(bmarker + "\n" +
               indent(bm.column-1,(
-              f"{self.result}"+
-              # f"============================\n"
-              # f"cursor line {line} col {col}\n"
+              f"{sres[self.nsec]}"+
               emarker)),end='')
-        self.result=None
+        self.nosec+=1
       else:
+        # pstderr(f'skipping {self.nsec}')
         print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
     def ocodesection(self,tree):
       self._result(tree,verbatim=False)
     def oversection(self,tree):
       self._result(tree,verbatim=True)
     def inlinesection(self,tree):
+      # pstderr(tree)
+      self.nsec+=1
       bm,em=tree.children[0].meta,tree.children[4].meta
       code=tree.children[1].children[0].value
       spaces_obs=tree.children[2].children[0].value
       im=symbols.inlinemarker
-      if cursor_within((line,col),(bm.line,bm.column),
-                       (em.end_line,em.end_column)):
+      if self.nsec in nsecs:
         result=process('print('+code+');\n').rstrip('\n')
       else:
-        result=tree.children[3].children[0].value
+        result=tree.children[3].children[0].value if len(tree.children[3].children)>0 else ''
       print(f"{im}{OBR}{code}{CBR}{spaces_obs}{result}{CBR}", end='')
   C().visit(tree)
 
+def solve_cpos(tree,cs:List[Tuple[int,int]]
+               )->Tuple[int,Dict[Tuple[int,int],int]]:
+  """ Solve the list of cursor positions into a set of section numbers. Also
+  return the number of last section. """
+  acc:dict={}
+  class C(Interpreter):
+    def __init__(self):
+      self.nsec=-1
+    def _count(self,bm,em):
+      for (line,col) in cs:
+        if cursor_within((line,col),(bm.line,bm.column),
+                                    (em.end_line,em.end_column)):
+          acc[(line,col)]=self.nsec
+    def icodesection(self,tree):
+      self.nsec+=1
+      self._count(tree.children[0].meta,tree.children[2].meta)
+    def ocodesection(self,tree):
+      self._count(tree.children[0].meta,tree.children[2].meta)
+    def oversection(self,tree):
+      self._count(tree.children[0].meta,tree.children[2].meta)
+    def inlinesection(self,tree):
+      self.nsec+=1
+      self._count(tree.children[0].meta,tree.children[4].meta)
+  c=C()
+  c.visit(tree)
+  return c.nsec,acc
+
+grammar_sloc = fr"""
+start: addr -> l_const
+     | addr (","|";") start -> l_add
+addr : sloc ".." sloc -> a_range
+     | sloc -> a_const
+sloc : num ":" num -> s_cursor
+     | const -> s_const
+const : num -> s_const_num
+      | "$" -> s_const_last
+num : /[0-9]+/
+"""
+
+def solve_sloc(s:str,tree)->Set[int]:
+  p=Lark(grammar_sloc)
+  t=p.parse(s)
+  nknown:Dict[int,int]={}
+  nqueries:Dict[int,Tuple[int,int]]={}
+  # print(t.pretty())
+  lastq=0
+  class T(Transformer):
+    def __init__(self):
+      self.q=lastq
+    def l_const(self,tree):
+      return [tree[0]]
+    def l_add(self,tree):
+      return [tree[0]]+tree[1]
+    def a_range(self,tree):
+      return (tree[0],tree[1])
+    def a_const(self,tree):
+      return (tree[0],)
+    def s_const(self,tree):
+      return tree[0]
+    def s_const_num(self,tree):
+      self.q+=1
+      nknown[self.q]=int(tree[0].children[0].value)
+      return int(self.q)
+    def s_const_last(self,tree):
+      return int(lastq)
+    def s_cursor(self,tree):
+      self.q+=1
+      nqueries[self.q]=(int(tree[0].children[0].value),
+                        int(tree[1].children[0].value))
+      return int(self.q)
+  qs=T().transform(t)
+  # print(qs)
+  nsec,nsol=solve_cpos(tree,list(nqueries.values()))
+  nknown[lastq]=nsec
+  def _get(q):
+    return nsol[nqueries[q]] if q in nqueries else nknown[q]
+  def _safeset(x):
+    try:
+      return set(x())
+    except KeyError as err:
+      pstderr(f"Unable to resolve section at {err}")
+      return set()
+  return set.union(*[_safeset(lambda:range(_get(q[0]),_get(q[1])+1)) if len(q)==2
+                     else _safeset(lambda:[_get(q[0])]) for q in qs])
 
 if __name__=='__main__':
   ap=ArgumentParser(prog='litrepl.py')
@@ -366,7 +422,8 @@ if __name__=='__main__':
   apes=sps.add_parser('eval-section',help='eval-section help')
   apes.add_argument('--line',type=int,default=None)
   apes.add_argument('--col',type=int,default=None)
-  apes.add_argument('--nsec',type=int,default=None)
+  eps=sps.add_parser('eval-sections',help='eval-sections help')
+  eps.add_argument('locs',metavar='LOCS',default='*',help='locs help')
   sps.add_parser('repl',help='repl help')
   a=ap.parse_args(sys.argv[1:])
 
@@ -378,10 +435,15 @@ if __name__=='__main__':
     t=parse_(GRAMMARS[a.filetype])
     print(t.pretty())
   elif a.command=='parse-print':
-    print_(parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype])
+    eval_section_(a,parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype],{})
   elif a.command=='eval-section':
-    cpos=(a.line,a.col) if None not in [a.line,a.col] else None
-    eval_section_(a,parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype],cpos,a.nsec)
+    t=parse_(GRAMMARS[a.filetype])
+    nsecs=set(solve_cpos(t,[(a.line,a.col)])[1].values())
+    eval_section_(a,t,SYMBOLS[a.filetype],nsecs)
+  elif a.command=='eval-sections':
+    t=parse_(GRAMMARS[a.filetype])
+    nsecs=solve_sloc(a.locs,t)
+    eval_section_(a,t,SYMBOLS[a.filetype],nsecs)
   elif a.command=='repl':
     system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
   else:
