@@ -144,7 +144,7 @@ def start(a):
     else:
       start_(partial(fork_python,name='python'))
   else:
-    raise ValueError(f"Unsupported interpreter {a.interpreter}")
+    raise ValueError(f"Unsupported interpreter '{a.interpreter}'")
 
 def running()->bool:
   """ Checks if the background session was run or not. """
@@ -198,6 +198,7 @@ class SymbolsLatex:
   ocodendmarker=r"\end{lresult}"
   verbeginmarker=r"%\begin{lresult}"
   verendmarker=r"%\end{lresult}"
+  inlinemarker=r"\linline"
 
 symbols_latex=SymbolsLatex()
 icodebeginmarkerE=r"\\begin\{lcode\}"
@@ -206,25 +207,34 @@ ocodebeginmarkerE=r"\\begin\{lresult\}"
 ocodendmarkerE=r"\\end\{lresult\}"
 verbeginmarkerE=r"\%\\begin\{lresult\}"
 verendmarkerE=r"\%\\end\{lresult\}"
+inlinemarkerE=r"\\linline\{"
 
+OBR="{"
+CBR="}"
+BCBR="\\}"
 grammar_latex = fr"""
 start: (snippet)*
 snippet : icodesection -> e_icodesection
         | ocodesection -> e_ocodesection
         | oversection -> e_versection
         | topleveltext -> e_text
-        // | inlinesection -> e_inline
+        | inlinesection -> e_inline
 icodesection.1 : icodebeginmarker innertext icodendmarker
 ocodesection.1 : ocodebeginmarker innertext ocodendmarker
 oversection.1 : verbeginmarker innertext verendmarker
+inlinesection.1 : inlinemarker "{OBR}" inltext "{CBR}" spaces_obr inltext cbr
+inlinemarker : "{symbols_latex.inlinemarker}"
 icodebeginmarker : "{symbols_latex.icodebeginmarker}"
 icodendmarker : "{symbols_latex.icodendmarker}"
 ocodebeginmarker : "{symbols_latex.ocodebeginmarker}"
 ocodendmarker : "{symbols_latex.ocodendmarker}"
 verbeginmarker : "{symbols_latex.verbeginmarker}"
 verendmarker : "{symbols_latex.verendmarker}"
-topleveltext : /(.(?!{icodebeginmarkerE}|{ocodebeginmarkerE}|{verbeginmarkerE}))*./s
+topleveltext : /(.(?!{icodebeginmarkerE}|{ocodebeginmarkerE}|{verbeginmarkerE}|{inlinemarkerE}))*./s
 innertext : /(.(?!{icodendmarkerE}|{ocodendmarkerE}|{verendmarkerE}))*./s
+inltext : /(.(?!{CBR}))*./s
+spaces_obr : /[ \t\r\n]*{OBR}/s
+cbr : "{CBR}"
 """
 
 def parse_(grammar):
@@ -248,10 +258,14 @@ def print_(tree,symbols):
       print(f"{symbols.icodebeginmarker}{tree.children[1].children[0].value}{symbols.icodendmarker}", end='')
     def ocodesection(self,tree):
       print(f"{symbols.ocodebeginmarker}{tree.children[1].children[0].value}{symbols.ocodendmarker}", end='')
-    # def inlinesection(self,tree):
-    #   print(f"`{tree.children[1].children[0].value}`", end='')
     def oversection(self,tree):
       print(f"{symbols.verbeginmarker}{tree.children[1].children[0].value}{symbols.verendmarker}", end='')
+    def inlinesection(self,tree):
+      code=tree.children[1].children[0].value
+      result=tree.children[3].children[0].value
+      spaces_obs=tree.children[2].children[0].value
+      im=symbols.inlinemarker
+      print(f"{im}{OBR}{code}{CBR}{spaces_obs}{result}{CBR}", end='')
   C().visit(tree)
 
 SYMBOLS={'markdown':symbols_md,'tex':symbols_latex,'latex':symbols_latex}
@@ -301,10 +315,6 @@ def eval_section_(a, tree, symbols, cpos:Optional[Tuple[int,int]]=None,
       if cursor_within((line,col),(bm.line,bm.column),
                        (em.end_line,em.end_column)):
         self.result=process(self.task)
-    def ocodesection(self,tree):
-      self._result(tree,verbatim=False)
-    def oversection(self,tree):
-      self._result(tree,verbatim=True)
     def _result(self,tree,verbatim:bool):
       bmarker=symbols.verbeginmarker if verbatim else symbols.ocodebeginmarker
       emarker=symbols.verendmarker if verbatim else symbols.ocodendmarker
@@ -325,8 +335,21 @@ def eval_section_(a, tree, symbols, cpos:Optional[Tuple[int,int]]=None,
         self.result=None
       else:
         print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
-    # def inlinesection(self,tree):
-    #   print(f"`{tree.children[1].children[0].value}`", end='')
+    def ocodesection(self,tree):
+      self._result(tree,verbatim=False)
+    def oversection(self,tree):
+      self._result(tree,verbatim=True)
+    def inlinesection(self,tree):
+      bm,em=tree.children[0].meta,tree.children[4].meta
+      code=tree.children[1].children[0].value
+      spaces_obs=tree.children[2].children[0].value
+      im=symbols.inlinemarker
+      if cursor_within((line,col),(bm.line,bm.column),
+                       (em.end_line,em.end_column)):
+        result=process('print('+code+');\n').rstrip('\n')
+      else:
+        result=tree.children[3].children[0].value
+      print(f"{im}{OBR}{code}{CBR}{spaces_obs}{result}{CBR}", end='')
   C().visit(tree)
 
 

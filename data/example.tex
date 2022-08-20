@@ -13,6 +13,7 @@
 \newenvironment{lresult}
   {\begin{mdframed}}
   {\end{mdframed}}
+\newcommand{\linplace}[2]{#2}
 
 \graphicspath{ {./} }
 
@@ -35,6 +36,7 @@ newenvironment declarations.
 \newenvironment{lresult}
   {\begin{mdframed}[leftline=false,rightline=false]}
   {\end{mdframed}}
+\newcommand{\linplace}[2]{#2}
 \end{verbatim}
 
 \section{Executing code snippets}
@@ -83,7 +85,6 @@ def texplot(f):
 texplot('_img.png')
 \end{lcode}
 
-\newcommand{\linplace}[2]{#2}
 %\begin{lresult}
 \includegraphics{\linplace{VAR}{_img.png}}
 %\end{lresult}

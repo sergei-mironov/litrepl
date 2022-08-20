@@ -10,7 +10,8 @@ code evaluation right inside the editor.
 
 * Lightweight: Runs on a bare Python with the
   [lark-parser](https://github.com/lark-parser/lark) library
-* Supported document formats: Markdown, Latex
+* Supported document formats: Markdown (Example \[MD\]), Latex (Example
+  [[TEX](./data/example.tex)][[PDF](./data/example.pdf)])
 * Supported interpreters: Python, IPython
 * Supported editor: Vim
 * Nix/NixOS - friendly
@@ -125,6 +126,7 @@ newenvironment declarations
 
 \newenvironment{lcode}{\begin{texttt}}{\end{texttt}}
 \newenvironment{lresult}{\begin{texttt}}{\end{texttt}}
+\newcommand{\linline}[2]{#2}
 
 Executable section is the one inside the \texttt{lcode} environment. Putting the
 cursor on it and typing the \texttt{:LitEval1} command would execute it in a
@@ -143,12 +145,22 @@ content of the section will be replaced.
 PlAcEhOlDeR
 \end{lresult}
 
-Commented \texttt{lresult} environmet is recognized as a section for verbatim
-results. This way users can generate parts of the latex document.
+Commented \texttt{lresult} environmet is still recognized as an output section.
+This way users can generate parts of the latex document.
+
+\begin{lcode}
+print("Hi")
+\end{lcode}
 
 %\begin{lresult}
 PlAcEhOlDeR
 %\end{lresult}
+
+For LaTeX, VimREPL also recognises \texttt{linline} tag for which it prints its
+first argument and pastes the result in place of the second argument.
+
+\linline{W}{?}
+
 \end{document}
 ````
 

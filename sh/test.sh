@@ -1,11 +1,9 @@
 #!/bin/sh
 
-CWD=$(cd `dirname $0`/..; pwd;)
-
-set -e -x
-
 mktest() {
-  T="$CWD/_test/$1"
+  set -e -x
+  test -d "$LITREPL_ROOT"
+  T="$LITREPL_ROOT/_test/$1"
   rm -rf  "$T" || true
   mkdir -p "$T"
   cd "$T"
@@ -103,7 +101,7 @@ EOF
 )} #}}}
 
 
-test_eval_md_1() {
+test_eval_md_1() {(
 mktest "_test_eval_md_1"
 runlitrepl start
 runlitrepl eval-section --line 1 --col 1 >out.md <<"EOF"
@@ -120,9 +118,9 @@ EOF
 grep -q "Hello, World!" out.md
 grep -v -q "PLACEHOLDER" out.md
 runlitrepl stop
-}
+)}
 
-test_eval_md_2() {
+test_eval_md_2() {(
 mktest "_test_eval_md_2"
 runlitrepl start
 runlitrepl eval-section --line 1 --col 1 >out.md <<"EOF"
@@ -136,9 +134,9 @@ EOF
 grep -q "ABCDEF" out.md
 grep -v -q "PLACEHOLDER" out.md
 runlitrepl stop
-}
+)}
 
-test_eval_tex_1() {
+test_eval_tex_1() {(
 mktest "_test_eval_tex_1"
 runlitrepl start
 cat >source.tex <<"EOF"
@@ -154,17 +152,51 @@ cat source.tex | runlitrepl --filetype=latex eval-section --line 1 --col 1 >out.
 grep -q "AB" out.tex
 grep -v -q "PLACEHOLDER" out.tex
 runlitrepl stop
-}
+)}
 
-trap "echo FAIL" EXIT
-for I in python ipython ; do
-  echo "Checking $I"
-  LITREPL_INTERPRETER=$I
-  test_parse_print
-  test_eval_md_1
-  test_eval_md_2
-  test_eval_tex_1
-done
-trap "" EXIT
-echo OK
+test_parse_print_tex_inline_1() {(
+mktest "_test_parse_print_tex_inline_1"
+# runlitrepl start
+cat >source.tex <<"EOF"
+111
+\linline{"A"+"B"}
+{XX}
+222
+EOF
+cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
+diff -u source.tex out.tex
+# runlitrepl stop
+)}
+
+test_eval_tex_inline_1() {(
+mktest "_test_eval_tex_inline_1"
+runlitrepl start
+cat >source.tex <<"EOF"
+111
+\linline{"A"+"B"}
+{XX}
+222
+EOF
+cat source.tex | runlitrepl --filetype=latex eval-section --line 2 --col 1 >out.tex
+grep -q "AB" out.tex
+grep -v -q "XX" out.tex
+runlitrepl stop
+)}
+
+if test "$(basename $0)" = "test.sh" ; then
+  set -e -x
+  trap "echo FAIL" EXIT
+  for I in python ipython ; do
+    echo "Checking $I"
+    LITREPL_INTERPRETER=$I
+    test_parse_print
+    test_eval_md_1
+    test_eval_md_2
+    test_eval_tex_1
+    test_parse_print_tex_inline_1
+    test_eval_tex_inline_1
+  done
+  trap "" EXIT
+  echo OK
+fi
 
