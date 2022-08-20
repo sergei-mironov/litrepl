@@ -164,16 +164,20 @@ class SymbolsMarkdown:
   ocodendmarker="```"
   verbeginmarker="<!--litrepl-->"
   verendmarker="<!--litrepl-->"
+  combeginmarker=r"<!--lignore-->"
+  comendmarker=r"<!--lnoignore-->"
 
 symbols_md=SymbolsMarkdown()
 
 grammar_md = fr"""
-start: (snippet)*
+start: (text)? (snippet (text)?)*
 snippet : icodesection -> e_icodesection
         | ocodesection -> e_ocodesection
         | oversection -> e_versection
-        | text -> e_text
-//        | inlinesection -> e_inline
+        | comsection -> e_comsection
+        // | text -> e_text
+        // | inlinesection -> e_inline
+comsection.2 : combeginmarker comtext comendmarker
 icodesection.1 : icodebeginmarker text icodendmarker
 ocodesection.1 : ocodebeginmarker text ocodendmarker
 oversection.1 : verbeginmarker text verendmarker
@@ -186,7 +190,10 @@ verbeginmarker : "<!--litrepl-->"
 verendmarker : "<!--litrepl-->"
 inlinebeginmarker : "`"
 inlinendmarker : "`"
-text : /(.(?!```|<\!--litrepl-->))*./s
+combeginmarker : "{symbols_md.combeginmarker}"
+comendmarker : "{symbols_md.comendmarker}"
+text : /(.(?!```|<\!--litrepl-->|{symbols_md.combeginmarker}|{symbols_md.comendmarker}))*./s
+comtext : /(.(?!{symbols_md.comendmarker}))*./s
 """
 
 
@@ -199,6 +206,8 @@ class SymbolsLatex:
   verbeginmarker=r"%\begin{lresult}"
   verendmarker=r"%\end{lresult}"
   inlinemarker=r"\linline"
+  combeginmarker=r"%lignore"
+  comendmarker=r"%lnoignore"
 
 symbols_latex=SymbolsLatex()
 icodebeginmarkerE=r"\\begin\{lcode\}"
@@ -208,17 +217,25 @@ ocodendmarkerE=r"\\end\{lresult\}"
 verbeginmarkerE=r"\%\\begin\{lresult\}"
 verendmarkerE=r"\%\\end\{lresult\}"
 inlinemarkerE=r"\\linline\{"
+combeginmarkerE=r"\%lignore"
+comendmarkerE=r"\%lnoignore"
 
+allmarkersE='|'.join([icodebeginmarkerE,icodendmarkerE,
+                      ocodebeginmarkerE,ocodendmarkerE,
+                      verbeginmarkerE,verendmarkerE,
+                      combeginmarkerE,comendmarkerE,
+                      inlinemarkerE])
 OBR="{"
 CBR="}"
 BCBR="\\}"
 grammar_latex = fr"""
-start: (snippet)*
+start: (topleveltext)? (snippet (topleveltext)? )*
 snippet : icodesection -> e_icodesection
         | ocodesection -> e_ocodesection
         | oversection -> e_versection
-        | topleveltext -> e_text
         | inlinesection -> e_inline
+        | comsection -> e_comment
+comsection.2 : combeginmarker comtext comendmarker
 icodesection.1 : icodebeginmarker innertext icodendmarker
 ocodesection.1 : ocodebeginmarker innertext ocodendmarker
 oversection.1 : verbeginmarker innertext verendmarker
@@ -230,9 +247,12 @@ ocodebeginmarker : "{symbols_latex.ocodebeginmarker}"
 ocodendmarker : "{symbols_latex.ocodendmarker}"
 verbeginmarker : "{symbols_latex.verbeginmarker}"
 verendmarker : "{symbols_latex.verendmarker}"
-topleveltext : /(.(?!{icodebeginmarkerE}|{ocodebeginmarkerE}|{verbeginmarkerE}|{inlinemarkerE}))*./s
+combeginmarker : "{symbols_latex.combeginmarker}"
+comendmarker : "{symbols_latex.comendmarker}"
+topleveltext : /(.(?!{allmarkersE}))*./s
 innertext : /(.(?!{icodendmarkerE}|{ocodendmarkerE}|{verendmarkerE}))*./s
 inltext : ( /(.(?!{CBR}))*./s )?
+comtext : ( /(.(?!{comendmarkerE}))*./s )?
 spaces_obr : /[ \t\r\n]*{OBR}/s
 cbr : "{CBR}"
 """
@@ -322,6 +342,10 @@ def eval_section_(a, tree, symbols, nsecs:Set[int]):
       else:
         result=tree.children[3].children[0].value if len(tree.children[3].children)>0 else ''
       print(f"{im}{OBR}{code}{CBR}{spaces_obs}{result}{CBR}", end='')
+    def comsection(self,tree):
+      bmarker=symbols.combeginmarker
+      emarker=symbols.comendmarker
+      print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
   C().visit(tree)
 
 def solve_cpos(tree,cs:List[Tuple[int,int]]

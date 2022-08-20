@@ -46,43 +46,53 @@ Putting the cursor on this environment and typing the \texttt{:LitEval1} Vim
 command sends the code to the Python interpreter persistently running in the
 background.
 
+%lignore
 \begin{verbatim}
 \begin{lcode}
 W='Hello, world!'
 print(W)
 \end{lcode}
 \end{verbatim}
+%lnoignore
 
 \begin{lcode}
-W='Hello, world!'
+W='Hello, my world!'
 print(W)
 \end{lcode}
 
 \texttt{lresult} section next to the executable section is a result container.
 When executed, LitREPL replaces its content with the executable code output.
 
+%lignore
 \begin{verbatim}
 \begin{lresult}
-Hello, world!
+PLACEHOLDER
 \end{lresult}
 \end{verbatim}
+%lnoignore
 
 \begin{lresult}
-Hello, world!
+Hello, my world!
 \end{lresult}
 
 VimREPL also recognises commented \texttt{lresult} tags as a valid result
 container. This we can generate custom parts of the document.
 
+%lignore
+\begin{lcode}
+print('Hello, zzLitREPL.vim!')
+\end{lcode}
+\begin{verbatim}
+%\begin{lresult}
+PLACEHOLDER
+%\end{lresult}
+\end{verbatim}
+
+%lnoignore
+
 \begin{lcode}
 print('Hello, LitREPL.vim!')
 \end{lcode}
-
-\begin{verbatim}
-%\begin{lresult}
-Hello, LitREPL.vim!
-%\end{lresult}
-\end{verbatim}
 
 \begin{mdframed}
 %\begin{lresult}
@@ -96,9 +106,11 @@ Python variables, so the VimREPL wraps the executable code with the additional
 \texttt{print(...)} operator. On the Latex side, we define the tag to ignore its
 first argument but pass the second one as-is.
 
+%lignore
 \begin{verbatim}
 \begin{mdframed}\linline{W}{??}\end{mdframed}
 \end{verbatim}
+%lnoignore
 
 \begin{mdframed}\linline{W}{Hello, world!}\end{mdframed}
 

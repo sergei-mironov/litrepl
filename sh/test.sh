@@ -122,6 +122,18 @@ TXT
 * <!--litrepl-->
   PLACEHOLDER
   <!--litrepl-->
+== Ignore ==
+<!--lignore-->
+```python
+print('A'+'B')
+```
+```
+PLACEHOLDER
+```
+<!--lnoignore-->
+```
+NOEVAL
+```
 EOF
 cat source.md | runlitrepl --filetype=markdown parse-print >out.md
 diff -u source.md out.md
@@ -144,6 +156,18 @@ TXT
 * <!--litrepl-->
   ABCDEF
   <!--litrepl-->
+== Ignore ==
+<!--lignore-->
+```python
+print('A'+'B')
+```
+```
+PLACEHOLDER
+```
+<!--lnoignore-->
+```
+NOEVAL
+```
 EOF
 runlitrepl stop
 )}
@@ -165,8 +189,21 @@ Text
 \begin{lresult}
 NOEVAL
 \end{lresult}
+== Inline ==
 \linline{"A"+"B"}
 {XX}\linline{"C"+"D"}{}
+== Ignore ==
+%lignore
+\begin{lcode}
+print("X"+"Y")
+\end{lcode}
+%\begin{lresult}
+ZZZZZ
+%\end{lresult}
+%lnoignore
+\begin{lresult}
+PLACEHOLDER
+\end{lresult}
 EOF
 cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
 diff -u source.tex out.tex
@@ -185,11 +222,53 @@ Text
 \begin{lresult}
 NOEVAL
 \end{lresult}
+== Inline ==
 \linline{"A"+"B"}
 {AB}\linline{"C"+"D"}{CD}
+== Ignore ==
+%lignore
+\begin{lcode}
+print("X"+"Y")
+\end{lcode}
+%\begin{lresult}
+ZZZZZ
+%\end{lresult}
+%lnoignore
+\begin{lresult}
+PLACEHOLDER
+\end{lresult}
 EOF
 runlitrepl stop
 )}
+
+# test_eval_ignore() {(
+# mktest "_test_eval_ignore"
+# runlitrepl start
+# cat >source.tex <<"EOF"
+# %lignore
+# \begin{lcode}
+# print("X"+"W")
+# \end{lcode}
+# %\begin{lresult}
+# ZZZZZ
+# %\end{lresult}
+# %lnoignore
+# EOF
+# # cat source.tex | runlitrepl --filetype=latex parse #>out.tex
+# # diff -u source.tex out.tex
+# cat source.tex | runlitrepl --filetype=latex eval-sections '0..$' >out.tex
+# diff -u out.tex - <<"EOF"
+# %lignore
+# \begin{lcode}
+# print("X"+"W")
+# \end{lcode}
+# %\begin{lresult}
+# ZZZZZ
+# %\end{lresult}
+# %lnoignore
+# EOF
+# runlitrepl stop
+# )}
 
 if test "$(basename $0)" = "test.sh" ; then
   set -e -x
