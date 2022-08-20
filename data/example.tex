@@ -1,0 +1,91 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{mdframed}
+\usepackage{minted}
+
+\newenvironment{lcode}
+  {\VerbatimEnvironment
+   \begin{mdframed}
+   \begin{minted}[breaklines, fontsize=\footnotesize]{python}}
+  {\end{minted}
+   \end{mdframed}}
+\newenvironment{lresult}
+  {\begin{mdframed}}
+  {\end{mdframed}}
+
+\graphicspath{ {./} }
+
+\begin{document}
+
+\section{Environment tags}
+
+LitREPL for latex recognizes specifically named environments as code and result
+sections. It doesn't really evaluate Tex commands so renaming those environments
+wouldn't work. But we still need to introduce it to Latex so we start with a
+newenvironment declarations.
+
+\begin{verbatim}
+\newenvironment{lcode}
+  {\VerbatimEnvironment
+   \begin{mdframed}
+   \begin{minted}[breaklines, fontsize=\footnotesize]{python}}
+  {\end{minted}
+   \end{mdframed}}
+\newenvironment{lresult}
+  {\begin{mdframed}[leftline=false,rightline=false]}
+  {\end{mdframed}}
+\end{verbatim}
+
+\section{Executing code snippets}
+
+Executable code snippet is the content of the \texttt{lcode} environment.
+Putting the cursor on it and typing the \texttt{:LitEval1} command runs it
+it in a background Python interpreter.
+
+\begin{lcode}
+W='Hello, world!'
+print(W)
+\end{lcode}
+
+\texttt{lresult} section next to the executable section is a result container.
+LitREPL would paste here the output of above code snippet. The original content
+of the section will be replaced.
+
+\begin{lresult}
+Hello, world!
+\end{lresult}
+
+Commented \texttt{lresult} environmet tags are still recognized as a section for
+verbatim results. This way users can generate parts of the latex document.
+
+\begin{lcode}
+print('Hello, LitREPL.vim!')
+\end{lcode}
+
+\begin{mdframed}
+%\begin{lresult}
+Hello LitREPL.vim
+%\end{lresult}
+\end{mdframed}
+
+\section{Invoking Mathplotlib code}
+
+\begin{lcode}
+import numpy as np
+import matplotlib.pyplot as plt
+X=np.array(range(10))
+_=plt.plot(X, np.sin(X))
+def texplot(f):
+  plt.savefig(f)
+  print("\\includegraphics{./"+f+"}")
+
+texplot('_img.png')
+\end{lcode}
+
+\newcommand{\linplace}[2]{#2}
+%\begin{lresult}
+\includegraphics{\linplace{VAR}{_img.png}}
+%\end{lresult}
+
+\end{document}
