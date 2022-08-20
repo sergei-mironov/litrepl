@@ -232,7 +232,7 @@ verbeginmarker : "{symbols_latex.verbeginmarker}"
 verendmarker : "{symbols_latex.verendmarker}"
 topleveltext : /(.(?!{icodebeginmarkerE}|{ocodebeginmarkerE}|{verbeginmarkerE}|{inlinemarkerE}))*./s
 innertext : /(.(?!{icodendmarkerE}|{ocodendmarkerE}|{verendmarkerE}))*./s
-inltext : /(.(?!{CBR}))*./s
+inltext : ( /(.(?!{CBR}))*./s )?
 spaces_obr : /[ \t\r\n]*{OBR}/s
 cbr : "{CBR}"
 """

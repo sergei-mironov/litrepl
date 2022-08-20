@@ -183,6 +183,19 @@ grep -v -q "XX" out.tex
 runlitrepl stop
 )}
 
+test_eval_tex_inline_2() {(
+mktest "_test_eval_tex_inline_2"
+runlitrepl start
+cat >source.tex <<"EOF"
+111
+\linline{"A"+"B"}{}
+222
+EOF
+cat source.tex | runlitrepl --filetype=latex eval-section --line 2 --col 1 >out.tex
+grep -q "AB" out.tex
+runlitrepl stop
+)}
+
 if test "$(basename $0)" = "test.sh" ; then
   set -e -x
   trap "echo FAIL" EXIT
@@ -195,6 +208,7 @@ if test "$(basename $0)" = "test.sh" ; then
     test_eval_tex_1
     test_parse_print_tex_inline_1
     test_eval_tex_inline_1
+    test_eval_tex_inline_2
   done
   trap "" EXIT
   echo OK
