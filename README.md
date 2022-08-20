@@ -14,13 +14,12 @@ code evaluation right inside the editor.
 
 **Requirements:**
 
-* Linux-compatible OS. The plugin depends on UNIX pipes and certain shell
-  commands.
+* POSIX-compatible OS, typically a Linux. The plugin depends on UNIX pipes and
+  certain shell commands.
 * More or less recent `Vim`
-* `Python3` with the following libraries:
-  - lark-parser
-  - ~~pylightnix~~
-* `socat` application
+* `Python3` with the following libraries: `lark-parser`, (Optional) `ipython`.
+* (Optional) `GNU socat` application.
+* (Optional) `Nix` package manager.
 
 **Limitations:**
 
