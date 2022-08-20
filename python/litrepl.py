@@ -72,7 +72,50 @@ def process(lines:str)->str:
     if fdw!=0:
       os.close(fdw)
 
-def start():
+def fork_python(name):
+  assert name.startswith('python')
+  system((f'{name} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
+          'os.open(\'_inp.pipe\',os.O_RDWR);'
+          'os.open(\'_out.pipe\',os.O_RDWR);"'
+          '<_inp.pipe >_out.pipe 2>&1 & echo $! >_pid.txt'))
+  open('_inp.pipe','w').write(
+    'import signal\n'
+    'def _handler(signum,frame):\n'
+    '  raise KeyboardInterrupt()\n\n'
+    '_=signal.signal(signal.SIGINT,_handler)\n')
+  exit(0)
+
+def fork_ipython(name):
+  assert name.startswith('ipython')
+  open('_config.py','w').write(
+    'from IPython.terminal.prompts import Prompts, Token\n'
+    'class EmptyPrompts(Prompts):\n'
+    '    def in_prompt_tokens(self):\n'
+    '        return [(Token.Prompt, "")]\n'
+    '    def continuation_prompt_tokens(self, width=None):\n'
+    '        return [(Token.Prompt, "") ]\n'
+    '    def rewrite_prompt_tokens(self):\n'
+    '        return []\n'
+    '    def out_prompt_tokens(self):\n'
+    '        return []\n'
+    'c.TerminalInteractiveShell.prompts_class = EmptyPrompts\n'
+    'c.TerminalInteractiveShell.separate_in = ""\n'
+    'c.TerminalInteractiveShell.separate_out = ""\n'
+    )
+  system((f'{name} --config=_config.py --debug --logfile=_ipython.log -c '
+          '"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
+          'os.open(\'_inp.pipe\',os.O_RDWR);'
+          'os.open(\'_out.pipe\',os.O_RDWR);"'
+          ' -i <_inp.pipe >_out.pipe 2>&1 & echo $! >_pid.txt'))
+  open('_inp.pipe','w').write(
+    'import signal\n'
+    'def _handler(signum,frame):\n'
+    '  raise KeyboardInterrupt()\n\n'
+    '_=signal.signal(signal.SIGINT,_handler)\n'
+  )
+  exit(0)
+
+def start_(fork_handler:callable):
   """ Starts the background Python interpreter. Kill an existing interpreter if
   any. Creates files `_inp.pipe`, `_out.pipt`, `_pid.txt`."""
   if isfile('_pid.txt'):
@@ -81,16 +124,7 @@ def start():
   system('mkfifo _inp.pipe _out.pipe 2>/dev/null')
   if os.fork()==0:
     sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
-    system(('python -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
-            'os.open(\'_inp.pipe\',os.O_RDWR);'
-            'os.open(\'_out.pipe\',os.O_RDWR);"'
-            '<_inp.pipe >_out.pipe 2>&1 & echo $! >_pid.txt'))
-    open('_inp.pipe','w').write(
-      'import signal\n'
-      'def _handler(signum,frame):\n'
-      '  raise KeyboardInterrupt()\n\n'
-      '_=signal.signal(signal.SIGINT,_handler)\n')
-    exit(0)
+    fork_handler()
   else:
     for i in range(10):
       if isfile("_pid.txt"):
@@ -98,6 +132,19 @@ def start():
       sleep(0.5)
     if not isfile("_pid.txt"):
       raise ValueError("Couldn't see '_pid.txt'. Did the fork fail?")
+
+def start(a):
+  if 'ipython' in a.interpreter:
+    start_(partial(fork_ipython,name=a.interpreter))
+  elif 'python' in a.interpreter:
+    start_(partial(fork_python,name=a.interpreter))
+  elif a.interpreter=='auto':
+    if system('which ipython >/dev/null')==0:
+      start_(partial(fork_ipython,name='ipython'))
+    else:
+      start_(partial(fork_python,name='python'))
+  else:
+    raise ValueError(f"Unsupported interpreter {a.interpreter}")
 
 def running()->bool:
   """ Checks if the background session was run or not. """
@@ -235,13 +282,13 @@ def unindent(col:int,lines:str)->str:
 def indent(col,lines:str)->str:
   return '\n'.join([' '*col+l for l in lines.split('\n')])
 
-def eval_section_(tree, symbols, cpos:Optional[Tuple[int,int]]=None,
+def eval_section_(a, tree, symbols, cpos:Optional[Tuple[int,int]]=None,
                   nsec:Optional[int]=None):
   # TODO: nsec
   assert cpos is not None
   line,col=cpos if cpos is not None else (None,None)
   if not running():
-    start()
+    start(a)
   class C(Interpreter):
     def __init__(self):
       self.task=None
@@ -289,14 +336,14 @@ def eval_section_(tree, symbols, cpos:Optional[Tuple[int,int]]=None,
     #   print(f"`{tree.children[1].children[0].value}`", end='')
   C().visit(tree)
 
-eval_section_md=partial(eval_section_,symbols=symbols_md)
-eval_section_latex=partial(eval_section_,symbols=symbols_latex)
 
 if __name__=='__main__':
   ap=ArgumentParser(prog='litrepl.py')
   ap.add_argument('--filetype',metavar='STR',default='markdown',help='ft help')
+  ap.add_argument('--interpreter',metavar='EXE',default='auto',help='python|ipython|auto')
   sps=ap.add_subparsers(help='command help', dest='command')
   sps.add_parser('start',help='start help')
+  sps.add_parser('start-ipython',help='start help')
   sps.add_parser('stop',help='stop help')
   sps.add_parser('parse',help='parse help')
   sps.add_parser('parse-print',help='parse-print help')
@@ -308,7 +355,7 @@ if __name__=='__main__':
   a=ap.parse_args(sys.argv[1:])
 
   if a.command=='start':
-    start()
+    start(a)
   elif a.command=='stop':
     stop()
   elif a.command=='parse':
@@ -318,7 +365,7 @@ if __name__=='__main__':
     print_(parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype])
   elif a.command=='eval-section':
     cpos=(a.line,a.col) if None not in [a.line,a.col] else None
-    eval_section_(parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype],cpos,a.nsec)
+    eval_section_(a,parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype],cpos,a.nsec)
   elif a.command=='repl':
     system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
   else:

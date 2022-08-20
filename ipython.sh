@@ -19,6 +19,9 @@ c.InteractiveShellApp.exec_lines.append('%load_ext autoreload')
 c.InteractiveShellApp.exec_lines.append('%autoreload 2')
 c.InteractiveShellApp.exec_lines.append('%config Application.verbose_crash=False')
 
+# from IPython.terminal.prompts import ClassicPrompts
+# c.TerminalInteractiveShell.prompts_class = ClassicPrompts
+
 def tweak():
   print("Enabling tweaks")
 

@@ -11,16 +11,21 @@ mktest() {
   cd "$T"
 }
 
+runlitrepl() {
+  test -n "$LITREPL_INTERPRETER"
+  litrepl.py --interpreter="$LITREPL_INTERPRETER" "$@"
+}
+
 test_parse_print() {( # {{{
 mktest "_test_parse_print"
 run_md() {
   cat > "source.md"
-  cat "source.md" | litrepl.py --filetype=markdown parse-print > "parsed.md"
+  cat "source.md" | runlitrepl --filetype=markdown parse-print > "parsed.md"
   diff -u "source.md" "parsed.md"
 }
 run_latex() {
   cat > "source.tex"
-  cat "source.tex" | litrepl.py --filetype=latex parse-print > "parsed.tex"
+  cat "source.tex" | runlitrepl --filetype=latex parse-print > "parsed.tex"
   diff -u "source.tex" "parsed.tex"
 }
 run_md <<"EOF"
@@ -100,8 +105,8 @@ EOF
 
 test_eval_md_1() {
 mktest "_test_eval_md_1"
-litrepl.py start
-litrepl.py eval-section --line 1 --col 1 >out.md <<"EOF"
+runlitrepl start
+runlitrepl eval-section --line 1 --col 1 >out.md <<"EOF"
 ```python
 def hello(name):
   print(f"Hello, {name}!")
@@ -114,13 +119,13 @@ PLACEHOLDER
 EOF
 grep -q "Hello, World!" out.md
 grep -v -q "PLACEHOLDER" out.md
-litrepl.py stop
+runlitrepl stop
 }
 
 test_eval_md_2() {
 mktest "_test_eval_md_2"
-litrepl.py start
-litrepl.py eval-section --line 1 --col 1 >out.md <<"EOF"
+runlitrepl start
+runlitrepl eval-section --line 1 --col 1 >out.md <<"EOF"
 ```python
 print("ABC"+"DEF")
 ```
@@ -130,12 +135,12 @@ PLACEHOLDER
 EOF
 grep -q "ABCDEF" out.md
 grep -v -q "PLACEHOLDER" out.md
-litrepl.py stop
+runlitrepl stop
 }
 
 test_eval_tex_1() {
 mktest "_test_eval_tex_1"
-litrepl.py start
+runlitrepl start
 cat >source.tex <<"EOF"
 \begin{lcode}
 print("A"+"B")
@@ -145,17 +150,21 @@ Text
 PLACEHOLDER
 %\end{lresult}
 EOF
-cat source.tex | litrepl.py --filetype=latex eval-section --line 1 --col 1 >out.tex
+cat source.tex | runlitrepl --filetype=latex eval-section --line 1 --col 1 >out.tex
 grep -q "AB" out.tex
 grep -v -q "PLACEHOLDER" out.tex
-litrepl.py stop
+runlitrepl stop
 }
 
 trap "echo FAIL" EXIT
-test_parse_print
-test_eval_md_1
-test_eval_md_2
-test_eval_tex_1
+for I in python ipython ; do
+  echo "Checking $I"
+  LITREPL_INTERPRETER=$I
+  test_parse_print
+  test_eval_md_1
+  test_eval_md_2
+  test_eval_tex_1
+done
 trap "" EXIT
 echo OK
 
