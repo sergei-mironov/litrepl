@@ -8,6 +8,10 @@ code evaluation right inside the editor.
 
 **Featrues**
 
+* Lightweight: Runs on a bare Python with the
+  [lark-parser](https://github.com/lark-parser/lark) library.
+* Nix-friendly: [./default.nix](./default.nix) provides the full development
+  environment.
 * Supported document formats: Markdown, Latex
 * Supported interpreters: Python, IPython
 * Supported editor: Vim
@@ -17,9 +21,9 @@ code evaluation right inside the editor.
 * POSIX-compatible OS, typically a Linux. The plugin depends on UNIX pipes and
   certain shell commands.
 * More or less recent `Vim`
-* `Python3` with the following libraries: `lark-parser`, (Optional) `ipython`.
+* Python3 with the following libraries: `lark-parser` (Required), `ipython`
+  (Optional).
 * (Optional) `GNU socat` application.
-* (Optional) `Nix` package manager.
 
 **Limitations:**
 
