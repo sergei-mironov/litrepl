@@ -10,8 +10,8 @@ code evaluation right inside the editor.
 
 * Lightweight: Runs on a bare Python with the
   [lark-parser](https://github.com/lark-parser/lark) library
-* Supported document formats: Markdown (Example \[MD\]), Latex (Example
-  [[TEX]](./data/example.tex)[[PDF]](./data/example.pdf))
+* Supported document formats: Markdown \[MD\], Latex
+  [[TEX]](./data/example.tex)[[PDF]](./data/example.pdf)
 * Supported interpreters: Python, IPython
 * Supported editor: Vim
 * Nix/NixOS - friendly

@@ -13,7 +13,7 @@
 \newenvironment{lresult}
   {\begin{mdframed}}
   {\end{mdframed}}
-\newcommand{\linplace}[2]{#2}
+\newcommand{\linline}[2]{#2}
 
 \graphicspath{ {./} }
 
@@ -21,10 +21,10 @@
 
 \section{Environment tags}
 
-LitREPL for latex recognizes specifically named environments as code and result
-sections. It doesn't really evaluate Tex commands so renaming those environments
-wouldn't work. But we still need to introduce it to Latex so we start with a
-newenvironment declarations.
+LitREPL treats specially named Latex environments as code and result sections.
+It doesn't really evaluate \TeX\ commands so the tags should present in the source
+file explicitly rather than be a result of other commands such as
+\texttt{newcommand} or \texttt{newenvironment}.
 
 \begin{verbatim}
 \newenvironment{lcode}
@@ -41,9 +41,17 @@ newenvironment declarations.
 
 \section{Executing code snippets}
 
-Executable code snippet is the content of the \texttt{lcode} environment.
-Putting the cursor on it and typing the \texttt{:LitEval1} command runs it
-it in a background Python interpreter.
+Executable code is obtained from the content of the \texttt{lcode} environment.
+Putting the cursor on this environment and typing the \texttt{:LitEval1} Vim
+command sends the code to the Python interpreter persistently running in the
+background.
+
+\begin{verbatim}
+\begin{lcode}
+W='Hello, world!'
+print(W)
+\end{lcode}
+\end{verbatim}
 
 \begin{lcode}
 W='Hello, world!'
@@ -51,42 +59,60 @@ print(W)
 \end{lcode}
 
 \texttt{lresult} section next to the executable section is a result container.
-LitREPL would paste here the output of above code snippet. The original content
-of the section will be replaced.
+When executed, LitREPL replaces its content with the executable code output.
+
+\begin{verbatim}
+\begin{lresult}
+??
+\end{lresult}
+\end{verbatim}
 
 \begin{lresult}
 Hello, world!
 \end{lresult}
 
-Commented \texttt{lresult} environmet tags are still recognized as a section for
-verbatim results. This way users can generate parts of the latex document.
+VimREPL also recognises commented \texttt{lresult} tags as a valid result
+container. This we can generate custom parts of the document.
 
 \begin{lcode}
 print('Hello, LitREPL.vim!')
 \end{lcode}
 
+\begin{verbatim}
+%\begin{lresult}
+??
+%\end{lresult}
+\end{verbatim}
+
 \begin{mdframed}
 %\begin{lresult}
-Hello LitREPL.vim
+Hello, LitREPL.vim!
 %\end{lresult}
 \end{mdframed}
 
-\section{Invoking Mathplotlib code}
+A special two-argument \texttt{linline} tag works both as an executable section
+and as a result container. We expect it to be used to print the contents of
+Python variables, so the VimREPL wraps the executable code with the additional
+\texttt{print(...)} operator. On the Latex side, we define the tag to ignore its
+first argument but pass the second one as-is.
+
+\begin{verbatim}
+\begin{mdframed}\linline{W}{??}\end{mdframed}
+\end{verbatim}
+
+\begin{mdframed}\linline{W}{Hello, world!}\end{mdframed}
+
+\section{Mathplotlib plots and other graphics}
 
 \begin{lcode}
 import numpy as np
 import matplotlib.pyplot as plt
 X=np.array(range(10))
-_=plt.plot(X, np.sin(X))
-def texplot(f):
-  plt.savefig(f)
-  print("\\includegraphics{./"+f+"}")
-
-texplot('_img.png')
+plt.plot(X, np.sin(X))
+path='_img.png'
+plt.savefig(path)
 \end{lcode}
 
-%\begin{lresult}
-\includegraphics{\linplace{VAR}{_img.png}}
-%\end{lresult}
+\includegraphics{\linline{path}{_img.png}}
 
 \end{document}
