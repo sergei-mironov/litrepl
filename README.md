@@ -9,12 +9,11 @@ code evaluation right inside the editor.
 **Featrues**
 
 * Lightweight: Runs on a bare Python with the
-  [lark-parser](https://github.com/lark-parser/lark) library.
-* Nix-friendly: [./default.nix](./default.nix) provides the full development
-  environment.
+  [lark-parser](https://github.com/lark-parser/lark) library
 * Supported document formats: Markdown, Latex
 * Supported interpreters: Python, IPython
 * Supported editor: Vim
+* Nix/NixOS - friendly
 
 **Requirements:**
 
