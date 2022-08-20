@@ -2,12 +2,17 @@ LitREPL.vim
 -----------
 
 **LitREPL** is a VIM plugin and a Python library for Litrate programming and
-code evaluation right inside the editor. LaTex and Markdown formats are
-supported.
+code evaluation right inside the editor.
 
 <img src="./demo.gif" width="400"/>
 
-Requirements:
+**Featrues**
+
+* Supported document formats: Markdown, Latex
+* Supported interpreters: Python, IPython
+* Supported editor: Vim
+
+**Requirements:**
 
 * Linux-compatible OS. The plugin depends on UNIX pipes and certain shell
   commands.
@@ -17,7 +22,7 @@ Requirements:
   - ~~pylightnix~~
 * `socat` application
 
-Known limitations:
+**Limitations:**
 
 * Formatting: Nested code sections are not supported.
 * Formatting: Special symbols in the Python output could invalidate the
