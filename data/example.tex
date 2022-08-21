@@ -3,16 +3,25 @@
 \usepackage[utf8]{inputenc}
 \usepackage{mdframed}
 \usepackage{minted}
+\usepackage{verbatim}
 
 \newenvironment{lcode}
   {\VerbatimEnvironment
-   \begin{mdframed}
-   \begin{minted}[breaklines, fontsize=\footnotesize]{python}}
-  {\end{minted}
-   \end{mdframed}}
-\newenvironment{lresult}
-  {\begin{mdframed}}
-  {\end{mdframed}}
+   \begin{minted}[breaklines,fontsize=\footnotesize]{python}}
+  {\end{minted}}
+\BeforeBeginEnvironment{lcode}{\begin{mdframed}}
+\AfterEndEnvironment{lcode}{\end{mdframed}}
+
+% \newenvironment{lcode}{\verbatim}{\endverbatim}
+% \BeforeBeginEnvironment{lcode}{\begin{minted}[breaklines,fontsize=\footnotesize]{python} }
+% \AfterEndEnvironment{lcode}{\end{minted}}
+% \BeforeBeginEnvironment{lcode}{\begin{mdframed}}
+% \AfterEndEnvironment{lcode}{\end{mdframed}}
+
+\newenvironment{lresult}{\verbatim}{\endverbatim}
+\BeforeBeginEnvironment{lresult}{\begin{mdframed}}
+\AfterEndEnvironment{lresult}{\end{mdframed}}
+
 \newcommand{\linline}[2]{#2}
 
 \graphicspath{ {./} }
@@ -34,12 +43,14 @@ file explicitly rather than be a result of other commands such as
   {\end{minted}
    \end{mdframed}}
 \newenvironment{lresult}
-  {\begin{mdframed}[leftline=false,rightline=false]}
+  {\begin{mdframed}}
   {\end{mdframed}}
-\newcommand{\linplace}[2]{#2}
+\newcommand{\linline}[2]{#2}
 \end{verbatim}
 
 \section{Executing code snippets}
+
+\subsection{Regular output}
 
 Executable code is obtained from the content of the \texttt{lcode} environment.
 Putting the cursor on this environment and typing the \texttt{:LitEval1} Vim
@@ -49,14 +60,14 @@ background.
 %lignore
 \begin{verbatim}
 \begin{lcode}
-W='Hello, world!'
+W='Value of \\textbf{W}!'
 print(W)
 \end{lcode}
 \end{verbatim}
 %lnoignore
 
 \begin{lcode}
-W='Hello, my world!'
+W='Value of \\textbf{W}!'
 print(W)
 \end{lcode}
 
@@ -72,38 +83,62 @@ PLACEHOLDER
 %lnoignore
 
 \begin{lresult}
-Hello, my world!
+Value of \textbf{W}!
 \end{lresult}
+
+\subsection{Verbatim input and output}
 
 VimREPL also recognises commented \texttt{lresult} tags as a valid result
 container. This we can generate custom parts of the document.
 
 %lignore
-\begin{lcode}
-print('Hello, zzLitREPL.vim!')
-\end{lcode}
 \begin{verbatim}
-%\begin{lresult}
+\begin{lcode}
+print(W)
+\end{lcode}
+\begin{mdframed}
+%lresult
 PLACEHOLDER
-%\end{lresult}
+%lnoresult
+\end{mdframed}
 \end{verbatim}
-
 %lnoignore
 
 \begin{lcode}
-print('Hello, LitREPL.vim!')
+print(W)
 \end{lcode}
-
 \begin{mdframed}
-%\begin{lresult}
-Hello, LitREPL.vim!
-%\end{lresult}
+%lresult
+Value of \textbf{W}!
+%lnoresult
 \end{mdframed}
+
+A less often used option of verbatim input is also supported
+
+%lignore
+\begin{verbatim}
+%lcode
+print(r'Value of \textbf{W}!')
+%lnocode
+\begin{lresult}
+PLACEHOLDER
+\end{lresult}
+\end{verbatim}
+%lnoignore
+
+%lcode
+print(r'Value of \textbf{W}!')
+%lnocode
+\begin{lresult}
+Value of \textbf{W}!
+\end{lresult}
+
+\subsection{Inline code}
 
 A special two-argument \texttt{linline} tag works both as an executable section
 and as a result container. We expect it to be used to print the contents of
-Python variables, so the VimREPL wraps the executable code with the additional
-\texttt{print(...)} operator. On the Latex side, we define the tag to ignore its
+Python variables, so VimREPL wraps the executable portion with the additional
+\texttt{print(\%s)} operator. On the Latex side, we define the tag to ignore its
 first argument but pass the second one as-is.
 
 %lignore
@@ -112,19 +147,30 @@ first argument but pass the second one as-is.
 \end{verbatim}
 %lnoignore
 
-\begin{mdframed}\linline{W}{Hello, world!}\end{mdframed}
+\begin{mdframed}\linline{W}{Value of \textbf{W}!}\end{mdframed}
 
 \section{Mathplotlib plots and other graphics}
 
 \begin{lcode}
 import numpy as np
 import matplotlib.pyplot as plt
-X=np.array(range(10))
-plt.plot(X, np.sin(X))
+plt.close()
+X=np.array(range(100))
+plt.plot(X, np.sin(X/10))
 path='_img.png'
 plt.savefig(path)
 \end{lcode}
 
-\includegraphics{\linline{path}{_img.png}}
+%lignore
+\begin{verbatim}
+\begin{center}
+\includegraphics[width=0.8\textwidth]{\linline{path}{?}}
+\end{center}
+\end{verbatim}
+%lnoignore
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{\linline{path}{_img.png}}
+\end{center}
 
 \end{document}

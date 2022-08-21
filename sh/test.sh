@@ -91,9 +91,9 @@ Bartext
   \end{lcode}
 
   \item
-  %\begin{lresult}
+  %lresult
   hello("Verbose")
-  %\end{lresult}
+  %lnoresult
 \end{itemize}
 \end{document}
 EOF
@@ -166,7 +166,7 @@ PLACEHOLDER
 ```
 <!--lnoignore-->
 ```
-NOEVAL
+ABCDEF
 ```
 EOF
 runlitrepl stop
@@ -182,9 +182,9 @@ print("A"+"B")
 Text
 \begin{enumerate}
 \item
-  %\begin{lresult}
+  %lresult
   PLACEHOLDER
-  %\end{lresult}
+  %lnoresult
 \end{enumerate}
 \begin{lresult}
 NOEVAL
@@ -192,14 +192,18 @@ NOEVAL
 == Inline ==
 \linline{"A"+"B"}
 {XX}\linline{"C"+"D"}{}
+\begin{lcode}
+tag='\\textbf{bold}'
+\end{lcode}
+\linline{tag+tag}{\textbf{old}\textbf{old}}
 == Ignore ==
 %lignore
 \begin{lcode}
 print("X"+"Y")
 \end{lcode}
-%\begin{lresult}
+%lresult
 ZZZZZ
-%\end{lresult}
+%lnoresult
 %lnoignore
 \begin{lresult}
 PLACEHOLDER
@@ -215,60 +219,63 @@ print("A"+"B")
 Text
 \begin{enumerate}
 \item
-  %\begin{lresult}
+  %lresult
   AB
-  %\end{lresult}
+  %lnoresult
 \end{enumerate}
 \begin{lresult}
-NOEVAL
+AB
 \end{lresult}
 == Inline ==
 \linline{"A"+"B"}
 {AB}\linline{"C"+"D"}{CD}
+\begin{lcode}
+tag='\\textbf{bold}'
+\end{lcode}
+\linline{tag+tag}{\textbf{bold}\textbf{bold}}
 == Ignore ==
 %lignore
 \begin{lcode}
 print("X"+"Y")
 \end{lcode}
-%\begin{lresult}
+%lresult
 ZZZZZ
-%\end{lresult}
+%lnoresult
 %lnoignore
 \begin{lresult}
-PLACEHOLDER
 \end{lresult}
 EOF
 runlitrepl stop
 )}
 
-# test_eval_ignore() {(
-# mktest "_test_eval_ignore"
-# runlitrepl start
-# cat >source.tex <<"EOF"
-# %lignore
-# \begin{lcode}
-# print("X"+"W")
-# \end{lcode}
-# %\begin{lresult}
-# ZZZZZ
-# %\end{lresult}
-# %lnoignore
-# EOF
-# # cat source.tex | runlitrepl --filetype=latex parse #>out.tex
-# # diff -u source.tex out.tex
-# cat source.tex | runlitrepl --filetype=latex eval-sections '0..$' >out.tex
-# diff -u out.tex - <<"EOF"
-# %lignore
-# \begin{lcode}
-# print("X"+"W")
-# \end{lcode}
-# %\begin{lresult}
-# ZZZZZ
-# %\end{lresult}
-# %lnoignore
-# EOF
-# runlitrepl stop
-# )}
+test_eval_ignore() {(
+mktest "_test_eval_ignore"
+runlitrepl start
+cat >source.tex <<"EOF"
+\linline{"A"+"B"}
+{XX}\linline{"C"+"D"}{}
+\begin{lcode}
+tag='\\textbf{bold}'
+\end{lcode}
+\linline{tag+tag}{\textbf{old}\textbf{old}}
+\begin{lresult}
+PLACEHOLDER
+\end{lresult}
+EOF
+cat source.tex | runlitrepl --filetype=latex parse
+cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
+diff -u source.tex out.tex
+cat source.tex | runlitrepl --filetype=latex eval-sections '0..$' >out.tex
+diff -u out.tex - <<"EOF"
+\linline{"A"+"B"}
+{AB}\linline{"C"+"D"}{CD}
+\begin{lcode}
+tag='\\textbf{bold}'
+\end{lcode}
+\linline{tag+tag}{\textbf{bold}\textbf{bold}}
+EOF
+runlitrepl stop
+)}
 
 if test "$(basename $0)" = "test.sh" ; then
   set -e -x

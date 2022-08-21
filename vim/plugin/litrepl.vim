@@ -45,7 +45,7 @@ fun! s:SessionEval(mode)
     return
   end
   " A hack to remember the undo position
-  execute "normal! i "
+  execute "normal! $i "
   execute "normal! a\<BS>"
   execute "%! litrepl.py --filetype=".ft." eval-sections ".cmd." 2>/tmp/vim.err"
   if getfsize('/tmp/vim.err')>0
