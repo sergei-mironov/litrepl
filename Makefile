@@ -24,10 +24,13 @@ $(WHEEL): $(PY) Makefile .stamp_test
 .PHONY: wheel
 wheel: $(WHEEL)
 
-
 .PHONY: version
 version:
 	@echo $(VERSION)
+
+.PHONY: upload
+upload: $(WHEEL)
+	twine upload dist/*
 
 .PHONY: all
 all: wheel
