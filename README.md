@@ -25,19 +25,6 @@ programming and code execution right inside the editor.
   (Optional).
 * (Optional) `GNU socat` application.
 
-**Limitations:**
-
-* Formatting: Nested code sections are not supported.
-* Formatting: Special symbols in the Python output could invalidate the
-  document.
-* Interpreter: Extra newline is required after Python function definitions.
-* Interpreter: Stdout and stderr are joined together.
-* Interpreter: Evaluation of a code section locks the editor.
-* Interpreter: Tweaking `os.ps1`/`os.ps2` prompts of the Python interpreter
-  could break the session.
-* Interpreter: No asynchronous code execution.
-* ~~Interpreter: Background Python interpreter couldn't be interrupted~~
-
 _Currently, the plugin is at the proof-of-concept stage. No code is packaged,
 clone this repository to reproduce the results!_
 
@@ -47,7 +34,7 @@ Contents
 1. [LitREPL.vim](#litrepl.vim)
 2. [Contents](#contents)
 3. [Install](#install)
-   * [[Plug](https://github.com/junegunn/vim-plug)](#[plug](https://github.com/junegunn/vim-plug))
+   * [Plug](#plug)
    * [Nix/NixOS](#nix/nixos)
 4. [Develop](#develop)
 5. [Usage](#usage)
@@ -56,12 +43,15 @@ Contents
      * [Markdown](#markdown)
      * [Latex](#latex)
 6. [Technical details](#technical-details)
-7. [Third-party issues](#third-party-issues)
+7. [Limitations](#limitations)
+8. [Third-party issues](#third-party-issues)
 
 Install
 -------
 
-### [Plug](https://github.com/junegunn/vim-plug)
+### Plug
+
+Instructions for the [Plug](https://github.com/junegunn/vim-plug) manager:
 
 1. Add the following line to your `.vimrc` between `plug#begin` and `plug#end`
    calls.
@@ -205,6 +195,21 @@ The following events should normally happen upon typing the `LitEval1` command:
    through the interpreter.
 3. The result will be pasted into the Markdown section next after the current
    one.
+
+Limitations
+-----------
+
+* Formatting: Nested code sections are not supported.
+* Formatting: Special symbols in the Python output could invalidate the
+  document.
+* Interpreter: Extra newline is required after Python function definitions.
+* Interpreter: Stdout and stderr are joined together.
+* Interpreter: Evaluation of a code section locks the editor.
+* Interpreter: Tweaking `os.ps1`/`os.ps2` prompts of the Python interpreter
+  could break the session.
+* Interpreter: No asynchronous code execution.
+* ~~Interpreter: Background Python interpreter couldn't be interrupted~~
+
 
 Third-party issues
 ------------------
