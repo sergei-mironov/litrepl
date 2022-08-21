@@ -63,8 +63,8 @@ Setup
    ```vim
    Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
    ```
-2. Install `litrepl` python package. The plugin relies on its `litrepl` tool to
-   be available via system `PATH`.
+2. Install `litrepl` python package. The plugin relies on the `litrepl` script
+   to be available via system `PATH`.
    ```sh
    pip install litrepl
    ```
