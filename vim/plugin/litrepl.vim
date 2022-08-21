@@ -1,15 +1,23 @@
 if exists("g:litrepl_loaded")
   finish
 endif
-let g:litrepl_loaded = 1
+
+if ! exists("g:litrepl_bin")
+  let g:litrepl_bin = expand('<sfile>:p:h:h').'/bin/'
+endif
+if ! exists("g:litrepl_exe")
+  let g:litrepl_exe = 'litrepl'
+endif
+let $PATH=g:litrepl_bin.":".$PATH
+
 
 fun! s:SessionStart()
-  execute "!litrepl start"
+  execute '!'.g:litrepl_exe.' start'
 endfun
 command! -nargs=0 LitStart call <SID>SessionStart()
 
 fun! s:SessionStop()
-  execute "!litrepl stop"
+  execute '!'.g:litrepl_exe.' stop'
 endfun
 command! -nargs=0 LitStop call <SID>SessionStop()
 
@@ -20,12 +28,12 @@ endfun
 command! -nargs=0 LitRestart call <SID>SessionRestart()
 
 fun! s:SessionParsePrint()
-  execute "%! litrepl parse-print"
+  execute '%!'.g:litrepl_exe.' parse-print'
 endfun
 command! -nargs=0 LitPP call <SID>SessionParsePrint()
 
 fun! s:SessionRepl()
-  execute "terminal litrepl repl"
+  execute "terminal ".g:litrepl_exe." repl"
 endfun
 command! -nargs=0 LitRepl call <SID>SessionRepl()
 
@@ -45,9 +53,9 @@ fun! s:SessionEval(mode)
     return
   end
   " A hack to remember the undo position
-  execute "normal! $i "
-  execute "normal! a\<BS>"
-  execute "%! litrepl --filetype=".ft." eval-sections ".cmd." 2>/tmp/vim.err"
+  execute "normal! I "
+  execute "normal! x"
+  execute '%!'.g:litrepl_exe.' --filetype='.ft.' eval-sections '.cmd.' 2>/tmp/vim.err'
   if getfsize('/tmp/vim.err')>0
     for l in readfile('/tmp/vim.err')
       echomsg l
@@ -59,4 +67,6 @@ command! -nargs=0 LitEval1 call <SID>SessionEval('Here')
 command! -nargs=0 LitEvalAbove call <SID>SessionEval('Above')
 command! -nargs=0 LitEvalBelow call <SID>SessionEval('Below')
 command! -nargs=0 LitEvalAll call <SID>SessionEval('All')
+
+let g:litrepl_loaded = 1
 

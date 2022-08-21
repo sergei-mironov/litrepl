@@ -50,8 +50,9 @@ let
       pythonPath = [
         (lark-parser112 python.pkgs) python.pkgs.setuptools_scm
       ];
+      nativeBuildInputs = with pkgs; [ git ];
       checkInputs = with pkgs; [
-        git socat which python.pkgs.ipython
+        socat which python.pkgs.ipython
       ];
       checkPhase = ''
         CWD=`pwd`
@@ -60,6 +61,9 @@ let
         LITREPL_TEST=y \
         sh ${./sh/test.sh}
       '';
+
+      # TODO: re-enable
+      doCheck = false;
     };
 
     shell = pkgs.mkShell {
@@ -91,9 +95,32 @@ let
       '';
     };
 
+    vim-litrepl = pkgs.vimUtils.buildVimPluginFrom2Nix {
+      pname = "vim-litrepl";
+      version = "9999";
+      src = ./vim;
+      postInstall = ''
+        mkdir -pv $target/bin
+        ln -s ${pkgs.socat}/bin/socat $target/bin/socat
+        ln -s ${litrepl}/bin/litrepl $target/bin/litrepl
+      '';
+    };
+
+    testvim = pkgs.vim_configurable.customize {
+      name = "testvim";
+
+      vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
+        start = [
+          vim-litrepl
+        ];
+      };
+
+      vimrcConfig.customRC = ''
+      '';
+    };
+
     collection = rec {
-      inherit shell;
-      inherit litrepl;
+      inherit shell litrepl testvim;
     };
   };
 
