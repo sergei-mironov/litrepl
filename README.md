@@ -1,12 +1,12 @@
 LitREPL.vim
 -----------
 
-**LitREPL** is a VIM plugin and a macroprocessing Python library for Litrate
+**LitREPL** is a VIM plugin and a macro processing Python library for Literate
 programming and code execution right inside the editor.
 
 <img src="./demo.gif" width="400"/>
 
-**Featrues**
+**Features**
 
 * Lightweight: Runs on a bare Python with the
   [lark-parser](https://github.com/lark-parser/lark) library
@@ -56,10 +56,31 @@ Contents
 Setup
 -----
 
+### [Plug](https://github.com/junegunn/vim-plug)
+
+1. Add the following line to your `.vimrc` between `plug#begin` and `plug#end`
+   calls.
+   ```vim
+   Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
+   ```
+2. Install `litrepl` python package. The plugin relies on its `litrepl` tool to
+   be available via system `PATH`.
+   ```sh
+   pip install litrepl
+   ```
+
+### Nix/NixOS
+
+[default.nix](./default.nix) contains a `testvim` expression which may be
+built with `nix-build -A testvim` and run with `./result/bin/testvim`. Modify
+your system's configuration accordingly.
+
+### Development environment
+
 1. `git clone --recursive <https://this_repo>; cd litrepl.vim`
 2. Enter the development environment
-   * (For Nix/NixOS systems) `nix-shell`
-   * (For other Linuxes) `. env.sh`
+   * (Nix/NixOS systems) `nix-shell`
+   * (Other Linuxes) `. env.sh`
    Read the warnings and install the missing packages if required. The
    environment script will add `./sh` and `./python` folders to the current
    shell's PATH.  The former folder contains the back-end script, the latter one
@@ -178,5 +199,9 @@ The following events should normally happen upon typing the `LitEval1` command:
 3. The result will be pasted into the Markdown section next after the current
    one.
 
+Third-party issues
+------------------
+
+* https://github.com/junegunn/vim-plug/issues/1010#issuecomment-1221614232
 
 

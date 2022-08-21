@@ -119,8 +119,32 @@ let
       '';
     };
 
+    plugvim = pkgs.vim_configurable.customize {
+      name = "plugvim";
+
+      vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
+        start = [
+          (vim-plug.overrideAttrs (old: {
+            postInstall = ''
+              mkdir -pv $target/autoload
+              ln -s $target/plug.vim $target/autoload
+            '';
+          }))
+        ];
+      };
+      vimrcConfig.customRC = ''
+        runtime! plug.vim
+
+        call plug#begin($HOME.'/_vim')
+        Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
+        call plug#end()
+
+        let $PATH="${pkgs.socat}/bin:${litrepl}/bin:".$PATH
+      '';
+    };
+
     collection = rec {
-      inherit shell litrepl testvim;
+      inherit shell litrepl testvim plugvim;
     };
   };
 
