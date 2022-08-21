@@ -430,6 +430,7 @@ def solve_sloc(s:str,tree)->Set[int]:
 
 if __name__=='__main__':
   ap=ArgumentParser(prog='litrepl.py')
+  ap.add_argument('--version',action='version',version='999.999',help='print version')
   ap.add_argument('--filetype',metavar='STR',default='markdown',help='ft help')
   ap.add_argument('--interpreter',metavar='EXE',default='auto',help='python|ipython|auto')
   sps=ap.add_subparsers(help='command help', dest='command')

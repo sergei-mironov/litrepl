@@ -11,7 +11,7 @@ mktest() {
 
 runlitrepl() {
   test -n "$LITREPL_INTERPRETER"
-  litrepl.py --interpreter="$LITREPL_INTERPRETER" "$@"
+  $LITREPL --interpreter="$LITREPL_INTERPRETER" "$@"
 }
 
 test_parse_print() {( # {{{
@@ -277,8 +277,11 @@ EOF
 runlitrepl stop
 )}
 
-if test "$(basename $0)" = "test.sh" ; then
+if test -n '$LITREPL_TEST' || echo "$(basename $0)" | grep -q "test.sh" ; then
   set -e -x
+  if test -z "$LITREPL"; then
+    LITREPL=$LITREPL_ROOT/python/litrepl.py
+  fi
   trap "echo FAIL" EXIT
   for I in python ipython ; do
     echo "Checking $I"
