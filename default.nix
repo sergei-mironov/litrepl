@@ -34,6 +34,7 @@ let
         pytest-mypy
         wheel
         (lark-parser112 pp)
+        twine
       ]
     );
 
