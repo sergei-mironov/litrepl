@@ -46,19 +46,20 @@ Contents
 
 1. [LitREPL.vim](#litrepl.vim)
 2. [Contents](#contents)
-3. [Setup](#setup)
+3. [Install](#install)
    * [[Plug](https://github.com/junegunn/vim-plug)](#[plug](https://github.com/junegunn/vim-plug))
    * [Nix/NixOS](#nix/nixos)
-   * [Development environment](#development-environment)
-4. [Vim Commands](#vim-commands)
-5. [Formatting](#formatting)
-   * [Markdown](#markdown)
-   * [Latex](#latex)
+4. [Develop](#develop)
+5. [Usage](#usage)
+   * [Vim commands](#vim-commands)
+   * [Formatting](#formatting)
+     * [Markdown](#markdown)
+     * [Latex](#latex)
 6. [Technical details](#technical-details)
 7. [Third-party issues](#third-party-issues)
 
-Setup
------
+Install
+-------
 
 ### [Plug](https://github.com/junegunn/vim-plug)
 
@@ -68,7 +69,7 @@ Setup
    Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
    ```
 2. Install `litrepl` python package. The plugin relies on the `litrepl` script
-   to be available via system `PATH`.
+   to be available via the system `PATH`.
    ```sh
    pip install litrepl
    ```
@@ -79,7 +80,8 @@ Setup
 built with `nix-build -A testvim` and run with `./result/bin/testvim`. Modify
 your system's configuration accordingly.
 
-### Development environment
+Develop
+-------
 
 1. `git clone --recursive <https://this_repo>; cd litrepl.vim`
 2. Enter the development environment
@@ -93,8 +95,10 @@ your system's configuration accordingly.
    LitREPL plugin from the `./vim` folder.
 4. (Optional) Run `test.sh`
 
-Vim Commands
-------------
+Usage
+-----
+
+### Vim commands
 
 * `:LitStart`/`:LitStop`/`:LitRestart` - Starts, stops or restarts the
   background Python interpreter
@@ -105,10 +109,9 @@ Vim Commands
   runs in the background. Note, that standard Python prompts `>>>`/`...` are
   disabled.
 
-Formatting
-----------
+### Formatting
 
-### Markdown
+#### Markdown
 
 ```` markdown
 Executable section is the one that marked with "python" tag. Putting the cursor
@@ -137,7 +140,7 @@ PlAcEhOlDeR
 
 ````
 
-### Latex
+#### Latex
 
 ````latex
 \documentclass{article}
