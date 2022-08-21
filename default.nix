@@ -32,24 +32,30 @@ let
         hypothesis
         pytest
         pytest-mypy
+        wheel
         (lark-parser112 pp)
       ]
     );
 
     litrepl = python.pkgs.buildPythonApplication {
       pname = "litrepl";
-      version = "1.0";
-      src = ./python;
+      version = "9999";
+      src = builtins.filterSource (
+        path: type: !( baseNameOf path == "build" && type == "directory" ) &&
+                    !( baseNameOf path == "dist" && type == "directory" ) &&
+                    !( ((builtins.match "_[^_]*" (baseNameOf path)) != null)) &&
+                    !( baseNameOf path == "result" )
+        ) ./.;
       pythonPath = [
-        (lark-parser112 python.pkgs)
+        (lark-parser112 python.pkgs) python.pkgs.setuptools_scm
       ];
       checkInputs = with pkgs; [
-        socat which python.pkgs.ipython
+        git socat which python.pkgs.ipython
       ];
       checkPhase = ''
         CWD=`pwd`
-        LITREPL="python $CWD/litrepl.py" \
-        LITREPL_ROOT=`pwd` \
+        LITREPL="python $CWD/python/bin/litrepl" \
+        LITREPL_ROOT=`pwd`/python \
         LITREPL_TEST=y \
         sh ${./sh/test.sh}
       '';

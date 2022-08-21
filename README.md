@@ -1,8 +1,8 @@
 LitREPL.vim
 -----------
 
-**LitREPL** is a VIM plugin and a Python library for Litrate programming and
-code evaluation right inside the editor.
+**LitREPL** is a VIM plugin and a macroprocessing Python library for Litrate
+programming and code execution right inside the editor.
 
 <img src="./demo.gif" width="400"/>
 

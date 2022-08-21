@@ -4,12 +4,12 @@ endif
 let g:litrepl_loaded = 1
 
 fun! s:SessionStart()
-  execute "!litrepl.py start"
+  execute "!litrepl start"
 endfun
 command! -nargs=0 LitStart call <SID>SessionStart()
 
 fun! s:SessionStop()
-  execute "!litrepl.py stop"
+  execute "!litrepl stop"
 endfun
 command! -nargs=0 LitStop call <SID>SessionStop()
 
@@ -20,12 +20,12 @@ endfun
 command! -nargs=0 LitRestart call <SID>SessionRestart()
 
 fun! s:SessionParsePrint()
-  execute "%! litrepl.py parse-print"
+  execute "%! litrepl parse-print"
 endfun
 command! -nargs=0 LitPP call <SID>SessionParsePrint()
 
 fun! s:SessionRepl()
-  execute "terminal litrepl.py repl"
+  execute "terminal litrepl repl"
 endfun
 command! -nargs=0 LitRepl call <SID>SessionRepl()
 
@@ -47,7 +47,7 @@ fun! s:SessionEval(mode)
   " A hack to remember the undo position
   execute "normal! $i "
   execute "normal! a\<BS>"
-  execute "%! litrepl.py --filetype=".ft." eval-sections ".cmd." 2>/tmp/vim.err"
+  execute "%! litrepl --filetype=".ft." eval-sections ".cmd." 2>/tmp/vim.err"
   if getfsize('/tmp/vim.err')>0
     for l in readfile('/tmp/vim.err')
       echomsg l

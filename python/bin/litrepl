@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+
+from litrepl import *
+from litrepl import __version__
+
+if __name__=='__main__':
+  ap=ArgumentParser(prog='litrepl.py')
+  ap.add_argument('--version',action='version',version=__version__ or '?',help='print version')
+  ap.add_argument('--filetype',metavar='STR',default='markdown',help='ft help')
+  ap.add_argument('--interpreter',metavar='EXE',default='auto',help='python|ipython|auto')
+  sps=ap.add_subparsers(help='command help', dest='command')
+  sps.add_parser('start',help='start help')
+  sps.add_parser('start-ipython',help='start help')
+  sps.add_parser('stop',help='stop help')
+  sps.add_parser('parse',help='parse help')
+  sps.add_parser('parse-print',help='parse-print help')
+  apes=sps.add_parser('eval-section',help='eval-section help')
+  apes.add_argument('--line',type=int,default=None)
+  apes.add_argument('--col',type=int,default=None)
+  eps=sps.add_parser('eval-sections',help='eval-sections help')
+  eps.add_argument('locs',metavar='LOCS',default='*',help='locs help')
+  sps.add_parser('repl',help='repl help')
+  a=ap.parse_args(sys.argv[1:])
+
+  if a.command=='start':
+    start(a)
+  elif a.command=='stop':
+    stop()
+  elif a.command=='parse':
+    t=parse_(GRAMMARS[a.filetype])
+    print(t.pretty())
+  elif a.command=='parse-print':
+    eval_section_(a,parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype],{})
+  elif a.command=='eval-section':
+    t=parse_(GRAMMARS[a.filetype])
+    nsecs=set(solve_cpos(t,[(a.line,a.col)])[1].values())
+    eval_section_(a,t,SYMBOLS[a.filetype],nsecs)
+  elif a.command=='eval-sections':
+    t=parse_(GRAMMARS[a.filetype])
+    nsecs=solve_sloc(a.locs,t)
+    eval_section_(a,t,SYMBOLS[a.filetype],nsecs)
+  elif a.command=='repl':
+    system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
+  else:
+    pstderr(f'Unknown command: {a.command}')
+    exit(1)
+

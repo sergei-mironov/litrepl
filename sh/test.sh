@@ -280,7 +280,7 @@ runlitrepl stop
 if test -n '$LITREPL_TEST' || echo "$(basename $0)" | grep -q "test.sh" ; then
   set -e -x
   if test -z "$LITREPL"; then
-    LITREPL=$LITREPL_ROOT/python/litrepl.py
+    LITREPL=$LITREPL_ROOT/python/bin/litrepl
   fi
   trap "echo FAIL" EXIT
   for I in python ipython ; do

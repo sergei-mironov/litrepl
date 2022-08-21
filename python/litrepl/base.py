@@ -1,13 +1,10 @@
-#!/usr/bin/env python3
-
-# from pylightnix import *
-
-from typing import List, Optional, Tuple, Set, Dict
-from re import search, match as re_match
 import re
 import os
 import sys
 import fcntl
+
+from typing import List, Optional, Tuple, Set, Dict, Callable
+from re import search, match as re_match
 from select import select
 from os import environ, system
 from lark import Lark, Visitor, Transformer, Token, Tree
@@ -90,14 +87,14 @@ def fork_ipython(name):
   open('_config.py','w').write(
     'from IPython.terminal.prompts import Prompts, Token\n'
     'class EmptyPrompts(Prompts):\n'
-    '    def in_prompt_tokens(self):\n'
-    '        return [(Token.Prompt, "")]\n'
-    '    def continuation_prompt_tokens(self, width=None):\n'
-    '        return [(Token.Prompt, "") ]\n'
-    '    def rewrite_prompt_tokens(self):\n'
-    '        return []\n'
-    '    def out_prompt_tokens(self):\n'
-    '        return []\n'
+    '  def in_prompt_tokens(self):\n'
+    '    return [(Token.Prompt, "")]\n'
+    '  def continuation_prompt_tokens(self, width=None):\n'
+    '    return [(Token.Prompt, "") ]\n'
+    '  def rewrite_prompt_tokens(self):\n'
+    '    return []\n'
+    '  def out_prompt_tokens(self):\n'
+    '    return []\n'
     'c.TerminalInteractiveShell.prompts_class = EmptyPrompts\n'
     'c.TerminalInteractiveShell.separate_in = ""\n'
     'c.TerminalInteractiveShell.separate_out = ""\n'
@@ -115,7 +112,7 @@ def fork_ipython(name):
   )
   exit(0)
 
-def start_(fork_handler:callable):
+def start_(fork_handler:Callable[...,None])->None:
   """ Starts the background Python interpreter. Kill an existing interpreter if
   any. Creates files `_inp.pipe`, `_out.pipt`, `_pid.txt`."""
   if isfile('_pid.txt'):
@@ -427,46 +424,4 @@ def solve_sloc(s:str,tree)->Set[int]:
       return set()
   return set.union(*[_safeset(lambda:range(_get(q[0]),_get(q[1])+1)) if len(q)==2
                      else _safeset(lambda:[_get(q[0])]) for q in qs])
-
-if __name__=='__main__':
-  ap=ArgumentParser(prog='litrepl.py')
-  ap.add_argument('--version',action='version',version='999.999',help='print version')
-  ap.add_argument('--filetype',metavar='STR',default='markdown',help='ft help')
-  ap.add_argument('--interpreter',metavar='EXE',default='auto',help='python|ipython|auto')
-  sps=ap.add_subparsers(help='command help', dest='command')
-  sps.add_parser('start',help='start help')
-  sps.add_parser('start-ipython',help='start help')
-  sps.add_parser('stop',help='stop help')
-  sps.add_parser('parse',help='parse help')
-  sps.add_parser('parse-print',help='parse-print help')
-  apes=sps.add_parser('eval-section',help='eval-section help')
-  apes.add_argument('--line',type=int,default=None)
-  apes.add_argument('--col',type=int,default=None)
-  eps=sps.add_parser('eval-sections',help='eval-sections help')
-  eps.add_argument('locs',metavar='LOCS',default='*',help='locs help')
-  sps.add_parser('repl',help='repl help')
-  a=ap.parse_args(sys.argv[1:])
-
-  if a.command=='start':
-    start(a)
-  elif a.command=='stop':
-    stop()
-  elif a.command=='parse':
-    t=parse_(GRAMMARS[a.filetype])
-    print(t.pretty())
-  elif a.command=='parse-print':
-    eval_section_(a,parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype],{})
-  elif a.command=='eval-section':
-    t=parse_(GRAMMARS[a.filetype])
-    nsecs=set(solve_cpos(t,[(a.line,a.col)])[1].values())
-    eval_section_(a,t,SYMBOLS[a.filetype],nsecs)
-  elif a.command=='eval-sections':
-    t=parse_(GRAMMARS[a.filetype])
-    nsecs=solve_sloc(a.locs,t)
-    eval_section_(a,t,SYMBOLS[a.filetype],nsecs)
-  elif a.command=='repl':
-    system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
-  else:
-    pstderr(f'Unknown command: {a.command}')
-    exit(1)
 
