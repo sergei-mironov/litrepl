@@ -291,7 +291,7 @@ def unindent(col:int,lines:str)->str:
 def indent(col,lines:str)->str:
   return '\n'.join([' '*col+l for l in lines.split('\n')])
 
-def eval_section_(a, tree, symbols, nsecs:Set[int]):
+def eval_section_(a, tree, symbols, nsecs:Set[int])->None:
   if not running():
     start(a)
   ssrc:Dict[int,str]={}
@@ -299,7 +299,6 @@ def eval_section_(a, tree, symbols, nsecs:Set[int]):
   class C(Interpreter):
     def __init__(self):
       self.nsec=-1
-      # self.nosec=0
     def text(self,tree):
       print(tree.children[0].value, end='')
     def topleveltext(self,tree):
@@ -308,7 +307,6 @@ def eval_section_(a, tree, symbols, nsecs:Set[int]):
       return self.text(tree)
     def icodesection(self,tree):
       self.nsec+=1
-      # self.nosec=0
       t=tree.children[1].children[0].value
       bmarker=getattr(symbols,tree.children[0].data)
       emarker=getattr(symbols,tree.children[2].data)
@@ -326,7 +324,6 @@ def eval_section_(a, tree, symbols, nsecs:Set[int]):
         assert self.nsec in sres
         print(bmarker+"\n"+indent(bm.column-1,(f"{sres[self.nsec]}"+emarker)),
               end='')
-        # self.nosec+=1
       else:
         print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
     def ocodesection(self,tree):
@@ -368,8 +365,7 @@ def solve_cpos(tree,cs:List[Tuple[int,int]]
     def oversection(self,tree):
       self._count(tree.children[0].meta,tree.children[2].meta)
     def inlinesection(self,tree):
-      self.nsec+=1
-      self._count(tree.children[0].meta,tree.children[4].meta)
+      self._count(tree.children[0].meta,tree.children[5].meta)
   c=C()
   c.visit(tree)
   return c.nsec,acc
