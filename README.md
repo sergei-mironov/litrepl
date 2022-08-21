@@ -47,11 +47,15 @@ Contents
 1. [LitREPL.vim](#litrepl.vim)
 2. [Contents](#contents)
 3. [Setup](#setup)
+   * [[Plug](https://github.com/junegunn/vim-plug)](#[plug](https://github.com/junegunn/vim-plug))
+   * [Nix/NixOS](#nix/nixos)
+   * [Development environment](#development-environment)
 4. [Vim Commands](#vim-commands)
 5. [Formatting](#formatting)
    * [Markdown](#markdown)
    * [Latex](#latex)
 6. [Technical details](#technical-details)
+7. [Third-party issues](#third-party-issues)
 
 Setup
 -----
