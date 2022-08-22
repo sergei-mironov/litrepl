@@ -107,15 +107,15 @@ markup.
 ````markdown
 Some text text
 
+<!-- Code block 1 -->
 ```python
-# Code block 1
 print("Hello, World!")
 ```
 
 More text text
 
+<!-- Result block 1 -->
 ```lresult
-# Result block 1
 Hello, World!
 ```
 
