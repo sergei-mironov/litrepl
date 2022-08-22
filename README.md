@@ -1,15 +1,14 @@
 LitREPL.vim
 -----------
 
-**LitREPL** is a VIM plugin and a macro processing Python library for Literate
-programming and code execution right inside the editor.
+**LitREPL** is a macro processing Python library and a Vim plugin for Literate
+programming and code execution right from the editor.
 
 <img src="./demo.gif" width="400"/>
 
 **Features**
 
-* Lightweight: Runs on a bare Python with the
-  [lark-parser](https://github.com/lark-parser/lark) library
+* Lightweight: Runs on a system where only a few Python packages are installed.
 * Supported document formats: Markdown \[MD\], Latex
   [[TEX]](./data/example.tex)[[PDF]](./data/example.pdf)
 * Supported interpreters: Python, IPython
@@ -21,8 +20,8 @@ programming and code execution right inside the editor.
 * POSIX-compatible OS, typically a Linux. The plugin depends on UNIX pipes and
   certain shell commands.
 * More or less recent `Vim`
-* Python3 with the following libraries: `lark-parser` (Required), `ipython`
-  (Optional).
+* Python3 with the following libraries: `setuptools_scm`, `lark-parser`
+  (Required), `ipython` (Optional).
 * (Optional) `GNU socat` application.
 
 _Currently, the plugin is at the proof-of-concept stage. No code is packaged,
@@ -34,11 +33,11 @@ Contents
 1. [LitREPL.vim](#litrepl.vim)
 2. [Contents](#contents)
 3. [Install](#install)
-   * [Plug](#plug)
-   * [Nix/NixOS](#nix/nixos)
+   * [Pip and Plug](#pip-and-plug)
+   * [Nix](#nix)
 4. [Develop](#develop)
 5. [Usage](#usage)
-   * [Vim commands](#vim-commands)
+   * [Commands](#commands)
    * [Formatting](#formatting)
      * [Markdown](#markdown)
      * [Latex](#latex)
@@ -49,38 +48,45 @@ Contents
 Install
 -------
 
-### Plug
+A Python package and a vim plugin need to be installed in order to run the
+setup. The Vim plugin relies on the `litrepl` and some thirdparty UNIX tools to
+be available in the system `PATH`. Both Python and Vim packages reside in this
+repository so we advise to git-clone it by all the package managers involved.
 
-Instructions for the [Plug](https://github.com/junegunn/vim-plug) manager:
+### Pip and Plug
 
-1. Add the following line to your `.vimrc` between `plug#begin` and `plug#end`
-   calls.
+Instructions for the Pip and [Plug](https://github.com/junegunn/vim-plug)
+manager of Vim:
+
+1. Install the Python package.
+   ```sh
+   $ pip install lark setuptool_scm
+   $ pip install git+https://github.com/grwlf/litrepl.vim
+   $ litrepl --version
+   ```
+2. Install the Vim plugin by adding the following line between the
+   `plug#begin` and `plug#end` lines of your `.vimrc` file:
    ```vim
    Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
    ```
-2. Install `litrepl` python package. The plugin relies on the `litrepl` script
-   to be available via the system `PATH`.
-   ```sh
-   pip install litrepl
-   ```
 
-### Nix/NixOS
+### Nix
 
-[default.nix](./default.nix) contains a `testvim` expression which may be
+[default.nix](./default.nix) contains a `testvim` expression which could be
 built with `nix-build -A testvim` and run with `./result/bin/testvim`. Modify
 your system's configuration accordingly.
 
 Develop
 -------
 
-1. `git clone --recursive <https://this_repo>; cd litrepl.vim`
+1. `git clone --recursive https://github.com/grwlf/litrepl.vim; cd litrepl.vim`
 2. Enter the development environment
    * (Nix/NixOS systems) `nix-shell`
    * (Other Linuxes) `. env.sh`
-   Read the warnings and install the missing packages if required. The
+   Read the warnings and install missing packages if required. The
    environment script will add `./sh` and `./python` folders to the current
-   shell's PATH.  The former folder contains the back-end script, the latter one
-   contains the back-end script.
+   shell's PATH/PYTHONPATH.  The former folder contains the back-end script, the
+   latter one contains the Python library.
 3. Run the `vim_litrepl_dev` (a thin wrapper around Vim) to run the Vim with the
    LitREPL plugin from the `./vim` folder.
 4. (Optional) Run `test.sh`
@@ -88,16 +94,60 @@ Develop
 Usage
 -----
 
-### Vim commands
+LitREPL works with text documents organized in a Jupyter-notebooks manner: main
+text separates code blocks followed by the verbatim result blocks or other
+markup.
 
-* `:LitStart`/`:LitStop`/`:LitRestart` - Starts, stops or restarts the
-  background Python interpreter
-* `:LitEval1` - Execute the executable section under the cursor, or the
-  executable section of the result section under the cursor
-* `:LitRepl` - Open the `socat` with the right argument in the Vim terminal.
-  This way users could inspect the state of Python interpreter which normally
-  runs in the background. Note, that standard Python prompts `>>>`/`...` are
-  disabled.
+````
+Text text text
+
+```python
+# Code block 1
+print("Hello, World!")
+```
+
+More text
+
+```
+# Result block 1
+Hello, World!
+```
+````
+
+The tool executes code from the code block and pastes the result into the
+afterward one or many result sections. The execution goes in a background by the
+interpreter which is tied to the UNIX pipes saved in the filesystem. Thus, the
+state of the interpreter is persistent between the executions and in fact
+even between the Vim edit sessions.
+
+### Commands
+
+Most of the commands could be sent from the command line or from Vim directly.
+
+| Vim               | Command line     | Description                       |
+|-------------------|------------------|-----------------------------------|
+| `:LitStart`       | `litepl start`   | Start the interpreter             |
+| `:LitStop`        | `litepl stop`    | Stop the interpreter              |
+| `:LitRestart`     | `litrepl restart`| Restart the interpreter           |
+| `:LitEval1`       | `lirtepl eval-sections (N\|L:C)`| Evaluate the secion under the cursor |
+| `:LitEvalAbove`  | `lirtepl eval-sections 0..(N\|L:C)`| Evaluate the sections above and under the cursor |
+| `:LitEvalBelow`  | `lirtepl eval-sections (N\|L:C)..$`| Evaluate the sections below and under the cursor |
+| `:LitRepl`  | `lirtepl repl`| Open the terminal to the interpreter |
+
+Where
+
+* `N` denotes the number of code section starting from 0.
+* `L:C` denotes line:column of the curstor.
+
+Commands accept the following arguments:
+
+| Vim setting       | CLI argument      | Description                       |
+|-------------------|------------------|-----------------------------------|
+| `set filetype`    | `--filetype=T`   | Input file type: `latex`\|`markdown`  |
+|                   | `--interpreter=I`   | The interpreter to use: `python`\|`ipython`\|`auto`, defaulting to `auto` |
+
+* `I` is taken into account by the `start` command and by the first
+  `eval-sections` only.
 
 ### Formatting
 
@@ -146,38 +196,38 @@ newenvironment declarations
 \newenvironment{lresult}{\begin{texttt}}{\end{texttt}}
 \newcommand{\linline}[2]{#2}
 
-Executable section is the one inside the \texttt{lcode} environment. Putting the
-cursor on it and typing the \texttt{:LitEval1} command would execute it in a
+Executable sections are between the \texttt{lcode} begin/end tags. Putting the
+cursor on it and typing the \texttt{:LitEval1} would execute it in a
 background Python interpreter.
 
 \begin{lcode}
-W='Hello, world!'
+W='Hello, World!'
 print(W)
 \end{lcode}
 
-\texttt{lresult} section next to the executable section is a result section. The
-output of the code from the executable section will be pasted here. The original
-content of the section will be replaced.
+\texttt{lresult} tags next to the executable section mark the result section.
+The output of the executable section will be pasted here. The
+original content of the section will be replaced.
 
 \begin{lresult}
-PlAcEhOlDeR
+Hello, World!
 \end{lresult}
 
 Commented \texttt{lresult} environmet is still recognized as an output section.
 This way users can generate parts of the latex document.
 
 \begin{lcode}
-print("Hi")
+print("Hi!")
 \end{lcode}
 
-%\begin{lresult}
-PlAcEhOlDeR
-%\end{lresult}
+%lresult
+Hi!
+%lresult
 
 For LaTeX, VimREPL also recognises \texttt{linline} tag for which it prints its
 first argument and pastes the result in place of the second argument.
 
-\linline{W}{?}
+\linline{W}{Hello, World!}
 
 \end{document}
 ````
