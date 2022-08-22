@@ -130,7 +130,7 @@ Most of the commands could be sent from the command line or from Vim directly.
 | `:LitStart`       | `litepl start`   | Start the interpreter             |
 | `:LitStop`        | `litepl stop`    | Stop the interpreter              |
 | `:LitRestart`     | `litrepl restart`| Restart the interpreter           |
-| `:LitEval1`       | `lirtepl eval-sections (N\|L:C)`| Evaluate the secion under the cursor |
+| `:LitEval1`       | `lirtepl eval-sections (N\|L:C)`| Evaluate the section under the cursor |
 | `:LitEvalAbove`  | `lirtepl eval-sections 0..(N\|L:C)`| Evaluate the sections above and under the cursor |
 | `:LitEvalBelow`  | `lirtepl eval-sections (N\|L:C)..$`| Evaluate the sections below and under the cursor |
 | `:LitRepl`  | `lirtepl repl`| Open the terminal to the interpreter |
@@ -138,9 +138,9 @@ Most of the commands could be sent from the command line or from Vim directly.
 Where
 
 * `N` denotes the number of code section starting from 0.
-* `L:C` denotes line:column of the curstor.
+* `L:C` denotes line:column of the cursor.
 
-Commands accept the following arguments:
+### Arguments
 
 | Vim setting       | CLI argument      | Description                       |
 |-------------------|------------------|-----------------------------------|
