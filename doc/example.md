@@ -11,14 +11,19 @@ Verbatim sections next to the executable section are result sections. The output
 of the code from the executable section is pasted here. The original
 content of the section is replaced with the output of the last execution.
 
-```
+```lresult
 Hello, World!
 ```
 
-Markdown comments with `litrepl` word also mark a result section. This way we
-could produce the markdown document markup.
+Markdown comment-like tags `lcode`/`lnocode`/`lresult`/`lnoresult` also mark
+executable and result sections.  This way we could produce the markdown document
+markup.
 
-<!--litrepl-->
-Hello, World!
-<!--litrepl-->
+<!--lcode
+print("Hello, LitREPL")
+lnocode-->
+
+<!--lresult-->
+Hello, LitREPL
+<!--lnoresult-->
 

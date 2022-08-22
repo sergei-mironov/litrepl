@@ -37,10 +37,13 @@ Contents
    * [Nix](#nix)
 4. [Develop](#develop)
 5. [Usage](#usage)
+   * [Basics](#basics)
    * [Commands](#commands)
+   * [Arguments](#arguments)
    * [Formatting](#formatting)
      * [Markdown](#markdown)
      * [Latex](#latex)
+   * [Example](#example)
 6. [Technical details](#technical-details)
 7. [Limitations](#limitations)
 8. [Third-party issues](#third-party-issues)
@@ -94,6 +97,8 @@ Develop
 
 Usage
 -----
+
+### Basics
 
 LitREPL works with text documents organized in a Jupyter-notebooks manner: main
 text separates code blocks followed by the verbatim result blocks or other
@@ -150,6 +155,7 @@ Where
 * `I` is taken into account by the `start` command and by the first
   `eval-sections` only.
 
+
 ### Formatting
 
 #### Markdown
@@ -168,16 +174,21 @@ Verbatim sections next to the executable section are result sections. The output
 of the code from the executable section is pasted here. The original
 content of the section is replaced with the output of the last execution.
 
-```
+```lresult
 Hello, World!
 ```
 
-Markdown comments with `litrepl` word also mark a result section. This way we
-could produce the markdown document markup.
+Markdown comment-like tags `lcode`/`lnocode`/`lresult`/`lnoresult` also mark
+executable and result sections.  This way we could produce the markdown document
+markup.
 
-<!--litrepl-->
-Hello, World!
-<!--litrepl-->
+<!--lcode
+print("Hello, LitREPL")
+lnocode-->
+
+<!--lresult-->
+Hello, LitREPL
+<!--lnoresult-->
 ````
 
 #### Latex
@@ -231,6 +242,13 @@ prints its first argument and pastes the result in place of the second argument.
 
 \end{document}
 ````
+
+### Example
+
+```sh
+$ cat doc/example.md | \
+  litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
+```
 
 Technical details
 -----------------

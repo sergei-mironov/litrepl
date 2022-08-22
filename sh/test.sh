@@ -34,7 +34,7 @@ def hello(name):
 
 hello("LitREPL")
 ```
-```
+```lresult
 Hello, LitREPL!
 ```
 ```python
@@ -44,9 +44,9 @@ hello("World")
 Hello, World!
 ```
 * List
-* <!--litrepl-->
+* <!--lresult-->
   BLABLA
-  <!--litrepl-->
+  <!--lnoresult-->
 EOF
 
 run_latex <<"EOF"
@@ -112,16 +112,16 @@ def hello(name):
 hello('World')
 ```
 TXT
-```
+```lresult
 PLACEHOLDER
 ```
 TXT
 * ```python
   print("ABC"+"DEF")
   ```
-* <!--litrepl-->
+* <!--lresult-->
   PLACEHOLDER
-  <!--litrepl-->
+  <!--lnoresult-->
 == Ignore ==
 <!--lignore-->
 ```python
@@ -133,6 +133,15 @@ PLACEHOLDER
 <!--lnoignore-->
 ```
 NOEVAL
+```
+```lresult
+EVAL
+```
+<!--lcode
+print('FOO')
+lnocode-->
+```lresult
+XX
 ```
 EOF
 cat source.md | runlitrepl --filetype=markdown parse-print >out.md
@@ -146,16 +155,16 @@ def hello(name):
 hello('World')
 ```
 TXT
-```
+```lresult
 Hello, World!
 ```
 TXT
 * ```python
   print("ABC"+"DEF")
   ```
-* <!--litrepl-->
+* <!--lresult-->
   ABCDEF
-  <!--litrepl-->
+  <!--lnoresult-->
 == Ignore ==
 <!--lignore-->
 ```python
@@ -166,7 +175,16 @@ PLACEHOLDER
 ```
 <!--lnoignore-->
 ```
+NOEVAL
+```
+```lresult
 ABCDEF
+```
+<!--lcode
+print('FOO')
+lnocode-->
+```lresult
+FOO
 ```
 EOF
 runlitrepl stop

@@ -157,10 +157,12 @@ def stop():
 class SymbolsMarkdown:
   icodebeginmarker="```python"
   icodendmarker="```"
-  ocodebeginmarker="```"
+  icodebeginmarker2="<!--lcode"
+  icodendmarker2="lnocode-->"
+  ocodebeginmarker="```lresult"
   ocodendmarker="```"
-  verbeginmarker="<!--litrepl-->"
-  verendmarker="<!--litrepl-->"
+  verbeginmarker="<!--lresult-->"
+  verendmarker="<!--lnoresult-->"
   combeginmarker=r"<!--lignore-->"
   comendmarker=r"<!--lnoignore-->"
 
@@ -172,20 +174,24 @@ snippet : icodesection -> e_icodesection
         | ocodesection -> e_ocodesection
         | comsection -> e_comsection
 comsection.2 : combeginmarker comtext comendmarker
-icodesection.1 : icodebeginmarker text icodendmarker
-ocodesection.1 : ocodebeginmarker text ocodendmarker
-               | verbeginmarker text verendmarker
+icodesection.1 : icodebeginmarker ctext icodendmarker
+               | icodebeginmarker2 ctext icodendmarker2
+ocodesection.1 : ocodebeginmarker ctext ocodendmarker
+               | verbeginmarker ctext verendmarker
 icodebeginmarker : "{symbols_md.icodebeginmarker}"
 icodendmarker : "{symbols_md.icodendmarker}"
+icodebeginmarker2 : "{symbols_md.icodebeginmarker2}"
+icodendmarker2 : "{symbols_md.icodendmarker2}"
 ocodebeginmarker : "{symbols_md.ocodebeginmarker}"
 ocodendmarker : "{symbols_md.ocodendmarker}"
-verbeginmarker : "<!--litrepl-->"
-verendmarker : "<!--litrepl-->"
+verbeginmarker : "{symbols_md.verbeginmarker}"
+verendmarker : "{symbols_md.verendmarker}"
 inlinebeginmarker : "`"
 inlinendmarker : "`"
 combeginmarker : "{symbols_md.combeginmarker}"
 comendmarker : "{symbols_md.comendmarker}"
-text : /(.(?!```|<\!--litrepl-->|{symbols_md.combeginmarker}|{symbols_md.comendmarker}))*./s
+text : /(.(?!{symbols_md.ocodebeginmarker}|{symbols_md.icodebeginmarker}|{symbols_md.icodebeginmarker2}|{symbols_md.verbeginmarker}|{symbols_md.combeginmarker}))*./s
+ctext : /(.(?!{symbols_md.ocodendmarker}|{symbols_md.icodendmarker}|{symbols_md.icodendmarker2}|{symbols_md.verendmarker}))*./s
 comtext : /(.(?!{symbols_md.comendmarker}))*./s
 """
 
