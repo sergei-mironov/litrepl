@@ -35,6 +35,7 @@ let
         wheel
         (lark-parser112 pp)
         twine
+        sympy
       ]
     );
 
@@ -72,6 +73,7 @@ let
         cloc
         gnumake
         socat
+        latexrun
         ] ++ [
         mypython
         (let

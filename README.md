@@ -44,9 +44,10 @@ Contents
      * [Markdown](#markdown)
      * [Latex](#latex)
    * [Example](#example)
-6. [Technical details](#technical-details)
-7. [Limitations](#limitations)
-8. [Third-party issues](#third-party-issues)
+6. [Gallery](#gallery)
+7. [Technical details](#technical-details)
+8. [Limitations](#limitations)
+9. [Third-party issues](#third-party-issues)
 
 Install
 -------
@@ -252,6 +253,11 @@ $ cat doc/example.md | \
   litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
 ```
 
+Gallery
+-------
+
+<img src="./demo-latex.mp4" width="400"/>
+
 Technical details
 -----------------
 
@@ -279,7 +285,6 @@ Limitations
   could break the session.
 * Interpreter: No asynchronous code execution.
 * ~~Interpreter: Background Python interpreter couldn't be interrupted~~
-
 
 Third-party issues
 ------------------

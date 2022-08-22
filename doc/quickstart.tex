@@ -3,23 +3,25 @@
 \usepackage[utf8]{inputenc}
 \usepackage{mdframed}
 \usepackage{minted}
+\renewcommand{\MintedPygmentize}{/nix/store/1r3k7gbfc8bjc4mr5f3bc3j7g7ws24cy-python3-3.8.12-env/bin/pygmentize}
 \usepackage{verbatim}
+
+\newenvironment{myverbatim}
+  {\VerbatimEnvironment
+   \begin{minted}[breaklines,fontsize=\footnotesize]{latex}}
+  {\end{minted}}
+\BeforeBeginEnvironment{myverbatim}{\begin{mdframed}[nobreak=true,frametitle=\tiny{Source}]}
+\AfterEndEnvironment{myverbatim}{\end{mdframed}}
 
 \newenvironment{lcode}
   {\VerbatimEnvironment
    \begin{minted}[breaklines,fontsize=\footnotesize]{python}}
   {\end{minted}}
-\BeforeBeginEnvironment{lcode}{\begin{mdframed}}
+\BeforeBeginEnvironment{lcode}{\begin{mdframed}[frametitle=\tiny{Rendered}]}
 \AfterEndEnvironment{lcode}{\end{mdframed}}
 
-% \newenvironment{lcode}{\verbatim}{\endverbatim}
-% \BeforeBeginEnvironment{lcode}{\begin{minted}[breaklines,fontsize=\footnotesize]{python} }
-% \AfterEndEnvironment{lcode}{\end{minted}}
-% \BeforeBeginEnvironment{lcode}{\begin{mdframed}}
-% \AfterEndEnvironment{lcode}{\end{mdframed}}
-
 \newenvironment{lresult}{\verbatim}{\endverbatim}
-\BeforeBeginEnvironment{lresult}{\begin{mdframed}}
+\BeforeBeginEnvironment{lresult}{\begin{mdframed}\footnotesize}
 \AfterEndEnvironment{lresult}{\end{mdframed}}
 
 \newcommand{\linline}[2]{#2}
@@ -28,59 +30,47 @@
 
 \begin{document}
 
-\section{Environment tags}
+\section{Organizing the document}
 
-LitREPL treats specially named Latex environments as code and result sections.
-It doesn't really evaluate \TeX\ commands so the tags should present in the source
-file explicitly rather than be a result of other commands such as
-\texttt{newcommand} or \texttt{newenvironment}.
+\subsection{Preamble}
 
-\begin{verbatim}
+The following Latex code provides a reference Latex definitions of
+\texttt{lcode}, \texttt{lresult} and \texttt{linline} tags. These names are
+currently hardcoded into VimREPL. Users may define them arbitrary.
+
+\begin{myverbatim}
 \newenvironment{lcode}
   {\VerbatimEnvironment
-   \begin{mdframed}
-   \begin{minted}[breaklines, fontsize=\footnotesize]{python}}
-  {\end{minted}
-   \end{mdframed}}
-\newenvironment{lresult}
-  {\begin{mdframed}}
-  {\end{mdframed}}
+   \begin{minted}[breaklines,fontsize=\footnotesize]{python}}
+  {\end{minted}}
+\BeforeBeginEnvironment{lcode}{\begin{mdframed}[frametitle=\tiny{Rendered}]}
+\AfterEndEnvironment{lcode}{\end{mdframed}}
+
+\newenvironment{lresult}{\verbatim}{\endverbatim}
+\BeforeBeginEnvironment{lresult}{\begin{mdframed}\footnotesize}
+\AfterEndEnvironment{lresult}{\end{mdframed}}
+
 \newcommand{\linline}[2]{#2}
-\end{verbatim}
+\end{myverbatim}
 
-\section{Executing code snippets}
-
-\subsection{Regular output}
-
-Executable code is obtained from the content of the \texttt{lcode} environment.
-Putting the cursor on this environment and typing the \texttt{:LitEval1} Vim
-command sends the code to the Python interpreter persistently running in the
-background.
+\subsection{Code and result sections}
 
 %lignore
-\begin{verbatim}
-\begin{lcode}
-W='Value of \\textbf{W}!'
-print(W)
-\end{lcode}
-\end{verbatim}
-%lnoignore
-
+\begin{myverbatim}
 \begin{lcode}
 W='Value of \\textbf{W}!'
 print(W)
 \end{lcode}
 
-\texttt{lresult} section next to the executable section is a result container.
-When executed, LitREPL replaces its content with the executable code output.
-
-%lignore
-\begin{verbatim}
 \begin{lresult}
-PLACEHOLDER
 \end{lresult}
-\end{verbatim}
+\end{myverbatim}
 %lnoignore
+
+\begin{lcode}
+W='Value of \\textbf{W}!'
+print(W)
+\end{lcode}
 
 \begin{lresult}
 Value of \textbf{W}!
@@ -88,23 +78,22 @@ Value of \textbf{W}!
 
 \subsection{Verbatim input and output}
 
-VimREPL also recognises commented \texttt{lresult} tags as a valid result
-container. This we can generate custom parts of the document.
+\subsubsection{Verbatim output}
 
 %lignore
-\begin{verbatim}
+\begin{myverbatim}
 \begin{lcode}
 print(W)
 \end{lcode}
 \begin{mdframed}
 %lresult
-PLACEHOLDER
 %lnoresult
 \end{mdframed}
-\end{verbatim}
+\end{myverbatim}
 %lnoignore
 
 \begin{lcode}
+W='Value of \\textbf{W}!'
 print(W)
 \end{lcode}
 \begin{mdframed}
@@ -113,17 +102,17 @@ Value of \textbf{W}!
 %lnoresult
 \end{mdframed}
 
+\subsubsection{Verbatim input}
 A less often used option of verbatim input is also supported
 
 %lignore
-\begin{verbatim}
+\begin{myverbatim}
 %lcode
-print(r'Value of \textbf{W}!')
+print('Value of \\textbf{W}!')
 %lnocode
 \begin{lresult}
-PLACEHOLDER
 \end{lresult}
-\end{verbatim}
+\end{myverbatim}
 %lnoignore
 
 %lcode
@@ -135,42 +124,71 @@ Value of \textbf{W}!
 
 \subsection{Inline code}
 
-A special two-argument \texttt{linline} tag works both as an executable section
-and as a result container. We expect it to be used to print the contents of
-Python variables, so VimREPL wraps the executable portion with the additional
-\texttt{print(\%s)} operator. On the Latex side, we define the tag to ignore its
-first argument but pass the second one as-is.
-
 %lignore
-\begin{verbatim}
-\begin{mdframed}\linline{W}{??}\end{mdframed}
-\end{verbatim}
+\begin{myverbatim}
+\begin{lcode}
+W='\\textbf{W}'
+\end{lcode}
+\begin{mdframed}Here is an inline value of \linline{W}{}.\end{mdframed}
+\end{myverbatim}
 %lnoignore
 
-\begin{mdframed}\linline{W}{Value of \textbf{W}!}\end{mdframed}
-
-\section{Mathplotlib plots and other graphics}
-
 \begin{lcode}
+W='\\textbf{W}'
+\end{lcode}
+\begin{mdframed}Here is an inline value of \linline{W}{\textbf{W}}.\end{mdframed}
+
+\break
+\section{Mathplotlib and other graphics}
+
+%lignore
+\begin{myverbatim}
+\begin{lcode}
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 plt.close()
 X=np.array(range(100))
 plt.plot(X, np.sin(X/10))
-path='_img.png'
+os.makedirs('img',exist_ok=True)
+path='img/plot.png'
 plt.savefig(path)
 \end{lcode}
 
-%lignore
-\begin{verbatim}
 \begin{center}
-\includegraphics[width=0.8\textwidth]{\linline{path}{?}}
+\includegraphics[width=0.8\textwidth]{\linline{path}{img/plot.png}}
 \end{center}
-\end{verbatim}
+\end{myverbatim}
 %lnoignore
 
+\begin{lcode}
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+plt.close()
+X=np.array(range(100))
+plt.plot(X, np.sin(X/10))
+os.makedirs('img',exist_ok=True)
+path='img/plot.png'
+plt.savefig(path)
+\end{lcode}
+
 \begin{center}
-\includegraphics[width=0.8\textwidth]{\linline{path}{_img.png}}
+\includegraphics[width=0.8\textwidth]{\linline{path}{img/plot.png}}
 \end{center}
+
+
+\section{Live Demo}
+
+
+
+\begin{lcode}
+W='Hello'
+print(W)
+\end{lcode}
+
+\begin{lresult}
+Hello
+\end{lresult}
 
 \end{document}

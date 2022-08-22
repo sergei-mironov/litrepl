@@ -28,5 +28,36 @@ if &filetype == 'tex'
   catch
     call vimtex#syntax#core#new_region_math('eq')
   endtry
+
+  let g:vimtex_compiler_latexmk = {
+      \ 'build_dir' : '',
+      \ 'callback' : 1,
+      \ 'continuous' : 1,
+      \ 'executable' : 'latexmk',
+      \ 'hooks' : [],
+      \ 'options' : [
+      \   '-verbose',
+      \   '-file-line-error',
+      \   '-synctex=1',
+      \   '-interaction=nonstopmode',
+      \   '-latex="pdflatex -shell-escape"',
+      \   '-latexoption=-shell-escape',
+      \ ],
+      \}
+
+    let g:vimtex_compiler_latexrun = {
+        \ 'build_dir' : '',
+        \ 'options' : [
+        \   '--verbose-cmds',
+        \   '--latex-args="-synctex=1 -shell-escape"',
+        \ ],
+        \}
+
+    let g:vimtex_compiler_method='latexmk'
+    execute "VimtexReload"
+    set conceallevel=0
+
+    nnoremap <F5> :LitEval1<CR>:w<CR>:VimtexView<CR>
+    nnoremap <F2> :w<CR>
 endif
 

@@ -99,7 +99,7 @@ def fork_ipython(name):
     'c.TerminalInteractiveShell.separate_in = ""\n'
     'c.TerminalInteractiveShell.separate_out = ""\n'
     )
-  system((f'{name} --config=_config.py --debug --logfile=_ipython.log -c '
+  system((f'{name} --config=_config.py --colors=NoColor --logfile=_ipython.log -c '
           '"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
           'os.open(\'_inp.pipe\',os.O_RDWR);'
           'os.open(\'_out.pipe\',os.O_RDWR);"'
