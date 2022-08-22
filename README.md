@@ -9,8 +9,8 @@ programming and code execution right from the editor.
 **Features**
 
 * Lightweight: Runs on a system where only a few Python packages are installed.
-* Supported document formats: Markdown \[MD\], Latex
-  [[TEX]](./data/example.tex)[[PDF]](./data/example.pdf)
+* Supported document formats: Markdown [[MD]](./doc/example.md), Latex
+  [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf)
 * Supported interpreters: Python, IPython
 * Supported editor: Vim
 * Nix/NixOS - friendly
@@ -155,30 +155,29 @@ Where
 #### Markdown
 
 ```` markdown
-Executable section is the one that marked with "python" tag. Putting the cursor
-on it and typing the :LitEval1 command would execute it in a background Python
+Executable sections are marked with the "python" tag. Putting the cursor on one
+of the typing the :LitEval1 command executes its code in a background Python
 interpreter.
 
 ```python
-W='Hello, world!'
+W='Hello, World!'
 print(W)
 ```
 
-Pure verbatim section next to the executable section is a result section. The
-output of the code from the executable section will be pasted here. The original
-content of the section will be replaced.
+Verbatim sections next to the executable section are result sections. The output
+of the code from the executable section is pasted here. The original
+content of the section is replaced with the output of the last execution.
 
 ```
-PlAcEhOlDeR
+Hello, World!
 ```
 
-Markdown comments with `litrepl` word marks a special kind of result section for
-verbatim results. This way we can generate parts of the markdown document.
+Markdown comments with `litrepl` word also mark a result section. This way we
+could produce the markdown document markup.
 
 <!--litrepl-->
-PlAcEhOlDeR
+Hello, World!
 <!--litrepl-->
-
 ````
 
 #### Latex
@@ -188,17 +187,17 @@ PlAcEhOlDeR
 \usepackage[utf8]{inputenc}
 \begin{document}
 
-LitREPL for latex recognizes specifically named environments as code and result
-sections. It doesn't really evaluate Tex commands so renaming those environments
-wouldn't work. But we still need to introduce it to Latex so we start with some
-newenvironment declarations
+LitREPL for latex recognizes \texttt{lcode} environments as code and
+\texttt{lresult} as result sections. The tag names is currently hardcoded into
+the simple parser the tool is using, so we need to additionally introduce it to
+the Latex system. Here we do it in a most simple way.
 
 \newenvironment{lcode}{\begin{texttt}}{\end{texttt}}
 \newenvironment{lresult}{\begin{texttt}}{\end{texttt}}
 \newcommand{\linline}[2]{#2}
 
-Executable sections are between the \texttt{lcode} begin/end tags. Putting the
-cursor on it and typing the \texttt{:LitEval1} would execute it in a
+Executable section is the text between the \texttt{lcode} begin/end tags.
+Putting the cursor on it and typing the \texttt{:LitEval1} executes it in the
 background Python interpreter.
 
 \begin{lcode}
@@ -214,8 +213,8 @@ original content of the section will be replaced.
 Hello, World!
 \end{lresult}
 
-Commented \texttt{lresult} environmet is still recognized as an output section.
-This way users can generate parts of the latex document.
+Commented \texttt{lresult}/\texttt{lnoresult} tags also marks result sections.
+This way we could customise the Latex markup for every particular section.
 
 \begin{lcode}
 print("Hi!")
@@ -223,10 +222,10 @@ print("Hi!")
 
 %lresult
 Hi!
-%lresult
+%lnoresult
 
-For LaTeX, VimREPL also recognises \texttt{linline} tag for which it prints its
-first argument and pastes the result in place of the second argument.
+Additionally, VimREPL for Latex recognises \texttt{linline} tags for which it
+prints its first argument and pastes the result in place of the second argument.
 
 \linline{W}{Hello, World!}
 

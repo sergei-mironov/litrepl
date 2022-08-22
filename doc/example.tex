@@ -1,0 +1,48 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\begin{document}
+
+LitREPL for latex recognizes \texttt{lcode} environments as code and
+\texttt{lresult} as result sections. The tag names is currently hardcoded into
+the simple parser the tool is using, so we need to additionally introduce it to
+the Latex system. Here we do it in a most simple way.
+
+\newenvironment{lcode}{\begin{texttt}}{\end{texttt}}
+\newenvironment{lresult}{\begin{texttt}}{\end{texttt}}
+\newcommand{\linline}[2]{#2}
+
+Executable section is the text between the \texttt{lcode} begin/end tags.
+Putting the cursor on it and typing the \texttt{:LitEval1} executes it in the
+background Python interpreter.
+
+\begin{lcode}
+W='Hello, World!'
+print(W)
+\end{lcode}
+
+\texttt{lresult} tags next to the executable section mark the result section.
+The output of the executable section will be pasted here. The
+original content of the section will be replaced.
+
+\begin{lresult}
+Hello, World!
+\end{lresult}
+
+Commented \texttt{lresult}/\texttt{lnoresult} tags also marks result sections.
+This way we could customise the Latex markup for every particular section.
+
+\begin{lcode}
+print("Hi!")
+\end{lcode}
+
+%lresult
+Hi!
+%lnoresult
+
+Additionally, VimREPL for Latex recognises \texttt{linline} tags for which it
+prints its first argument and pastes the result in place of the second argument.
+
+\linline{W}{Hello, World!}
+
+\end{document}
+
