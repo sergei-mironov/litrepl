@@ -104,20 +104,22 @@ LitREPL works with text documents organized in a Jupyter-notebooks manner: main
 text separates code blocks followed by the verbatim result blocks or other
 markup.
 
-````
-Text text text
+````markdown
+Some text text
 
 ```python
 # Code block 1
 print("Hello, World!")
 ```
 
-More text
+More text text
 
-```
+```lresult
 # Result block 1
 Hello, World!
 ```
+
+More text text
 ````
 
 The tool executes code from the code block and pastes the result into the
