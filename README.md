@@ -30,25 +30,25 @@ clone this repository to reproduce the results!_
 Contents
 --------
 
-1. [LitREPL.vim](#litrepl.vim)
-2. [Contents](#contents)
-3. [Install](#install)
-   * [Pip and Plug](#pip-and-plug)
-   * [Nix](#nix)
-4. [Develop](#develop)
-5. [Usage](#usage)
-   * [Basics](#basics)
-   * [Commands](#commands)
-   * [Arguments](#arguments)
-   * [Formatting](#formatting)
-     * [Markdown](#markdown)
-     * [Latex](#latex)
-   * [Example](#example)
-6. [Gallery](#gallery)
-7. [Technical details](#technical-details)
-8. [Limitations](#limitations)
-9. [Third-party issues](#third-party-issues)
-
+ 1. [LitREPL.vim](#litrepl.vim)
+ 2. [Contents](#contents)
+ 3. [Install](#install)
+    * [Pip and Plug](#pip-and-plug)
+    * [Nix](#nix)
+ 4. [Develop](#develop)
+ 5. [Usage](#usage)
+    * [Basics](#basics)
+    * [Commands](#commands)
+    * [Arguments](#arguments)
+    * [Formatting](#formatting)
+      * [Markdown](#markdown)
+      * [Latex](#latex)
+    * [Example](#example)
+ 6. [Gallery](#gallery)
+ 7. [Technical details](#technical-details)
+ 8. [Limitations](#limitations)
+ 9. [Related plugins](#related-plugins)
+10. [Third-party issues](#third-party-issues)
 Install
 -------
 
@@ -288,6 +288,14 @@ Limitations
   could break the session.
 * Interpreter: No asynchronous code execution.
 * ~~Interpreter: Background Python interpreter couldn't be interrupted~~
+
+Related plugins
+---------------
+
+* https://github.com/hanschen/vim-ipython-cell
+* https://github.com/ivanov/vim-ipython
+* https://github.com/goerz/jupytext.vim
+* https://github.com/ivanov/ipython-vimception
 
 Third-party issues
 ------------------
