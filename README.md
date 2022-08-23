@@ -9,8 +9,8 @@ programming and code execution right from the editor.
 **Features**
 
 * Lightweight: Runs on a system where only a few Python packages are installed.
-* Supported document formats: Markdown [[MD]](./doc/example.md), Latex
-  [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf)
+* Supported document formats: Markdown [[MD]](https://raw.githubusercontent.com/grwlf/litrepl.vim/main/doc/example.md), Latex
+  [[TEX]]()[[PDF]](./doc/example.pdf)
 * Supported interpreters: Python, IPython
 * Supported editor: Vim
 * Nix/NixOS - friendly
