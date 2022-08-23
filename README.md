@@ -256,6 +256,9 @@ $ cat doc/example.md | \
 Gallery
 -------
 
+Using LitREPL in combination with the [Vimtex](https://github.com/lervag/vimtex)
+plugin to edit Latex documents on the fly.
+
 <img src="./demo-latex.gif" width="400"/>
 
 Technical details
