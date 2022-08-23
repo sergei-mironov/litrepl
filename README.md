@@ -52,11 +52,11 @@ Contents
 Install
 -------
 
-The distribution includes a Python package and a Vim plugin, we need to install
-both to run the setup. We advise to git-clone the current repository by all the
-package managers involved. The Vim plugin relies on the similarly named
-`litrepl` script and on some third-party UNIX tools available via the system
-`PATH`. Below are the instructions for some packaging systems.
+To run the setup, one needs to install a Python package and a Vim plugin. The
+Vim plugin relies on the `litrepl` script and on some third-party UNIX tools
+available via the system `PATH`. We advise users to git-clone the same
+repository with all the package managers involved to match the versions. Below
+are the instructions for some packaging system combinations.
 
 ### Pip and Plug
 
