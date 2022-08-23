@@ -256,7 +256,7 @@ $ cat doc/example.md | \
 Gallery
 -------
 
-<img src="./demo-latex.mp4" width="400"/>
+<img src="./demo-latex.gif" width="400"/>
 
 Technical details
 -----------------
