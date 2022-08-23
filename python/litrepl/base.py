@@ -3,6 +3,7 @@ import os
 import sys
 import fcntl
 
+from copy import deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable
 from re import search, match as re_match
 from select import select
@@ -23,13 +24,69 @@ def mkre(prompt:str):
   return re.compile(f"(.*)(?={prompt})|{prompt}".encode('utf-8'),
                     re.A|re.MULTILINE|re.DOTALL)
 
-def readout(fdr, prompt=mkre('>>>'),timeout:Optional[int]=10)->str:
+def merge_basic(acc,r)->bytes:
+  return acc+r
+
+def merge_rn(acc,r)->bytes:
+  sz=len(acc)
+  sz_r=len(r)
+  acc+=r
+  sz1=sz+sz_r
+  i=sz
+  i_n=sz-1
+  while i<sz1:
+    if acc[i]==10:
+      i_n=i
+      i+=1
+    elif acc[i]==13:
+      acc=acc[:i_n+1]+acc[i+1:]
+      sz1-=(i-i_n)
+      i=i_n+1
+    else:
+      i+=1
+  sz=sz1
+  return acc
+
+def merge_basic2(acc,r,xxx)->Tuple[bytes,int]:
+  return (acc+r,xxx)
+
+def merge_rn2(buf_,r,i_n=-1)->Tuple[bytes,int]:
+  buf=deepcopy(buf_)
+  sz=len(buf)
+  i_n=-(sz-i_n)
+  start=0
+  for i in range(len(r)):
+    if r[i]==10:
+      i_n=i
+      buf+=r[start:i+1]
+      start=i+1
+    elif r[i]==13:
+      if i_n<0:
+        buf=buf[:sz+i_n+1]
+        sz=len(buf)
+        i_n=-1
+      start=i+1
+  buf+=r[start:]
+  if i_n>=0:
+    i_n-=start
+  assert b'\r' not in buf
+  if i_n>=0:
+    assert i_n<len(buf), f"{len(buf)}, {i_n}"
+    assert buf[i_n]==(b'\n'[0]), f"{buf}, {i_n}, {buf[i_n]}"
+  return buf,sz+i_n if i_n<0 else sz+i_n
+
+def readout(fdr,
+            prompt=mkre('>>>'),
+            timeout:Optional[int]=10,
+            merge=merge_basic2)->str:
   acc:bytes=b''
+  i_n=-1
   while select([fdr],[],[],timeout)[0] != []:
     r=os.read(fdr, 1024)
     if r==b'':
       return acc.decode('utf-8')
-    acc+=r
+    # acc+=r
+    acc,i_n=merge(acc,r,i_n)
     m=re_match(prompt,acc)
     if m:
       ans=m.group(1)
@@ -37,12 +94,13 @@ def readout(fdr, prompt=mkre('>>>'),timeout:Optional[int]=10)->str:
   return acc.decode('utf-8').replace("\n","|")
 
 def interact(fdr, fdw, text:str)->str:
+  _m=merge_rn2
   os.write(fdw,'3256748426384\n'.encode())
-  x=readout(fdr,prompt=mkre('3256748426384\n'))
+  x=readout(fdr,prompt=mkre('3256748426384\n'),merge=_m)
   os.write(fdw,text.encode())
   os.write(fdw,'\n'.encode())
   os.write(fdw,'3256748426384\n'.encode())
-  res=readout(fdr,prompt=mkre('3256748426384\n'))
+  res=readout(fdr,prompt=mkre('3256748426384\n'),merge=_m)
   return res
 
 def process(lines:str)->str:

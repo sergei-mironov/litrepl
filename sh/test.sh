@@ -295,6 +295,25 @@ EOF
 runlitrepl stop
 )}
 
+test_tqdm() {(
+mktest "_test_eval_md"
+runlitrepl start
+cat >source.md <<"EOF"
+```python
+from tqdm import tqdm
+for i in tqdm(range(100)):
+  pass
+```
+```lresult
+```
+EOF
+cat source.md | runlitrepl --filetype=markdown parse-print >out.md
+diff -u source.md out.md
+cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
+test "$(cat out.md | grep '100%' | wc -l)" = "1"
+runlitrepl stop
+)}
+
 if test -n '$LITREPL_TEST' || echo "$(basename $0)" | grep -q "test.sh" ; then
   set -e -x
   if test -z "$LITREPL"; then
@@ -306,6 +325,7 @@ if test -n '$LITREPL_TEST' || echo "$(basename $0)" | grep -q "test.sh" ; then
     LITREPL_INTERPRETER=$I
     test_parse_print
     test_eval_md
+    test_tqdm
     test_eval_tex
   done
   trap "" EXIT

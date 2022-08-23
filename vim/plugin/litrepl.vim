@@ -12,7 +12,7 @@ let $PATH=g:litrepl_bin.":".$PATH
 
 
 fun! s:SessionStart()
-  execute '!'.g:litrepl_exe.' start'
+  execute '!'.g:litrepl_exe.' --interpreter=auto start'
 endfun
 command! -nargs=0 LitStart call <SID>SessionStart()
 
@@ -55,7 +55,7 @@ fun! s:SessionEval(mode)
   " A hack to remember the undo position
   execute "normal! I "
   execute "normal! x"
-  execute '%!'.g:litrepl_exe.' --filetype='.ft.' eval-sections '.cmd.' 2>/tmp/vim.err'
+  execute '%!'.g:litrepl_exe.' --interpreter=auto --filetype='.ft.' eval-sections '.cmd.' 2>/tmp/vim.err'
   if getfsize('/tmp/vim.err')>0
     for l in readfile('/tmp/vim.err')
       echomsg l
