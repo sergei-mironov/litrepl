@@ -55,7 +55,12 @@ fun! s:SessionEval(mode)
   " A hack to remember the undo position
   execute "normal! I "
   execute "normal! x"
-  execute '%!'.g:litrepl_exe.' --interpreter=auto --filetype='.ft.' eval-sections '.cmd.' 2>/tmp/vim.err'
+  let errfile = '/tmp/litrepl.err'
+  execute '%!'.g:litrepl_exe.' --interpreter=auto --filetype='.ft.' eval-sections '.cmd.' 2>'.errfile
+  if v:shell_error != 0
+    execute "u"
+    execute "botright vs ".errfile
+  endif
   if getfsize('/tmp/vim.err')>0
     for l in readfile('/tmp/vim.err')
       echomsg l
