@@ -43,12 +43,13 @@ Contents
     * [Formatting](#formatting)
       * [Markdown](#markdown)
       * [Latex](#latex)
-    * [Example](#example)
+    * [Command line](#command-line)
  6. [Gallery](#gallery)
  7. [Technical details](#technical-details)
  8. [Limitations](#limitations)
  9. [Related plugins](#related-plugins)
 10. [Third-party issues](#third-party-issues)
+
 Install
 -------
 
@@ -77,8 +78,8 @@ manager of Vim:
 
 ### Nix
 
-[default.nix](./default.nix) contains a `testvim` expression which could be
-built with `nix-build -A testvim` and run with `./result/bin/testvim`. Modify
+[default.nix](./default.nix) contains a `vim-test` expression which could be
+built with `nix-build -A vim-test` and run with `./result/bin/testvim`. Modify
 your system's configuration accordingly.
 
 Develop
@@ -101,9 +102,10 @@ Usage
 
 ### Basics
 
-LitREPL works with text documents organized in a Jupyter-notebooks manner: main
-text separates code blocks followed by the verbatim result blocks or other
-markup.
+LitREPL works with text documents organized in a Jupyter-Notebooks manner: main
+text separates the code blocks followed by the result blocks followed by the
+more text and so on. The markup is up to user, the plugin works with what it
+could find.
 
 ````markdown
 Some text text
@@ -123,25 +125,25 @@ Hello, World!
 More text text
 ````
 
-The tool executes code from the code block and pastes the result into the
-afterward one or many result sections. The execution goes in a background by the
-interpreter which is tied to the UNIX pipes saved in the filesystem. Thus, the
-state of the interpreter is persistent between the executions and in fact
-even between the Vim edit sessions.
+After typing `:LitEval1` in Vim, the tool executes the code block under the
+cursor and pastes the result into the afterward one or many result sections. The
+execution taked place in the background interpreter which is tied to the UNIX
+pipes saved in the filesystem. Thus, the state of the interpreter is persistent
+between the executions and in fact even between the Vim edit sessions.
 
 ### Commands
 
 Most of the commands could be sent from the command line or from Vim directly.
 
-| Vim               | Command line     | Description                       |
-|-------------------|------------------|-----------------------------------|
-| `:LitStart`       | `litepl start`   | Start the interpreter             |
-| `:LitStop`        | `litepl stop`    | Stop the interpreter              |
-| `:LitRestart`     | `litrepl restart`| Restart the interpreter           |
-| `:LitEval1`       | `lirtepl eval-sections (N\|L:C)`| Evaluate the section under the cursor |
-| `:LitEvalAbove`  | `lirtepl eval-sections 0..(N\|L:C)`| Evaluate the sections above and under the cursor |
-| `:LitEvalBelow`  | `lirtepl eval-sections (N\|L:C)..$`| Evaluate the sections below and under the cursor |
-| `:LitRepl`  | `lirtepl repl`| Open the terminal to the interpreter |
+| Vim             | Command line     | Description                          |
+|-----------------|------------------|--------------------------------------|
+| `:LitEval1`     | `lirtepl eval-sections (N\|L:C)`   | Evaluate the section under the cursor |
+| `:LitEvalAbove` | `lirtepl eval-sections 0..(N\|L:C)`| Evaluate the sections above and under the cursor |
+| `:LitEvalBelow` | `lirtepl eval-sections (N\|L:C)..$`| Evaluate the sections below and under the cursor |
+| `:LitRepl`      | `lirtepl repl`   | Open the terminal to the interpreter |
+| `:LitStart`     | `litepl start`   | Start the interpreter                |
+| `:LitStop`      | `litepl stop`    | Stop the interpreter                 |
+| `:LitRestart`   | `litrepl restart`| Restart the interpreter              |
 
 Where
 
@@ -246,7 +248,9 @@ prints its first argument and pastes the result in place of the second argument.
 \end{document}
 ````
 
-### Example
+### Command line
+
+An example:
 
 ```sh
 $ cat doc/example.md | \

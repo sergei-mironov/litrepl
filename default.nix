@@ -36,6 +36,7 @@ let
         (lark-parser112 pp)
         twine
         sympy
+        tqdm
       ]
     );
 
@@ -48,8 +49,8 @@ let
                     !( ((builtins.match "_[^_]*" (baseNameOf path)) != null)) &&
                     !( baseNameOf path == "result" )
         ) ./.;
-      pythonPath = [
-        (lark-parser112 python.pkgs) python.pkgs.setuptools_scm
+      pythonPath = with python.pkgs; [
+        (lark-parser112 python.pkgs) tqdm
       ];
       nativeBuildInputs = with pkgs; [ git ];
       checkInputs = with pkgs; [
@@ -64,7 +65,7 @@ let
       '';
 
       # TODO: re-enable
-      doCheck = false;
+      doCheck = true;
     };
 
     shell = pkgs.mkShell {
@@ -97,8 +98,8 @@ let
       '';
     };
 
-    vim-litrepl = pkgs.vimUtils.buildVimPluginFrom2Nix {
-      pname = "vim-litrepl";
+    litrepl-vim = pkgs.vimUtils.buildVimPluginFrom2Nix {
+      pname = "litrepl-vim";
       version = "9999";
       src = ./vim;
       postInstall = ''
@@ -108,12 +109,12 @@ let
       '';
     };
 
-    testvim = pkgs.vim_configurable.customize {
+    vim-test = pkgs.vim_configurable.customize {
       name = "testvim";
 
       vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
         start = [
-          vim-litrepl
+          litrepl-vim
         ];
       };
 
@@ -121,8 +122,36 @@ let
       '';
     };
 
-    plugvim = pkgs.vim_configurable.customize {
-      name = "plugvim";
+    vim-demo = pkgs.vim_configurable.customize {
+      name = "vim-demo";
+
+      vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
+        start = [
+          vim-colorschemes
+          litrepl-vim
+          vimtex
+        ];
+      };
+
+      vimrcConfig.customRC = ''
+        colorscheme blackboard
+        syntax on
+        filetype plugin indent on
+
+        " Save
+        nnoremap <F2> <ESC>:noh<CR>:w!<CR>
+        inoremap <F2> <ESC>:noh<CR>:w!<CR>
+
+        " VimTex
+        let g:tex_flavor = 'latex'
+        let g:vimtex_view_method = 'zathura'
+        let g:vimtex_quickfix_mode=0
+        let g:vimtex_format_enabled=1
+      '';
+    };
+
+    vim-plug = pkgs.vim_configurable.customize {
+      name = "vim-plug";
 
       vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
         start = [
@@ -146,7 +175,7 @@ let
     };
 
     collection = rec {
-      inherit shell litrepl testvim plugvim;
+      inherit shell litrepl vim-test vim-demo;
     };
   };
 
