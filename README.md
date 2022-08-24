@@ -4,7 +4,7 @@ LitREPL.vim
 **LitREPL** is a macro processing Python library and a Vim plugin for Literate
 programming and code execution right from the editor.
 
-<img src="./demo.gif" width="400"/>
+<img src="https://github.com/grwlf/litrepl-media/blob/main/demo.gif?raw=true" width="400"/>
 
 **Features**
 
@@ -259,7 +259,9 @@ Gallery
 Using LitREPL in combination with the [Vimtex](https://github.com/lervag/vimtex)
 plugin to edit Latex documents on the fly.
 
-<img src="./demo-latex.gif" width="400"/>
+<video width="840px" controls>
+  <source src="https://raw.githubusercontent.com/grwlf/litrepl-media/main/screencast-vimtex.mp4" type="video/mp4">
+</video>
 
 Technical details
 -----------------
