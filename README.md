@@ -259,9 +259,9 @@ Gallery
 Using LitREPL in combination with the [Vimtex](https://github.com/lervag/vimtex)
 plugin to edit Latex documents on the fly.
 
-<video width="840px" controls>
-  <source src="https://raw.githubusercontent.com/grwlf/litrepl-media/main/screencast-vimtex.mp4" type="video/mp4">
-</video>
+
+<video controls src="https://user-images.githubusercontent.com/4477729/186507249-c570ce67-ae90-4643-a6de-6bbe94b0fb62.mp4" muted="true"></video>
+
 
 Technical details
 -----------------
