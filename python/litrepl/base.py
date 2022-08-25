@@ -77,7 +77,7 @@ def merge_rn2(buf_,r,i_n=-1)->Tuple[bytes,int]:
 
 def readout(fdr,
             prompt=mkre('>>>'),
-            timeout:Optional[int]=10,
+            timeout:Optional[int]=None,
             merge=merge_basic2)->str:
   acc:bytes=b''
   i_n=-1
@@ -91,7 +91,7 @@ def readout(fdr,
     if m:
       ans=m.group(1)
       return ans.decode('utf-8')
-  return acc.decode('utf-8').replace("\n","|")
+  return "LitREPL timeout waiting the interpreter response"
 
 def interact(fdr, fdw, text:str)->str:
   _m=merge_rn2
