@@ -142,7 +142,7 @@ def fork_python(name):
 
 def fork_ipython(name):
   assert name.startswith('ipython')
-  open('_config.py','w').write(
+  open('/tmp/litrepl_ipython_config.py','w').write(
     'from IPython.terminal.prompts import Prompts, Token\n'
     'class EmptyPrompts(Prompts):\n'
     '  def in_prompt_tokens(self):\n'
@@ -157,7 +157,7 @@ def fork_ipython(name):
     'c.TerminalInteractiveShell.separate_in = ""\n'
     'c.TerminalInteractiveShell.separate_out = ""\n'
     )
-  system((f'{name} --config=_config.py --colors=NoColor --logfile=_ipython.log -c '
+  system((f'{name} --config=/tmp/litrepl_ipython_config.py --colors=NoColor --logfile=_ipython.log -c '
           '"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
           'os.open(\'_inp.pipe\',os.O_RDWR);'
           'os.open(\'_out.pipe\',os.O_RDWR);"'

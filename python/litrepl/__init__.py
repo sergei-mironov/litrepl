@@ -13,5 +13,7 @@ except ImportError:
     from os.path import join
     __version__ = get_version(root=join('..','..'), relative_to=__file__)
   except Exception:
-    warning("LitREPL failed to read its version.")
+    warning("Neither `litrepl/version.py` module was not generated during the "
+            "setup, nor the Git metadata is available. Re-install litrepl with "
+            "the `setuptools_scm` package available to fix")
     __version__ = None

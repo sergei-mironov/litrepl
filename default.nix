@@ -175,7 +175,7 @@ let
     };
 
     collection = rec {
-      inherit shell litrepl vim-test vim-demo;
+      inherit shell litrepl litrepl-vim vim-test vim-demo;
     };
   };
 
