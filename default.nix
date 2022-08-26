@@ -2,9 +2,9 @@
 , stdenv ? pkgs.stdenv
 } :
 let
-  lib = pkgs.lib;
-
   local = rec {
+    inherit (pkgs) lib stdenv fetchFromGitHub imagemagick makeWrapper;
+
     callPackage = pkgs.lib.callPackageWith collection;
 
     python = pkgs.python38;
@@ -109,6 +109,37 @@ let
       '';
     };
 
+    vim-terminal-images = pkgs.vimUtils.buildVimPluginFrom2Nix rec {
+      name = "vim-terminal-images";
+      src = fetchFromGitHub {
+        owner = "sergei-grechanik";
+        repo = name;
+        rev = "9eb7b143ed712773f2fafab7e4c7af8d978ac927";
+        sha256 = "sha256:1kqgdz7bzaj4rmj9wd9dzy6k26ngysims5j1qrhhpipmkai60bzw";
+      };
+    };
+
+    tupimage = stdenv.mkDerivation {
+      name = "tupimage";
+
+      src = fetchFromGitHub {
+        owner = "sergei-grechanik";
+        repo = "tupimage";
+        rev = "256a5960099e36f9429ccda1354a61de3cf0f36a";
+        sha256 = "sha256:1hj98vhs4bggqgwig78fmyrinfxqwx3kbddqbiccs194pqvhvf2b";
+      };
+
+      buildInputs = [ makeWrapper ];
+
+      buildCommand = ''
+        mkdir -pv $out/bin
+        cp -r -v $src/tupimage $out/bin
+        chmod +x $out/bin/tupimage
+        wrapProgram "$out/bin/tupimage" \
+          --prefix PATH : "${imagemagick}/bin"
+      '';
+    };
+
     vim-test = pkgs.vim_configurable.customize {
       name = "testvim";
 
@@ -122,6 +153,17 @@ let
       '';
     };
 
+    grechanik-st = pkgs.st.overrideDerivation (old:{
+      pname = "grechanik-st";
+      src = fetchFromGitHub {
+        owner = "sergei-grechanik";
+        repo = "st";
+        rev = "e4c6d7145771319518e211112f702ec380b8bda0";
+        sha256 = "sha256:0f6w9hjdp1jh6s4bmpqbc210ph4vdk69fdwqy9zfy5d3fg1kc28n";
+      };
+      buildInputs = old.buildInputs ++ [pkgs.imlib2.dev];
+    });
+
     vim-demo = pkgs.vim_configurable.customize {
       name = "vim-demo";
 
@@ -130,6 +172,7 @@ let
           vim-colorschemes
           litrepl-vim
           vimtex
+          vim-terminal-images
         ];
       };
 
@@ -147,6 +190,9 @@ let
         let g:vimtex_view_method = 'zathura'
         let g:vimtex_quickfix_mode=0
         let g:vimtex_format_enabled=1
+
+        " vim-terminal-images
+        let g:terminal_images_command = "${tupimage}/bin/tupimage"
       '';
     };
 
@@ -174,8 +220,12 @@ let
       '';
     };
 
+    demo-set = {
+      inherit grechanik-st vim-demo;
+    };
+
     collection = rec {
-      inherit shell litrepl litrepl-vim vim-test vim-demo;
+      inherit shell litrepl litrepl-vim vim-test vim-demo grechanik-st demo-set;
     };
   };
 
