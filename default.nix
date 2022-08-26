@@ -3,7 +3,9 @@
 } :
 let
   local = rec {
-    inherit (pkgs) lib stdenv fetchFromGitHub imagemagick makeWrapper;
+
+    inherit (pkgs) lib stdenv fetchFromGitHub imagemagick makeWrapper cloc
+    gnumake socat latexrun;
 
     callPackage = pkgs.lib.callPackageWith collection;
 
@@ -68,27 +70,29 @@ let
       doCheck = true;
     };
 
-    shell = pkgs.mkShell {
-      name = "shell";
-      buildInputs = with pkgs; [
+    mytexlive =
+      (let
+        mytexlive = pkgs.texlive.override { python3=mypython; };
+      in
+        mytexlive.combine {
+          scheme-medium = mytexlive.scheme-medium;
+          inherit (mytexlive) fvextra upquote xstring pgfopts currfile
+          collection-langcyrillic makecell ftnxtra minted catchfile framed
+          pdflscape environ trimspaces mdframed zref needspace import
+          beamerposter qcircuit xypic standalone preview amsmath thmtools
+          tocloft tocbibind varwidth beamer tabulary ifoddpage relsize;
+        }
+      );
+
+    shell-dev = pkgs.mkShell {
+      name = "shell-dev";
+      buildInputs = [
         cloc
         gnumake
         socat
         latexrun
-        ] ++ [
         mypython
-        (let
-           mytexlive = pkgs.texlive.override { python3=mypython; };
-         in
-           mytexlive.combine {
-             scheme-medium = mytexlive.scheme-medium;
-             inherit (mytexlive) fvextra upquote xstring pgfopts currfile
-             collection-langcyrillic makecell ftnxtra minted catchfile framed
-             pdflscape environ trimspaces mdframed zref needspace import
-             beamerposter qcircuit xypic standalone preview amsmath thmtools
-             tocloft tocbibind varwidth beamer tabulary ifoddpage relsize;
-           }
-        )
+        mytexlive
       ];
       shellHook = with pkgs; ''
         if test -f ./env.sh ; then
@@ -98,8 +102,8 @@ let
       '';
     };
 
-    litrepl-vim = pkgs.vimUtils.buildVimPluginFrom2Nix {
-      pname = "litrepl-vim";
+    vim-litrepl = pkgs.vimUtils.buildVimPluginFrom2Nix {
+      pname = "vim-litrepl";
       version = "9999";
       src = ./vim;
       postInstall = ''
@@ -145,7 +149,7 @@ let
 
       vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
         start = [
-          litrepl-vim
+          vim-litrepl
         ];
       };
 
@@ -170,7 +174,7 @@ let
       vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
         start = [
           vim-colorschemes
-          litrepl-vim
+          vim-litrepl
           vimtex
           vim-terminal-images
           vim-markdown
@@ -185,6 +189,7 @@ let
         " Save
         nnoremap <F2> <ESC>:noh<CR>:w!<CR>
         inoremap <F2> <ESC>:noh<CR>:w!<CR>
+        nnoremap <F5> :LitEval1<CR>
 
         " VimTex
         let g:tex_flavor = 'latex'
@@ -225,8 +230,26 @@ let
       inherit grechanik-st vim-demo;
     };
 
+    shell-demo = pkgs.mkShell {
+      name = "shell-demo";
+      buildInputs = [
+        vim-demo
+        latexrun
+        mytexlive
+      ];
+      # shellHook = ''
+      #   if test -f ./env.sh ; then
+      #     . ./env.sh
+      #     export QT_QPA_PLATFORM_PLUGIN_PATH=`echo ${pkgs.qt5.qtbase.bin}/lib/qt-*/plugins/platforms/`
+      #   fi
+      # '';
+    };
+
+    shell = shell-dev;
+
     collection = rec {
-      inherit shell litrepl litrepl-vim vim-test vim-demo grechanik-st demo-set;
+      inherit shell shell-dev litrepl vim-litrepl vim-test vim-demo grechanik-st
+      demo-set;
     };
   };
 

@@ -43,7 +43,7 @@ Contents
     * [Formatting](#formatting)
       * [Markdown](#markdown)
       * [Latex](#latex)
-    * [Command line](#command-line)
+    * [Batch processing](#batch-processing)
  6. [Gallery](#gallery)
  7. [Technical details](#technical-details)
  8. [Limitations](#limitations)
@@ -125,11 +125,17 @@ Hello, World!
 More text text
 ````
 
-After typing `:LitEval1` in Vim, the tool executes the code block under the
-cursor and pastes the result into the afterward one or many result sections. The
-execution taked place in the background interpreter which is tied to the UNIX
-pipes saved in the filesystem. Thus, the state of the interpreter is persistent
-between the executions and in fact even between the Vim edit sessions.
+Vim command `:LitEval1` executes the code block under the cursor and pastes the
+result into the afterward one or many result sections. The execution taked place
+in the background interpreter which is tied to the UNIX pipes saved in the
+filesystem. Thus, the state of the interpreter is persistent between the
+executions and in fact even between the Vim edit sessions.
+
+There are no key bindings defined in the plugin, but users are free to
+
+```vim
+nmap <F5> :LitEval1<CR>
+```
 
 ### Commands
 
@@ -248,9 +254,9 @@ prints its first argument and pastes the result in place of the second argument.
 \end{document}
 ````
 
-### Command line
+### Batch processing
 
-An example:
+To evaluate the document run the following command
 
 ```sh
 $ cat doc/example.md | \
