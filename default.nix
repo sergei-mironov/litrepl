@@ -173,6 +173,7 @@ let
           litrepl-vim
           vimtex
           vim-terminal-images
+          vim-markdown
         ];
       };
 
