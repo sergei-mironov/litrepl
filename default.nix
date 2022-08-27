@@ -49,10 +49,12 @@ let
         path: type: !( baseNameOf path == "build" && type == "directory" ) &&
                     !( baseNameOf path == "dist" && type == "directory" ) &&
                     !( ((builtins.match "_[^_]*" (baseNameOf path)) != null)) &&
+                    !( ((builtins.match "README.md" (baseNameOf path)) != null)) &&
+                    !( ((builtins.match "default.nix" (baseNameOf path)) != null)) &&
                     !( baseNameOf path == "result" )
         ) ./.;
       pythonPath = with python.pkgs; [
-        (lark-parser112 python.pkgs) tqdm
+        (lark-parser112 python.pkgs) tqdm setuptools_scm
       ];
       nativeBuildInputs = with pkgs; [ git ];
       checkInputs = with pkgs; [
@@ -185,9 +187,56 @@ let
         colorscheme blackboard
         syntax on
         filetype plugin indent on
+        set backspace=indent,eol,start
+        set wrap
+        set conceallevel=0
+        set textwidth=80
+        set foldmethod=marker
+        set foldcolumn=0
+
+        function! Ident(ident_spaces)
+          let &expandtab=1
+          let &shiftwidth=a:ident_spaces
+          let &tabstop=a:ident_spaces
+          let &cinoptions="'g0,(".a:ident_spaces
+          let &softtabstop=a:ident_spaces
+        endfunction
+        call Ident(2)
+
+        vnoremap "a "ay
+        vnoremap "b "by
+        vnoremap "c "cy
+        vnoremap "d "dy
+        vnoremap "e "ey
+
+        nnoremap "a "ap
+        nnoremap "b "bp
+        nnoremap "c "cp
+        nnoremap "d "dp
+        nnoremap "e "ep
+
+        nnoremap "A "aP
+        nnoremap "B "bP
+        nnoremap "C "cP
+        nnoremap "D "dP
+        nnoremap "E "eP
+
+        vnoremap y "+y
+        vnoremap d "+d
+        vnoremap c "+c
+        nnoremap Y "+y$
+        nnoremap D "+D
+        nnoremap yy "+yy
+        nnoremap yw "+yw
+        nnoremap dd "+dd
+        nnoremap cc "+cc
+        vnoremap p "+p
+        nnoremap p "+p
+        nnoremap P "+P
+
 
         " Save
-        nnoremap <F2> <ESC>:noh<CR>:w!<CR>
+        nnoremap <F2> :noh<CR>:w!<CR>
         inoremap <F2> <ESC>:noh<CR>:w!<CR>
         nnoremap <F5> :LitEval1<CR>
 
@@ -199,6 +248,13 @@ let
 
         " vim-terminal-images
         let g:terminal_images_command = "${tupimage}/bin/tupimage"
+
+        " vim-markdown
+        let g:vim_markdown_folding_disabled = 1
+        let g:vim_markdown_new_list_item_indent = 2
+        let g:vim_markdown_auto_insert_bullets = 0
+        let g:vim_markdown_conceal = 0
+        let g:vim_markdown_conceal_code_blocks = 0
       '';
     };
 
@@ -236,7 +292,9 @@ let
         vim-demo
         latexrun
         mytexlive
-      ];
+      ] ++ (with pkgs ; [
+        peek
+      ]);
       # shellHook = ''
       #   if test -f ./env.sh ; then
       #     . ./env.sh
@@ -248,8 +306,8 @@ let
     shell = shell-dev;
 
     collection = rec {
-      inherit shell shell-dev litrepl vim-litrepl vim-test vim-demo grechanik-st
-      demo-set;
+      inherit shell shell-dev shell-demo litrepl vim-litrepl vim-test vim-demo
+      grechanik-st demo-set;
     };
   };
 
