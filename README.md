@@ -20,9 +20,9 @@ programming and code execution right from the editor.
 * POSIX-compatible OS, typically a Linux. The plugin depends on UNIX pipes and
   certain shell commands.
 * More or less recent `Vim`
-* Python3 with the following libraries: `setuptools_scm`, `lark-parser`
-  (Required), `ipython` (Optional).
-* (Optional) `GNU socat` application.
+* Python3 with the following libraries: `lark-parser`
+  (Required), `setuptools_scm`, `ipython` (Optional).
+* `GNU socat` application (Optional).
 
 _Currently, the plugin is at the proof-of-concept stage. No code is packaged,
 clone this repository to reproduce the results!_
