@@ -39,10 +39,12 @@ let
         twine
         sympy
         tqdm
+        matplotlib
+        numpy
       ]
     );
 
-    litrepl = python.pkgs.buildPythonApplication {
+    litrepl = (py : py.pkgs.buildPythonApplication {
       pname = "litrepl";
       version = "9999";
       src = builtins.filterSource (
@@ -53,12 +55,12 @@ let
                     !( ((builtins.match "default.nix" (baseNameOf path)) != null)) &&
                     !( baseNameOf path == "result" )
         ) ./.;
-      pythonPath = with python.pkgs; [
-        (lark-parser112 python.pkgs) tqdm setuptools_scm
+      pythonPath = with py.pkgs; [
+        (lark-parser112 py.pkgs) tqdm setuptools_scm
       ];
       nativeBuildInputs = with pkgs; [ git ];
       checkInputs = with pkgs; [
-        socat which python.pkgs.ipython
+        socat which py.pkgs.ipython
       ];
       checkPhase = ''
         CWD=`pwd`
@@ -70,7 +72,7 @@ let
 
       # TODO: re-enable
       doCheck = true;
-    };
+    });
 
     mytexlive =
       (let
@@ -104,16 +106,16 @@ let
       '';
     };
 
-    vim-litrepl = pkgs.vimUtils.buildVimPluginFrom2Nix {
+    vim-litrepl = (py : pkgs.vimUtils.buildVimPluginFrom2Nix {
       pname = "vim-litrepl";
       version = "9999";
       src = ./vim;
       postInstall = ''
         mkdir -pv $target/bin
         ln -s ${pkgs.socat}/bin/socat $target/bin/socat
-        ln -s ${litrepl}/bin/litrepl $target/bin/litrepl
+        ln -s ${litrepl py}/bin/litrepl $target/bin/litrepl
       '';
-    };
+    });
 
     vim-terminal-images = pkgs.vimUtils.buildVimPluginFrom2Nix rec {
       name = "vim-terminal-images";
@@ -170,15 +172,15 @@ let
       buildInputs = old.buildInputs ++ [pkgs.imlib2.dev];
     });
 
-    vim-demo = pkgs.vim_configurable.customize {
+    vim-demo = (py : pkgs.vim_configurable.customize {
       name = "vim-demo";
 
       vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
         start = [
           vim-colorschemes
-          vim-litrepl
+          (vim-litrepl py)
           vimtex
-          vim-terminal-images
+          # vim-terminal-images
           vim-markdown
         ];
       };
@@ -248,6 +250,22 @@ let
 
         " vim-terminal-images
         let g:terminal_images_command = "${tupimage}/bin/tupimage"
+        let g:vimtex_compiler_latexmk = {
+           \ 'build_dir' : "",
+           \ 'callback' : 1,
+           \ 'continuous' : 1,
+           \ 'executable' : 'latexmk',
+           \ 'hooks' : [],
+           \ 'options' : [
+           \   '-verbose',
+           \   '-file-line-error',
+           \   '-synctex=1',
+           \   '-interaction=nonstopmode',
+           \   '-latex="pdflatex -shell-escape"',
+           \   '-latexoption=-shell-escape',
+           \ ],
+           \}
+
 
         " vim-markdown
         let g:vim_markdown_folding_disabled = 1
@@ -256,7 +274,7 @@ let
         let g:vim_markdown_conceal = 0
         let g:vim_markdown_conceal_code_blocks = 0
       '';
-    };
+    });
 
     vim-plug = pkgs.vim_configurable.customize {
       name = "vim-plug";
@@ -278,20 +296,21 @@ let
         Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
         call plug#end()
 
-        let $PATH="${pkgs.socat}/bin:${litrepl}/bin:".$PATH
+        let $PATH="${pkgs.socat}/bin:${litrepl python}/bin:".$PATH
       '';
     };
 
-    demo-set = {
-      inherit grechanik-st vim-demo;
-    };
+    # demo-set = {
+    #   inherit grechanik-st vim-demo;
+    # };
 
     shell-demo = pkgs.mkShell {
       name = "shell-demo";
       buildInputs = [
-        vim-demo
+        (vim-demo python)
         latexrun
         mytexlive
+        mypython
       ] ++ (with pkgs ; [
         peek
       ]);
@@ -306,8 +325,10 @@ let
     shell = shell-dev;
 
     collection = rec {
-      inherit shell shell-dev shell-demo litrepl vim-litrepl vim-test vim-demo
-      grechanik-st demo-set;
+      inherit shell shell-dev shell-demo vim-litrepl vim-test vim-demo
+      grechanik-st;
+
+      litrepl = litrepl mypython;
     };
   };
 
