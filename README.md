@@ -135,7 +135,7 @@ executions and in fact even between the Vim edit sessions.
 There are no key bindings defined in the plugin, but users are free to
 
 ```vim
-nmap <F5> :LitEval1<CR>
+nnoremap <F5> :LitEval1<CR>
 ```
 
 ### Commands
