@@ -301,13 +301,16 @@ Limitations
 * Interpreter: No asynchronous code execution.
 * ~~Interpreter: Background Python interpreter couldn't be interrupted~~
 
-Related plugins
----------------
+Related projects
+----------------
 
+* https://github.com/gpoore/pythontex
+* https://github.com/gpoore/codebraid
 * https://github.com/hanschen/vim-ipython-cell
 * https://github.com/ivanov/vim-ipython
 * https://github.com/goerz/jupytext.vim
 * https://github.com/ivanov/ipython-vimception
+* https://github.com/lervag/vimtex
 
 Third-party issues
 ------------------
