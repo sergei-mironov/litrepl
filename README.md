@@ -30,6 +30,7 @@ clone this repository to reproduce the results!_
 Contents
 --------
 
+
  1. [LitREPL.vim](#litrepl.vim)
  2. [Contents](#contents)
  3. [Install](#install)
@@ -47,7 +48,7 @@ Contents
  6. [Gallery](#gallery)
  7. [Technical details](#technical-details)
  8. [Limitations](#limitations)
- 9. [Related plugins](#related-plugins)
+ 9. [Related projects](#related-projects)
 10. [Third-party issues](#third-party-issues)
 
 Install
