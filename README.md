@@ -270,7 +270,7 @@ Using LitREPL in combination with the [Vimtex](https://github.com/lervag/vimtex)
 plugin to edit Latex documents on the fly.
 
 
-<video controls src="https://user-images.githubusercontent.com/4477729/186507249-c570ce67-ae90-4643-a6de-6bbe94b0fb62.mp4" muted="true"></video>
+<video controls src="https://user-images.githubusercontent.com/4477729/187065835-3302e93e-6fec-48a0-841d-97986636a347.mp4" muted="true"></video>
 
 
 Technical details
