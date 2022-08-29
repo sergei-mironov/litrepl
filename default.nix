@@ -170,6 +170,9 @@ let
         sha256 = "sha256:0f6w9hjdp1jh6s4bmpqbc210ph4vdk69fdwqy9zfy5d3fg1kc28n";
       };
       buildInputs = old.buildInputs ++ [pkgs.imlib2.dev];
+      preBuild = ''
+        cp ${./nix/st-config.def.h} config.def.h
+      '';
     });
 
     vim-demo = (py : pkgs.vim_configurable.customize {
