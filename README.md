@@ -79,9 +79,18 @@ manager of Vim:
 
 ### Nix
 
-[default.nix](./default.nix) contains a `vim-test` expression which could be
-built with `nix-build -A vim-test` and run with `./result/bin/testvim`. Modify
-your system's configuration accordingly.
+[default.nix](./default.nix) contains a set of Nix exressions. Expressions
+prefixed with `shell-` are to be opened with `nix-shell -A NAME`. Other
+expressions need to be built with `nix-build -A NAME` and run with
+`./result/bin/...`. Some expressions are:
+
+* `litrepl` - Litrepl script and Python lib
+* `vim-litrepl` - Litrepl vim plugin
+* `vim-test` - a minimalistic vim with a single litrepl plugin
+* `vim-demo` - vim for recording screencasts
+* `vim-plug` - vim configured to use the Plug manager
+* `shell-demo` - shell for recording screencasts
+* `shell` - Full development shell
 
 Develop
 -------
