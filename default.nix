@@ -122,8 +122,8 @@ let
       src = fetchFromGitHub {
         owner = "sergei-grechanik";
         repo = name;
-        rev = "9eb7b143ed712773f2fafab7e4c7af8d978ac927";
-        sha256 = "sha256:1kqgdz7bzaj4rmj9wd9dzy6k26ngysims5j1qrhhpipmkai60bzw";
+        rev = "ccb7bd161e3a87af3305bf781481f908d58ad0fa";
+        sha256 = "sha256:0f8j0dqhhrkys3yk0cwh1jhp3gswbl349fd9igzaab32h17lgni3";
       };
     };
 
@@ -133,8 +133,8 @@ let
       src = fetchFromGitHub {
         owner = "sergei-grechanik";
         repo = "tupimage";
-        rev = "256a5960099e36f9429ccda1354a61de3cf0f36a";
-        sha256 = "sha256:1hj98vhs4bggqgwig78fmyrinfxqwx3kbddqbiccs194pqvhvf2b";
+        rev = "b3c77d43cd4edd9c3bb570676059d259980b608b";
+        sha256 = "sha256:0v477gizq72pcghi65m9vb9cxzzkcxizc3cpz3dldfaqpancz7i4";
       };
 
       buildInputs = [ makeWrapper ];
@@ -183,8 +183,9 @@ let
           vim-colorschemes
           (vim-litrepl py)
           vimtex
-          # vim-terminal-images
+          vim-terminal-images
           vim-markdown
+          nerdtree
         ];
       };
 
@@ -198,6 +199,8 @@ let
         set textwidth=80
         set foldmethod=marker
         set foldcolumn=0
+
+        hi Pmenu ctermbg=258
 
         function! Ident(ident_spaces)
           let &expandtab=1
@@ -253,6 +256,10 @@ let
 
         " vim-terminal-images
         let g:terminal_images_command = "${tupimage}/bin/tupimage"
+        " let g:terminal_images_max_columns=5
+        nnoremap gi <Esc>:TerminalImagesShowUnderCursor<CR>
+
+        " vimtex
         let g:vimtex_compiler_latexmk = {
            \ 'build_dir' : "",
            \ 'callback' : 1,
@@ -314,6 +321,7 @@ let
         latexrun
         mytexlive
         mypython
+        grechanik-st
       ] ++ (with pkgs ; [
         peek
       ]);

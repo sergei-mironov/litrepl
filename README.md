@@ -314,13 +314,25 @@ Limitations
 Related projects
 ----------------
 
+Documenting
+
+* https://github.com/lervag/vimtex
+* https://github.com/preservim/vim-markdown
+
+Code execution
+
+* https://github.com/metakirby5/codi.vim
+* https://github.com/gpoore/pythontex
 * https://github.com/gpoore/pythontex
 * https://github.com/gpoore/codebraid
 * https://github.com/hanschen/vim-ipython-cell
 * https://github.com/ivanov/vim-ipython
 * https://github.com/goerz/jupytext.vim
 * https://github.com/ivanov/ipython-vimception
-* https://github.com/lervag/vimtex
+
+Graphics
+
+* https://github.com/sergei-grechanik/vim-terminal-images
 
 Third-party issues
 ------------------
