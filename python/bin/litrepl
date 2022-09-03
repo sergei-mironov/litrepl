@@ -20,6 +20,7 @@ if __name__=='__main__':
   eps=sps.add_parser('eval-sections',help='eval-sections help')
   eps.add_argument('locs',metavar='LOCS',default='*',help='locs help')
   sps.add_parser('repl',help='repl help')
+  ec=sps.add_parser('eval-code',help='eval-code help')
   a=ap.parse_args(sys.argv[1:])
 
   if a.command=='start':
@@ -41,6 +42,8 @@ if __name__=='__main__':
     eval_section_(a,t,SYMBOLS[a.filetype],nsecs)
   elif a.command=='repl':
     system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
+  elif a.command=='eval-code':
+    print(process(sys.stdin.read()))
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)

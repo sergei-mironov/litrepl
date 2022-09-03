@@ -17,115 +17,7 @@ from dataclasses import dataclass
 from functools import partial
 from argparse import ArgumentParser
 
-def pstderr(*args,**kwargs):
-  print(*args, file=sys.stderr, **kwargs)
-
-def mkre(prompt:str):
-  return re.compile(f"(.*)(?={prompt})|{prompt}".encode('utf-8'),
-                    re.A|re.MULTILINE|re.DOTALL)
-
-def merge_basic(acc,r)->bytes:
-  return acc+r
-
-def merge_rn(acc,r)->bytes:
-  sz=len(acc)
-  sz_r=len(r)
-  acc+=r
-  sz1=sz+sz_r
-  i=sz
-  i_n=sz-1
-  while i<sz1:
-    if acc[i]==10:
-      i_n=i
-      i+=1
-    elif acc[i]==13:
-      acc=acc[:i_n+1]+acc[i+1:]
-      sz1-=(i-i_n)
-      i=i_n+1
-    else:
-      i+=1
-  sz=sz1
-  return acc
-
-def merge_basic2(acc,r,xxx)->Tuple[bytes,int]:
-  return (acc+r,xxx)
-
-def merge_rn2(buf_,r,i_n=-1)->Tuple[bytes,int]:
-  buf=deepcopy(buf_)
-  sz=len(buf)
-  i_n=-(sz-i_n)
-  start=0
-  for i in range(len(r)):
-    if r[i]==10:
-      i_n=i
-      buf+=r[start:i+1]
-      start=i+1
-    elif r[i]==13:
-      if i_n<0:
-        buf=buf[:sz+i_n+1]
-        sz=len(buf)
-        i_n=-1
-      start=i+1
-  buf+=r[start:]
-  if i_n>=0:
-    i_n-=start
-  assert b'\r' not in buf
-  if i_n>=0:
-    assert i_n<len(buf), f"{len(buf)}, {i_n}"
-    assert buf[i_n]==(b'\n'[0]), f"{buf}, {i_n}, {buf[i_n]}"
-  return buf,sz+i_n if i_n<0 else sz+i_n
-
-def readout(fdr,
-            prompt=mkre('>>>'),
-            timeout:Optional[int]=None,
-            merge=merge_basic2)->str:
-  acc:bytes=b''
-  i_n=-1
-  while select([fdr],[],[],timeout)[0] != []:
-    r=os.read(fdr, 1024)
-    if r==b'':
-      return acc.decode('utf-8')
-    # acc+=r
-    acc,i_n=merge(acc,r,i_n)
-    m=re_match(prompt,acc)
-    if m:
-      ans=m.group(1)
-      return ans.decode('utf-8')
-  return "LitREPL timeout waiting the interpreter response"
-
-def interact(fdr, fdw, text:str)->str:
-  _m=merge_rn2
-  os.write(fdw,'3256748426384\n'.encode())
-  x=readout(fdr,prompt=mkre('3256748426384\n'),merge=_m)
-  os.write(fdw,text.encode())
-  os.write(fdw,'\n'.encode())
-  os.write(fdw,'3256748426384\n'.encode())
-  res=readout(fdr,prompt=mkre('3256748426384\n'),merge=_m)
-  return res
-
-def process(lines:str)->str:
-  pid=int(open('_pid.txt').read())
-  fdr=0; fdw=0; prev=None
-  try:
-    fdw=os.open('_inp.pipe', os.O_WRONLY | os.O_SYNC)
-    fdr=os.open('_out.pipe', os.O_RDONLY | os.O_SYNC)
-    if fdw<0 or fdr<0:
-      return f"ERROR: litrepl.py couldn't open session pipes\n"
-    def _handler(signum,frame):
-      os.kill(pid,SIGINT)
-    prev=signal(SIGINT,_handler)
-    fcntl.flock(fdw,fcntl.LOCK_EX|fcntl.LOCK_NB)
-    fcntl.flock(fdr,fcntl.LOCK_EX|fcntl.LOCK_NB)
-    return interact(fdr,fdw,lines)
-  except BlockingIOError:
-    return "ERROR: litrepl.py couldn't lock the sessions pipes\n"
-  finally:
-    if prev is not None:
-      signal(SIGINT,prev)
-    if fdr!=0:
-      os.close(fdr)
-    if fdw!=0:
-      os.close(fdw)
+from .eval import process
 
 def fork_python(name):
   assert name.startswith('python')
@@ -355,8 +247,8 @@ def indent(col,lines:str)->str:
 def eval_section_(a, tree, symbols, nsecs:Set[int])->None:
   if not running():
     start(a)
-  ssrc:Dict[int,str]={}
-  sres:Dict[int,str]={}
+  ssrc:Dict[int,str]={} # Section sources
+  sres:Dict[int,str]={} # Section results
   class C(Interpreter):
     def __init__(self):
       self.nsec=-1
@@ -377,7 +269,7 @@ def eval_section_(a, tree, symbols, nsecs:Set[int])->None:
       ssrc[self.nsec]=t
       if self.nsec in nsecs:
         sres[self.nsec]=process(t)
-    def _result(self,tree):
+    def ocodesection(self,tree):
       bmarker=getattr(symbols,tree.children[0].data)
       emarker=getattr(symbols,tree.children[2].data)
       bm,em=tree.children[0].meta,tree.children[2].meta
@@ -387,8 +279,6 @@ def eval_section_(a, tree, symbols, nsecs:Set[int])->None:
               end='')
       else:
         print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
-    def ocodesection(self,tree):
-      self._result(tree)
     def inlinesection(self,tree):
       bm,em=tree.children[0].meta,tree.children[4].meta
       code=tree.children[1].children[0].value
