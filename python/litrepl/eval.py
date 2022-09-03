@@ -109,8 +109,20 @@ def processAsync(lines:str)->PResult:
   # fname=f"/tmp/litrepl-eval-{codehash}.txt"
   fname=f"/tmp/litrepl-eval-test.txt"
   pattern=PATTERN
+  sys.stdout.flush()
+  sys.stderr.flush()
   pid=os.fork()
   if pid==0:
+    # pstderr(sys.stdout.fileno())
+    # os.close(sys.stdout.fileno())
+    # os.close(sys.stderr.fileno())
+    # os.close(sys.stdin.fileno())
+    # os.close(1)
+    # pstderr('AAAAAAAAAA')
+    # os.close(2)
+    # pstderr('BBBBBBBBBB')
+    # os.close(2)
+    # pstderr('AAAAAAAAAA')
     fdr=0; fdw=0
     try:
       fdw=os.open('_inp.pipe', os.O_WRONLY|os.O_SYNC)
@@ -136,15 +148,19 @@ def processAsync(lines:str)->PResult:
 def process(lines:str)->str:
   ipid=int(open('_pid.txt').read())
   r=processAsync(lines)
-  def _handler(signum,frame):
-    os.kill(r.ipid,SIGINT)
   fdr=0
-  prev=signal(SIGINT,_handler)
+  prev=None
   try:
+    def _handler(signum,frame):
+      os.kill(ipid,SIGINT)
+    prev=signal(SIGINT,_handler)
     (pid,exitcode)=os.waitpid(r.pid,0)
+    assert exitcode==0
     assert pid==r.pid
     fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
-    return readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
+    res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
+    # pstderr(res)
+    return res
   finally:
     if prev is not None:
       signal(SIGINT,prev)

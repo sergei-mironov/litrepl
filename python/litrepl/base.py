@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from functools import partial
 from argparse import ArgumentParser
 
-from .eval import process
+from .eval import process, pstderr
 
 def fork_python(name):
   assert name.startswith('python')

@@ -20,7 +20,7 @@ if __name__=='__main__':
   eps=sps.add_parser('eval-sections',help='eval-sections help')
   eps.add_argument('locs',metavar='LOCS',default='*',help='locs help')
   sps.add_parser('repl',help='repl help')
-  ec=sps.add_parser('eval-code',help='eval-code help')
+  sps.add_parser('eval-code',help='eval-code help')
   a=ap.parse_args(sys.argv[1:])
 
   if a.command=='start':
