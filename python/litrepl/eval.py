@@ -11,11 +11,12 @@ from os import environ, system
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
 from os.path import isfile
-from signal import signal, SIGINT
+from signal import signal, SIGINT, alarm, SIGALRM
 from time import sleep
 from dataclasses import dataclass
 from functools import partial
 from argparse import ArgumentParser
+from contextlib import contextmanager
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs)
@@ -63,10 +64,10 @@ def readout(fdr,
       acc,i_n=merge(acc,r,i_n)
     m=re_match(prompt,acc)
     if m:
-      ans=m.group(1)
+      acc=m.group(1)
       r=b''
     if r==b'':
-      return ans.decode('utf-8')
+      return acc.decode('utf-8')
   return "LitREPL timeout waiting the interpreter response"
 
 def readout_asis(fdr, fo, prompt, timeout:Optional[int]=None)->None:
@@ -75,6 +76,7 @@ def readout_asis(fdr, fo, prompt, timeout:Optional[int]=None)->None:
     r=os.read(fdr, 1024)
     if r==b'':
       return
+    # pstderr(f'PIPING {r.decode("utf-8")}')
     os.write(fo,r)
     acc+=r # TODO: don't store everything
     m=re_match(prompt,acc)
@@ -140,24 +142,73 @@ def processAsync(lines:str)->PResult:
     os.close(fo)
     return PResult(fname,pattern)
 
+@contextmanager
+def with_sigint(ipid:Optional[int]=None):
+  ipid_=int(open('_pid.txt').read()) if ipid is None else ipid
+  def _handler(signum,frame):
+    os.kill(ipid_,SIGINT)
+  prev=signal(SIGINT,_handler)
+  try:
+    yield
+  finally:
+    signal(SIGINT,prev)
 
-def process(lines:str)->str:
-  ipid=int(open('_pid.txt').read())
-  r=processAsync(lines)
-  fdr=0
+@contextmanager
+def with_alarm(timeout:int):
   prev=None
   try:
-    def _handler(signum,frame):
-      os.kill(ipid,SIGINT)
-    prev=signal(SIGINT,_handler)
-    fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
-    assert fdr>0
-    fcntl.flock(fdr,fcntl.LOCK_EX)
-    res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
-    return res
+    if timeout>0:
+      def _handler(signum,frame):
+        raise TimeoutError()
+      prev=signal(SIGALRM,_handler)
+      alarm(timeout)
+    yield
   finally:
     if prev is not None:
-      signal(SIGINT,prev)
+      alarm(0)
+      signal(SIGALRM,prev)
+
+
+def process(lines:str)->str:
+  r=processAsync(lines)
+  fdr=0
+  try:
+    with with_sigint():
+      fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
+      assert fdr>0
+      fcntl.flock(fdr,fcntl.LOCK_EX)
+      res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
+      return res
+  finally:
     if fdr!=0:
       os.close(fdr)
+
+@dataclass
+class PAResult:
+  text:str
+  fname:Optional[str]
+
+def processCont(r:PResult, timeout:int=2):
+  fdr=0
+  try:
+    with with_sigint():
+      fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
+      assert fdr>0
+      with with_alarm(timeout):
+        try:
+          fcntl.flock(fdr,fcntl.LOCK_EX)
+          res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
+          return PAResult(res,None)
+        except TimeoutError:
+          res=os.read(fdr,1024).decode('utf-8') # FIXME: read all the bytes
+          # pstderr(f'|{res}|')
+          return PAResult(res,r.fname)
+  finally:
+    if fdr!=0:
+      os.close(fdr)
+
+def processAdapt(lines:str,timeout:int=2)->PAResult:
+  return processCont(processAsync(lines),timeout=timeout)
+
+
 

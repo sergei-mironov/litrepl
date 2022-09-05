@@ -22,8 +22,8 @@ from .eval import process, pstderr
 def fork_python(name):
   assert name.startswith('python')
   system((f'{name} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
-          'os.open(\'_inp.pipe\',os.O_RDWR);'
-          'os.open(\'_out.pipe\',os.O_RDWR);"'
+          'os.open(\'_inp.pipe\',os.O_RDWR|os.O_SYNC);'
+          'os.open(\'_out.pipe\',os.O_RDWR|os.O_SYNC);"'
           '<_inp.pipe >_out.pipe 2>&1 & echo $! >_pid.txt'))
   open('_inp.pipe','w').write(
     'import signal\n'
@@ -34,6 +34,8 @@ def fork_python(name):
 
 def fork_ipython(name):
   assert name.startswith('ipython')
+  if name!='ipython':
+    pstderr(f"Warning: ignoring unusual IPython {name}, check the code")
   open('/tmp/litrepl_ipython_config.py','w').write(
     'from IPython.terminal.prompts import Prompts, Token\n'
     'class EmptyPrompts(Prompts):\n'
@@ -49,10 +51,10 @@ def fork_ipython(name):
     'c.TerminalInteractiveShell.separate_in = ""\n'
     'c.TerminalInteractiveShell.separate_out = ""\n'
     )
-  system((f'{name} --config=/tmp/litrepl_ipython_config.py --colors=NoColor --logfile=_ipython.log -c '
+  system((f'python -um IPython --config=/tmp/litrepl_ipython_config.py --colors=NoColor --logfile=_ipython.log -c '
           '"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
-          'os.open(\'_inp.pipe\',os.O_RDWR);'
-          'os.open(\'_out.pipe\',os.O_RDWR);"'
+          'os.open(\'_inp.pipe\',os.O_RDWR|os.O_SYNC);'
+          'os.open(\'_out.pipe\',os.O_RDWR|os.O_SYNC);"'
           ' -i <_inp.pipe >_out.pipe 2>&1 & echo $! >_pid.txt'))
   open('_inp.pipe','w').write(
     'import signal\n'

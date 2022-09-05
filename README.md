@@ -321,6 +321,7 @@ Documenting
 
 Code execution
 
+* https://github.com/dccsillag/magma-nvim
 * https://github.com/metakirby5/codi.vim
 * https://github.com/gpoore/pythontex
 * https://github.com/gpoore/pythontex
