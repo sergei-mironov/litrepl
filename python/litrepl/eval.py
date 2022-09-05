@@ -59,13 +59,13 @@ def readout(fdr,
   i_n=-1
   while select([fdr],[],[],None)[0] != []:
     r=os.read(fdr, 1024)
-    if r==b'':
-      return acc.decode('utf-8')
-    # acc+=r
-    acc,i_n=merge(acc,r,i_n)
+    if r!=b'':
+      acc,i_n=merge(acc,r,i_n)
     m=re_match(prompt,acc)
     if m:
       ans=m.group(1)
+      r=b''
+    if r==b'':
       return ans.decode('utf-8')
   return "LitREPL timeout waiting the interpreter response"
 
@@ -75,16 +75,16 @@ def readout_asis(fdr, fo, prompt, timeout:Optional[int]=None)->None:
     r=os.read(fdr, 1024)
     if r==b'':
       return
-    fo.write(r)
+    os.write(fo,r)
     acc+=r # TODO: don't store everything
     m=re_match(prompt,acc)
     if m:
       return
-  fo.write("LitREPL timeout waiting for the interpreter response\n")
+  os.write(fo,"LitREPL timeout waiting for the interpreter response\n".encode())
 
 PATTERN='3256748426384\n'
 
-def interact(fdr, fdw, text:str, fo, pattern)->None:
+def interact(fdr, fdw, text:str, fo:int, pattern)->None:
   _m=merge_rn2
   os.write(fdw,pattern.encode())
   x=readout(fdr,prompt=mkre(pattern),merge=_m)
@@ -95,7 +95,6 @@ def interact(fdr, fdw, text:str, fo, pattern)->None:
 
 @dataclass
 class PResult:
-  pid:int       # Code feed process
   fname:str     # Result file name
   pattern:str   # Shell stop patter
 
@@ -109,20 +108,13 @@ def processAsync(lines:str)->PResult:
   # fname=f"/tmp/litrepl-eval-{codehash}.txt"
   fname=f"/tmp/litrepl-eval-test.txt"
   pattern=PATTERN
-  sys.stdout.flush()
-  sys.stderr.flush()
+  sys.stdout.flush(); sys.stderr.flush() # FIXME: crude
+  fo=os.open(fname,os.O_WRONLY|os.O_SYNC|os.O_TRUNC)
+  assert fo>0
+  fcntl.flock(fo,fcntl.LOCK_EX|fcntl.LOCK_NB)
+  # pstderr('Got a write lock')
   pid=os.fork()
   if pid==0:
-    # pstderr(sys.stdout.fileno())
-    # os.close(sys.stdout.fileno())
-    # os.close(sys.stderr.fileno())
-    # os.close(sys.stdin.fileno())
-    # os.close(1)
-    # pstderr('AAAAAAAAAA')
-    # os.close(2)
-    # pstderr('BBBBBBBBBB')
-    # os.close(2)
-    # pstderr('AAAAAAAAAA')
     fdr=0; fdw=0
     try:
       fdw=os.open('_inp.pipe', os.O_WRONLY|os.O_SYNC)
@@ -131,18 +123,22 @@ def processAsync(lines:str)->PResult:
         perror(fname,f"ERROR: litrepl.py couldn't open session pipes\n")
       fcntl.flock(fdw,fcntl.LOCK_EX|fcntl.LOCK_NB)
       fcntl.flock(fdr,fcntl.LOCK_EX|fcntl.LOCK_NB)
-      with open(fname,"wb") as fo:
-        interact(fdr,fdw,lines,fo,pattern)
+      interact(fdr,fdw,lines,fo,pattern)
     except BlockingIOError:
       perror(fname,"ERROR: litrepl.py couldn't lock the sessions pipes\n")
     finally:
+      if fo!=0:
+        fcntl.fcntl(fo,fcntl.LOCK_UN)
+        os.close(fo)
       if fdr!=0:
         os.close(fdr)
       if fdw!=0:
         os.close(fdw)
     exit(0)
   else:
-    return PResult(pid,fname,pattern)
+    fcntl.fcntl(fo,fcntl.LOCK_UN)
+    os.close(fo)
+    return PResult(fname,pattern)
 
 
 def process(lines:str)->str:
@@ -154,12 +150,10 @@ def process(lines:str)->str:
     def _handler(signum,frame):
       os.kill(ipid,SIGINT)
     prev=signal(SIGINT,_handler)
-    (pid,exitcode)=os.waitpid(r.pid,0)
-    assert exitcode==0
-    assert pid==r.pid
     fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
+    assert fdr>0
+    fcntl.flock(fdr,fcntl.LOCK_EX)
     res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
-    # pstderr(res)
     return res
   finally:
     if prev is not None:
