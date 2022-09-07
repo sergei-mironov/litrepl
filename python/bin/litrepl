@@ -36,7 +36,7 @@ if __name__=='__main__':
     eval_section_(a,parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype],{})
   elif a.command=='eval-section':
     t=parse_(GRAMMARS[a.filetype])
-    nsecs=set(solve_cpos(t,[(a.line,a.col)])[1].values())
+    nsecs=set(solve_cpos(t,[(a.line,a.col)]).cursors.values())
     eval_section_(a,t,SYMBOLS[a.filetype],nsecs)
   elif a.command=='eval-sections':
     t=parse_(GRAMMARS[a.filetype])
@@ -46,22 +46,22 @@ if __name__=='__main__':
     system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
   elif a.command=='eval-code':
     if a.cont is not None:
-      r=processCont(PResult(a.cont,PATTERN),a.timeout)
-      if r.fname is None:
+      r=processCont(RunResult(a.cont,PATTERN),a.timeout)
+      if not r.timeout:
         print(r.text)
       else:
         print(r.text)
-        print(f'LITREPL:{r.fname}')
+        print(f'LITREPL:[{a.cont}]')
     else:
       if a.timeout is None:
         print(process(sys.stdin.read()))
       else:
-        r=processAdapt(sys.stdin.read(),a.timeout)
-        if r.fname is None:
+        r,f=processAdapt(sys.stdin.read(),a.timeout)
+        if not r.timeout:
           print(r.text)
         else:
           print(r.text)
-          print(f'LITREPL:{r.fname}')
+          print(f'LITREPL:[{f}]')
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)

@@ -16,8 +16,10 @@ from time import sleep
 from dataclasses import dataclass
 from functools import partial
 from argparse import ArgumentParser
+from collections import defaultdict
 
-from .eval import process, pstderr
+from .types import PrepInfo, RunResult, NSec, FileName
+from .eval import process, pstderr, rresultLoad, rresultSave
 
 def fork_python(name):
   assert name.startswith('python')
@@ -297,11 +299,11 @@ def eval_section_(a, tree, symbols, nsecs:Set[int])->None:
       print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
   C().visit(tree)
 
-def solve_cpos(tree,cs:List[Tuple[int,int]]
-               )->Tuple[int,Dict[Tuple[int,int],int]]:
+def solve_cpos(tree,cs:List[Tuple[int,int]])->PrepInfo:
   """ Solve the list of cursor positions into a set of section numbers. Also
-  return the number of last section. """
+  return the number of the last section. """
   acc:dict={}
+  rres:Dict[NSec,Set[RunResult]]=defaultdict(set)
   class C(Interpreter):
     def __init__(self):
       self.nsec=-1
@@ -310,18 +312,28 @@ def solve_cpos(tree,cs:List[Tuple[int,int]]
         if cursor_within((line,col),(bm.line,bm.column),
                                     (em.end_line,em.end_column)):
           acc[(line,col)]=self.nsec
+    def _getrr(self,text):
+      text1,pend=rresultLoad(text)
+      if pend is not None:
+        rres[self.nsec].add(pend)
     def icodesection(self,tree):
       self.nsec+=1
       self._count(tree.children[0].meta,tree.children[2].meta)
     def ocodesection(self,tree):
       self._count(tree.children[0].meta,tree.children[2].meta)
+      self._getrr(tree.children[1].data)
     def oversection(self,tree):
       self._count(tree.children[0].meta,tree.children[2].meta)
+      self._getrr(tree.children[1].data)
     def inlinesection(self,tree):
       self._count(tree.children[0].meta,tree.children[5].meta)
   c=C()
   c.visit(tree)
-  return c.nsec,acc
+  rres2:dict={}
+  for k,v in rres.items():
+    assert len(v)==1, f"Results of codesec #{k} refer to different readout files: ({list(v)})"
+    rres2[k]=list(v)[0]
+  return PrepInfo(c.nsec,acc,rres2)
 
 grammar_sloc = fr"""
 start: addr -> l_const
@@ -367,8 +379,8 @@ def solve_sloc(s:str,tree)->Set[int]:
                         int(tree[1].children[0].value))
       return int(self.q)
   qs=T().transform(t)
-  # print(qs)
-  nsec,nsol=solve_cpos(tree,list(nqueries.values()))
+  ppi=solve_cpos(tree,list(nqueries.values()))
+  nsec,nsol=ppi.nsec,ppi.cursors
   nknown[lastq]=nsec
   def _get(q):
     return nsol[nqueries[q]] if q in nqueries else nknown[q]

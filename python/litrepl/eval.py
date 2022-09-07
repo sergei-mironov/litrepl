@@ -18,6 +18,8 @@ from functools import partial
 from argparse import ArgumentParser
 from contextlib import contextmanager
 
+from .types import RunResult, ReadResult, FileName
+
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs)
 
@@ -95,17 +97,12 @@ def interact(fdr, fdw, text:str, fo:int, pattern)->None:
   os.write(fdw,pattern.encode())
   readout_asis(fdr,fo,prompt=mkre(pattern))
 
-@dataclass
-class PResult:
-  fname:str     # Result file name
-  pattern:str   # Shell stop patter
-
 def perror(fname,err)->None:
   with open(fname,"w") as f:
     f.write(err)
 
 
-def processAsync(lines:str)->PResult:
+def processAsync(lines:str)->RunResult:
   codehash=abs(hash(lines))
   # fname=f"/tmp/litrepl-eval-{codehash}.txt"
   fname=f"/tmp/litrepl-eval-test.txt"
@@ -140,7 +137,7 @@ def processAsync(lines:str)->PResult:
   else:
     fcntl.fcntl(fo,fcntl.LOCK_UN)
     os.close(fo)
-    return PResult(fname,pattern)
+    return RunResult(fname,pattern)
 
 @contextmanager
 def with_sigint(ipid:Optional[int]=None):
@@ -183,12 +180,7 @@ def process(lines:str)->str:
     if fdr!=0:
       os.close(fdr)
 
-@dataclass
-class PAResult:
-  text:str
-  fname:Optional[str]
-
-def processCont(r:PResult, timeout:int=2):
+def processCont(r:RunResult, timeout:int=2)->ReadResult:
   fdr=0
   try:
     with with_sigint():
@@ -198,17 +190,33 @@ def processCont(r:PResult, timeout:int=2):
         try:
           fcntl.flock(fdr,fcntl.LOCK_EX)
           res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
-          return PAResult(res,None)
+          return ReadResult(res,False)
         except TimeoutError:
           res=os.read(fdr,1024).decode('utf-8') # FIXME: read all the bytes
           # pstderr(f'|{res}|')
-          return PAResult(res,r.fname)
+          return ReadResult(res,True)
   finally:
     if fdr!=0:
       os.close(fdr)
 
-def processAdapt(lines:str,timeout:int=2)->PAResult:
-  return processCont(processAsync(lines),timeout=timeout)
+def processAdapt(lines:str,timeout:int=2)->Tuple[ReadResult,FileName]:
+  rr=processAsync(lines)
+  return processCont(rr,timeout=timeout),rr.fname
+
+
+PRESULT_RE=re.compile(r"(.*)\[WAIT:([a-zA-Z0-9_\/\.-]+)\]\n",
+                      re.A|re.MULTILINE|re.DOTALL)
+
+def rresultLoad(text:str)->Tuple[str,Optional[RunResult]]:
+  m=re_match(PRESULT_RE,text)
+  if m:
+    print(m[1],m[2])
+    return (m[1],RunResult(m[2],PATTERN))
+  else:
+    return text,None
+
+def rresultSave(text:str, presult:RunResult)->str:
+  return text+f"\n[WAIT:{presult.fname}]\n"
 
 
 
