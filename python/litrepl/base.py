@@ -16,122 +16,17 @@ from time import sleep
 from dataclasses import dataclass
 from functools import partial
 from argparse import ArgumentParser
+from collections import defaultdict
 
-def pstderr(*args,**kwargs):
-  print(*args, file=sys.stderr, **kwargs)
-
-def mkre(prompt:str):
-  return re.compile(f"(.*)(?={prompt})|{prompt}".encode('utf-8'),
-                    re.A|re.MULTILINE|re.DOTALL)
-
-def merge_basic(acc,r)->bytes:
-  return acc+r
-
-def merge_rn(acc,r)->bytes:
-  sz=len(acc)
-  sz_r=len(r)
-  acc+=r
-  sz1=sz+sz_r
-  i=sz
-  i_n=sz-1
-  while i<sz1:
-    if acc[i]==10:
-      i_n=i
-      i+=1
-    elif acc[i]==13:
-      acc=acc[:i_n+1]+acc[i+1:]
-      sz1-=(i-i_n)
-      i=i_n+1
-    else:
-      i+=1
-  sz=sz1
-  return acc
-
-def merge_basic2(acc,r,xxx)->Tuple[bytes,int]:
-  return (acc+r,xxx)
-
-def merge_rn2(buf_,r,i_n=-1)->Tuple[bytes,int]:
-  buf=deepcopy(buf_)
-  sz=len(buf)
-  i_n=-(sz-i_n)
-  start=0
-  for i in range(len(r)):
-    if r[i]==10:
-      i_n=i
-      buf+=r[start:i+1]
-      start=i+1
-    elif r[i]==13:
-      if i_n<0:
-        buf=buf[:sz+i_n+1]
-        sz=len(buf)
-        i_n=-1
-      start=i+1
-  buf+=r[start:]
-  if i_n>=0:
-    i_n-=start
-  assert b'\r' not in buf
-  if i_n>=0:
-    assert i_n<len(buf), f"{len(buf)}, {i_n}"
-    assert buf[i_n]==(b'\n'[0]), f"{buf}, {i_n}, {buf[i_n]}"
-  return buf,sz+i_n if i_n<0 else sz+i_n
-
-def readout(fdr,
-            prompt=mkre('>>>'),
-            timeout:Optional[int]=None,
-            merge=merge_basic2)->str:
-  acc:bytes=b''
-  i_n=-1
-  while select([fdr],[],[],timeout)[0] != []:
-    r=os.read(fdr, 1024)
-    if r==b'':
-      return acc.decode('utf-8')
-    # acc+=r
-    acc,i_n=merge(acc,r,i_n)
-    m=re_match(prompt,acc)
-    if m:
-      ans=m.group(1)
-      return ans.decode('utf-8')
-  return "LitREPL timeout waiting the interpreter response"
-
-def interact(fdr, fdw, text:str)->str:
-  _m=merge_rn2
-  os.write(fdw,'3256748426384\n'.encode())
-  x=readout(fdr,prompt=mkre('3256748426384\n'),merge=_m)
-  os.write(fdw,text.encode())
-  os.write(fdw,'\n'.encode())
-  os.write(fdw,'3256748426384\n'.encode())
-  res=readout(fdr,prompt=mkre('3256748426384\n'),merge=_m)
-  return res
-
-def process(lines:str)->str:
-  pid=int(open('_pid.txt').read())
-  fdr=0; fdw=0; prev=None
-  try:
-    fdw=os.open('_inp.pipe', os.O_WRONLY | os.O_SYNC)
-    fdr=os.open('_out.pipe', os.O_RDONLY | os.O_SYNC)
-    if fdw<0 or fdr<0:
-      return f"ERROR: litrepl.py couldn't open session pipes\n"
-    def _handler(signum,frame):
-      os.kill(pid,SIGINT)
-    prev=signal(SIGINT,_handler)
-    fcntl.flock(fdw,fcntl.LOCK_EX|fcntl.LOCK_NB)
-    fcntl.flock(fdr,fcntl.LOCK_EX|fcntl.LOCK_NB)
-    return interact(fdr,fdw,lines)
-  except BlockingIOError:
-    return "ERROR: litrepl.py couldn't lock the sessions pipes\n"
-  finally:
-    if prev is not None:
-      signal(SIGINT,prev)
-    if fdr!=0:
-      os.close(fdr)
-    if fdw!=0:
-      os.close(fdw)
+from .types import PrepInfo, RunResult, NSec, FileName, SecRec
+from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
+                   processCont)
 
 def fork_python(name):
   assert name.startswith('python')
   system((f'{name} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
-          'os.open(\'_inp.pipe\',os.O_RDWR);'
-          'os.open(\'_out.pipe\',os.O_RDWR);"'
+          'os.open(\'_inp.pipe\',os.O_RDWR|os.O_SYNC);'
+          'os.open(\'_out.pipe\',os.O_RDWR|os.O_SYNC);"'
           '<_inp.pipe >_out.pipe 2>&1 & echo $! >_pid.txt'))
   open('_inp.pipe','w').write(
     'import signal\n'
@@ -142,6 +37,8 @@ def fork_python(name):
 
 def fork_ipython(name):
   assert name.startswith('ipython')
+  if name!='ipython':
+    pstderr(f"Warning: ignoring unusual IPython {name}, check the code")
   open('/tmp/litrepl_ipython_config.py','w').write(
     'from IPython.terminal.prompts import Prompts, Token\n'
     'class EmptyPrompts(Prompts):\n'
@@ -157,10 +54,10 @@ def fork_ipython(name):
     'c.TerminalInteractiveShell.separate_in = ""\n'
     'c.TerminalInteractiveShell.separate_out = ""\n'
     )
-  system((f'{name} --config=/tmp/litrepl_ipython_config.py --colors=NoColor --logfile=_ipython.log -c '
+  system((f'python -um IPython --config=/tmp/litrepl_ipython_config.py --colors=NoColor --logfile=_ipython.log -c '
           '"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
-          'os.open(\'_inp.pipe\',os.O_RDWR);'
-          'os.open(\'_out.pipe\',os.O_RDWR);"'
+          'os.open(\'_inp.pipe\',os.O_RDWR|os.O_SYNC);'
+          'os.open(\'_out.pipe\',os.O_RDWR|os.O_SYNC);"'
           ' -i <_inp.pipe >_out.pipe 2>&1 & echo $! >_pid.txt'))
   open('_inp.pipe','w').write(
     'import signal\n'
@@ -352,11 +249,12 @@ def unindent(col:int,lines:str)->str:
 def indent(col,lines:str)->str:
   return '\n'.join([' '*col+l for l in lines.split('\n')])
 
-def eval_section_(a, tree, symbols, nsecs:Set[int])->None:
+def eval_section_(a, tree, symbols, secrec:SecRec)->None:
+  nsecs=secrec.nsecs
   if not running():
     start(a)
-  ssrc:Dict[int,str]={}
-  sres:Dict[int,str]={}
+  ssrc:Dict[int,str]={} # Section sources
+  sres:Dict[int,str]={} # Section results
   class C(Interpreter):
     def __init__(self):
       self.nsec=-1
@@ -376,8 +274,13 @@ def eval_section_(a, tree, symbols, nsecs:Set[int])->None:
       t=unindent(bm.column-1,t)
       ssrc[self.nsec]=t
       if self.nsec in nsecs:
-        sres[self.nsec]=process(t)
-    def _result(self,tree):
+        runr:Optional[RunResult]=secrec.pending.get(self.nsec)
+        if runr is None:
+          rr,runr=processAdapt(t,a.timeout_initial)
+        else:
+          rr=processCont(runr,a.timeout_continue)
+        sres[self.nsec]=rresultSave(rr.text,runr) if rr.timeout else rr.text
+    def ocodesection(self,tree):
       bmarker=getattr(symbols,tree.children[0].data)
       emarker=getattr(symbols,tree.children[2].data)
       bm,em=tree.children[0].meta,tree.children[2].meta
@@ -387,8 +290,6 @@ def eval_section_(a, tree, symbols, nsecs:Set[int])->None:
               end='')
       else:
         print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
-    def ocodesection(self,tree):
-      self._result(tree)
     def inlinesection(self,tree):
       bm,em=tree.children[0].meta,tree.children[4].meta
       code=tree.children[1].children[0].value
@@ -405,11 +306,11 @@ def eval_section_(a, tree, symbols, nsecs:Set[int])->None:
       print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
   C().visit(tree)
 
-def solve_cpos(tree,cs:List[Tuple[int,int]]
-               )->Tuple[int,Dict[Tuple[int,int],int]]:
+def solve_cpos(tree,cs:List[Tuple[int,int]])->PrepInfo:
   """ Solve the list of cursor positions into a set of section numbers. Also
-  return the number of last section. """
+  return the number of the last section. """
   acc:dict={}
+  rres:Dict[NSec,Set[RunResult]]=defaultdict(set)
   class C(Interpreter):
     def __init__(self):
       self.nsec=-1
@@ -418,18 +319,28 @@ def solve_cpos(tree,cs:List[Tuple[int,int]]
         if cursor_within((line,col),(bm.line,bm.column),
                                     (em.end_line,em.end_column)):
           acc[(line,col)]=self.nsec
+    def _getrr(self,text):
+      text1,pend=rresultLoad(text)
+      if pend is not None:
+        rres[self.nsec].add(pend)
     def icodesection(self,tree):
       self.nsec+=1
       self._count(tree.children[0].meta,tree.children[2].meta)
     def ocodesection(self,tree):
       self._count(tree.children[0].meta,tree.children[2].meta)
+      self._getrr(tree.children[1].children[0].value)
     def oversection(self,tree):
       self._count(tree.children[0].meta,tree.children[2].meta)
+      self._getrr(tree.children[1].children[0].value)
     def inlinesection(self,tree):
       self._count(tree.children[0].meta,tree.children[5].meta)
   c=C()
   c.visit(tree)
-  return c.nsec,acc
+  rres2:dict={}
+  for k,v in rres.items():
+    assert len(v)==1, f"Results of codesec #{k} refer to different readout files: ({list(v)})"
+    rres2[k]=list(v)[0]
+  return PrepInfo(c.nsec,acc,rres2)
 
 grammar_sloc = fr"""
 start: addr -> l_const
@@ -443,7 +354,7 @@ const : num -> s_const_num
 num : /[0-9]+/
 """
 
-def solve_sloc(s:str,tree)->Set[int]:
+def solve_sloc(s:str,tree)->SecRec:
   p=Lark(grammar_sloc)
   t=p.parse(s)
   nknown:Dict[int,int]={}
@@ -475,8 +386,8 @@ def solve_sloc(s:str,tree)->Set[int]:
                         int(tree[1].children[0].value))
       return int(self.q)
   qs=T().transform(t)
-  # print(qs)
-  nsec,nsol=solve_cpos(tree,list(nqueries.values()))
+  ppi=solve_cpos(tree,list(nqueries.values()))
+  nsec,nsol=ppi.nsec,ppi.cursors
   nknown[lastq]=nsec
   def _get(q):
     return nsol[nqueries[q]] if q in nqueries else nknown[q]
@@ -486,6 +397,8 @@ def solve_sloc(s:str,tree)->Set[int]:
     except KeyError as err:
       pstderr(f"Unable to resolve section at {err}")
       return set()
-  return set.union(*[_safeset(lambda:range(_get(q[0]),_get(q[1])+1)) if len(q)==2
-                     else _safeset(lambda:[_get(q[0])]) for q in qs])
+  return SecRec(
+    set.union(*[_safeset(lambda:range(_get(q[0]),_get(q[1])+1)) if len(q)==2
+                else _safeset(lambda:[_get(q[0])]) for q in qs]),
+    ppi.pending)
 

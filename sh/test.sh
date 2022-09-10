@@ -296,7 +296,7 @@ runlitrepl stop
 )}
 
 test_tqdm() {(
-mktest "_test_eval_md"
+mktest "_test_tqdm"
 runlitrepl start
 cat >source.md <<"EOF"
 ```python
@@ -314,7 +314,27 @@ test "$(cat out.md | grep '100%' | wc -l)" = "1"
 runlitrepl stop
 )}
 
-if test -n '$LITREPL_TEST' || echo "$(basename $0)" | grep -q "test.sh" ; then
+test_async() {(
+mktest "_test_async"
+runlitrepl start
+cat >source.md <<"EOF"
+```python
+from tqdm import tqdm
+from time import sleep
+for i in tqdm(range(4)):
+  sleep(1)
+  pass
+```
+```lresult
+```
+EOF
+cat source.md | runlitrepl --filetype=markdown --timeout-initial=1 eval-sections '0..$' >out1.md
+cat out1.md | runlitrepl --filetype=markdown --timeout-continue=1 eval-sections '0..$' >out2.md
+grep -q 'BG' out2.md
+runlitrepl stop
+)}
+
+if test -n "$LITREPL_TEST" || echo "$(basename $0)" | grep -q "test.sh" ; then
   set -e -x
   if test -z "$LITREPL"; then
     LITREPL=$LITREPL_ROOT/python/bin/litrepl
@@ -327,6 +347,7 @@ if test -n '$LITREPL_TEST' || echo "$(basename $0)" | grep -q "test.sh" ; then
     test_eval_md
     test_tqdm
     test_eval_tex
+    test_async
   done
   trap "" EXIT
   echo OK

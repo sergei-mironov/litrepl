@@ -3,7 +3,9 @@ logger=getLogger(__name__)
 info=logger.info
 warning=logger.warning
 
-from litrepl.base import *
+from .types import *
+from .eval import *
+from .base import *
 
 try:
   from litrepl.version import __version__
