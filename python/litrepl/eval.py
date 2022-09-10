@@ -3,6 +3,7 @@ import os
 import sys
 import fcntl
 
+from fcntl import LOCK_NB,LOCK_UN,LOCK_EX
 from copy import deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable
 from re import search, match as re_match
@@ -11,7 +12,7 @@ from os import environ, system
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
 from os.path import isfile
-from signal import signal, SIGINT, alarm, SIGALRM
+from signal import signal, SIGINT, SIGALRM, setitimer, ITIMER_REAL
 from time import sleep
 from dataclasses import dataclass
 from functools import partial
@@ -21,7 +22,13 @@ from contextlib import contextmanager
 from .types import RunResult, ReadResult, FileName
 
 def pstderr(*args,**kwargs):
-  print(*args, file=sys.stderr, **kwargs)
+  print(*args, file=sys.stderr, **kwargs, flush=True)
+
+DEBUG:bool=False
+
+def pdebug(*args,**kwargs):
+  if DEBUG:
+    print(*args, file=sys.stderr, **kwargs, flush=True)
 
 def mkre(prompt:str):
   return re.compile(f"(.*)(?={prompt})|{prompt}".encode('utf-8'),
@@ -97,21 +104,19 @@ def interact(fdr, fdw, text:str, fo:int, pattern)->None:
   os.write(fdw,pattern.encode())
   readout_asis(fdr,fo,prompt=mkre(pattern))
 
-def perror(fname,err)->None:
+def pusererror(fname,err)->None:
   with open(fname,"w") as f:
     f.write(err)
 
-
 def processAsync(lines:str)->RunResult:
   codehash=abs(hash(lines))
-  # fname=f"/tmp/litrepl-eval-{codehash}.txt"
-  fname=f"/tmp/litrepl-eval-test.txt"
+  fname=f"/tmp/litrepl-eval-{codehash}.txt"
   pattern=PATTERN
-  sys.stdout.flush(); sys.stderr.flush() # FIXME: crude
-  fo=os.open(fname,os.O_WRONLY|os.O_SYNC|os.O_TRUNC)
+  fo=os.open(fname,os.O_WRONLY|os.O_SYNC|os.O_TRUNC|os.O_CREAT)
   assert fo>0
   fcntl.flock(fo,fcntl.LOCK_EX|fcntl.LOCK_NB)
   # pstderr('Got a write lock')
+  sys.stdout.flush(); sys.stderr.flush() # FIXME: crude
   pid=os.fork()
   if pid==0:
     fdr=0; fdw=0
@@ -119,12 +124,15 @@ def processAsync(lines:str)->RunResult:
       fdw=os.open('_inp.pipe', os.O_WRONLY|os.O_SYNC)
       fdr=os.open('_out.pipe', os.O_RDONLY|os.O_SYNC)
       if fdw<0 or fdr<0:
-        perror(fname,f"ERROR: litrepl.py couldn't open session pipes\n")
+        pusererror(fname,f"ERROR: litrepl.py couldn't open session pipes\n")
       fcntl.flock(fdw,fcntl.LOCK_EX|fcntl.LOCK_NB)
       fcntl.flock(fdr,fcntl.LOCK_EX|fcntl.LOCK_NB)
+      def _handler(signum,frame):
+        pass
+      signal(SIGINT,_handler)
       interact(fdr,fdw,lines,fo,pattern)
     except BlockingIOError:
-      perror(fname,"ERROR: litrepl.py couldn't lock the sessions pipes\n")
+      pusererror(fname,"ERROR: litrepl.py couldn't lock the sessions pipes\n")
     finally:
       if fo!=0:
         fcntl.fcntl(fo,fcntl.LOCK_UN)
@@ -143,6 +151,7 @@ def processAsync(lines:str)->RunResult:
 def with_sigint(ipid:Optional[int]=None):
   ipid_=int(open('_pid.txt').read()) if ipid is None else ipid
   def _handler(signum,frame):
+    pdebug(f"Sending SIGINT to {ipid_}")
     os.kill(ipid_,SIGINT)
   prev=signal(SIGINT,_handler)
   try:
@@ -151,18 +160,19 @@ def with_sigint(ipid:Optional[int]=None):
     signal(SIGINT,prev)
 
 @contextmanager
-def with_alarm(timeout:int):
+def with_alarm(timeout:float):
   prev=None
   try:
-    if timeout>0:
+    if timeout>0 and timeout<float('inf'):
       def _handler(signum,frame):
+        pdebug(f"SIGALARM received")
         raise TimeoutError()
       prev=signal(SIGALRM,_handler)
-      alarm(timeout)
+      setitimer(ITIMER_REAL,timeout)
     yield
   finally:
     if prev is not None:
-      alarm(0)
+      setitimer(ITIMER_REAL,0)
       signal(SIGALRM,prev)
 
 
@@ -173,50 +183,53 @@ def process(lines:str)->str:
     with with_sigint():
       fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
       assert fdr>0
-      fcntl.flock(fdr,fcntl.LOCK_EX)
+      fcntl.flock(fdr,LOCK_EX)
       res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
       return res
   finally:
     if fdr!=0:
       os.close(fdr)
 
-def processCont(r:RunResult, timeout:int=2)->ReadResult:
+def processCont(r:RunResult, timeout:float=1.0)->ReadResult:
   fdr=0
+  rr:Optional[RunResult]=None
   try:
     with with_sigint():
       fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
       assert fdr>0
-      with with_alarm(timeout):
-        try:
-          fcntl.flock(fdr,fcntl.LOCK_EX)
-          res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
-          return ReadResult(res,False)
-        except TimeoutError:
-          res=os.read(fdr,1024).decode('utf-8') # FIXME: read all the bytes
-          # pstderr(f'|{res}|')
-          return ReadResult(res,True)
+      try:
+        with with_alarm(timeout):
+          fcntl.flock(fdr,LOCK_EX|(0 if timeout>0 else LOCK_NB))
+        res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
+        rr=ReadResult(res,False)
+        os.unlink(r.fname)
+        pdebug(f"processCont unlinked {r.fname}")
+      except (BlockingIOError,TimeoutError):
+        pdebug("processCont receieved Timeout or BlockingIOError")
+        res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
+        rr=ReadResult(res,True)
+      return rr
   finally:
     if fdr!=0:
       os.close(fdr)
 
-def processAdapt(lines:str,timeout:int=2)->Tuple[ReadResult,FileName]:
-  rr=processAsync(lines)
-  return processCont(rr,timeout=timeout),rr.fname
+def processAdapt(lines:str,timeout:float=1.0)->Tuple[ReadResult,RunResult]:
+  runr=processAsync(lines)
+  rr=processCont(runr,timeout=timeout)
+  return rr,runr
 
 
-PRESULT_RE=re.compile(r"(.*)\[WAIT:([a-zA-Z0-9_\/\.-]+)\]\n",
+PRESULT_RE=re.compile(r"(.*)\[BG:([a-zA-Z0-9_\/\.-]+)\]\n.*",
                       re.A|re.MULTILINE|re.DOTALL)
 
 def rresultLoad(text:str)->Tuple[str,Optional[RunResult]]:
   m=re_match(PRESULT_RE,text)
   if m:
-    print(m[1],m[2])
     return (m[1],RunResult(m[2],PATTERN))
   else:
     return text,None
 
 def rresultSave(text:str, presult:RunResult)->str:
-  return text+f"\n[WAIT:{presult.fname}]\n"
-
-
+  return (text+f"\n[BG:{presult.fname}]\n"
+          "<Re-evaluate to update>\n")
 

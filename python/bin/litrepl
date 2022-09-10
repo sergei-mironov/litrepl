@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import litrepl
 from litrepl import *
 from litrepl import __version__
 
@@ -8,10 +9,14 @@ if __name__=='__main__':
   ap.add_argument('--version',action='version',version=__version__ or '?',help='print version')
   ap.add_argument('--filetype',metavar='STR',default='markdown',help='ft help')
   ap.add_argument('--interpreter',metavar='EXE',default='auto',help='python|ipython|auto')
+  ap.add_argument('--timeout-initial',type=str,metavar='SEC',default='inf')
+  ap.add_argument('--timeout-continue',type=str,metavar='SEC',default='inf')
+  ap.add_argument('--debug',type=int,metavar='LEVEL',default=0)
   sps=ap.add_subparsers(help='command help', dest='command')
   sps.add_parser('start',help='start help')
   sps.add_parser('start-ipython',help='start help')
   sps.add_parser('stop',help='stop help')
+  sps.add_parser('restart',help='restart help')
   sps.add_parser('parse',help='parse help')
   sps.add_parser('parse-print',help='parse-print help')
   apes=sps.add_parser('eval-section',help='eval-section help')
@@ -19,16 +24,24 @@ if __name__=='__main__':
   apes.add_argument('--col',type=int,default=None)
   eps=sps.add_parser('eval-sections',help='eval-sections help')
   eps.add_argument('locs',metavar='LOCS',default='*',help='locs help')
-  sps.add_parser('repl',help='repl help')
+  repl=sps.add_parser('repl',help='repl help')
   ec=sps.add_parser('eval-code',help='eval-code help')
   ec.add_argument('--timeout',type=int,default=None)
   ec.add_argument('--cont',type=str,default=None)
   a=ap.parse_args(sys.argv[1:])
 
+  a.timeout_initial=float(a.timeout_initial)
+  a.timeout_continue=float(a.timeout_continue)
+
+  if a.debug>0:
+    litrepl.eval.DEBUG=True
+
   if a.command=='start':
     start(a)
   elif a.command=='stop':
     stop()
+  elif a.command=='restart':
+    start(a); stop()
   elif a.command=='parse':
     t=parse_(GRAMMARS[a.filetype])
     print(t.pretty())
@@ -57,12 +70,12 @@ if __name__=='__main__':
       if a.timeout is None:
         print(process(sys.stdin.read()))
       else:
-        r,f=processAdapt(sys.stdin.read(),a.timeout)
+        r,runr=processAdapt(sys.stdin.read(),a.timeout)
         if not r.timeout:
           print(r.text)
         else:
           print(r.text)
-          print(f'LITREPL:[{f}]')
+          print(f'LITREPL:[{runr.fname}]')
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)

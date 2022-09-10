@@ -19,7 +19,8 @@ from argparse import ArgumentParser
 from collections import defaultdict
 
 from .types import PrepInfo, RunResult, NSec, FileName, SecRec
-from .eval import process, pstderr, rresultLoad, rresultSave
+from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
+                   processCont)
 
 def fork_python(name):
   assert name.startswith('python')
@@ -273,7 +274,12 @@ def eval_section_(a, tree, symbols, secrec:SecRec)->None:
       t=unindent(bm.column-1,t)
       ssrc[self.nsec]=t
       if self.nsec in nsecs:
-        sres[self.nsec]=process(t)
+        runr:Optional[RunResult]=secrec.pending.get(self.nsec)
+        if runr is None:
+          rr,runr=processAdapt(t,a.timeout_initial)
+        else:
+          rr=processCont(runr,a.timeout_continue)
+        sres[self.nsec]=rresultSave(rr.text,runr) if rr.timeout else rr.text
     def ocodesection(self,tree):
       bmarker=getattr(symbols,tree.children[0].data)
       emarker=getattr(symbols,tree.children[2].data)
@@ -322,10 +328,10 @@ def solve_cpos(tree,cs:List[Tuple[int,int]])->PrepInfo:
       self._count(tree.children[0].meta,tree.children[2].meta)
     def ocodesection(self,tree):
       self._count(tree.children[0].meta,tree.children[2].meta)
-      self._getrr(tree.children[1].data)
+      self._getrr(tree.children[1].children[0].value)
     def oversection(self,tree):
       self._count(tree.children[0].meta,tree.children[2].meta)
-      self._getrr(tree.children[1].data)
+      self._getrr(tree.children[1].children[0].value)
     def inlinesection(self,tree):
       self._count(tree.children[0].meta,tree.children[5].meta)
   c=C()

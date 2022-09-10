@@ -16,6 +16,10 @@ if &filetype == 'python'
   call Ident(2)
 endif
 
+nnoremap <F5> :LitEval1<CR>
+nnoremap <F6> :LitEvalWait1<CR>
+nnoremap <F9> :unlet g:litrepl_bin<CR>:unlet g:litrepl_loaded<CR>:runtime plugin/litrepl.vim<CR>
+
 if &filetype == 'tex'
   syn region texZone start="\\begin{shellcode}"
         \ end="\\end{shellcode}\|%stopzone\>" contains=@Spell
@@ -56,7 +60,6 @@ if &filetype == 'tex'
     let g:vimtex_compiler_method='latexmk'
     execute "VimtexReload"
     set conceallevel=0
-
     nnoremap <F5> :LitEval1<CR>:w<CR>:VimtexView<CR>
     nnoremap <F2> :w<CR>
 endif

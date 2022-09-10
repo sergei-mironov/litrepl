@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 FileName=str
 
-@dataclass
+@dataclass(frozen=True)
 class RunResult:
   """ Result of launchng the readout job """
   fname:FileName     # File to read the incoming data from.

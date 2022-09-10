@@ -4,10 +4,15 @@
 # repository to the VIM's runtime path.
 
 if ! test -f "$LITREPL_ROOT/vim/plugin/litrepl.vim" ; then
-  echo "'litrepl.vim' is not under the LITREPL_ROOT. Did you source 'env.sh'?"
+  echo "'litrepl.vim' is not under the LITREPL_ROOT. Did you source 'env.sh'?" >&2
+  exit 1
 fi
 exec vim -c "
-let &runtimepath .= ',$LITREPL_ROOT/vim'
+unlet g:litrepl_bin
+unlet g:litrepl_loaded
+let &runtimepath = '$LITREPL_ROOT/vim,'.&runtimepath
 runtime plugin/litrepl.vim
+echomsg \"LitREPL: litrepl_bin=\".g:litrepl_bin
+echomsg \"LitREPL: PATH=\".\$PATH
 " "$@"
 
