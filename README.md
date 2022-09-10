@@ -24,8 +24,7 @@ programming and code execution right from the editor.
   (Required), `setuptools_scm`, `ipython` (Optional).
 * `GNU socat` application (Optional).
 
-_Currently, the plugin is at the proof-of-concept stage. No code is packaged,
-clone this repository to reproduce the results!_
+_The project is unstable, please install packages by cloning this repository!_
 
 Contents
 --------
@@ -145,6 +144,7 @@ There are no key bindings defined in the plugin, but users are free to
 
 ```vim
 nnoremap <F5> :LitEval1<CR>
+nnoremap <F6> :LitEvalWait1<CR>
 ```
 
 ### Commands
@@ -153,7 +153,7 @@ Most of the commands could be sent from the command line or from Vim directly.
 
 | Vim             | Command line     | Description                          |
 |-----------------|------------------|--------------------------------------|
-| `:LitEval1`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C)` | Run section under the cursor and wait a bit |
+| `:LitEval1`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C)` | Run section under the cursor and wait a bit or update the output from the already running code section. |
 | `:LitEvalWait1` | `lirtepl eval-sections (N\|L:C)`   | Run section under the cursor and wait until the completion |
 | `:LitEvalAbove` | `lirtepl eval-sections 0..(N\|L:C)`| Run sections above and under the cursor and wait until the completion |
 | `:LitEvalBelow` | `lirtepl eval-sections (N\|L:C)..$`| Run sections below and under the cursor and wait until the completion |
