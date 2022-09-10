@@ -315,7 +315,7 @@ Limitations
 * Interpreter: Evaluation of a code section locks the editor.
 * Interpreter: Tweaking `os.ps1`/`os.ps2` prompts of the Python interpreter
   could break the session.
-* Interpreter: No asynchronous code execution.
+* ~~Interpreter: No asynchronous code execution.~~
 * ~~Interpreter: Background Python interpreter couldn't be interrupted~~
 
 Related projects
