@@ -102,9 +102,22 @@ Develop
    environment script will add `./sh` and `./python` folders to the current
    shell's PATH/PYTHONPATH.  The former folder contains the back-end script, the
    latter one contains the Python library.
-3. Run the `vim_litrepl_dev` (a thin wrapper around Vim) to run the Vim with the
+3. (Optional) Run `test.sh`
+4. Run the `vim_litrepl_dev` (a thin wrapper around Vim) to run the Vim with the
    LitREPL plugin from the `./vim` folder.
-4. (Optional) Run `test.sh`
+
+A useful keymapping to reload the plugin:
+
+```vim
+nnoremap <F9> :unlet g:litrepl_bin<CR>:unlet g:litrepl_loaded<CR>:runtime plugin/litrepl.vim<CR>
+```
+
+To view debug messages, set
+
+```vim
+let g:litrepl_debug = 1
+let g:litrepl_always_show_stderr = 1
+```
 
 Usage
 -----
