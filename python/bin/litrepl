@@ -33,10 +33,11 @@ if __name__=='__main__':
     t=parse_(GRAMMARS[a.filetype])
     print(t.pretty())
   elif a.command=='parse-print':
-    eval_section_(a,parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype],{})
+    sr0=SecRec(set(),{})
+    eval_section_(a,parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype],sr0)
   elif a.command=='eval-section':
     t=parse_(GRAMMARS[a.filetype])
-    nsecs=set(solve_cpos(t,[(a.line,a.col)]).cursors.values())
+    nsecs=SecRec(set(solve_cpos(t,[(a.line,a.col)]).cursors.values()),{})
     eval_section_(a,t,SYMBOLS[a.filetype],nsecs)
   elif a.command=='eval-sections':
     t=parse_(GRAMMARS[a.filetype])

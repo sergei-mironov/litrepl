@@ -18,7 +18,7 @@ from functools import partial
 from argparse import ArgumentParser
 from collections import defaultdict
 
-from .types import PrepInfo, RunResult, NSec, FileName
+from .types import PrepInfo, RunResult, NSec, FileName, SecRec
 from .eval import process, pstderr, rresultLoad, rresultSave
 
 def fork_python(name):
@@ -248,7 +248,8 @@ def unindent(col:int,lines:str)->str:
 def indent(col,lines:str)->str:
   return '\n'.join([' '*col+l for l in lines.split('\n')])
 
-def eval_section_(a, tree, symbols, nsecs:Set[int])->None:
+def eval_section_(a, tree, symbols, secrec:SecRec)->None:
+  nsecs=secrec.nsecs
   if not running():
     start(a)
   ssrc:Dict[int,str]={} # Section sources
@@ -347,7 +348,7 @@ const : num -> s_const_num
 num : /[0-9]+/
 """
 
-def solve_sloc(s:str,tree)->Set[int]:
+def solve_sloc(s:str,tree)->SecRec:
   p=Lark(grammar_sloc)
   t=p.parse(s)
   nknown:Dict[int,int]={}
@@ -390,6 +391,8 @@ def solve_sloc(s:str,tree)->Set[int]:
     except KeyError as err:
       pstderr(f"Unable to resolve section at {err}")
       return set()
-  return set.union(*[_safeset(lambda:range(_get(q[0]),_get(q[1])+1)) if len(q)==2
-                     else _safeset(lambda:[_get(q[0])]) for q in qs])
+  return SecRec(
+    set.union(*[_safeset(lambda:range(_get(q[0]),_get(q[1])+1)) if len(q)==2
+                else _safeset(lambda:[_get(q[0])]) for q in qs]),
+    ppi.pending)
 

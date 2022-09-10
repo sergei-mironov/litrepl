@@ -1,4 +1,4 @@
-from typing import List,Dict,Tuple,Callable,Optional
+from typing import (Set, List, Dict, Tuple, Callable, Optional)
 from dataclasses import dataclass
 
 FileName=str
@@ -19,8 +19,14 @@ NSec=int
 
 @dataclass
 class PrepInfo:
-  """ Data extracted while preprocessing the document"""
-  nsec:NSec          # Number of code sections
+  """ Data extracted while preprocessing the document """
+  nsec:NSec                         # Number of code sections
   cursors:Dict[Tuple[int,int],NSec] # Resolved cursor locations
-  pending:Dict[NSec,RunResult] # Async job markers found
+  pending:Dict[NSec,RunResult]      # Async job markers
 
+
+@dataclass
+class SecRec:
+  """ Request for section evaluation """
+  nsecs:Set[NSec]
+  pending:Dict[NSec,RunResult]
