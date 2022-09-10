@@ -7,9 +7,6 @@ endif
 if ! exists("g:litrepl_exe")
   let g:litrepl_exe = 'litrepl'
 endif
-if ! exists("g:litrepl_timeout_continue")
-  let g:litrepl_timeout_continue = 0
-endif
 if ! exists("g:litrepl_always_show_stderr")
   let g:litrepl_always_show_stderr = 0
 endif
