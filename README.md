@@ -170,15 +170,15 @@ Where
 
 ### Arguments
 
-| Vim setting             | CLI argument           | Description                       |
-|-------------------------|------------------------|-----------------------------------|
-| `set filetype`          | `--filetype=T`         | Input file type: `latex`\|`markdown`  |
-|                         | `--interpreter=I`      | The interpreter to use: `python`\|`ipython`\|`auto`, defaulting to `auto` |
+| Vim setting               | CLI argument         | Description                       |
+|---------------------------|----------------------|-----------------------------------|
+| `set filetype`            | `--filetype=T`       | Input file type: `latex`\|`markdown`  |
+| N/A                       | `--interpreter=I`    | The interpreter to use: `python`\|`ipython`\|`auto`, defaulting to `auto` |
 | `let g:litrepl_debug=0/1` |  `--debug=1`         | Print debug messages to the stderr |
 | `let g:litrepl_errfile=/tmp/litrepl.vim` |  N/A  | Intermediary file for debug and error messages |
 | `let g:litrepl_always_show_stderr=0/1`   |  N/A  | Set to auto-open stderr window after each execution |
-| N/A                 |  `--timeout-initial=FLOAT`   | Timeout to wait for the new executions, in seconds, defaults to inf |
-| N/A                 |  `--timeout-continue=FLOAT`  | Timeout to wait for executions which are already running, in seconds, defaults to inf |
+| N/A                 |  `--timeout-initial=FLOAT` | Timeout to wait for the new executions, in seconds, defaults to inf |
+| N/A                 |  `--timeout-continue=FLOAT`| Timeout to wait for executions which are already running, in seconds, defaults to inf |
 
 * `I` is taken into account by the `start` command and by the first
   `eval-sections` only.
