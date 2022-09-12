@@ -133,18 +133,18 @@ icodesection.1 : icodebeginmarker ctext icodendmarker
                | icodebeginmarker2 ctext icodendmarker2
 ocodesection.1 : ocodebeginmarker ctext ocodendmarker
                | verbeginmarker ctext verendmarker
-icodebeginmarker : "{symbols_md.icodebeginmarker}"
-icodendmarker : "{symbols_md.icodendmarker}"
-icodebeginmarker2 : "{symbols_md.icodebeginmarker2}"
-icodendmarker2 : "{symbols_md.icodendmarker2}"
-ocodebeginmarker : "{symbols_md.ocodebeginmarker}"
-ocodendmarker : "{symbols_md.ocodendmarker}"
-verbeginmarker : "{symbols_md.verbeginmarker}"
-verendmarker : "{symbols_md.verendmarker}"
+icodebeginmarker : /{symbols_md.icodebeginmarker}/
+icodendmarker : /{symbols_md.icodendmarker}/
+icodebeginmarker2 : /{symbols_md.icodebeginmarker2}/
+icodendmarker2 : /{symbols_md.icodendmarker2}/
+ocodebeginmarker : /{symbols_md.ocodebeginmarker}/
+ocodendmarker : /{symbols_md.ocodendmarker}/
+verbeginmarker : /{symbols_md.verbeginmarker}/
+verendmarker : /{symbols_md.verendmarker}/
 inlinebeginmarker : "`"
 inlinendmarker : "`"
-combeginmarker : "{symbols_md.combeginmarker}"
-comendmarker : "{symbols_md.comendmarker}"
+combeginmarker : /{symbols_md.combeginmarker}/
+comendmarker : /{symbols_md.comendmarker}/
 text : /(.(?!{symbols_md.ocodebeginmarker}|{symbols_md.icodebeginmarker}|{symbols_md.icodebeginmarker2}|{symbols_md.verbeginmarker}|{symbols_md.combeginmarker}))*./s
 ctext : /(.(?!{symbols_md.ocodendmarker}|{symbols_md.icodendmarker}|{symbols_md.icodendmarker2}|{symbols_md.verendmarker}))*./s
 comtext : /(.(?!{symbols_md.comendmarker}))*./s
@@ -153,37 +153,28 @@ comtext : /(.(?!{symbols_md.comendmarker}))*./s
 
 @dataclass
 class SymbolsLatex:
-  icodebeginmarker=r"\begin{lcode}"
-  icodendmarker=r"\end{lcode}"
-  icodebeginmarker2=r"%lcode"
-  icodendmarker2=r"%lnocode"
-  ocodebeginmarker=r"\begin{lresult}"
-  ocodendmarker=r"\end{lresult}"
-  verbeginmarker=r"%lresult"
-  verendmarker=r"%lnoresult"
-  inlinemarker=r"\linline"
-  combeginmarker=r"%lignore"
-  comendmarker=r"%lnoignore"
+  icodebeginmarker=r"\\begin\{l[a-zA-Z0-9]*code\}"
+  icodendmarker=r"\\end\{l[a-zA-Z0-9]*code\}"
+  icodebeginmarker2=r"\%lcode"
+  icodendmarker2=r"\%lnocode"
+  ocodebeginmarker=r"\\begin\{l[a-zA-Z0-9]*result\}"
+  ocodendmarker=r"\\end\{l[a-zA-Z0-9]*result\}"
+  verbeginmarker=r"\%lresult"
+  verendmarker=r"\%lnoresult"
+  inlinemarker=r"\\l[a-zA-Z0-9]*inline"
+  combeginmarker=r"\%lignore"
+  comendmarker=r"\%lnoignore"
 
 symbols_latex=SymbolsLatex()
-icodebeginmarkerE=r"\\begin\{lcode\}"
-icodendmarkerE=r"\\end\{lcode\}"
-icodebeginmarker2E=r"\%lcode"
-icodendmarker2E=r"\%lnocode"
-ocodebeginmarkerE=r"\\begin\{lresult\}"
-ocodendmarkerE=r"\\end\{lresult\}"
-verbeginmarkerE=r"\%lresult"
-verendmarkerE=r"\%lnoresult"
-inlinemarkerE=r"\\linline\{"
-combeginmarkerE=r"\%lignore"
-comendmarkerE=r"\%lnoignore"
 
-allmarkersE='|'.join([icodebeginmarkerE,icodendmarkerE,
-                      icodebeginmarker2E,icodendmarker2E,
-                      ocodebeginmarkerE,ocodendmarkerE,
-                      verbeginmarkerE,verendmarkerE,
-                      combeginmarkerE,comendmarkerE,
-                      inlinemarkerE])
+def toplevel_markers_latex():
+  sl=symbols_latex
+  return '|'.join([sl.icodebeginmarker,sl.icodendmarker,
+                   sl.icodebeginmarker2,sl.icodendmarker2,
+                   sl.ocodebeginmarker,sl.ocodendmarker,
+                   sl.verbeginmarker,sl.verendmarker,
+                   sl.combeginmarker,sl.comendmarker,
+                   sl.inlinemarker])
 OBR="{"
 CBR="}"
 BCBR="\\}"
@@ -199,22 +190,21 @@ icodesection.1 : icodebeginmarker innertext icodendmarker
 ocodesection.1 : ocodebeginmarker innertext ocodendmarker
                | verbeginmarker innertext verendmarker
 inlinesection.1 : inlinemarker "{OBR}" inltext "{CBR}" spaces obr inltext cbr
-inlinemarker : "{symbols_latex.inlinemarker}"
-icodebeginmarker : "{symbols_latex.icodebeginmarker}"
-icodendmarker : "{symbols_latex.icodendmarker}"
-icodebeginmarker2 : "{symbols_latex.icodebeginmarker2}"
-icodendmarker2 : "{symbols_latex.icodendmarker2}"
-ocodebeginmarker : "{symbols_latex.ocodebeginmarker}"
-ocodendmarker : "{symbols_latex.ocodendmarker}"
-verbeginmarker : "{symbols_latex.verbeginmarker}"
-verendmarker : "{symbols_latex.verendmarker}"
-combeginmarker : "{symbols_latex.combeginmarker}"
-comendmarker : "{symbols_latex.comendmarker}"
-topleveltext : /(.(?!{allmarkersE}))*./s
-innertext : /(.(?!{icodendmarker2E}|{icodendmarkerE}|{ocodendmarkerE}|{verendmarkerE}))*./s
-// inltext : ( /(.(?!{CBR}))*./s )?
+inlinemarker : /{symbols_latex.inlinemarker}/
+icodebeginmarker : /{symbols_latex.icodebeginmarker}/
+icodendmarker : /{symbols_latex.icodendmarker}/
+icodebeginmarker2 : /{symbols_latex.icodebeginmarker2}/
+icodendmarker2 : /{symbols_latex.icodendmarker2}/
+ocodebeginmarker : /{symbols_latex.ocodebeginmarker}/
+ocodendmarker : /{symbols_latex.ocodendmarker}/
+verbeginmarker : /{symbols_latex.verbeginmarker}/
+verendmarker : /{symbols_latex.verendmarker}/
+combeginmarker : /{symbols_latex.combeginmarker}/
+comendmarker : /{symbols_latex.comendmarker}/
+topleveltext : /(.(?!{toplevel_markers_latex()}))*./s
+innertext : /(.(?!{symbols_latex.icodendmarker2}|{symbols_latex.icodendmarker}|{symbols_latex.ocodendmarker}|{symbols_latex.verendmarker}))*./s
 inltext : ( /[^{OBR}{CBR}]+({OBR}[^{CBR}]*{CBR}[^{OBR}{CBR}]*)*/ )?
-comtext : ( /(.(?!{comendmarkerE}))*./s )?
+comtext : ( /(.(?!{symbols_latex.comendmarker}))*./s )?
 spaces : ( /[ \t\r\n]+/s )?
 obr : "{OBR}"
 cbr : "{CBR}"
@@ -267,8 +257,8 @@ def eval_section_(a, tree, symbols, secrec:SecRec)->None:
     def icodesection(self,tree):
       self.nsec+=1
       t=tree.children[1].children[0].value
-      bmarker=getattr(symbols,tree.children[0].data)
-      emarker=getattr(symbols,tree.children[2].data)
+      bmarker=tree.children[0].children[0].value
+      emarker=tree.children[2].children[0].value
       print(f"{bmarker}{t}{emarker}", end='')
       bm,em=tree.children[0].meta,tree.children[2].meta
       t=unindent(bm.column-1,t)
@@ -281,8 +271,8 @@ def eval_section_(a, tree, symbols, secrec:SecRec)->None:
           rr=processCont(runr,a.timeout_continue)
         sres[self.nsec]=rresultSave(rr.text,runr) if rr.timeout else rr.text
     def ocodesection(self,tree):
-      bmarker=getattr(symbols,tree.children[0].data)
-      emarker=getattr(symbols,tree.children[2].data)
+      bmarker=tree.children[0].children[0].value
+      emarker=tree.children[2].children[0].value
       bm,em=tree.children[0].meta,tree.children[2].meta
       if self.nsec in nsecs:
         assert self.nsec in sres
@@ -294,15 +284,15 @@ def eval_section_(a, tree, symbols, secrec:SecRec)->None:
       bm,em=tree.children[0].meta,tree.children[4].meta
       code=tree.children[1].children[0].value
       spaces=tree.children[2].children[0].value if tree.children[2].children else ''
-      im=symbols.inlinemarker
+      im=tree.children[0].children[0].value
       if self.nsec in nsecs:
         result=process('print('+code+');\n').rstrip('\n')
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
       print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}", end='')
     def comsection(self,tree):
-      bmarker=getattr(symbols,tree.children[0].data)
-      emarker=getattr(symbols,tree.children[2].data)
+      bmarker=tree.children[0].children[0].value
+      emarker=tree.children[2].children[0].value
       print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
   C().visit(tree)
 
