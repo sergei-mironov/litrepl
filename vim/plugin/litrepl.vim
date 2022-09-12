@@ -51,6 +51,11 @@ fun! s:OpenErr(file)
 endfun
 command! -nargs=0 LitOpenErr call <SID>OpenErr(g:litrepl_errfile)
 
+fun! s:Version()
+  echomsg systemlist(g:litrepl_exe." --version")[0]
+endfun
+command! -nargs=0 LitVersion call <SID>Version()
+
 fun! s:SessionEval(mode,timeout_initial,timeout_continue)
   let ft = &filetype
   let p = getcharpos('.')

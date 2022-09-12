@@ -281,6 +281,7 @@ def eval_section_(a, tree, symbols, secrec:SecRec)->None:
       else:
         print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
     def inlinesection(self,tree):
+      # FIXME: Latex-only
       bm,em=tree.children[0].meta,tree.children[4].meta
       code=tree.children[1].children[0].value
       spaces=tree.children[2].children[0].value if tree.children[2].children else ''
