@@ -344,9 +344,9 @@ if test -n "$LITREPL_TEST" || echo "$(basename $0)" | grep -q "test.sh" ; then
     echo "Checking $I"
     LITREPL_INTERPRETER=$I
     test_parse_print
-    test_eval_md
+    time test_eval_md
     test_tqdm
-    test_eval_tex
+    time test_eval_tex
     test_async
   done
   trap "" EXIT
