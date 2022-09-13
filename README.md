@@ -166,8 +166,8 @@ Most of the commands could be sent from the command line or from Vim directly.
 
 | Vim             | Command line         | Description                          |
 |-----------------|----------------------|--------------------------------------|
-| `:LitEval1`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C)` | Run section under the cursor and wait a bit or update the output from the already running section. |
-| `:LitEvalBreak1`| `lirtepl interrupt (N\|L:C)`       | Send Ctrl+C signal to the interpreter and get some feedback |
+| `:LitEval1`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C)` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
+| `:LitEvalBreak1`| `lirtepl interrupt (N\|L:C)`       | Send Ctrl+C signal to the interpreter and get a feedback |
 | `:LitEvalWait1` | `lirtepl eval-sections (N\|L:C)`   | Run or update section under the cursor and wait until the completion |
 | `:LitEvalAbove` | `lirtepl eval-sections 0..(N\|L:C)`| Run sections above and under the cursor and wait until the completion |
 | `:LitEvalBelow` | `lirtepl eval-sections (N\|L:C)..$`| Run sections below and under the cursor and wait until the completion |

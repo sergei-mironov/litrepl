@@ -248,6 +248,7 @@ let
         nnoremap <F2> :noh<CR>:w!<CR>
         inoremap <F2> <ESC>:noh<CR>:w!<CR>
         nnoremap <F5> :LitEval1<CR>
+        nnoremap <F6> :LitEvalLast1<CR>
 
         " VimTex
         let g:tex_flavor = 'latex'

@@ -61,7 +61,7 @@ fun! s:SessionEval(mode,timeout_initial,timeout_continue,p)
   let ft = &filetype
   let cur = getcharpos('.')
   let p = a:p
-  let g:litrepl_lastcur = cur
+  let g:litrepl_lastcur = a:p
   if a:mode == 'Here'
     let cmd = "eval-sections '".p[1].":".p[2]."'"
   elseif a:mode == 'Int'
