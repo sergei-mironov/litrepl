@@ -153,11 +153,12 @@ in the background interpreter which is tied to the UNIX pipes saved in the
 filesystem. Thus, the state of the interpreter is persistent between the
 executions and in fact even between the Vim edit sessions.
 
-There are no key bindings defined in the plugin, but users are free to
+There are no key bindings defined in the plugin, users are free to define their
+own. Consider the example below:
 
 ```vim
 nnoremap <F5> :LitEval1<CR>
-nnoremap <F6> :LitEvalWait1<CR>
+nnoremap <F6> :LitEvalBreak1<CR>
 ```
 
 ### Commands
