@@ -109,7 +109,8 @@ let
     vim-litrepl = (py : pkgs.vimUtils.buildVimPluginFrom2Nix {
       pname = "vim-litrepl";
       version = "9999";
-      src = ./vim;
+      src = builtins.filterSource (
+        path: type: !( baseNameOf path == "bin" && type == "directory" )) ./vim;
       postInstall = ''
         mkdir -pv $target/bin
         ln -s ${pkgs.socat}/bin/socat $target/bin/socat
