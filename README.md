@@ -124,10 +124,11 @@ Usage
 
 ### Basics
 
-LitREPL works with text documents organized in a Jupyter-Notebooks manner: main
-text separates the code blocks followed by the result blocks followed by the
-more text and so on. The markup is up to user, the plugin works with what it
-could find.
+LitREPL processes text documents written in the [literate
+programming](https://en.wikipedia.org/wiki/Literate_programming) style combined
+with the style of [Jupyter Notebooks](https://jupyter.org/). The text separates
+code citation blocks followed by the result blocks followed by more text and
+so on:
 
 ````markdown
 Some text text
@@ -148,13 +149,12 @@ More text text
 ````
 
 Vim command `:LitEval1` executes the code block under the cursor and pastes the
-result into the afterward one or many result sections. The execution taked place
-in the background interpreter which is tied to the UNIX pipes saved in the
-filesystem. Thus, the state of the interpreter is persistent between the
-executions and in fact even between the Vim edit sessions.
+result into the corresponding result section. The execution takes place in the
+background interpreter which is tied to the UNIX pipes saved in the filesystem.
+Thus, the state of the interpreter is persistent between the executions and in
+fact even between the Vim editing sessions.
 
-There are no key bindings defined in the plugin, users are free to define their
-own. Consider the example below:
+There are no key bindings defined in the plugin, users are to define their own:
 
 ```vim
 nnoremap <F5> :LitEval1<CR>
