@@ -148,7 +148,7 @@ def processAsync(lines:str)->RunResult:
     return RunResult(fname,pattern)
 
 @contextmanager
-def with_sigint(ipid:Optional[int]=None):
+def with_sigint(brk=False,ipid:Optional[int]=None):
   ipid_=int(open('_pid.txt').read()) if ipid is None else ipid
   def _handler(signum,frame):
     pdebug(f"Sending SIGINT to {ipid_}")
@@ -217,7 +217,6 @@ def processAdapt(lines:str,timeout:float=1.0)->Tuple[ReadResult,RunResult]:
   runr=processAsync(lines)
   rr=processCont(runr,timeout=timeout)
   return rr,runr
-
 
 PRESULT_RE=re.compile(r"(.*)\[BG:([a-zA-Z0-9_\/\.-]+)\]\n.*",
                       re.A|re.MULTILINE|re.DOTALL)

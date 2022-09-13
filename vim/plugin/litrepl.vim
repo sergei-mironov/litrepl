@@ -56,17 +56,22 @@ fun! s:Version()
 endfun
 command! -nargs=0 LitVersion call <SID>Version()
 
-fun! s:SessionEval(mode,timeout_initial,timeout_continue)
+let g:litrepl_lastcur = [0,0,0,0]
+fun! s:SessionEval(mode,timeout_initial,timeout_continue,p)
   let ft = &filetype
-  let p = getcharpos('.')
+  let cur = getcharpos('.')
+  let p = a:p
+  let g:litrepl_lastcur = cur
   if a:mode == 'Here'
-    let cmd = "'".p[1].":".p[2]."'"
+    let cmd = "eval-sections '".p[1].":".p[2]."'"
+  elseif a:mode == 'Int'
+    let cmd = "interrupt '".p[1].":".p[2]."'"
   elseif a:mode == 'Above'
-    let cmd = "'0..".p[1].":".p[2]."'"
+    let cmd = "eval-sections '0..".p[1].":".p[2]."'"
   elseif a:mode == 'Below'
-    let cmd = "'".p[1].":".p[2]."..$'"
+    let cmd = "eval-sections '".p[1].":".p[2]."..$'"
   elseif a:mode == 'All'
-    let cmd = "'0..$'"
+    let cmd = "eval-sections '0..$'"
   else
     echomsg "Invalid mode '".a:mode."'"
     return
@@ -81,9 +86,9 @@ fun! s:SessionEval(mode,timeout_initial,timeout_continue)
         \ ' --timeout-continue='.a:timeout_continue.
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.
-        \ ' eval-sections '.cmd.' 2>'.g:litrepl_errfile
+        \ ' '.cmd.' 2>'.g:litrepl_errfile
   let errcode = v:shell_error
-  call setcharpos('.',p)
+  call setcharpos('.',cur)
   if errcode != 0
     execute "u"
     call s:OpenErr(g:litrepl_errfile)
@@ -93,11 +98,13 @@ fun! s:SessionEval(mode,timeout_initial,timeout_continue)
     endif
   endif
 endfun
-command! -nargs=0 LitEval1 call <SID>SessionEval('Here',0.5,0.0)
-command! -nargs=0 LitEvalWait1 call <SID>SessionEval('Here',"inf","inf")
-command! -nargs=0 LitEvalAbove call <SID>SessionEval("Above","inf","inf")
-command! -nargs=0 LitEvalBelow call <SID>SessionEval("Below","inf","inf")
-command! -nargs=0 LitEvalAll call <SID>SessionEval("All","inf","inf")
+command! -nargs=0 LitEval1 call <SID>SessionEval('Here',0.5,0.0,getcharpos('.'))
+command! -nargs=0 LitEvalLast1 call <SID>SessionEval('Here',0.5,0.0,g:litrepl_lastcur)
+command! -nargs=0 LitEvalWait1 call <SID>SessionEval('Here',"inf","inf",getcharpos('.'))
+command! -nargs=0 LitEvalAbove call <SID>SessionEval("Above","inf","inf",getcharpos('.'))
+command! -nargs=0 LitEvalBelow call <SID>SessionEval("Below","inf","inf",getcharpos('.'))
+command! -nargs=0 LitEvalAll call <SID>SessionEval("All","inf","inf",getcharpos('.'))
+command! -nargs=0 LitEvalBreak1 call <SID>SessionEval('Int',1.0,1.0,getcharpos('.'))
 
 let g:litrepl_loaded = 1
 

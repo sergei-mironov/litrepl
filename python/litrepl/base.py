@@ -239,7 +239,7 @@ def unindent(col:int,lines:str)->str:
 def indent(col,lines:str)->str:
   return '\n'.join([' '*col+l for l in lines.split('\n')])
 
-def eval_section_(a, tree, symbols, secrec:SecRec)->None:
+def eval_section_(a, tree, secrec:SecRec, force_code:Optional[str]=None)->None:
   nsecs=secrec.nsecs
   if not running():
     start(a)
@@ -261,12 +261,13 @@ def eval_section_(a, tree, symbols, secrec:SecRec)->None:
       emarker=tree.children[2].children[0].value
       print(f"{bmarker}{t}{emarker}", end='')
       bm,em=tree.children[0].meta,tree.children[2].meta
-      t=unindent(bm.column-1,t)
-      ssrc[self.nsec]=t
+      code=unindent(bm.column-1,t)
+      ssrc[self.nsec]=code
       if self.nsec in nsecs:
         runr:Optional[RunResult]=secrec.pending.get(self.nsec)
         if runr is None:
-          rr,runr=processAdapt(t,a.timeout_initial)
+          rr,runr=processAdapt(code if force_code is None else force_code,
+                               a.timeout_initial)
         else:
           rr=processCont(runr,a.timeout_continue)
         sres[self.nsec]=rresultSave(rr.text,runr) if rr.timeout else rr.text

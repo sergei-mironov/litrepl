@@ -28,6 +28,8 @@ if __name__=='__main__':
   ec=sps.add_parser('eval-code',help='eval-code help')
   ec.add_argument('--timeout',type=int,default=None)
   ec.add_argument('--cont',type=str,default=None)
+  ips=sps.add_parser('interrupt',help='interrupt help')
+  ips.add_argument('locs',metavar='LOCS',default='*',help='locs help')
   a=ap.parse_args(sys.argv[1:])
 
   a.timeout_initial=float(a.timeout_initial)
@@ -47,15 +49,15 @@ if __name__=='__main__':
     print(t.pretty())
   elif a.command=='parse-print':
     sr0=SecRec(set(),{})
-    eval_section_(a,parse_(GRAMMARS[a.filetype]),SYMBOLS[a.filetype],sr0)
+    eval_section_(a,parse_(GRAMMARS[a.filetype]),sr0)
   elif a.command=='eval-section':
     t=parse_(GRAMMARS[a.filetype])
     nsecs=SecRec(set(solve_cpos(t,[(a.line,a.col)]).cursors.values()),{})
-    eval_section_(a,t,SYMBOLS[a.filetype],nsecs)
+    eval_section_(a,t,nsecs)
   elif a.command=='eval-sections':
     t=parse_(GRAMMARS[a.filetype])
     nsecs=solve_sloc(a.locs,t)
-    eval_section_(a,t,SYMBOLS[a.filetype],nsecs)
+    eval_section_(a,t,nsecs)
   elif a.command=='repl':
     system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
   elif a.command=='eval-code':
@@ -76,6 +78,12 @@ if __name__=='__main__':
         else:
           print(r.text)
           print(f'LITREPL:[{runr.fname}]')
+  elif a.command=='interrupt':
+    os.kill(int(open('_pid.txt').read()),SIGINT)
+    t=parse_(GRAMMARS[a.filetype])
+    sr=solve_sloc(a.locs,t)
+    sr.nsecs|=set(sr.pending.keys())
+    eval_section_(a,t,sr,force_code='\nraise KeyboardInterrupt()\n')
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)
