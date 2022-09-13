@@ -355,6 +355,7 @@ Documenting
 
 Code execution
 
+* https://www.ctan.org/pkg/pyluatex
 * https://github.com/dccsillag/magma-nvim
 * https://github.com/metakirby5/codi.vim
 * https://github.com/gpoore/pythontex
