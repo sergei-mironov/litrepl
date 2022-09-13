@@ -309,16 +309,23 @@ plugin to edit Latex documents on the fly.
 Technical details
 -----------------
 
-The following events should normally happen upon typing the `LitEval1` command:
+The following events should normally happen after users type the `:LitEval1`
+command:
 
-1. On the first run, the Python interpreter will be started in the
-   background. Its standard input and output will be redirected into UNIX
-   pipes in the current directory. Its PID will be saved into the
-   `./_pid.txt` file.
-2. The code from the Markdown code section under the cursor will be piped
-   through the interpreter.
-3. The result will be pasted into the Markdown section next after the current
-   one.
+1. On the first run, LitREPL starts the Python interpreter in the background.
+   Its standard input and output are redirected into UNIX pipes in the current
+   directory. The PID is saved into the `./_pid.txt` file.
+2. LitREPL runs the whole document through the express Markdown/Latex parser
+   which determines the start/stop positions of code and result sections. Cursor
+   position is also resolved and the code from the right code section goes to
+   the interpreter.
+3. The process which reads the interpreter's response is forked out of the main
+   LitREPL process. The output goes to the temporary file.
+4. If the interpreter reports the completion quickly, the output is pasted to
+   the resulting document immediately. Otherwise, the temporary results are
+   pasted.
+5. Re-evaluating sections with temporary results causes LitREPL to update
+   these results.
 
 Limitations
 -----------
