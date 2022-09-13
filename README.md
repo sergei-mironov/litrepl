@@ -66,7 +66,7 @@ manager of Vim:
 
 1. Install the Python package.
    ```sh
-   $ pip install lark setuptool_scm
+   $ pip install lark setuptools-scm
    $ pip install git+https://github.com/grwlf/litrepl.vim
    $ litrepl --version
    ```
