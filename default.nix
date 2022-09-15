@@ -255,18 +255,16 @@ let
         nnoremap <F5> :LitEval1<CR>
         nnoremap <F6> :LitEvalLast1<CR>
 
-        " VimTex
-        let g:tex_flavor = 'latex'
-        let g:vimtex_view_method = 'zathura'
-        let g:vimtex_quickfix_mode=0
-        let g:vimtex_format_enabled=1
-
         " vim-terminal-images
         let g:terminal_images_command = "${tupimage}/bin/tupimage"
         " let g:terminal_images_max_columns=5
         nnoremap gi <Esc>:TerminalImagesShowUnderCursor<CR>
 
-        " vimtex
+        " VimTex
+        let g:tex_flavor = 'latex'
+        let g:vimtex_view_method = 'zathura'
+        let g:vimtex_quickfix_mode=0
+        let g:vimtex_format_enabled=1
         let g:vimtex_compiler_latexmk = {
            \ 'build_dir' : "",
            \ 'callback' : 1,
@@ -282,6 +280,7 @@ let
            \   '-latexoption=-shell-escape',
            \ ],
            \}
+        let g:vimtex_syntax_packages = { 'litrepl' : { 'load' : 2 } }
 
 
         " vim-markdown
