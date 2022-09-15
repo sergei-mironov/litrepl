@@ -176,6 +176,11 @@ let
       '';
     });
 
+    vimtex-local = pkgs.vimPlugins.vimtex.overrideAttrs (old: {
+      version = "master";
+      src = ./modules/vimtex;
+    });
+
     vim-demo = (py : pkgs.vim_configurable.customize {
       name = "vim-demo";
 
@@ -183,7 +188,7 @@ let
         start = [
           vim-colorschemes
           (vim-litrepl py)
-          vimtex
+          vimtex-local
           vim-terminal-images
           vim-markdown
           nerdtree
@@ -312,34 +317,27 @@ let
       '';
     };
 
-    # demo-set = {
-    #   inherit grechanik-st vim-demo;
-    # };
-
     shell-demo = pkgs.mkShell {
       name = "shell-demo";
       buildInputs = [
         (vim-demo python)
         latexrun
         mytexlive
-        mypython
         grechanik-st
+        (litrepl python)
       ] ++ (with pkgs ; [
         peek
       ]);
-      # shellHook = ''
-      #   if test -f ./env.sh ; then
-      #     . ./env.sh
-      #     export QT_QPA_PLATFORM_PLUGIN_PATH=`echo ${pkgs.qt5.qtbase.bin}/lib/qt-*/plugins/platforms/`
-      #   fi
-      # '';
+      shellHook = with pkgs; ''
+        export PS1="\n[DEMO] \[\033[1;32m\][nix-shell:\w]\$\[\033[0m\] "
+      '';
     };
 
     shell = shell-dev;
 
     collection = rec {
       inherit shell shell-dev shell-demo vim-litrepl vim-test vim-demo
-      grechanik-st;
+      grechanik-st vimtex-local;
 
       litrepl = litrepl mypython;
     };

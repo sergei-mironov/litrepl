@@ -91,7 +91,7 @@ def start(a):
   elif 'python' in a.interpreter:
     start_(partial(fork_python,name=a.interpreter))
   elif a.interpreter=='auto':
-    if system('which ipython >/dev/null 2>&1')==0:
+    if system('python -m IPython -c \'print("OK")\' >/dev/null 2>&1')==0:
       start_(partial(fork_ipython,name='ipython'))
     else:
       start_(partial(fork_python,name='python'))
