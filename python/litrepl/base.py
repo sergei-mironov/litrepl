@@ -23,7 +23,7 @@ from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont)
 
 def fork_python(name):
-  assert name.startswith('python')
+  assert 'python' in name
   system((f'{name} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
           'os.open(\'_inp.pipe\',os.O_RDWR|os.O_SYNC);'
           'os.open(\'_out.pipe\',os.O_RDWR|os.O_SYNC);"'
@@ -36,9 +36,7 @@ def fork_python(name):
   exit(0)
 
 def fork_ipython(name):
-  assert name.startswith('ipython')
-  if name!='ipython':
-    pstderr(f"Warning: ignoring unusual IPython {name}, check the code")
+  assert 'ipython' in name
   open('/tmp/litrepl_ipython_config.py','w').write(
     'from IPython.terminal.prompts import Prompts, Token\n'
     'class EmptyPrompts(Prompts):\n'
@@ -54,7 +52,7 @@ def fork_ipython(name):
     'c.TerminalInteractiveShell.separate_in = ""\n'
     'c.TerminalInteractiveShell.separate_out = ""\n'
     )
-  system((f'python -um IPython --config=/tmp/litrepl_ipython_config.py --colors=NoColor --logfile=_ipython.log -c '
+  system((f'{name} -um IPython --config=/tmp/litrepl_ipython_config.py --colors=NoColor --logfile=_ipython.log -c '
           '"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
           'os.open(\'_inp.pipe\',os.O_RDWR|os.O_SYNC);'
           'os.open(\'_out.pipe\',os.O_RDWR|os.O_SYNC);"'
