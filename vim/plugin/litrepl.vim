@@ -16,10 +16,13 @@ endif
 if ! exists("g:litrepl_errfile")
   let g:litrepl_errfile = '/tmp/litrepl.err'
 endif
+if ! exists("g:litrepl_interpreter")
+  let g:litrepl_interpreter = 'auto'
+endif
 let $PATH=g:litrepl_bin.":".$PATH
 
 fun! s:SessionStart()
-  execute '!'.g:litrepl_exe.' --interpreter=auto start'
+  execute '!'.g:litrepl_exe.' --interpreter='.g:litrepl_interpreter.' start'
 endfun
 command! -nargs=0 LitStart call <SID>SessionStart()
 
@@ -81,7 +84,7 @@ fun! s:SessionEval(mode,timeout_initial,timeout_continue,p)
   execute "normal! x"
   " Execute the selected code blocks
   execute '%!'.g:litrepl_exe.
-        \ ' --interpreter=auto'.
+        \ ' --interpreter='.g:litrepl_interpreter.
         \ ' --timeout-initial='.a:timeout_initial.
         \ ' --timeout-continue='.a:timeout_continue.
         \ ' --debug='.g:litrepl_debug.
