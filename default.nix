@@ -50,15 +50,20 @@ let
       src = builtins.filterSource (
         path: type: !( baseNameOf path == "build" && type == "directory" ) &&
                     !( baseNameOf path == "dist" && type == "directory" ) &&
+                    !( baseNameOf path == ".git" && type == "directory" ) &&
                     !( ((builtins.match "_[^_]*" (baseNameOf path)) != null)) &&
                     !( ((builtins.match "README.md" (baseNameOf path)) != null)) &&
                     !( ((builtins.match "default.nix" (baseNameOf path)) != null)) &&
                     !( baseNameOf path == "result" )
         ) ./.;
       pythonPath = with py.pkgs; [
-        (lark-parser112 py.pkgs) tqdm setuptools_scm
+        (lark-parser112 py.pkgs) tqdm # setuptools_scm
       ];
-      nativeBuildInputs = with pkgs; [ git ];
+      nativeBuildInputs = with pkgs; [ git
+        # (writeShellScriptBin "git" ''
+        #   echo ${src.rev}
+        # '')
+      ];
       checkInputs = with pkgs; [
         socat which py.pkgs.ipython
       ];
@@ -334,11 +339,12 @@ let
 
     shell = shell-dev;
 
+
+    litrepl-mypython = litrepl mypython;
+
     collection = rec {
       inherit shell shell-dev shell-demo vim-litrepl vim-test vim-demo
-      grechanik-st vimtex-local;
-
-      litrepl = litrepl mypython;
+      grechanik-st vimtex-local litrepl-mypython;
     };
   };
 
