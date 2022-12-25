@@ -29,12 +29,12 @@
 
       packages = forAllSystems (system:
         let pkgs = nixpkgsFor.${system};
-        in (import ./default.nix) {inherit pkgs;});
+        in (import ./default.nix) {inherit pkgs; src = self;});
 
       devShells = forAllSystems (system:
         let pkgs = nixpkgsFor.${system};
         in {
-          default = ((import ./default.nix) {inherit pkgs;}).shell;
+          default = ((import ./default.nix) {inherit pkgs; src = self;}).shell;
         });
     };
 

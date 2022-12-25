@@ -1,5 +1,12 @@
 { pkgs ?  import <nixpkgs> {}
 , stdenv ? pkgs.stdenv
+, src ? builtins.filterSource (
+    path: type: !( baseNameOf path == "build" && type == "directory" ) &&
+                !( baseNameOf path == "dist" && type == "directory" ) &&
+                !( ((builtins.match "_[^_]*" (baseNameOf path)) != null)) &&
+                !( ((builtins.match "README.md" (baseNameOf path)) != null)) &&
+                !( ((builtins.match "default.nix" (baseNameOf path)) != null)) &&
+                !( baseNameOf path == "result")) ./.
 } :
 let
   local = rec {
@@ -21,7 +28,7 @@ let
       };
     }));
 
-    mypython = python.withPackages (
+    python-dev = python.withPackages (
       pp: let
         pylsp = pp.python-lsp-server;
         pylsp-mypy = pp.pylsp-mypy.override { python-lsp-server=pylsp; };
@@ -44,26 +51,26 @@ let
       ]
     );
 
+    python-release = pkgs.python3.withPackages (
+      pp: with pp; [
+        setuptools
+        setuptools_scm
+        pytest
+        wheel
+        (lark-parser112 pp)
+        numpy
+      ]
+    );
+
     litrepl = (py : py.pkgs.buildPythonApplication {
       pname = "litrepl";
       version = "9999";
-      src = builtins.filterSource (
-        path: type: !( baseNameOf path == "build" && type == "directory" ) &&
-                    !( baseNameOf path == "dist" && type == "directory" ) &&
-                    !( baseNameOf path == ".git" && type == "directory" ) &&
-                    !( ((builtins.match "_[^_]*" (baseNameOf path)) != null)) &&
-                    !( ((builtins.match "README.md" (baseNameOf path)) != null)) &&
-                    !( ((builtins.match "default.nix" (baseNameOf path)) != null)) &&
-                    !( baseNameOf path == "result" )
-        ) ./.;
+      inherit src;
+      LITREPL_VERSION = src.rev;
       pythonPath = with py.pkgs; [
         (lark-parser112 py.pkgs) tqdm # setuptools_scm
       ];
-      nativeBuildInputs = with pkgs; [ git
-        # (writeShellScriptBin "git" ''
-        #   echo ${src.rev}
-        # '')
-      ];
+      nativeBuildInputs = with pkgs; [ git ];
       checkInputs = with pkgs; [
         socat which py.pkgs.ipython
       ];
@@ -81,7 +88,7 @@ let
 
     mytexlive =
       (let
-        mytexlive = pkgs.texlive.override { python3=mypython; };
+        mytexlive = pkgs.texlive.override { python3=python-dev; };
       in
         mytexlive.combine {
           scheme-medium = mytexlive.scheme-medium;
@@ -100,7 +107,7 @@ let
         gnumake
         socat
         latexrun
-        mypython
+        python-dev
         mytexlive
       ];
       shellHook = with pkgs; ''
@@ -159,7 +166,7 @@ let
 
       vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
         start = [
-          vim-litrepl
+          vim-litrepl-release
         ];
       };
 
@@ -186,13 +193,13 @@ let
       src = ./modules/vimtex;
     });
 
-    vim-demo = (py : pkgs.vim_configurable.customize {
+    vim-demo = pkgs.vim_configurable.customize {
       name = "vim-demo";
 
       vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
         start = [
           vim-colorschemes
-          (vim-litrepl py)
+          vim-litrepl-release
           vimtex-local
           vim-terminal-images
           vim-markdown
@@ -295,7 +302,7 @@ let
         let g:vim_markdown_conceal = 0
         let g:vim_markdown_conceal_code_blocks = 0
       '';
-    });
+    };
 
     vim-plug = pkgs.vim_configurable.customize {
       name = "vim-plug";
@@ -324,11 +331,11 @@ let
     shell-demo = pkgs.mkShell {
       name = "shell-demo";
       buildInputs = [
-        (vim-demo python)
+        vim-demo
         latexrun
         mytexlive
         grechanik-st
-        (litrepl python)
+        (litrepl-release)
       ] ++ (with pkgs ; [
         peek
       ]);
@@ -340,11 +347,13 @@ let
     shell = shell-dev;
 
 
-    litrepl-mypython = litrepl mypython;
+    litrepl-dev = litrepl python-dev;
+    litrepl-release = litrepl python-release;
+    vim-litrepl-release = vim-litrepl python-release;
 
     collection = rec {
-      inherit shell shell-dev shell-demo vim-litrepl vim-test vim-demo
-      grechanik-st vimtex-local litrepl-mypython;
+      inherit shell shell-dev shell-demo vim-litrepl-release vim-test vim-demo
+      grechanik-st vimtex-local litrepl-release litrepl-dev;
     };
   };
 
