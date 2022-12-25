@@ -96,7 +96,7 @@ Develop
 
 1. `git clone --recursive https://github.com/grwlf/litrepl.vim; cd litrepl.vim`
 2. Enter the development environment
-   * (Nix/NixOS systems) `nix-shell`
+   * (Nix/NixOS systems) `nix develop`
    * (Other Linuxes) `. env.sh`
    Read the warnings and install missing packages if required. The
    environment script will add `./sh` and `./python` folders to the current
