@@ -9,9 +9,9 @@ let
 
     callPackage = pkgs.lib.callPackageWith collection;
 
-    python = pkgs.python38;
+    python = pkgs.python3;
 
-    lark-parser112 = pp : (pp.lark-parser.overrideAttrs (o : rec {
+    lark-parser112 = pp : (pp.lark.overrideAttrs (o : rec {
       version = "1.1.2";
       src = pkgs.fetchFromGitHub {
         owner = "lark-parser";
@@ -23,11 +23,11 @@ let
 
     mypython = python.withPackages (
       pp: let
-        pyls = pp.python-language-server.override { providers=["pycodestyle"]; };
-        pyls-mypy = pp.pyls-mypy.override { python-language-server=pyls; };
+        pylsp = pp.python-lsp-server;
+        pylsp-mypy = pp.pylsp-mypy.override { python-lsp-server=pylsp; };
       in with pp; [
-        pyls
-        pyls-mypy
+        pylsp
+        pylsp-mypy
         setuptools
         setuptools_scm
         ipython
