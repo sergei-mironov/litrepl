@@ -54,12 +54,7 @@ let
 
     python-release = pkgs.python3.withPackages (
       pp: with pp; [
-        setuptools
-        setuptools_scm
-        pytest
-        wheel
         (lark-parser112 pp)
-        numpy
       ]
     );
 
@@ -68,13 +63,15 @@ let
       version = lib.fileContents "${src}/version.txt";
       inherit src;
       LITREPL_REVISION = revision;
-      pythonPath = with py.pkgs; [
-        (lark-parser112 py.pkgs) tqdm
-      ];
-      nativeBuildInputs = with pkgs; [ git ];
+      propagatedBuildInputs = [(lark-parser112 py.pkgs) pkgs.socat];
       checkInputs = with pkgs; [
-        socat which py.pkgs.ipython
+        socat py.pkgs.ipython py.pkgs.tqdm
       ];
+      # We cut off the python PATH to allows users to use litrepl in custom
+      # Python environments
+      postFixup = ''
+        sed -i '/PATH.*python/d' $out/bin/litrepl
+      '';
       checkPhase = ''
         CWD=`pwd`
         LITREPL="python $CWD/python/bin/litrepl" \
