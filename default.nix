@@ -7,6 +7,7 @@
                 !( ((builtins.match "README.md" (baseNameOf path)) != null)) &&
                 !( ((builtins.match "default.nix" (baseNameOf path)) != null)) &&
                 !( baseNameOf path == "result")) ./.
+, revision ? null
 } :
 let
   local = rec {
@@ -64,10 +65,9 @@ let
 
     litrepl = (py : py.pkgs.buildPythonApplication {
       pname = "litrepl";
-      version = "9999";
+      version = lib.fileContents "${src}/version.txt";
       inherit src;
-      LITREPL_VERSION = src.rev;
-      # LITREPL_VERSION = if builtins.typeOf src == "string" then throw "No rev attr" else src.rev;
+      LITREPL_REVISION = revision;
       pythonPath = with py.pkgs; [
         (lark-parser112 py.pkgs) tqdm
       ];
@@ -83,7 +83,6 @@ let
         sh ${./sh/test.sh}
       '';
 
-      # TODO: re-enable
       doCheck = true;
     });
 

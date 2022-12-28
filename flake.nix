@@ -25,17 +25,16 @@
 
       # Nixpkgs instantiated for supported system types.
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
+
+      defaultsFor = system : (import ./default.nix) {
+        pkgs = nixpkgsFor.${system};
+        src = self;
+        revision = if self ? rev then self.rev else null;
+      };
     in {
+      packages = forAllSystems defaultsFor;
 
-      packages = forAllSystems (system:
-        let pkgs = nixpkgsFor.${system};
-        in (import ./default.nix) {inherit pkgs; src = self;});
-
-      devShells = forAllSystems (system:
-        let pkgs = nixpkgsFor.${system};
-        in {
-          default = ((import ./default.nix) {inherit pkgs; src = self;}).shell;
-        });
+      devShells = forAllSystems (system: (defaultsFor system).shell);
     };
 
 }
