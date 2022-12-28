@@ -67,8 +67,9 @@ let
       version = "9999";
       inherit src;
       LITREPL_VERSION = src.rev;
+      # LITREPL_VERSION = if builtins.typeOf src == "string" then throw "No rev attr" else src.rev;
       pythonPath = with py.pkgs; [
-        (lark-parser112 py.pkgs) tqdm # setuptools_scm
+        (lark-parser112 py.pkgs) tqdm
       ];
       nativeBuildInputs = with pkgs; [ git ];
       checkInputs = with pkgs; [
@@ -352,8 +353,8 @@ let
     vim-litrepl-release = vim-litrepl python-release;
 
     collection = rec {
-      inherit shell shell-dev shell-demo vim-litrepl-release vim-test vim-demo
-      grechanik-st vimtex-local litrepl-release litrepl-dev;
+      inherit pkgs shell shell-dev shell-demo vim-litrepl-release vim-test
+      vim-demo grechanik-st vimtex-local litrepl-release litrepl-dev;
     };
   };
 
