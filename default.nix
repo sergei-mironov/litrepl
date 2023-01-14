@@ -129,22 +129,24 @@ let
 
     vim-terminal-images = pkgs.vimUtils.buildVimPluginFrom2Nix rec {
       name = "vim-terminal-images";
+      # https://github.com/sergei-grechanik/vim-terminal-images/commits/master
       src = fetchFromGitHub {
         owner = "sergei-grechanik";
         repo = name;
-        rev = "ccb7bd161e3a87af3305bf781481f908d58ad0fa";
-        sha256 = "sha256:0f8j0dqhhrkys3yk0cwh1jhp3gswbl349fd9igzaab32h17lgni3";
+        rev = "8e617d76bbd2555d466c36a783835e63001135e9";
+        sha256 = "sha256-/CucaNiVkgvMuhtz8tULn3HGAgjq7d/cu4pIo0I6wlI=";
       };
     };
 
     tupimage = stdenv.mkDerivation {
       name = "tupimage";
 
+      # https://github.com/sergei-grechanik/tupimage/commits/main
       src = fetchFromGitHub {
         owner = "sergei-grechanik";
         repo = "tupimage";
-        rev = "b3c77d43cd4edd9c3bb570676059d259980b608b";
-        sha256 = "sha256:0v477gizq72pcghi65m9vb9cxzzkcxizc3cpz3dldfaqpancz7i4";
+        rev = "276d4ae07a79fe417f0419db8ece00ad3df5d911";
+        sha256 = "sha256-BQoclsLXFjMMjOQIXdGSjlSq+BrNRuz09LoBtmcEkRY=";
       };
 
       buildInputs = [ makeWrapper ];
@@ -173,11 +175,12 @@ let
 
     grechanik-st = pkgs.st.overrideDerivation (old:{
       pname = "grechanik-st";
+      # https://github.com/sergei-grechanik/st/commits/graphics
       src = fetchFromGitHub {
         owner = "sergei-grechanik";
         repo = "st";
-        rev = "e4c6d7145771319518e211112f702ec380b8bda0";
-        sha256 = "sha256:0f6w9hjdp1jh6s4bmpqbc210ph4vdk69fdwqy9zfy5d3fg1kc28n";
+        rev = "1ccdc65104d71776da1ed4c4c6246b35ece0ee1e";
+        sha256 = "sha256-2qNCWn0xLplq+vKvCSkp/hipSer/K4JRRCHyKj3NJFI=";
       };
       buildInputs = old.buildInputs ++ [pkgs.imlib2.dev];
       preBuild = ''
@@ -338,6 +341,7 @@ let
       ]);
       shellHook = with pkgs; ''
         export PS1="\n[DEMO] \[\033[1;32m\][nix-shell:\w]\$\[\033[0m\] "
+        exec ${grechanik-st}/bin/st
       '';
     };
 
