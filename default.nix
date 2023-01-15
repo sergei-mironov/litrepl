@@ -338,6 +338,7 @@ let
         (litrepl-release)
       ] ++ (with pkgs ; [
         peek
+        tmux
       ]);
       shellHook = with pkgs; ''
         export PS1="\n[DEMO] \[\033[1;32m\][nix-shell:\w]\$\[\033[0m\] "
