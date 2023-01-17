@@ -364,6 +364,7 @@ Code execution
 * https://github.com/hanschen/vim-ipython-cell
 * https://github.com/ivanov/vim-ipython
 * https://github.com/goerz/jupytext.vim
+  - https://github.com/mwouts/jupytext
 * https://github.com/ivanov/ipython-vimception
 
 Graphics
