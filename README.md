@@ -219,35 +219,39 @@ Formatting
 #### Syntax
 
 ````{.markdown}
-Executable sections are marked with the "python" tag. Putting the cursor on one
-of the typing the :LitEval1 command executes its code in a background Python
-interpreter.
+Executable sections are marked with either "python", "lpython" or "code" tags.
+Putting the cursor on one of the typing the :LitEval1 command executes its code
+in a background Python interpreter.
 
-```python
+``` python
 W='Hello, World!'
 print(W)
 ```
 
-Verbatim sections next to the executable section are the result sections. The
+Verbatim sections with "result" or "lresult" tags are the result sections . The
 output of the code from the executable section is pasted there. The original
 content of the section is replaced with the output of the last execution.
 
-```lresult
+``` result
 Hello, World!
 ```
 
-Markdown comment-like tags `lcode`/`lnocode`/`lresult`/`lnoresult` also mark
+Markdown comments taged with `code`/`nocode`/`result`/`noresult` also mark
 executable and result sections. This way we could hide the executable code from
 Markdown renderers and generate the markup they recognize.
 markup.
 
-<!--lcode
+<!-- code
 print("Hello, LitREPL")
-lnocode-->
+-->
 
-<!--lresult-->
+<!-- result -->
 Hello, LitREPL
-<!--lnoresult-->
+<!-- noresult -->
+
+<!-- result
+Hello, LitREPL
+-->
 ````
 
 #### Converting to Jupyter Notebook

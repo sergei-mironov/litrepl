@@ -108,16 +108,18 @@ def stop():
 
 @dataclass
 class SymbolsMarkdown:
-  icodebeginmarker="```[ ]*python|```[ ]*code|```[ ]*{[^}]*python[^}]*}"
+  icodebeginmarker="```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}"
   icodendmarker="```"
-  icodebeginmarker2="<!--lcode"
-  icodendmarker2="lnocode-->"
-  ocodebeginmarker="```[ ]*lresult|```[ ]*{[^}]*result[^}]*}"
+  icodebeginmarker2="<!--[ ]*l?code"
+  icodendmarker2="(l?(no)?code)?-->"
+  ocodebeginmarker="```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
   ocodendmarker="```"
-  verbeginmarker="<!--lresult-->"
-  verendmarker="<!--lnoresult-->"
-  combeginmarker=r"<!--lignore-->"
-  comendmarker=r"<!--lnoignore-->"
+  verbeginmarker="<!--[ ]*l?result[ ]*-->"
+  verendmarker="<!--[ ]*l?noresult[ ]*-->"
+  verbeginmarker2="<!--[ ]*l?result"
+  verendmarker2="(l?(no)?result)?-->"
+  combeginmarker=r"<!--[ ]*l?ignore[ ]*-->"
+  comendmarker=r"<!--[ ]*l?noignore[ ]*-->"
 
 symbols_md=SymbolsMarkdown()
 
@@ -131,6 +133,7 @@ icodesection.1 : icodebeginmarker ctext icodendmarker
                | icodebeginmarker2 ctext icodendmarker2
 ocodesection.1 : ocodebeginmarker ctext ocodendmarker
                | verbeginmarker ctext verendmarker
+               | verbeginmarker2 ctext verendmarker2
 icodebeginmarker : /{symbols_md.icodebeginmarker}/
 icodendmarker : /{symbols_md.icodendmarker}/
 icodebeginmarker2 : /{symbols_md.icodebeginmarker2}/
@@ -139,12 +142,14 @@ ocodebeginmarker : /{symbols_md.ocodebeginmarker}/
 ocodendmarker : /{symbols_md.ocodendmarker}/
 verbeginmarker : /{symbols_md.verbeginmarker}/
 verendmarker : /{symbols_md.verendmarker}/
+verbeginmarker2 : /{symbols_md.verbeginmarker2}/
+verendmarker2 : /{symbols_md.verendmarker2}/
 inlinebeginmarker : "`"
 inlinendmarker : "`"
 combeginmarker : /{symbols_md.combeginmarker}/
 comendmarker : /{symbols_md.comendmarker}/
-text : /(.(?!{symbols_md.ocodebeginmarker}|{symbols_md.icodebeginmarker}|{symbols_md.icodebeginmarker2}|{symbols_md.verbeginmarker}|{symbols_md.combeginmarker}))*./s
-ctext : /(.(?!{symbols_md.ocodendmarker}|{symbols_md.icodendmarker}|{symbols_md.icodendmarker2}|{symbols_md.verendmarker}))*./s
+text : /(.(?!{symbols_md.ocodebeginmarker}|{symbols_md.icodebeginmarker}|{symbols_md.icodebeginmarker2}|{symbols_md.verbeginmarker}|{symbols_md.verbeginmarker2}|{symbols_md.combeginmarker}))*./s
+ctext : /(.(?!{symbols_md.ocodendmarker}|{symbols_md.icodendmarker}|{symbols_md.icodendmarker2}|{symbols_md.verendmarker}|{symbols_md.verendmarker2}))*./s
 comtext : /(.(?!{symbols_md.comendmarker}))*./s
 """
 

@@ -139,15 +139,21 @@ PLACEHOLDER
 ```
 NOEVAL
 ```
-```lresult
+<!--result
 EVAL
-```
+-->
 <!--lcode
 print('FOO')
 lnocode-->
 ```lresult
 XX
 ```
+<!--code
+print('BAR')
+-->
+<!--result-->
+??
+<!--noresult-->
 EOF
 cat source.md | runlitrepl --filetype=markdown parse-print >out.md
 diff -u source.md out.md
@@ -188,15 +194,21 @@ PLACEHOLDER
 ```
 NOEVAL
 ```
-```lresult
+<!--result
 ABCDEF
-```
+-->
 <!--lcode
 print('FOO')
 lnocode-->
 ```lresult
 FOO
 ```
+<!--code
+print('BAR')
+-->
+<!--result-->
+BAR
+<!--noresult-->
 EOF
 runlitrepl stop
 )} #}}}
