@@ -29,7 +29,6 @@ _The project is unstable, please install packages by cloning this repository!_
 Contents
 --------
 
-
  1. [LitREPL.vim](#litrepl.vim)
  2. [Contents](#contents)
  3. [Install](#install)
@@ -43,14 +42,16 @@ Contents
     * [Batch processing](#batch-processing)
  6. [Formatting](#formatting)
     * [Markdown](#markdown)
-      * [Basic markup](#basic-markup)
+      * [Syntax](#syntax)
       * [Converting to Jupyter Notebook](#converting-to-jupyter-notebook)
     * [Latex](#latex)
+      * [Syntax](#syntax)
  7. [Gallery](#gallery)
  8. [Technical details](#technical-details)
  9. [Limitations](#limitations)
 10. [Related projects](#related-projects)
 11. [Third-party issues](#third-party-issues)
+
 
 Install
 -------
