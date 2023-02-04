@@ -108,11 +108,11 @@ def stop():
 
 @dataclass
 class SymbolsMarkdown:
-  icodebeginmarker="```python"
+  icodebeginmarker="```[ ]*python|```[ ]*code|```[ ]*{[^}]*python[^}]*}"
   icodendmarker="```"
   icodebeginmarker2="<!--lcode"
   icodendmarker2="lnocode-->"
-  ocodebeginmarker="```lresult"
+  ocodebeginmarker="```[ ]*lresult|```[ ]*{[^}]*result[^}]*}"
   ocodendmarker="```"
   verbeginmarker="<!--lresult-->"
   verendmarker="<!--lnoresult-->"

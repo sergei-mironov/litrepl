@@ -110,11 +110,17 @@ def hello(name):
 
 hello('World')
 ```
-TXT
 ```lresult
 PLACEHOLDER
 ```
-TXT
+Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+``` { .python }
+print('Wowowou')
+```
+``` { .lresult }
+PLACEHOLDER
+```
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
 * ```python
   print("ABC"+"DEF")
   ```
@@ -153,11 +159,17 @@ def hello(name):
 
 hello('World')
 ```
-TXT
 ```lresult
 Hello, World!
 ```
-TXT
+Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+``` { .python }
+print('Wowowou')
+```
+``` { .lresult }
+Wowowou
+```
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
 * ```python
   print("ABC"+"DEF")
   ```
