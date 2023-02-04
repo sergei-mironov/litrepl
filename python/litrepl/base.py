@@ -110,12 +110,12 @@ def stop():
 class SymbolsMarkdown:
   icodebeginmarker="```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}"
   icodendmarker="```"
-  icodebeginmarker2="<!--[ ]*l?code"
-  icodendmarker2="(l?(no)?code)?-->"
   ocodebeginmarker="```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
   ocodendmarker="```"
   verbeginmarker="<!--[ ]*l?result[ ]*-->"
   verendmarker="<!--[ ]*l?noresult[ ]*-->"
+  icodebeginmarker2="<!--[ ]*l?code"
+  icodendmarker2="(l?(no)?code)?-->"
   verbeginmarker2="<!--[ ]*l?result"
   verendmarker2="(l?(no)?result)?-->"
   combeginmarker=r"<!--[ ]*l?ignore[ ]*-->"
@@ -130,10 +130,10 @@ snippet : icodesection -> e_icodesection
         | comsection -> e_comsection
 comsection.2 : combeginmarker comtext comendmarker
 icodesection.1 : icodebeginmarker ctext icodendmarker
-               | icodebeginmarker2 ctext icodendmarker2
+               | icodebeginmarker2 ctext2 icodendmarker2
 ocodesection.1 : ocodebeginmarker ctext ocodendmarker
                | verbeginmarker ctext verendmarker
-               | verbeginmarker2 ctext verendmarker2
+               | verbeginmarker2 ctext2 verendmarker2
 icodebeginmarker : /{symbols_md.icodebeginmarker}/
 icodendmarker : /{symbols_md.icodendmarker}/
 icodebeginmarker2 : /{symbols_md.icodebeginmarker2}/
@@ -149,7 +149,8 @@ inlinendmarker : "`"
 combeginmarker : /{symbols_md.combeginmarker}/
 comendmarker : /{symbols_md.comendmarker}/
 text : /(.(?!{symbols_md.ocodebeginmarker}|{symbols_md.icodebeginmarker}|{symbols_md.icodebeginmarker2}|{symbols_md.verbeginmarker}|{symbols_md.verbeginmarker2}|{symbols_md.combeginmarker}))*./s
-ctext : /(.(?!{symbols_md.ocodendmarker}|{symbols_md.icodendmarker}|{symbols_md.icodendmarker2}|{symbols_md.verendmarker}|{symbols_md.verendmarker2}))*./s
+ctext : /(.(?!{symbols_md.ocodendmarker}|{symbols_md.icodendmarker}|{symbols_md.verendmarker}))*./s
+ctext2 : /(.(?!{symbols_md.icodendmarker2}|{symbols_md.verendmarker2}))*./s
 comtext : /(.(?!{symbols_md.comendmarker}))*./s
 """
 
