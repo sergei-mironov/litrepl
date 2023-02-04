@@ -40,15 +40,17 @@ Contents
     * [Basics](#basics)
     * [Commands](#commands)
     * [Arguments](#arguments)
-    * [Formatting](#formatting)
-      * [Markdown](#markdown)
-      * [Latex](#latex)
     * [Batch processing](#batch-processing)
- 6. [Gallery](#gallery)
- 7. [Technical details](#technical-details)
- 8. [Limitations](#limitations)
- 9. [Related projects](#related-projects)
-10. [Third-party issues](#third-party-issues)
+ 6. [Formatting](#formatting)
+    * [Markdown](#markdown)
+      * [Basic markup](#basic-markup)
+      * [Converting to Jupyter Notebook](#converting-to-jupyter-notebook)
+    * [Latex](#latex)
+ 7. [Gallery](#gallery)
+ 8. [Technical details](#technical-details)
+ 9. [Limitations](#limitations)
+10. [Related projects](#related-projects)
+11. [Third-party issues](#third-party-issues)
 
 Install
 -------
@@ -130,7 +132,7 @@ with the style of [Jupyter Notebooks](https://jupyter.org/). The text separates
 code citation blocks followed by the result blocks followed by more text and
 so on:
 
-````markdown
+````{.markdown}
 Some text text
 
 <!-- Code block 1 -->
@@ -199,12 +201,23 @@ Where
 * `I` is taken into account by the `start` command and by the first
   `eval-sections` only.
 
+### Batch processing
 
-### Formatting
+To evaluate the document run the following command
 
-#### Markdown
+```sh
+$ cat doc/example.md | \
+  litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
+```
 
-```` markdown
+Formatting
+----------
+
+### Markdown
+
+#### Basic markup
+
+````{.markdown}
 Executable sections are marked with the "python" tag. Putting the cursor on one
 of the typing the :LitEval1 command executes its code in a background Python
 interpreter.
@@ -235,7 +248,59 @@ Hello, LitREPL
 <!--lnoresult-->
 ````
 
-#### Latex
+#### Converting to Jupyter Notebook
+
+[Pandoc](https://pandoc.org) could be used to conver LitREPL-frinedly markdown
+documents to the Jupyter Notebook format. In order make it recognize code and
+result fields addtional efforts are required. Currently we aware of two options:
+1. Mark Jupyter sections with fenced-div markup as described in the [Pandoc
+   manual](https://pandoc.org/MANUAL.html#jupyter-notebooks)
+   1. Consider the following Markdown `file.md`
+      ````{.markdown}
+      :::::: {.cell .code execution_count=1}
+      ```python
+      print("hello XXXXXXX")
+      ```
+      ::: {.output .stream .stdout}
+      ```lresult
+      hello XXXXXXX
+      ```
+      :::
+      ::::::
+      ````
+   2. It is recognized by both `LitREPL` and `Pandoc`, so to convert it to the
+      Jupyter Notebook format one may run
+      ```sh
+      $ pandoc file.md -o file.ipynb
+      ```
+   3. Unfortunately, other renderers may interpret fenced divs directly,
+      bloating the output.
+
+2. Alternatively, native divs could be used.
+   1. Consider the following Markdown `file.md`
+      ````{.markdown}
+      <div class="cell code">
+      ```python
+      print("hello markdown")
+      ```
+
+      <div class="output stream stdout">
+      ```lresult
+      hello markdown
+      ```
+      </div>
+      </div>
+      ````
+   2. Again, both `LitREPL` and `Pandoc` would recognize the format, plus most
+      third-party renderers would ignore `div` tags. To convert this file to the
+      Jupyter Notebook format, call pandoc with
+      [native divs extension](https://pandoc.org/MANUAL.html#extension-native_divs)
+      enabled
+      ```sh
+      $ pandoc -f markdown+native_divs test.md -o test.ipynb
+      ```
+
+### Latex
 
 ````latex
 \documentclass{article}
@@ -286,15 +351,6 @@ prints its first argument and pastes the result in place of the second argument.
 
 \end{document}
 ````
-
-### Batch processing
-
-To evaluate the document run the following command
-
-```sh
-$ cat doc/example.md | \
-  litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
-```
 
 Gallery
 -------
