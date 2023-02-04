@@ -243,6 +243,10 @@ def unindent(col:int,lines:str)->str:
 def indent(col,lines:str)->str:
   return '\n'.join([' '*col+l for l in lines.split('\n')])
 
+def escape(text,pat):
+  epat=''.join(['\\'+c for c in pat])
+  return text.replace(pat,epat)
+
 def eval_section_(a, tree, secrec:SecRec, force_code:Optional[str]=None)->None:
   nsecs=secrec.nsecs
   if not running():
@@ -281,8 +285,9 @@ def eval_section_(a, tree, secrec:SecRec, force_code:Optional[str]=None)->None:
       bm,em=tree.children[0].meta,tree.children[2].meta
       if self.nsec in nsecs:
         assert self.nsec in sres
-        print(bmarker+"\n"+indent(bm.column-1,(f"{sres[self.nsec]}"+emarker)),
-              end='')
+        print(bmarker+"\n"+indent(bm.column-1,
+                                  escape(sres[self.nsec],emarker)+
+                                  emarker), end='')
       else:
         print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
     def inlinesection(self,tree):

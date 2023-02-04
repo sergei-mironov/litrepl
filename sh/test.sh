@@ -154,6 +154,12 @@ print('BAR')
 <!--result-->
 ??
 <!--noresult-->
+``` code
+print("-->")
+```
+<!-- result
+??
+-->
 EOF
 cat source.md | runlitrepl --filetype=markdown parse-print >out.md
 diff -u source.md out.md
@@ -209,6 +215,12 @@ print('BAR')
 <!--result-->
 BAR
 <!--noresult-->
+``` code
+print("-->")
+```
+<!-- result
+\-\-\>
+-->
 EOF
 runlitrepl stop
 )} #}}}
