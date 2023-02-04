@@ -228,8 +228,8 @@ W='Hello, World!'
 print(W)
 ```
 
-Verbatim sections next to the executable section are result sections. The output
-of the code from the executable section is pasted here. The original
+Verbatim sections next to the executable section are the result sections. The
+output of the code from the executable section is pasted there. The original
 content of the section is replaced with the output of the last execution.
 
 ```lresult
@@ -237,7 +237,8 @@ Hello, World!
 ```
 
 Markdown comment-like tags `lcode`/`lnocode`/`lresult`/`lnoresult` also mark
-executable and result sections.  This way we could produce the markdown document
+executable and result sections. This way we could hide the executable code from
+Markdown renderers and generate the markup they recognize.
 markup.
 
 <!--lcode
