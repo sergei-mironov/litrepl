@@ -100,8 +100,7 @@ EOF
 
 )} #}}}
 
-
-test_eval_md() {(
+test_eval_md() {( #{{{
 mktest "_test_eval_md"
 runlitrepl start
 cat >source.md <<"EOF"
@@ -188,9 +187,9 @@ FOO
 ```
 EOF
 runlitrepl stop
-)}
+)} #}}}
 
-test_eval_tex() {(
+test_eval_tex() {( #{{{
 mktest "_test_eval_tex"
 runlitrepl start
 cat >source.tex <<"EOF"
@@ -264,9 +263,9 @@ ZZZZZ
 \end{lresult}
 EOF
 runlitrepl stop
-)}
+)} #}}}
 
-test_eval_ignore() {(
+test_eval_ignore() {( #{{{
 mktest "_test_eval_ignore"
 runlitrepl start
 cat >source.tex <<"EOF"
@@ -293,9 +292,9 @@ tag='\\textbf{bold}'
 \linline{tag+tag}{\textbf{bold}\textbf{bold}}
 EOF
 runlitrepl stop
-)}
+)} #}}}
 
-test_tqdm() {(
+test_tqdm() {( #{{{
 mktest "_test_tqdm"
 runlitrepl start
 cat >source.md <<"EOF"
@@ -312,9 +311,9 @@ diff -u source.md out.md
 cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
 test "$(cat out.md | grep '100%' | wc -l)" = "1"
 runlitrepl stop
-)}
+)} #}}}
 
-test_async() {(
+test_async() {( #{{{
 mktest "_test_async"
 runlitrepl start
 cat >source.md <<"EOF"
@@ -332,7 +331,7 @@ cat source.md | runlitrepl --filetype=markdown --timeout-initial=1 eval-sections
 cat out1.md | runlitrepl --filetype=markdown --timeout-continue=1 eval-sections '0..$' >out2.md
 grep -q 'BG' out2.md
 runlitrepl stop
-)}
+)} #}}}
 
 if test -n "$LITREPL_TEST" || echo "$(basename $0)" | grep -q "test.sh" ; then
   set -e -x
