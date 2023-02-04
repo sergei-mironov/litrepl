@@ -34,7 +34,9 @@
     in {
       packages = forAllSystems defaultsFor;
 
-      devShells = forAllSystems (system: (defaultsFor system).shell);
+      devShells = forAllSystems (system: (let
+        outputs = defaultsFor system;
+      in outputs // { default = outputs.shell; }));
     };
 
 }
