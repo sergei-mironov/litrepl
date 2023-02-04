@@ -215,7 +215,7 @@ Formatting
 
 ### Markdown
 
-#### Basic markup
+#### Syntax
 
 ````{.markdown}
 Executable sections are marked with the "python" tag. Putting the cursor on one
@@ -301,6 +301,8 @@ result fields addtional efforts are required. Currently we aware of two options:
       ```
 
 ### Latex
+
+#### Syntax
 
 ````latex
 \documentclass{article}
