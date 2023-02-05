@@ -412,6 +412,10 @@ Limitations
 Related projects
 ----------------
 
+Format conversion
+
+* https://pandoc.org/
+
 Documenting
 
 * https://github.com/lervag/vimtex
@@ -439,5 +443,6 @@ Third-party issues
 ------------------
 
 * https://github.com/junegunn/vim-plug/issues/1010#issuecomment-1221614232
+* https://github.com/jgm/pandoc/issues/8598
 
 
