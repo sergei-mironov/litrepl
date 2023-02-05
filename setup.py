@@ -26,6 +26,7 @@ with open(join('python','litrepl','version.py'), 'w') as f:
 setup(
   name="litrepl",
   zip_safe=False, # https://mypy.readthedocs.io/en/latest/installed_packages.html
+  version=f"{ver}",
   package_dir={'':'python'},
   packages=find_packages(where='python'),
   install_requires=['lark'],
