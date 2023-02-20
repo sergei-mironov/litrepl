@@ -192,7 +192,7 @@ def process(lines:str)->str:
 
 def processCont(r:RunResult, timeout:float=1.0)->ReadResult:
   fdr=0
-  rr:Optional[RunResult]=None
+  rr:ReadResult
   try:
     with with_sigint():
       fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)

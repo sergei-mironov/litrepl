@@ -106,6 +106,7 @@ let
         latexrun
         python-dev
         mytexlive
+        pkgs.pandoc
       ];
       shellHook = with pkgs; ''
         if test -f ./env.sh ; then

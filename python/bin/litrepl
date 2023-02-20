@@ -13,22 +13,21 @@ if __name__=='__main__':
   ap.add_argument('--timeout-continue',type=str,metavar='SEC',default='inf')
   ap.add_argument('--debug',type=int,metavar='LEVEL',default=0)
   sps=ap.add_subparsers(help='command help', dest='command')
-  sps.add_parser('start',help='start help')
-  sps.add_parser('start-ipython',help='start help')
-  sps.add_parser('stop',help='stop help')
-  sps.add_parser('restart',help='restart help')
-  sps.add_parser('parse',help='parse help')
-  sps.add_parser('parse-print',help='parse-print help')
-  apes=sps.add_parser('eval-section',help='eval-section help')
+  sps.add_parser('start',help='Start the interpreter in the background')
+  sps.add_parser('stop',help='Stop the interpreter')
+  sps.add_parser('restart',help='Restart the interpreter')
+  sps.add_parser('parse',help='Parse the input file (diagnostics)')
+  sps.add_parser('parse-print',help='Parse and print the input file (diagnostics, no changes are expected)')
+  apes=sps.add_parser('eval-section',help='Evaluate the section under the cursor')
   apes.add_argument('--line',type=int,default=None)
   apes.add_argument('--col',type=int,default=None)
-  eps=sps.add_parser('eval-sections',help='eval-sections help')
+  eps=sps.add_parser('eval-sections',help='Evaluate one or more sections by location')
   eps.add_argument('locs',metavar='LOCS',default='*',help='locs help')
-  repl=sps.add_parser('repl',help='repl help')
-  ec=sps.add_parser('eval-code',help='eval-code help')
-  ec.add_argument('--timeout',type=int,default=None)
-  ec.add_argument('--cont',type=str,default=None)
-  ips=sps.add_parser('interrupt',help='interrupt help')
+  repl=sps.add_parser('repl',help='Connect interactive shell to the terminal')
+  # ec=sps.add_parser('eval-code',help='eval-code help')
+  # ec.add_argument('--timeout',type=int,default=None)
+  # ec.add_argument('--cont',type=str,default=None)
+  ips=sps.add_parser('interrupt',help='Raise KeyboardInterrupt exception to the interpreter')
   ips.add_argument('locs',metavar='LOCS',default='*',help='locs help')
   a=ap.parse_args(sys.argv[1:])
 
@@ -60,24 +59,24 @@ if __name__=='__main__':
     eval_section_(a,t,nsecs)
   elif a.command=='repl':
     system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
-  elif a.command=='eval-code':
-    if a.cont is not None:
-      r=processCont(RunResult(a.cont,PATTERN),a.timeout)
-      if not r.timeout:
-        print(r.text)
-      else:
-        print(r.text)
-        print(f'LITREPL:[{a.cont}]')
-    else:
-      if a.timeout is None:
-        print(process(sys.stdin.read()))
-      else:
-        r,runr=processAdapt(sys.stdin.read(),a.timeout)
-        if not r.timeout:
-          print(r.text)
-        else:
-          print(r.text)
-          print(f'LITREPL:[{runr.fname}]')
+  # elif a.command=='eval-code':
+  #   if a.cont is not None:
+  #     r=processCont(RunResult(a.cont,PATTERN),a.timeout)
+  #     if not r.timeout:
+  #       print(r.text)
+  #     else:
+  #       print(r.text)
+  #       print(f'LITREPL:[{a.cont}]')
+  #   else:
+  #     if a.timeout is None:
+  #       print(process(sys.stdin.read()))
+  #     else:
+  #       r,runr=processAdapt(sys.stdin.read(),a.timeout)
+  #       if not r.timeout:
+  #         print(r.text)
+  #       else:
+  #         print(r.text)
+  #         print(f'LITREPL:[{runr.fname}]')
   elif a.command=='interrupt':
     os.kill(int(open('_pid.txt').read()),SIGINT)
     t=parse_(GRAMMARS[a.filetype])
