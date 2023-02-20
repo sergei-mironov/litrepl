@@ -82,7 +82,7 @@ if __name__=='__main__':
     t=parse_(GRAMMARS[a.filetype])
     sr=solve_sloc(a.locs,t)
     sr.nsecs|=set(sr.pending.keys())
-    eval_section_(a,t,sr,force_code='\nraise KeyboardInterrupt()\n')
+    eval_section_(a,t,sr)
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)

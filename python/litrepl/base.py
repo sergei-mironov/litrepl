@@ -247,7 +247,8 @@ def escape(text,pat):
   epat=''.join(['\\'+c for c in pat])
   return text.replace(pat,epat)
 
-def eval_section_(a, tree, secrec:SecRec, force_code:Optional[str]=None)->None:
+def eval_section_(a, tree, secrec:SecRec)->None:
+  """ Evaluate sections as specify by the `secrec` request.  """
   nsecs=secrec.nsecs
   if not running():
     start(a)
@@ -274,8 +275,7 @@ def eval_section_(a, tree, secrec:SecRec, force_code:Optional[str]=None)->None:
       if self.nsec in nsecs:
         runr:Optional[RunResult]=secrec.pending.get(self.nsec)
         if runr is None:
-          rr,runr=processAdapt(code if force_code is None else force_code,
-                               a.timeout_initial)
+          rr,runr=processAdapt(code,a.timeout_initial)
         else:
           rr=processCont(runr,a.timeout_continue)
         sres[self.nsec]=rresultSave(rr.text,runr) if rr.timeout else rr.text

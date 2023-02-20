@@ -31,6 +31,7 @@ def pdebug(*args,**kwargs):
     print(*args, file=sys.stderr, **kwargs, flush=True)
 
 def mkre(prompt:str):
+  """ Create the regexp that matches everything ending with a `prompt` """
   return re.compile(f"(.*)(?={prompt})|{prompt}".encode('utf-8'),
                     re.A|re.MULTILINE|re.DOTALL)
 
@@ -76,29 +77,33 @@ def readout(fdr,
       acc=m.group(1)
       r=b''
     if r==b'':
-      return acc.decode('utf-8')
-  return "LitREPL timeout waiting the interpreter response"
+      try:
+        return acc.decode('utf-8')
+      except UnicodeDecodeError:
+        return "<LitREPL: Non-unicode output>"
+  return "<LitREPL: timeout waiting the interpreter response>"
 
-def readout_asis(fdr, fo, prompt, timeout:Optional[int]=None)->None:
+def readout_asis(fdr:int, fo:int, prompt, timeout:Optional[int]=None)->None:
+  """ Read everything from FD `fdr` until `prompt` is found. Write everything to
+  FD `fo`. """
   acc:bytes=b''
   while select([fdr],[],[],timeout)[0] != []:
     r=os.read(fdr, 1024)
     if r==b'':
       return
-    # pstderr(f'PIPING {r.decode("utf-8")}')
-    os.write(fo,r)
+    w=os.write(fo,r)
+    assert w==len(r), "LitREPL failed to copy input stream"
     acc+=r # TODO: don't store everything
     m=re_match(prompt,acc)
     if m:
       return
-  os.write(fo,"LitREPL timeout waiting for the interpreter response\n".encode())
+  os.write(fo,"<LitREPL: timeout waiting for the interpreter response>\n".encode())
 
 PATTERN='3256748426384\n'
 
 def interact(fdr, fdw, text:str, fo:int, pattern)->None:
-  _m=merge_rn2
   os.write(fdw,pattern.encode())
-  x=readout(fdr,prompt=mkre(pattern),merge=_m)
+  x=readout(fdr,prompt=mkre(pattern),merge=merge_rn2)
   os.write(fdw,text.encode())
   os.write(fdw,'\n'.encode())
   os.write(fdw,pattern.encode())
@@ -109,6 +114,7 @@ def pusererror(fname,err)->None:
     f.write(err)
 
 def processAsync(lines:str)->RunResult:
+  """ Send `lines` to the interpreter and fork the response reader """
   codehash=abs(hash(lines))
   fname=f"/tmp/litrepl-eval-{codehash}.txt"
   pattern=PATTERN
@@ -119,6 +125,7 @@ def processAsync(lines:str)->RunResult:
   sys.stdout.flush(); sys.stderr.flush() # FIXME: crude
   pid=os.fork()
   if pid==0:
+    # Child
     fdr=0; fdw=0
     try:
       fdw=os.open('_inp.pipe', os.O_WRONLY|os.O_SYNC)
@@ -143,6 +150,8 @@ def processAsync(lines:str)->RunResult:
         os.close(fdw)
     exit(0)
   else:
+    # Parent
+    pdebug(f"Forked reader {pid}")
     fcntl.fcntl(fo,fcntl.LOCK_UN)
     os.close(fo)
     return RunResult(fname,pattern)
@@ -177,6 +186,7 @@ def with_alarm(timeout:float):
 
 
 def process(lines:str)->str:
+  """ Evaluate `lines` synchronously. """
   r=processAsync(lines)
   fdr=0
   try:
@@ -214,6 +224,9 @@ def processCont(r:RunResult, timeout:float=1.0)->ReadResult:
       os.close(fdr)
 
 def processAdapt(lines:str,timeout:float=1.0)->Tuple[ReadResult,RunResult]:
+  """ Push `lines` to the interpreter and wait for `timeout` seconds for
+  immediate answer. In case of delay, return intermediate answer with
+  the continuation."""
   runr=processAsync(lines)
   rr=processCont(runr,timeout=timeout)
   return rr,runr
