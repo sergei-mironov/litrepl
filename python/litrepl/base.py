@@ -17,7 +17,7 @@ from dataclasses import dataclass, astuple
 from functools import partial
 from argparse import ArgumentParser
 from collections import defaultdict
-from os import makedirs,getuid,getcwd
+from os import makedirs, getuid, getcwd
 from tempfile import gettempdir
 from hashlib import sha256
 
@@ -25,10 +25,18 @@ from .types import PrepInfo, RunResult, NSec, FileName, SecRec, FileNames
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont)
 
+DEBUG:bool=False
+
+def pdebug(*args,**kwargs):
+  if DEBUG:
+    print(*args, file=sys.stderr, **kwargs, flush=True)
+
 def pipenames(a)->FileNames:
   """ Return file names of in.pipe, out.pip and log """
   workdir=a.workdir if a.workdir is not None else \
-    join(gettempdir(),"litrepl_"+sha256(getcwd().encode('utf-8')).hexdigest()[:6])
+    join(gettempdir(),f"litrepl_{getuid()}_"+
+         sha256(getcwd().encode('utf-8')).hexdigest()[:6])
+  pdebug(f"Workdir: {workdir}")
   makedirs(workdir, exist_ok=True)
   return FileNames(workdir, join(workdir,"_in.pipe"), join(workdir,"_out.pipt"),
                    join(workdir,"_pid.txt"))

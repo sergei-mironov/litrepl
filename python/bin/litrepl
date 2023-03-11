@@ -34,6 +34,7 @@ if __name__=='__main__':
 
   if a.debug>0:
     litrepl.eval.DEBUG=True
+    litrepl.base.DEBUG=True
 
   if a.command=='start':
     start(a)
