@@ -10,8 +10,8 @@ providing the text-frinedly code editing and execution workflow.
 **Features**
 
 * Lightweight: Runs on a system where only a few Python packages are installed.
-* Supported document formats: Markdown [[MD]](https://raw.githubusercontent.com/grwlf/litrepl.vim/main/doc/example.md), Latex
-  [[TEX]]()[[PDF]](./doc/example.pdf)
+* Supported document formats: Markdown [[MD]](./doc/example.md), Latex
+  [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf)
 * Supported interpreters: Python, IPython
 * Supported editor: Vim
 * Nix/NixOS - friendly
@@ -30,9 +30,11 @@ _The project is unstable, please install packages by cloning this repository!_
 Contents
 --------
 
+
 1. [Contents](#contents)
-2. [Install](#install)
+2. [Installation](#installation)
    * [Pip and Plug](#pip-and-plug)
+   * [Nix](#nix)
 3. [Usage](#usage)
    * [Basics](#basics)
    * [Vim and Command line](#vim-and-command-line)
@@ -44,8 +46,8 @@ Contents
 8. [Related projects](#related-projects)
 9. [Third-party issues](#third-party-issues)
 
-Install
--------
+Installation
+------------
 
 To run the setup, one needs to install a Python package and a Vim plugin. The
 Vim plugin relies on the `litrepl` script and on some third-party UNIX tools
@@ -60,7 +62,6 @@ manager of Vim:
 
 1. Install the Python package.
    ```sh
-   $ pip install --user lark
    $ pip install --user git+https://github.com/grwlf/litrepl.vim
    $ litrepl --version
    ```
@@ -69,6 +70,10 @@ manager of Vim:
    ```vim
    Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
    ```
+
+### Nix
+
+Consider following the [Development guide](./doc/develop.md)
 
 Usage
 -----
@@ -164,10 +169,10 @@ nnoremap <F6> :LitEvalBreak1<CR>
 * `I` is taken into account by the `start` command or by the first call to
   `eval-sections`.
 
-Develop
--------
+Development
+-----------
 
-See the [development guide](./doc/develop.md)
+See the [Development guide](./doc/develop.md)
 
 Gallery
 -------
