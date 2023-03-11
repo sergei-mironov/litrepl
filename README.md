@@ -129,12 +129,12 @@ Most of the commands could be sent from the command line or from Vim directly.
 |-----------------|----------------------|--------------------------------------|
 | `:LitStart`     | `litepl start`       | Start the interpreter     |
 | `:LitStop`      | `litepl stop`        | Stop the interpreter      |
-| `:LitStatus`    | `cat file | litepl status`     | Print the daemon status |
-| `:LitEval1`     | `cat file | lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C)` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
-| `:LitEvalBreak1`| `cat file | lirtepl interrupt (N\|L:C)`       | Send Ctrl+C signal to the interpreter and get a feedback |
-| `:LitEvalWait1` | `cat file | lirtepl eval-sections (N\|L:C)`   | Run or update section under the cursor and wait until the completion |
-| `:LitEvalAbove` | `cat file | lirtepl eval-sections 0..(N\|L:C)`| Run sections above and under the cursor and wait until the completion |
-| `:LitEvalBelow` | `cat file | lirtepl eval-sections (N\|L:C)..$`| Run sections below and under the cursor and wait until the completion |
+| `:LitStatus`    | `cat file \| litepl status`     | Print the daemon status |
+| `:LitEval1`     | `cat file \| lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C)` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
+| `:LitEvalBreak1`| `cat file \| lirtepl interrupt (N\|L:C)`       | Send Ctrl+C signal to the interpreter and get a feedback |
+| `:LitEvalWait1` | `cat file \| lirtepl eval-sections (N\|L:C)`   | Run or update section under the cursor and wait until the completion |
+| `:LitEvalAbove` | `cat file \| lirtepl eval-sections 0..(N\|L:C)`| Run sections above and under the cursor and wait until the completion |
+| `:LitEvalBelow` | `cat file \| lirtepl eval-sections (N\|L:C)..$`| Run sections below and under the cursor and wait until the completion |
 | `:LitRestart`   | `litrepl restart`    | Restart the interpreter   |
 | `:LitRepl`      | `lirtepl repl`       | Open the terminal to the interpreter |
 | `:LitOpenErr`   | N/A                  | Open the stderr window    |
