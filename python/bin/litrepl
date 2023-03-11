@@ -3,6 +3,8 @@
 import litrepl
 from litrepl import *
 from litrepl import __version__
+from os import chdir
+from subprocess import check_output, DEVNULL, CalledProcessError
 
 if __name__=='__main__':
   ap=ArgumentParser(prog='litrepl.py')
@@ -12,13 +14,15 @@ if __name__=='__main__':
   ap.add_argument('--timeout-initial',type=str,metavar='SEC',default='inf')
   ap.add_argument('--timeout-continue',type=str,metavar='SEC',default='inf')
   ap.add_argument('-d','--debug',type=int,metavar='LEVEL',default=0)
-  ap.add_argument('--workdir',type=str,metavar='DIR',default=None)
+  ap.add_argument('--auxdir',type=str,metavar='DIR',default=None,help="Directory to store auxilary files")
+  ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,help="Directory to run from")
   sps=ap.add_subparsers(help='command help', dest='command')
   sps.add_parser('start',help='Start the interpreter in the background')
   sps.add_parser('stop',help='Stop the interpreter')
   sps.add_parser('restart',help='Restart the interpreter')
   sps.add_parser('parse',help='Parse the input file (diagnostics)')
   sps.add_parser('parse-print',help='Parse and print the input file (diagnostics, no changes are expected)')
+  sps.add_parser('status',help='Print the status of the worker')
   apes=sps.add_parser('eval-section',help='Evaluate the section under the cursor')
   apes.add_argument('--line',type=int,default=None)
   apes.add_argument('--col',type=int,default=None)
@@ -36,12 +40,15 @@ if __name__=='__main__':
     litrepl.eval.DEBUG=True
     litrepl.base.DEBUG=True
 
+  if a.workdir:
+    chdir(a.workdir)
+
   if a.command=='start':
     start(a)
   elif a.command=='stop':
     stop(a)
   elif a.command=='restart':
-    start(a); stop(a)
+    stop(a); start(a)
   elif a.command=='parse':
     t=parse_(GRAMMARS[a.filetype])
     print(t.pretty())
@@ -64,6 +71,28 @@ if __name__=='__main__':
     sr=solve_sloc(a.locs,t)
     sr.nsecs|=set(sr.pending.keys())
     eval_section_(a,t,sr)
+  elif a.command=='status':
+    auxd,inp,outp,pidf=astuple(pipenames(a))
+    print(f"workdir: {getcwd()}")
+    print(f"auxdir: {auxd}")
+    try:
+      pid=open(pidf).read().strip()
+      print(f"interpreter pid: {pid}")
+    except Exception:
+      print(f"interpreter pid: -")
+    t=parse_(GRAMMARS[a.filetype])
+    sr=solve_sloc('0..$',t)
+    for nsec,pend in sr.pending.items():
+      fname=pend.fname
+      print(f"pending section {nsec} buffer: {fname}")
+      try:
+        for bline in check_output(['lsof','-t',fname], stderr=DEVNULL).split(b'\n'):
+          line=bline.decode('utf-8')
+          if len(line)==0:
+            continue
+          print(f"pending section {nsec} reader: {line}")
+      except CalledProcessError:
+        print(f"pending section {nsec} reader: -")
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)

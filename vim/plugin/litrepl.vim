@@ -21,28 +21,32 @@ if ! exists("g:litrepl_interpreter")
 endif
 let $PATH=g:litrepl_bin.":".$PATH
 
+fun! s:SessionCmd()
+  return g:litrepl_exe.' --workdir='.expand('%:p:h')
+endfun
+
 fun! s:SessionStart()
-  execute '!'.g:litrepl_exe.' --interpreter='.g:litrepl_interpreter.' start'
+  execute '!'.<SID>SessionCmd().' --interpreter='.g:litrepl_interpreter.' start'
 endfun
 command! -nargs=0 LitStart call <SID>SessionStart()
 
 fun! s:SessionStop()
-  execute '!'.g:litrepl_exe.' stop'
+  execute '!'.<SID>SessionCmd().' stop'
 endfun
 command! -nargs=0 LitStop call <SID>SessionStop()
 
 fun! s:SessionRestart()
-  execute '!'.g:litrepl_exe.' restart'
+  execute '!'.<SID>SessionCmd().' restart'
 endfun
 command! -nargs=0 LitRestart call <SID>SessionRestart()
 
 fun! s:SessionParsePrint()
-  execute '%!'.g:litrepl_exe.' parse-print'
+  execute '%!'.<SID>SessionCmd().' parse-print'
 endfun
 command! -nargs=0 LitPP call <SID>SessionParsePrint()
 
 fun! s:SessionRepl()
-  execute "terminal ".g:litrepl_exe." repl"
+  execute "terminal ".<SID>SessionCmd()." repl"
 endfun
 command! -nargs=0 LitRepl call <SID>SessionRepl()
 
@@ -55,7 +59,7 @@ endfun
 command! -nargs=0 LitOpenErr call <SID>OpenErr(g:litrepl_errfile)
 
 fun! s:Version()
-  echomsg systemlist(g:litrepl_exe." --version")[0]
+  echomsg systemlist(<SID>SessionCmd()." --version")[0]
 endfun
 command! -nargs=0 LitVersion call <SID>Version()
 
@@ -83,7 +87,7 @@ fun! s:SessionEval(mode,timeout_initial,timeout_continue,p)
   execute "normal! I "
   execute "normal! x"
   " Execute the selected code blocks
-  execute '%!'.g:litrepl_exe.
+  execute '%!'.<SID>SessionCmd().
         \ ' --interpreter='.g:litrepl_interpreter.
         \ ' --timeout-initial='.a:timeout_initial.
         \ ' --timeout-continue='.a:timeout_continue.
@@ -108,6 +112,23 @@ command! -nargs=0 LitEvalAbove call <SID>SessionEval("Above","inf","inf",getchar
 command! -nargs=0 LitEvalBelow call <SID>SessionEval("Below","inf","inf",getcharpos('.'))
 command! -nargs=0 LitEvalAll call <SID>SessionEval("All","inf","inf",getcharpos('.'))
 command! -nargs=0 LitEvalBreak1 call <SID>SessionEval('Int',1.0,1.0,getcharpos('.'))
+
+fun! s:SessionStatus()
+  let ft = &filetype
+  let cur = getcharpos('.')
+  " A hack to remember the undo position
+  execute "normal! I "
+  execute "normal! x"
+  " Execute the status command
+  silent execute '%!'.<SID>SessionCmd().
+        \ ' --debug='.g:litrepl_debug.
+        \ ' --filetype='.ft.
+        \ ' status 2>'.g:litrepl_errfile.' >&2'
+  call setcharpos('.',cur)
+  execute "u"
+  call s:OpenErr(g:litrepl_errfile)
+endfun
+command! -nargs=0 LitStatus call <SID>SessionStatus()
 
 let g:litrepl_loaded = 1
 

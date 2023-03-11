@@ -33,13 +33,13 @@ def pdebug(*args,**kwargs):
 
 def pipenames(a)->FileNames:
   """ Return file names of in.pipe, out.pip and log """
-  workdir=a.workdir if a.workdir is not None else \
+  auxdir=a.auxdir if a.auxdir is not None else \
     join(gettempdir(),f"litrepl_{getuid()}_"+
          sha256(getcwd().encode('utf-8')).hexdigest()[:6])
-  pdebug(f"Workdir: {workdir}")
-  makedirs(workdir, exist_ok=True)
-  return FileNames(workdir, join(workdir,"_in.pipe"), join(workdir,"_out.pipt"),
-                   join(workdir,"_pid.txt"))
+  pdebug(f"Auxdir: {auxdir}")
+  makedirs(auxdir, exist_ok=True)
+  return FileNames(auxdir, join(auxdir,"_in.pipe"), join(auxdir,"_out.pipe"),
+                   join(auxdir,"_pid.txt"))
 
 def fork_python(a, name):
   assert 'python' in name
@@ -90,7 +90,7 @@ def fork_ipython(a, name):
 
 def start_(a, fork_handler:Callable[...,None])->None:
   """ Starts the background Python interpreter. Kill an existing interpreter if
-  any. Creates files `_inp.pipe`, `_out.pipt`, `_pid.txt`."""
+  any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`."""
   wd,inp,outp,pid=astuple(pipenames(a))
   if isfile(pid):
     system(f'kill "$(cat {pid})" >/dev/null 2>&1')
