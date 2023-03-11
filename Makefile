@@ -1,7 +1,7 @@
 .DEFAULT_GOAL = all
 VERSION = $(shell python3 setup.py --version)
 WHEEL = dist/litrepl-$(VERSION)-py3-none-any.whl
-PY = $(shell find -name '*\.py' | grep -v version.py)
+PY = $(shell find -name '*\.py' | grep -v semver.py | grep -v revision.py)
 TESTS = ./sh/test.sh
 
 .stamp_test: $(PY) $(TESTS) Makefile
