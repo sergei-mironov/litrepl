@@ -1,8 +1,9 @@
 LitREPL.vim
 ===========
 
-**LitREPL** is a macro processing Python library and a Vim plugin for Literate
-programming and code execution right from the editor.
+**LitREPL** is a command-line tool and a Vim plugin for Python [literate
+programming](https://en.wikipedia.org/wiki/Literate_programming), aimed at
+providing the text-frinedly code editing and execution workflow.
 
 <img src="https://github.com/grwlf/litrepl-media/blob/main/demo.gif?raw=true" width="400"/>
 
@@ -63,8 +64,8 @@ manager of Vim:
 
 1. Install the Python package.
    ```sh
-   $ pip install lark setuptools-scm
-   $ pip install git+https://github.com/grwlf/litrepl.vim
+   $ pip install --user lark
+   $ pip install --user git+https://github.com/grwlf/litrepl.vim
    $ litrepl --version
    ```
 2. Install the Vim plugin by adding the following line between the
@@ -78,11 +79,11 @@ Usage
 
 ### Basics
 
-LitREPL processes text documents written in the [literate
-programming](https://en.wikipedia.org/wiki/Literate_programming) style combined
-with the style of [Jupyter Notebooks](https://jupyter.org/). The text separates
-code citation blocks followed by the result blocks followed by more text and
-so on:
+LitREPL is a command-line utility and a Vim plugin for processing text documents
+containing Python code blocks in the style of [Jupyter
+Notebooks](https://jupyter.org/). Note, that LitREPL does not depend on Jupyter
+web functionality in any direct way. The whole editing workflow is supposed to
+run in text editor.
 
 ````{.markdown}
 Some text text
@@ -109,8 +110,8 @@ Thus, the state of the interpreter is persistent between the executions and in
 fact even between the Vim editing sessions.
 
 
-See the [formatting guide](./doc/formatting.md) for more formatting
-instructions.
+See the [Markdown](./doc/formatting.md#markdown) and
+[LaTeX](./doc/formatting.md#latex) formatting guides for more instructions.
 
 ### Vim
 
@@ -123,18 +124,16 @@ nnoremap <F6> :LitEvalBreak1<CR>
 
 ### Commands
 
-Most of the commands could be sent from the command line or from Vim directly.
-
 | Vim             | Command line         | Description                          |
 |-----------------|----------------------|--------------------------------------|
 | `:LitStart`     | `litepl start`       | Start the interpreter     |
 | `:LitStop`      | `litepl stop`        | Stop the interpreter      |
-| `:LitStatus`    | `cat file \| litepl status`     | Print the daemon status |
-| `:LitEval1`     | `cat file \| lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C)` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
-| `:LitEvalBreak1`| `cat file \| lirtepl interrupt (N\|L:C)`       | Send Ctrl+C signal to the interpreter and get a feedback |
-| `:LitEvalWait1` | `cat file \| lirtepl eval-sections (N\|L:C)`   | Run or update section under the cursor and wait until the completion |
-| `:LitEvalAbove` | `cat file \| lirtepl eval-sections 0..(N\|L:C)`| Run sections above and under the cursor and wait until the completion |
-| `:LitEvalBelow` | `cat file \| lirtepl eval-sections (N\|L:C)..$`| Run sections below and under the cursor and wait until the completion |
+| `:LitStatus`    | `litepl status <F`     | Print the daemon status |
+| `:LitEval1`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C) <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
+| `:LitEvalBreak1`| `lirtepl interrupt (N\|L:C) <F`       | Send Ctrl+C signal to the interpreter and get a feedback |
+| `:LitEvalWait1` | `lirtepl eval-sections (N\|L:C) <F`   | Run or update section under the cursor and wait until the completion |
+| `:LitEvalAbove` | `lirtepl eval-sections 0..(N\|L:C) <F`| Run sections above and under the cursor and wait until the completion |
+| `:LitEvalBelow` | `lirtepl eval-sections (N\|L:C)..$ <F`| Run sections below and under the cursor and wait until the completion |
 | `:LitRestart`   | `litrepl restart`    | Restart the interpreter   |
 | `:LitRepl`      | `lirtepl repl`       | Open the terminal to the interpreter |
 | `:LitOpenErr`   | N/A                  | Open the stderr window    |
@@ -142,6 +141,7 @@ Most of the commands could be sent from the command line or from Vim directly.
 
 Where
 
+* `F` denotes the document file path
 * `N` denotes the number of code section starting from 0.
 * `L:C` denotes line:column of the cursor.
 
