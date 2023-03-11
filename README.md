@@ -30,7 +30,6 @@ _The project is unstable, please install packages by cloning this repository!_
 Contents
 --------
 
-
 1. [Contents](#contents)
 2. [Installation](#installation)
    * [Pip and Plug](#pip-and-plug)
@@ -39,12 +38,13 @@ Contents
    * [Basics](#basics)
    * [Vim and Command line](#vim-and-command-line)
    * [Vim variables and Command line arguments](#vim-variables-and-command-line-arguments)
-4. [Develop](#develop)
+4. [Development](#development)
 5. [Gallery](#gallery)
 6. [Technical details](#technical-details)
 7. [Limitations](#limitations)
 8. [Related projects](#related-projects)
 9. [Third-party issues](#third-party-issues)
+
 
 Installation
 ------------
