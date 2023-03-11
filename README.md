@@ -36,9 +36,8 @@ Contents
    * [Pip and Plug](#pip-and-plug)
 3. [Usage](#usage)
    * [Basics](#basics)
-   * [Vim](#vim)
-   * [Commands](#commands)
-   * [Arguments](#arguments)
+   * [Vim commands / command line commands](#vim-commands-/-command-line-commands)
+   * [Vim variables / command line arguments](#vim-variables-/-command-line-arguments)
    * [Batch processing](#batch-processing)
 4. [Develop](#develop)
 5. [Gallery](#gallery)
@@ -80,10 +79,10 @@ Usage
 ### Basics
 
 LitREPL is a command-line utility and a Vim plugin for processing text documents
-containing Python code blocks in the style of [Jupyter
-Notebooks](https://jupyter.org/). Note, that LitREPL does not depend on Jupyter
-web functionality in any direct way. The whole editing workflow is supposed to
-run in text editor.
+containing Python code blocks. The whole editing workflow is supposed to be run
+in the Vim text editor.
+
+Consider the following `Markdown` document:
 
 ````{.markdown}
 Some text text
@@ -103,26 +102,18 @@ Hello, World!
 More text text
 ````
 
-Vim command `:LitEval1` executes the code block under the cursor and pastes the
-result into the corresponding result section. The execution takes place in the
-background interpreter which is tied to the UNIX pipes saved in the filesystem.
-Thus, the state of the interpreter is persistent between the executions and in
-fact even between the Vim editing sessions.
+Having LitREPL tool and plugin installed, the users can type the `:LitEvalAll`
+command to evaluate the code blocks of the document. Any printed messages will
+be pasted back into the corresponding result sections. The execution will take
+place in a background interpreter which is tied to the UNIX pipes saved in the
+filesystem. Thus, the state of the interpreter is persistent between the
+executions and in fact even between the Vim editing sessions.
 
+For more formatting options, See the [Markdown](./doc/formatting.md#markdown)
+section of the formatting guide. For LaTeX options, see the
+[LaTeX](./doc/formatting.md#latex) section.
 
-See the [Markdown](./doc/formatting.md#markdown) and
-[LaTeX](./doc/formatting.md#latex) formatting guides for more instructions.
-
-### Vim
-
-There are no key bindings defined in the plugin, users are to define their own:
-
-```vim
-nnoremap <F5> :LitEval1<CR>
-nnoremap <F6> :LitEvalBreak1<CR>
-```
-
-### Commands
+### Vim commands / command line commands
 
 | Vim             | Command line         | Description                          |
 |-----------------|----------------------|--------------------------------------|
@@ -132,8 +123,9 @@ nnoremap <F6> :LitEvalBreak1<CR>
 | `:LitEval1`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C) <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
 | `:LitEvalBreak1`| `lirtepl interrupt (N\|L:C) <F`       | Send Ctrl+C signal to the interpreter and get a feedback |
 | `:LitEvalWait1` | `lirtepl eval-sections (N\|L:C) <F`   | Run or update section under the cursor and wait until the completion |
-| `:LitEvalAbove` | `lirtepl eval-sections 0..(N\|L:C) <F`| Run sections above and under the cursor and wait until the completion |
-| `:LitEvalBelow` | `lirtepl eval-sections (N\|L:C)..$ <F`| Run sections below and under the cursor and wait until the completion |
+| `:LitEvalAbove` | `lirtepl eval-sections '0..(N\|L:C)' <F`| Run sections above and under the cursor and wait until the completion |
+| `:LitEvalBelow` | `lirtepl eval-sections '(N\|L:C)..$' <F`| Run sections below and under the cursor and wait until the completion |
+| `:LitEvalAll`   | `lirtepl eval-sections '0..$' <F`       | Evaluate all code sections |
 | `:LitRestart`   | `litrepl restart`    | Restart the interpreter   |
 | `:LitRepl`      | `lirtepl repl`       | Open the terminal to the interpreter |
 | `:LitOpenErr`   | N/A                  | Open the stderr window    |
@@ -145,7 +137,15 @@ Where
 * `N` denotes the number of code section starting from 0.
 * `L:C` denotes line:column of the cursor.
 
-### Arguments
+### Vim variables / command line arguments
+
+The plugin does not define any Vim key bindings, users are expected to do it by
+themselves, for example:
+
+```vim
+nnoremap <F5> :LitEval1<CR>
+nnoremap <F6> :LitEvalBreak1<CR>
+```
 
 | Vim setting               | CLI argument         | Description                       |
 |---------------------------|----------------------|-----------------------------------|
