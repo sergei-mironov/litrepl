@@ -30,22 +30,19 @@ _The project is unstable, please install packages by cloning this repository!_
 Contents
 --------
 
-
 1. [Contents](#contents)
 2. [Install](#install)
    * [Pip and Plug](#pip-and-plug)
 3. [Usage](#usage)
    * [Basics](#basics)
-   * [Vim commands / command line commands](#vim-commands-/-command-line-commands)
-   * [Vim variables / command line arguments](#vim-variables-/-command-line-arguments)
-   * [Batch processing](#batch-processing)
+   * [Vim and Command line](#vim-and-command-line)
+   * [Vim variables and Command line arguments](#vim-variables-and-command-line-arguments)
 4. [Develop](#develop)
 5. [Gallery](#gallery)
 6. [Technical details](#technical-details)
 7. [Limitations](#limitations)
 8. [Related projects](#related-projects)
 9. [Third-party issues](#third-party-issues)
-
 
 Install
 -------
@@ -109,11 +106,18 @@ place in a background interpreter which is tied to the UNIX pipes saved in the
 filesystem. Thus, the state of the interpreter is persistent between the
 executions and in fact even between the Vim editing sessions.
 
+Alternatively, one could evaluate the document from the command line as follows:
+
+```sh
+$ cat doc/example.md | \
+  litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
+```
+
 For more formatting options, See the [Markdown](./doc/formatting.md#markdown)
 section of the formatting guide. For LaTeX options, see the
 [LaTeX](./doc/formatting.md#latex) section.
 
-### Vim commands / command line commands
+### Vim and Command line
 
 | Vim             | Command line         | Description                          |
 |-----------------|----------------------|--------------------------------------|
@@ -137,7 +141,7 @@ Where
 * `N` denotes the number of code section starting from 0.
 * `L:C` denotes line:column of the cursor.
 
-### Vim variables / command line arguments
+### Vim variables and Command line arguments
 
 The plugin does not define any Vim key bindings, users are expected to do it by
 themselves, for example:
@@ -149,25 +153,16 @@ nnoremap <F6> :LitEvalBreak1<CR>
 
 | Vim setting               | CLI argument         | Description                       |
 |---------------------------|----------------------|-----------------------------------|
-| `set filetype`            | `--filetype=T`       | Input file type: `latex`\|`markdown`  |
-| N/A                       | `--interpreter=I`    | The interpreter to use: `python`\|`ipython`\|`auto`, defaulting to `auto` |
+| `set filetype`            | `--filetype=T`       | Input file type: `latex`\|`markdown` |
+| N/A                       | `--interpreter=I`    | The interpreter to use: `python`\|`ipython`\|`auto` (the default) |
 | `let g:litrepl_debug=0/1` |  `--debug=1`         | Print debug messages to the stderr |
 | `let g:litrepl_errfile="/tmp/litrepl.vim"` |  N/A  | Intermediary file for debug and error messages |
 | `let g:litrepl_always_show_stderr=0/1`   |  N/A  | Set to auto-open stderr window after each execution |
 | N/A                 |  `--timeout-initial=FLOAT` | Timeout to wait for the new executions, in seconds, defaults to inf |
 | N/A                 |  `--timeout-continue=FLOAT`| Timeout to wait for executions which are already running, in seconds, defaults to inf |
 
-* `I` is taken into account by the `start` command and by the first
-  `eval-sections` only.
-
-### Batch processing
-
-To evaluate the document run the following command
-
-```sh
-$ cat doc/example.md | \
-  litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
-```
+* `I` is taken into account by the `start` command or by the first call to
+  `eval-sections`.
 
 Develop
 -------
