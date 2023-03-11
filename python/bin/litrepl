@@ -64,7 +64,9 @@ if __name__=='__main__':
     nsecs=solve_sloc(a.locs,t)
     eval_section_(a,t,nsecs)
   elif a.command=='repl':
-    system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
+    _,inp,outp,_=astuple(pipenames(a))
+    print("Opening the interpreter terminal (NO PROMPT, USE `Ctrl+D` TO EXIT)")
+    system(f"socat - 'PIPE:{outp},flock-ex-nb=1!!PIPE:{inp},flock-ex-nb=1'")
   elif a.command=='interrupt':
     os.kill(int(open('_pid.txt').read()),SIGINT)
     t=parse_(GRAMMARS[a.filetype])
