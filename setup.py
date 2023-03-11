@@ -15,7 +15,7 @@ except Exception:
     from subprocess import check_output
     import sys
     LITREPL_REVISION=check_output(['git', 'rev-parse', 'HEAD'],
-                                  cwd=environ['LITREPL_ROOT']).decode().strip()
+                                  cwd=dirname(__file__)).decode().strip()
   except Exception:
     warning("Couldn't use `git rev-parse`, no revision metadata will be set")
     LITREPL_REVISION=None
