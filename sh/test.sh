@@ -229,6 +229,9 @@ test_eval_tex() {( #{{{
 mktest "_test_eval_tex"
 runlitrepl start
 cat >source.tex <<"EOF"
+% == Ignore non-tags ==
+\newcommand{\linline}[2]{#2}
+% == Normal evaluation ==
 \begin{lcode}
 print("A"+"B")
 \end{lcode}
@@ -240,16 +243,16 @@ Text
   %lnoresult
 \end{enumerate}
 \begin{lresult}
-NOEVAL
+PLACEHOLDER
 \end{lresult}
-== Inline ==
+% == Inline evaluation ==
 \linline{"A"+"B"}
 {XX}\linline{"C"+"D"}{}
 \begin{lcode}
 tag='\\textbf{bold}'
 \end{lcode}
 \linline{tag+tag}{\textbf{old}\textbf{old}}
-== Ignore ==
+% == Meta-comments ==
 %lignore
 \begin{lcode}
 print("X"+"Y")
@@ -266,6 +269,9 @@ cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
 diff -u source.tex out.tex
 cat source.tex | runlitrepl --filetype=latex eval-sections '0..$' >out.tex
 diff -u out.tex - <<"EOF"
+% == Ignore non-tags ==
+\newcommand{\linline}[2]{#2}
+% == Normal evaluation ==
 \begin{lcode}
 print("A"+"B")
 \end{lcode}
@@ -279,14 +285,14 @@ Text
 \begin{lresult}
 AB
 \end{lresult}
-== Inline ==
+% == Inline evaluation ==
 \linline{"A"+"B"}
 {AB}\linline{"C"+"D"}{CD}
 \begin{lcode}
 tag='\\textbf{bold}'
 \end{lcode}
 \linline{tag+tag}{\textbf{bold}\textbf{bold}}
-== Ignore ==
+% == Meta-comments ==
 %lignore
 \begin{lcode}
 print("X"+"Y")

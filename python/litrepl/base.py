@@ -171,6 +171,11 @@ class SymbolsLatex:
 
 symbols_latex=SymbolsLatex()
 
+OBR="{"
+CBR="}"
+BCBR="\\}"
+BOBR="\\{"
+
 def toplevel_markers_latex():
   sl=symbols_latex
   return '|'.join([sl.icodebeginmarker,sl.icodendmarker,
@@ -178,10 +183,7 @@ def toplevel_markers_latex():
                    sl.ocodebeginmarker,sl.ocodendmarker,
                    sl.verbeginmarker,sl.verendmarker,
                    sl.combeginmarker,sl.comendmarker,
-                   sl.inlinemarker])
-OBR="{"
-CBR="}"
-BCBR="\\}"
+                   sl.inlinemarker+BOBR])
 grammar_latex = fr"""
 start: (topleveltext)? (snippet (topleveltext)? )*
 snippet : icodesection -> e_icodesection
