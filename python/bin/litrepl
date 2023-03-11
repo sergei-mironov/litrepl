@@ -75,6 +75,7 @@ if __name__=='__main__':
     eval_section_(a,t,sr)
   elif a.command=='status':
     auxd,inp,outp,pidf=astuple(pipenames(a))
+    print(f"version: {__version__}")
     print(f"workdir: {getcwd()}")
     print(f"auxdir: {auxd}")
     try:
