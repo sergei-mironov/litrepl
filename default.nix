@@ -91,7 +91,8 @@ let
       propagatedBuildInputs = [(lark-parser112 python.pkgs) pkgs.socat];
       src = python.pkgs.fetchPypi {
         inherit pname version;
-        sha256 = "sha256-tiNqmVMM3JttYc8LNnmMdxw6cenogCAhFu9feVMsnq4=";
+        sha256 = "sha256-9hdBwdZXfZFCbOzdrWe+KDYCKSaEw/NOW3E50N1NfxA=";
+        # sha256 = "sha256-tiNqmVMM3JttYc8LNnmMdxw6cenogCAhFu9feVMsnq4=";
         # sha256 = "sha256:0vq2igzfi3din1fah18fzp7wdh089hf28s3lwm321k11jhycqgy9";
       };
     });

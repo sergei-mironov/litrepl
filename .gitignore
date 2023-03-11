@@ -1,0 +1,36 @@
+_*
+.*
+
+# Nix
+result*
+
+# Python
+!__init__.py
+dist
+build
+*.egg-info
+semver.py
+revision.py
+
+# latex
+*.out
+*.log
+*.pytxcode
+*.aux
+*.toc
+*.max
+*.loe
+*.exmpl
+*.disc
+*.ans
+*.bbl
+*.blg
+*.tmp
+**/pythontex**
+*.vrb
+*.snm
+*.nav
+*.fls
+*.dvi
+*_latexmk
+*.pyg

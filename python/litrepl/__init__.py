@@ -11,28 +11,34 @@ from .base import *
 
 # Determine the package version using the following source priorities:
 # 1) version.txt+git 2) version.txt 3) version.py
-__version__:Optional[str]
+__revision__:Optional[str]
 try:
-  LITREPL_ROOT=environ['LITREPL_ROOT']
-  ver=open(join(LITREPL_ROOT,'version.txt')).read().strip()
-  LITREPL_REVISION:Optional[str]
-  try:
-    from subprocess import check_output
-    LITREPL_REVISION=check_output(['git', 'rev-parse', 'HEAD'],
-                                  cwd=LITREPL_ROOT).decode().strip()
-  except Exception:
-    try:
-      LITREPL_REVISION=environ["LITREPL_REVISION"]
-    except Exception:
-      LITREPL_REVISION=None
-
-  rev=f"+g{LITREPL_REVISION[:7]}" if LITREPL_REVISION is not None else ""
-  __version__ = f"{ver}{rev}"
+  __revision__=environ["LITREPL_REVISION"]
 except Exception:
   try:
-    from litrepl.version import __version__
-  except ImportError:
-    warning("Neither `litrepl/version.py` module was not generated during the "
-            "setup, nor the Git metadata is available. Re-install litrepl with "
-            "the `setuptools_scm` package available to fix")
-    __version__ = None
+    from subprocess import check_output
+    import sys
+    __revision__=check_output(['git', 'rev-parse', 'HEAD'],
+                            cwd=environ['LITREPL_ROOT']).decode().strip()
+  except Exception:
+    try:
+      from litrepl.revision import __revision__ as __rv__
+      __revision__=__rv__
+    except ImportError:
+      __revision__=None
+
+
+__semver__:Optional[str]
+try:
+  __semver__=open(join(environ['LITREPL_ROOT'],'version.txt')).read().strip()
+except Exception:
+    try:
+      from litrepl.semver import __semver__ as __sv__
+      __semver__= __sv__
+    except ImportError:
+      __semver__=None
+
+
+__version__:Optional[str]
+__version__=(__semver__ + (f"+g{__revision__[:7]}" \
+                           if __revision__ else "")) if __semver__ else None
