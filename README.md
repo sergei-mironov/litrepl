@@ -9,12 +9,11 @@ providing the text-friendly code editing and execution workflow.
 
 **Features**
 
-* Lightweight: Runs on a system where only a few Python packages are installed.
+* Lightweight: Has only a few dependencies.
 * Supported document formats: Markdown [[MD]](./doc/example.md), Latex
-  [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf)
+  [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf).
 * Supported interpreters: Python, IPython
 * Supported editor: Vim
-* Nix/NixOS - friendly
 
 **Requirements:**
 
