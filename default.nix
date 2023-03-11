@@ -62,7 +62,7 @@ let
 
     litrepl = (py : py.pkgs.buildPythonApplication {
       pname = "litrepl";
-      version = lib.fileContents "${src}/version.txt";
+      version = lib.fileContents "${src}/semver.txt";
       inherit src;
       LITREPL_REVISION = revision;
       LITREPL_ROOT = src;
@@ -87,11 +87,11 @@ let
 
     litrepl-pypy = (python: python.pkgs.buildPythonPackage rec {
       pname = "litrepl";
-      version = lib.fileContents "${litrepl_root}/version.txt";
+      version = lib.fileContents "${litrepl_root}/semver.txt";
       propagatedBuildInputs = [(lark-parser112 python.pkgs) pkgs.socat];
       src = python.pkgs.fetchPypi {
         inherit pname version;
-        sha256 = "sha256-9hdBwdZXfZFCbOzdrWe+KDYCKSaEw/NOW3E50N1NfxA=";
+        sha256 = "sha256-Av0lXAcn8PW5Tt/M8VFilYrhp0nJXYTly0dOzBTshlQ=";
         # sha256 = "sha256-tiNqmVMM3JttYc8LNnmMdxw6cenogCAhFu9feVMsnq4=";
         # sha256 = "sha256:0vq2igzfi3din1fah18fzp7wdh089hf28s3lwm321k11jhycqgy9";
       };
