@@ -85,13 +85,13 @@ let
       doCheck = true;
     });
 
-    litrepl-pypy = (python: python.pkgs.buildPythonPackage rec {
+    litrepl-pypi = (python: python.pkgs.buildPythonPackage rec {
       pname = "litrepl";
       version = lib.fileContents "${litrepl_root}/semver.txt";
       propagatedBuildInputs = [(lark-parser112 python.pkgs) pkgs.socat];
       src = python.pkgs.fetchPypi {
         inherit pname version;
-        sha256 = "sha256-Av0lXAcn8PW5Tt/M8VFilYrhp0nJXYTly0dOzBTshlQ=";
+        sha256 = "sha256-Ex06917+Grhhv8hGEr59CUK0+5tsQ6+wNv+7to2WDrg=";
         # sha256 = "sha256-tiNqmVMM3JttYc8LNnmMdxw6cenogCAhFu9feVMsnq4=";
         # sha256 = "sha256:0vq2igzfi3din1fah18fzp7wdh089hf28s3lwm321k11jhycqgy9";
       };
@@ -132,7 +132,7 @@ let
       '';
     };
 
-    vim-litrepl = (py : pkgs.vimUtils.buildVimPluginFrom2Nix {
+    vim-litrepl_ = (litrepl: py : pkgs.vimUtils.buildVimPluginFrom2Nix {
       pname = "vim-litrepl";
       version = "9999";
       src = builtins.filterSource (
@@ -143,6 +143,9 @@ let
         ln -s ${litrepl py}/bin/litrepl $target/bin/litrepl
       '';
     });
+
+    vim-litrepl = py: vim-litrepl_ litrepl py;
+    vim-litrepl-pypi = py: vim-litrepl_ litrepl-pypi py;
 
     vim-terminal-images = pkgs.vimUtils.buildVimPluginFrom2Nix rec {
       name = "vim-terminal-images";
@@ -353,7 +356,7 @@ let
         latexrun
         mytexlive
         grechanik-st
-        (litrepl-release-pypy)
+        (litrepl-release-pypi)
       ] ++ (with pkgs ; [
         peek
         tmux
@@ -369,12 +372,14 @@ let
 
     litrepl-dev = litrepl python-dev;
     litrepl-release = litrepl python-release;
-    litrepl-release-pypy = litrepl-pypy python-release;
+    litrepl-release-pypi = litrepl-pypi python-release;
     vim-litrepl-release = vim-litrepl python-release;
+    vim-litrepl-release-pypi = vim-litrepl-pypi python-release;
 
     collection = rec {
       inherit pkgs shell shell-dev shell-demo vim-litrepl-release vim-test
-      vim-demo grechanik-st vimtex-local litrepl-release litrepl-dev;
+      vim-demo grechanik-st vimtex-local litrepl-release litrepl-dev
+      litrepl-release-pypi vim-litrepl-release-pypi;
     };
   };
 
