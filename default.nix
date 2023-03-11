@@ -107,7 +107,8 @@ let
           collection-langcyrillic makecell ftnxtra minted catchfile framed
           pdflscape environ trimspaces mdframed zref needspace import
           beamerposter qcircuit xypic standalone preview amsmath thmtools
-          tocloft tocbibind varwidth beamer tabulary ifoddpage relsize;
+          tocloft tocbibind varwidth beamer tabulary ifoddpage relsize svg
+          transparent;
         }
       );
 
@@ -121,6 +122,7 @@ let
         python-dev
         mytexlive
         pkgs.pandoc
+        pkgs.inkscape
       ];
       shellHook = with pkgs; ''
         if test -f ./env.sh ; then
