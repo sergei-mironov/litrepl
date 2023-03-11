@@ -63,9 +63,10 @@ let
       version = lib.fileContents "${src}/version.txt";
       inherit src;
       LITREPL_REVISION = revision;
+      LITREPL_ROOT = src;
       propagatedBuildInputs = [(lark-parser112 py.pkgs) pkgs.socat];
       checkInputs = with pkgs; [
-        socat py.pkgs.ipython py.pkgs.tqdm which
+        socat py.pkgs.ipython py.pkgs.tqdm which git
       ];
       # We cut off the python PATH to allows users to use litrepl in custom
       # Python environments
