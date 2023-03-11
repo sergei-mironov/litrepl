@@ -6,7 +6,7 @@ from litrepl import __version__
 
 if __name__=='__main__':
   ap=ArgumentParser(prog='litrepl.py')
-  ap.add_argument('--version',action='version',version=__version__ or '?',help='print version')
+  ap.add_argument('--version',action='version',version=__version__ or '?', help='Print the version')
   ap.add_argument('--filetype',metavar='STR',default='markdown',help='ft help')
   ap.add_argument('--interpreter',metavar='EXE',default='auto',help='python|ipython|auto')
   ap.add_argument('--timeout-initial',type=str,metavar='SEC',default='inf')
@@ -24,9 +24,6 @@ if __name__=='__main__':
   eps=sps.add_parser('eval-sections',help='Evaluate one or more sections by location')
   eps.add_argument('locs',metavar='LOCS',default='*',help='locs help')
   repl=sps.add_parser('repl',help='Connect interactive shell to the terminal')
-  # ec=sps.add_parser('eval-code',help='eval-code help')
-  # ec.add_argument('--timeout',type=int,default=None)
-  # ec.add_argument('--cont',type=str,default=None)
   ips=sps.add_parser('interrupt',help='Raise KeyboardInterrupt exception to the interpreter')
   ips.add_argument('locs',metavar='LOCS',default='*',help='locs help')
   a=ap.parse_args(sys.argv[1:])
@@ -59,24 +56,6 @@ if __name__=='__main__':
     eval_section_(a,t,nsecs)
   elif a.command=='repl':
     system("socat - 'PIPE:_out.pipe,flock-ex-nb=1!!PIPE:_inp.pipe,flock-ex-nb=1'")
-  # elif a.command=='eval-code':
-  #   if a.cont is not None:
-  #     r=processCont(RunResult(a.cont,PATTERN),a.timeout)
-  #     if not r.timeout:
-  #       print(r.text)
-  #     else:
-  #       print(r.text)
-  #       print(f'LITREPL:[{a.cont}]')
-  #   else:
-  #     if a.timeout is None:
-  #       print(process(sys.stdin.read()))
-  #     else:
-  #       r,runr=processAdapt(sys.stdin.read(),a.timeout)
-  #       if not r.timeout:
-  #         print(r.text)
-  #       else:
-  #         print(r.text)
-  #         print(f'LITREPL:[{runr.fname}]')
   elif a.command=='interrupt':
     os.kill(int(open('_pid.txt').read()),SIGINT)
     t=parse_(GRAMMARS[a.filetype])
