@@ -9,7 +9,7 @@
   inputs = {
     # nixpkgs.url = "path:/home/grwlf/proj/nixcfg/nixpkgs";
     # nixpkgs.url = "nixpkgs";
-    nixpkgs.url = "github:grwlf/nixpkgs/local13";
+    nixpkgs.url = "github:grwlf/nixpkgs/local14";
   };
 
   outputs = { self, nixpkgs }:

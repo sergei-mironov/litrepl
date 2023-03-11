@@ -1,7 +1,6 @@
 #!/bin/sh
 
 mktest() {
-  set -e -x
   test -d "$LITREPL_ROOT"
   T="$LITREPL_ROOT/_test/$1"
   rm -rf  "$T" || true
@@ -9,13 +8,9 @@ mktest() {
   cd "$T"
 }
 
-runlitrepl() {
-  test -n "$LITREPL_INTERPRETER"
-  $LITREPL --interpreter="$LITREPL_INTERPRETER" "$@"
-}
-
 test_parse_print() {( # {{{
 mktest "_test_parse_print"
+runlitrepl start
 run_md() {
   cat > "source.md"
   cat "source.md" | runlitrepl --filetype=markdown parse-print > "parsed.md"
@@ -375,22 +370,56 @@ grep -q 'BG' out2.md
 runlitrepl stop
 )} #}}}
 
-if test -n "$LITREPL_TEST" || echo "$(basename $0)" | grep -q "test.sh" ; then
-  set -e -x
-  if test -z "$LITREPL"; then
-    LITREPL=$LITREPL_ROOT/python/bin/litrepl
-  fi
-  trap "echo FAIL" EXIT
-  for I in python ipython ; do
-    echo "Checking $I"
-    LITREPL_INTERPRETER=$I
-    test_parse_print
-    time test_eval_md
-    test_tqdm
-    time test_eval_tex
-    test_async
-  done
-  trap "" EXIT
-  echo OK
+
+interpreters() {
+  echo "$(which python)"
+  echo "$(which ipython)"
+}
+
+tests() {
+  echo test_parse_print
+  echo test_eval_md
+  echo test_tqdm
+  echo test_eval_tex
+  echo test_async
+}
+
+runlitrepl() {
+  test -n "$LITREPL_INTERPRETER"
+  test -n "$LITREPL_BIN"
+  $LITREPL_BIN --interpreter="$LITREPL_INTERPRETER" "$@"
+}
+
+set -e
+
+INTERPS=`interpreters`
+TESTS=`tests`
+while test -n "$1" ; do
+  case "$1" in
+    -i) INTERPS="$2"; shift ;;
+    --interpreters=*) INTERPS=$(echo "$1" | sed 's/.*=//g') ;;
+    -t) TESTS="$2"; shift ;;
+    --tests) TESTS=$(echo "$1" | sed 's/.*=//g') ;;
+    -h|--help) echo "Usage: test.sh [-i I(,I)*] [-t T(,T)*]" >&1 ; exit 1 ;;
+    -V|--verbose) set -x ;;
+  esac
+  shift
+done
+
+if test -z "$LITREPL_BIN"; then
+  LITREPL_BIN=$LITREPL_ROOT/python/bin/litrepl
 fi
 
+trap "echo FAIL" EXIT
+for t in $(tests) ; do
+  for i in $(interpreters) ; do
+    if echo "$INTERPS" | grep -q "$i" && \
+       echo "$TESTS" | grep -q "$t" ; then
+
+      echo "Running test '$t' interpreter '$i'"
+      LITREPL_INTERPRETER="$i" $t
+    fi
+  done
+done
+trap "" EXIT
+echo OK

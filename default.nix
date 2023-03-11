@@ -65,7 +65,7 @@ let
       LITREPL_REVISION = revision;
       propagatedBuildInputs = [(lark-parser112 py.pkgs) pkgs.socat];
       checkInputs = with pkgs; [
-        socat py.pkgs.ipython py.pkgs.tqdm
+        socat py.pkgs.ipython py.pkgs.tqdm which
       ];
       # We cut off the python PATH to allows users to use litrepl in custom
       # Python environments
@@ -74,10 +74,9 @@ let
       '';
       checkPhase = ''
         CWD=`pwd`
-        LITREPL="python $CWD/python/bin/litrepl" \
-        LITREPL_ROOT=`pwd`/python \
-        LITREPL_TEST=y \
-        sh ${./sh/test.sh}
+        LITREPL_BIN="python $CWD/python/bin/litrepl" \
+        LITREPL_ROOT="`pwd`/python" \
+        ${./sh/test.sh}
       '';
 
       doCheck = true;
