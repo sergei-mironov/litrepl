@@ -1,5 +1,5 @@
 LitREPL.vim
------------
+===========
 
 **LitREPL** is a macro processing Python library and a Vim plugin for Literate
 programming and code execution right from the editor.
@@ -17,40 +17,34 @@ programming and code execution right from the editor.
 
 **Requirements:**
 
-* POSIX-compatible OS, typically a Linux. The plugin depends on UNIX pipes and
-  certain shell commands.
+* POSIX-compatible OS, typically a Linux. The plugin relies on POSIX pipes and
+  depends on certain shell commands.
 * More or less recent `Vim`
-* Python3 with the following libraries: `lark-parser`
-  (Required), `setuptools_scm`, `ipython` (Optional).
-* `GNU socat` application (Optional).
+* Python3 with the following libraries: `lark-parser` (Required), `ipython`
+  (Optional).
+* Command line tools: `GNU socat` (Optional).
 
 _The project is unstable, please install packages by cloning this repository!_
 
 Contents
 --------
 
- 1. [LitREPL.vim](#litrepl.vim)
- 2. [Contents](#contents)
- 3. [Install](#install)
-    * [Pip and Plug](#pip-and-plug)
-    * [Nix](#nix)
- 4. [Develop](#develop)
- 5. [Usage](#usage)
-    * [Basics](#basics)
-    * [Commands](#commands)
-    * [Arguments](#arguments)
-    * [Batch processing](#batch-processing)
- 6. [Formatting](#formatting)
-    * [Markdown](#markdown)
-      * [Syntax](#syntax)
-      * [Converting to Jupyter Notebook](#converting-to-jupyter-notebook)
-    * [Latex](#latex)
-      * [Syntax](#syntax)
- 7. [Gallery](#gallery)
- 8. [Technical details](#technical-details)
- 9. [Limitations](#limitations)
-10. [Related projects](#related-projects)
-11. [Third-party issues](#third-party-issues)
+
+1. [Contents](#contents)
+2. [Install](#install)
+   * [Pip and Plug](#pip-and-plug)
+3. [Usage](#usage)
+   * [Basics](#basics)
+   * [Vim](#vim)
+   * [Commands](#commands)
+   * [Arguments](#arguments)
+   * [Batch processing](#batch-processing)
+4. [Develop](#develop)
+5. [Gallery](#gallery)
+6. [Technical details](#technical-details)
+7. [Limitations](#limitations)
+8. [Related projects](#related-projects)
+9. [Third-party issues](#third-party-issues)
 
 
 Install
@@ -78,49 +72,6 @@ manager of Vim:
    ```vim
    Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
    ```
-
-### Nix
-
-[default.nix](./default.nix) contains a set of Nix exressions. Expressions
-prefixed with `shell-` are to be opened with `nix-shell -A NAME`. Other
-expressions need to be built with `nix-build -A NAME` and run with
-`./result/bin/...`. Some expressions are:
-
-* `litrepl` - Litrepl script and Python lib
-* `vim-litrepl` - Litrepl vim plugin
-* `vim-test` - a minimalistic vim with a single litrepl plugin
-* `vim-demo` - vim for recording screencasts
-* `vim-plug` - vim configured to use the Plug manager
-* `shell-demo` - shell for recording screencasts
-* `shell` - Full development shell
-
-Develop
--------
-
-1. `git clone --recursive https://github.com/grwlf/litrepl.vim; cd litrepl.vim`
-2. Enter the development environment
-   * (Nix/NixOS systems) `nix develop`
-   * (Other Linuxes) `. env.sh`
-   Read the warnings and install missing packages if required. The
-   environment script will add `./sh` and `./python` folders to the current
-   shell's PATH/PYTHONPATH.  The former folder contains the back-end script, the
-   latter one contains the Python library.
-3. (Optional) Run `test.sh`
-4. Run the `vim_litrepl_dev` (a thin wrapper around Vim) to run the Vim with the
-   LitREPL plugin from the `./vim` folder.
-
-A useful keymapping to reload the plugin:
-
-```vim
-nnoremap <F9> :unlet g:litrepl_bin<CR>:unlet g:litrepl_loaded<CR>:runtime plugin/litrepl.vim<CR>
-```
-
-To view debug messages, set
-
-```vim
-let g:litrepl_debug = 1
-let g:litrepl_always_show_stderr = 1
-```
 
 Usage
 -----
@@ -157,6 +108,12 @@ background interpreter which is tied to the UNIX pipes saved in the filesystem.
 Thus, the state of the interpreter is persistent between the executions and in
 fact even between the Vim editing sessions.
 
+
+See the [formatting guide](./doc/formatting.md) for more formatting
+instructions.
+
+### Vim
+
 There are no key bindings defined in the plugin, users are to define their own:
 
 ```vim
@@ -170,15 +127,16 @@ Most of the commands could be sent from the command line or from Vim directly.
 
 | Vim             | Command line         | Description                          |
 |-----------------|----------------------|--------------------------------------|
-| `:LitEval1`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C)` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
-| `:LitEvalBreak1`| `lirtepl interrupt (N\|L:C)`       | Send Ctrl+C signal to the interpreter and get a feedback |
-| `:LitEvalWait1` | `lirtepl eval-sections (N\|L:C)`   | Run or update section under the cursor and wait until the completion |
-| `:LitEvalAbove` | `lirtepl eval-sections 0..(N\|L:C)`| Run sections above and under the cursor and wait until the completion |
-| `:LitEvalBelow` | `lirtepl eval-sections (N\|L:C)..$`| Run sections below and under the cursor and wait until the completion |
-| `:LitRepl`      | `lirtepl repl`       | Open the terminal to the interpreter |
 | `:LitStart`     | `litepl start`       | Start the interpreter     |
 | `:LitStop`      | `litepl stop`        | Stop the interpreter      |
+| `:LitStatus`    | `cat file | litepl status`     | Print the daemon status |
+| `:LitEval1`     | `cat file | lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C)` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
+| `:LitEvalBreak1`| `cat file | lirtepl interrupt (N\|L:C)`       | Send Ctrl+C signal to the interpreter and get a feedback |
+| `:LitEvalWait1` | `cat file | lirtepl eval-sections (N\|L:C)`   | Run or update section under the cursor and wait until the completion |
+| `:LitEvalAbove` | `cat file | lirtepl eval-sections 0..(N\|L:C)`| Run sections above and under the cursor and wait until the completion |
+| `:LitEvalBelow` | `cat file | lirtepl eval-sections (N\|L:C)..$`| Run sections below and under the cursor and wait until the completion |
 | `:LitRestart`   | `litrepl restart`    | Restart the interpreter   |
+| `:LitRepl`      | `lirtepl repl`       | Open the terminal to the interpreter |
 | `:LitOpenErr`   | N/A                  | Open the stderr window    |
 | `:LitVersion`   | `litrepl --version`  | Show version              |
 
@@ -211,154 +169,10 @@ $ cat doc/example.md | \
   litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
 ```
 
-Formatting
-----------
+Develop
+-------
 
-### Markdown
-
-#### Syntax
-
-````{.markdown}
-Executable sections are marked with either "python", "lpython" or "code" tags.
-Putting the cursor on one of the typing the :LitEval1 command executes its code
-in a background Python interpreter.
-
-``` python
-W='Hello, World!'
-print(W)
-```
-
-Verbatim sections with "result" or "lresult" tags are the result sections . The
-output of the code from the executable section is pasted there. The original
-content of the section is replaced with the output of the last execution.
-
-``` result
-Hello, World!
-```
-
-Markdown comments taged with `code`/`nocode`/`result`/`noresult` also mark
-executable and result sections. This way we could hide the executable code from
-Markdown renderers and generate the markup they recognize.
-markup.
-
-<!-- code
-print("Hello, LitREPL")
--->
-
-<!-- result -->
-Hello, LitREPL
-<!-- noresult -->
-
-<!-- result
-Hello, LitREPL
--->
-````
-
-#### Converting to Jupyter Notebook
-
-[Pandoc](https://pandoc.org) could be used to conver LitREPL-frinedly markdown
-documents to the Jupyter Notebook format. In order make it recognize code and
-result fields addtional efforts are required. Currently we aware of two options:
-1. Mark Jupyter sections with fenced-div markup as described in the [Pandoc
-   manual](https://pandoc.org/MANUAL.html#jupyter-notebooks)
-   1. Consider the following Markdown `file.md`
-      ````{.markdown}
-      :::::: {.cell .code execution_count=1}
-      ```python
-      print("hello XXXXXXX")
-      ```
-      ::: {.output .stream .stdout}
-      ```lresult
-      hello XXXXXXX
-      ```
-      :::
-      ::::::
-      ````
-   2. It is recognized by both `LitREPL` and `Pandoc`, so to convert it to the
-      Jupyter Notebook format one may run
-      ```sh
-      $ pandoc file.md -o file.ipynb
-      ```
-   3. Unfortunately, other renderers may interpret fenced divs directly,
-      bloating the output.
-
-2. Alternatively, native divs could be used.
-   1. Consider the following Markdown `file.md`
-      ````{.markdown}
-      <div class="cell code">
-      ```python
-      print("hello markdown")
-      ```
-
-      <div class="output stream stdout">
-      ```lresult
-      hello markdown
-      ```
-      </div>
-      </div>
-      ````
-   2. Again, both `LitREPL` and `Pandoc` would recognize the format, plus most
-      third-party renderers would ignore `div` tags. To convert this file to the
-      Jupyter Notebook format, call pandoc with
-      [native divs extension](https://pandoc.org/MANUAL.html#extension-native_divs)
-      enabled
-      ```sh
-      $ pandoc -f markdown+native_divs test.md -o test.ipynb
-      ```
-
-### Latex
-
-#### Syntax
-
-````latex
-\documentclass{article}
-\usepackage[utf8]{inputenc}
-\begin{document}
-
-LitREPL for latex recognizes \texttt{lcode} environments as code and
-\texttt{lresult} as result sections. The tag names is currently hardcoded into
-the simple parser the tool is using, so we need to additionally introduce it to
-the Latex system. Here we do it in a most simple way.
-
-\newenvironment{lcode}{\begin{texttt}}{\end{texttt}}
-\newenvironment{lresult}{\begin{texttt}}{\end{texttt}}
-\newcommand{\linline}[2]{#2}
-
-Executable section is the text between the \texttt{lcode} begin/end tags.
-Putting the cursor on it and typing the \texttt{:LitEval1} executes it in the
-background Python interpreter.
-
-\begin{lcode}
-W='Hello, World!'
-print(W)
-\end{lcode}
-
-\texttt{lresult} tags next to the executable section mark the result section.
-The output of the executable section will be pasted here. The
-original content of the section will be replaced.
-
-\begin{lresult}
-Hello, World!
-\end{lresult}
-
-Commented \texttt{lresult}/\texttt{lnoresult} tags also marks result sections.
-This way we could customise the Latex markup for every particular section.
-
-\begin{lcode}
-print("Hi!")
-\end{lcode}
-
-%lresult
-Hi!
-%lnoresult
-
-Additionally, VimREPL for Latex recognises \texttt{linline} tags for which it
-prints its first argument and pastes the result in place of the second argument.
-
-\linline{W}{Hello, World!}
-
-\end{document}
-````
+See the [development guide](./doc/develop.md)
 
 Gallery
 -------
