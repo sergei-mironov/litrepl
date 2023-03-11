@@ -10,34 +10,49 @@ from select import select
 from os import environ, system
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
-from os.path import isfile
+from os.path import isfile, join
 from signal import signal, SIGINT
 from time import sleep
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple
 from functools import partial
 from argparse import ArgumentParser
 from collections import defaultdict
+from os import makedirs,getuid,getcwd
+from tempfile import gettempdir
+from hashlib import sha256
 
-from .types import PrepInfo, RunResult, NSec, FileName, SecRec
+from .types import PrepInfo, RunResult, NSec, FileName, SecRec, FileNames
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont)
 
-def fork_python(name):
+def pipenames(a)->FileNames:
+  """ Return file names of in.pipe, out.pip and log """
+  workdir=a.workdir if a.workdir is not None else \
+    join(gettempdir(),"litrepl_"+sha256(getcwd().encode('utf-8')).hexdigest()[:6])
+  makedirs(workdir, exist_ok=True)
+  return FileNames(workdir, join(workdir,"_in.pipe"), join(workdir,"_out.pipt"),
+                   join(workdir,"_pid.txt"))
+
+def fork_python(a, name):
   assert 'python' in name
+  wd,inp,outp,pid=astuple(pipenames(a))
   system((f'{name} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
-          'os.open(\'_inp.pipe\',os.O_RDWR|os.O_SYNC);'
-          'os.open(\'_out.pipe\',os.O_RDWR|os.O_SYNC);"'
-          '<_inp.pipe >_out.pipe 2>&1 & echo $! >_pid.txt'))
-  open('_inp.pipe','w').write(
+          f'os.open(\'{inp}\',os.O_RDWR|os.O_SYNC);'
+          f'os.open(\'{outp}\',os.O_RDWR|os.O_SYNC);"'
+          f'<"{inp}" >"{outp}" 2>&1 & echo $! >"{pid}"'))
+  open(inp,'w').write(
     'import signal\n'
     'def _handler(signum,frame):\n'
     '  raise KeyboardInterrupt()\n\n'
     '_=signal.signal(signal.SIGINT,_handler)\n')
   exit(0)
 
-def fork_ipython(name):
+def fork_ipython(a, name):
   assert 'ipython' in name
-  open('/tmp/litrepl_ipython_config.py','w').write(
+  wd,inp,outp,pid=astuple(pipenames(a))
+  cfg=join(wd,'litrepl_ipython_config.py')
+  log=join(wd,'_ipython.log')
+  open(cfg,'w').write(
     'from IPython.terminal.prompts import Prompts, Token\n'
     'class EmptyPrompts(Prompts):\n'
     '  def in_prompt_tokens(self):\n'
@@ -52,12 +67,12 @@ def fork_ipython(name):
     'c.TerminalInteractiveShell.separate_in = ""\n'
     'c.TerminalInteractiveShell.separate_out = ""\n'
     )
-  system((f'{name} -um IPython --config=/tmp/litrepl_ipython_config.py --colors=NoColor --logfile=_ipython.log -c '
-          '"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
-          'os.open(\'_inp.pipe\',os.O_RDWR|os.O_SYNC);'
-          'os.open(\'_out.pipe\',os.O_RDWR|os.O_SYNC);"'
-          ' -i <_inp.pipe >_out.pipe 2>&1 & echo $! >_pid.txt'))
-  open('_inp.pipe','w').write(
+  system((f'{name} -um IPython --config={cfg} --colors=NoColor --logfile={log} -c '
+          f'"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
+          f'os.open(\'{inp}\',os.O_RDWR|os.O_SYNC);'
+          f'os.open(\'{outp}\',os.O_RDWR|os.O_SYNC);"'
+          f' -i <"{inp}" >"{outp}" 2>&1 & echo $! >"{pid}"'))
+  open(inp,'w').write(
     'import signal\n'
     'def _handler(signum,frame):\n'
     '  raise KeyboardInterrupt()\n\n'
@@ -65,45 +80,47 @@ def fork_ipython(name):
   )
   exit(0)
 
-def start_(fork_handler:Callable[...,None])->None:
+def start_(a, fork_handler:Callable[...,None])->None:
   """ Starts the background Python interpreter. Kill an existing interpreter if
   any. Creates files `_inp.pipe`, `_out.pipt`, `_pid.txt`."""
-  if isfile('_pid.txt'):
-    system('kill $(cat _pid.txt) >/dev/null 2>&1')
-  system('chmod -R +w _pylightnix 2>/dev/null && rm -rf _pylightnix')
-  system('mkfifo _inp.pipe _out.pipe 2>/dev/null')
+  wd,inp,outp,pid=astuple(pipenames(a))
+  if isfile(pid):
+    system(f'kill "$(cat {pid})" >/dev/null 2>&1')
+  system(f"mkfifo '{inp}' '{outp}' 2>/dev/null")
   if os.fork()==0:
     sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
     fork_handler()
   else:
     for i in range(10):
-      if isfile("_pid.txt"):
+      if isfile(pid):
         break
       sleep(0.5)
-    if not isfile("_pid.txt"):
-      raise ValueError("Couldn't see '_pid.txt'. Did the fork fail?")
+    if not isfile(pid):
+      raise ValueError(f"Couldn't see '{pid}'. Did the fork fail?")
 
 def start(a):
   if 'ipython' in a.interpreter:
-    start_(partial(fork_ipython,name=a.interpreter))
+    start_(a, partial(fork_ipython,a=a,name=a.interpreter))
   elif 'python' in a.interpreter:
-    start_(partial(fork_python,name=a.interpreter))
+    start_(a, partial(fork_python,a=a,name=a.interpreter))
   elif a.interpreter=='auto':
     if system('python -m IPython -c \'print("OK")\' >/dev/null 2>&1')==0:
-      start_(partial(fork_ipython,name='ipython'))
+      start_(a, partial(fork_ipython,a=a,name='ipython'))
     else:
-      start_(partial(fork_python,name='python'))
+      start_(a, partial(fork_python,a=a,name='python'))
   else:
     raise ValueError(f"Unsupported interpreter '{a.interpreter}'")
 
-def running()->bool:
+def running(a)->bool:
   """ Checks if the background session was run or not. """
-  return 0==system("test -f _pid.txt && test -p _inp.pipe && test -p _out.pipe")
+  wd,inp,outp,pid=astuple(pipenames(a))
+  return 0==system(f"test -f '{pid}' && test -p '{inp}' && test -p '{outp}'")
 
-def stop():
+def stop(a):
   """ Stops the background Python session. """
-  system('kill $(cat _pid.txt) >/dev/null 2>&1')
-  system('rm _inp.pipe _out.pipe _pid.txt')
+  wd,inp,outp,pid=astuple(pipenames(a))
+  system(f'kill "$(cat {pid})" >/dev/null 2>&1')
+  system(f"rm '{inp}' '{outp}' '{pid}'")
 
 
 @dataclass
@@ -251,8 +268,9 @@ def escape(text,pat):
 
 def eval_section_(a, tree, secrec:SecRec)->None:
   """ Evaluate sections as specify by the `secrec` request.  """
+  fns=pipenames(a)
   nsecs=secrec.nsecs
-  if not running():
+  if not running(a):
     start(a)
   ssrc:Dict[int,str]={} # Section sources
   sres:Dict[int,str]={} # Section results
@@ -277,9 +295,9 @@ def eval_section_(a, tree, secrec:SecRec)->None:
       if self.nsec in nsecs:
         runr:Optional[RunResult]=secrec.pending.get(self.nsec)
         if runr is None:
-          rr,runr=processAdapt(code,a.timeout_initial)
+          rr,runr=processAdapt(fns,code,a.timeout_initial)
         else:
-          rr=processCont(runr,a.timeout_continue)
+          rr=processCont(fns,runr,a.timeout_continue)
         sres[self.nsec]=rresultSave(rr.text,runr) if rr.timeout else rr.text
     def ocodesection(self,tree):
       bmarker=tree.children[0].children[0].value
@@ -299,7 +317,7 @@ def eval_section_(a, tree, secrec:SecRec)->None:
       spaces=tree.children[2].children[0].value if tree.children[2].children else ''
       im=tree.children[0].children[0].value
       if self.nsec in nsecs:
-        result=process('print('+code+');\n').rstrip('\n')
+        result=process(fns,'print('+code+');\n').rstrip('\n')
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
       print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}", end='')

@@ -30,3 +30,10 @@ class SecRec:
   """ Request for section evaluation """
   nsecs:Set[NSec]
   pending:Dict[NSec,RunResult]
+
+@dataclass
+class FileNames:
+  wd:str
+  inp:str
+  outp:str
+  pidf:str

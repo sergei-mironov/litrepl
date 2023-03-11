@@ -11,15 +11,15 @@ from select import select
 from os import environ, system
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
-from os.path import isfile
+from os.path import isfile, join
 from signal import signal, SIGINT, SIGALRM, setitimer, ITIMER_REAL
 from time import sleep
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple
 from functools import partial
 from argparse import ArgumentParser
 from contextlib import contextmanager
 
-from .types import RunResult, ReadResult, FileName
+from .types import RunResult, ReadResult, FileNames
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs, flush=True)
@@ -113,10 +113,11 @@ def pusererror(fname,err)->None:
   with open(fname,"w") as f:
     f.write(err)
 
-def processAsync(lines:str)->RunResult:
+def processAsync(fns:FileNames, lines:str)->RunResult:
   """ Send `lines` to the interpreter and fork the response reader """
+  wd,inp,outp,pidf=astuple(fns)
   codehash=abs(hash(lines))
-  fname=f"/tmp/litrepl-eval-{codehash}.txt"
+  fname=join(wd,f"litrepl_eval_{codehash}.txt")
   pattern=PATTERN
   fo=os.open(fname,os.O_WRONLY|os.O_SYNC|os.O_TRUNC|os.O_CREAT)
   assert fo>0
@@ -128,8 +129,8 @@ def processAsync(lines:str)->RunResult:
     # Child
     fdr=0; fdw=0
     try:
-      fdw=os.open('_inp.pipe', os.O_WRONLY|os.O_SYNC)
-      fdr=os.open('_out.pipe', os.O_RDONLY|os.O_SYNC)
+      fdw=os.open(inp, os.O_WRONLY|os.O_SYNC)
+      fdr=os.open(outp, os.O_RDONLY|os.O_SYNC)
       if fdw<0 or fdr<0:
         pusererror(fname,f"ERROR: litrepl.py couldn't open session pipes\n")
       fcntl.flock(fdw,fcntl.LOCK_EX|fcntl.LOCK_NB)
@@ -157,8 +158,8 @@ def processAsync(lines:str)->RunResult:
     return RunResult(fname,pattern)
 
 @contextmanager
-def with_sigint(brk=False,ipid:Optional[int]=None):
-  ipid_=int(open('_pid.txt').read()) if ipid is None else ipid
+def with_sigint(fns:FileNames, brk=False,ipid:Optional[int]=None):
+  ipid_=int(open(fns.pidf).read()) if ipid is None else ipid
   def _handler(signum,frame):
     pdebug(f"Sending SIGINT to {ipid_}")
     os.kill(ipid_,SIGINT)
@@ -185,12 +186,12 @@ def with_alarm(timeout:float):
       signal(SIGALRM,prev)
 
 
-def process(lines:str)->str:
+def process(fns:FileNames, lines:str)->str:
   """ Evaluate `lines` synchronously. """
-  r=processAsync(lines)
+  r=processAsync(fns, lines)
   fdr=0
   try:
-    with with_sigint():
+    with with_sigint(fns):
       fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
       assert fdr>0
       fcntl.flock(fdr,LOCK_EX)
@@ -200,11 +201,11 @@ def process(lines:str)->str:
     if fdr!=0:
       os.close(fdr)
 
-def processCont(r:RunResult, timeout:float=1.0)->ReadResult:
+def processCont(fns:FileNames, r:RunResult, timeout:float=1.0)->ReadResult:
   fdr=0
   rr:ReadResult
   try:
-    with with_sigint():
+    with with_sigint(fns):
       fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
       assert fdr>0
       try:
@@ -223,12 +224,14 @@ def processCont(r:RunResult, timeout:float=1.0)->ReadResult:
     if fdr!=0:
       os.close(fdr)
 
-def processAdapt(lines:str,timeout:float=1.0)->Tuple[ReadResult,RunResult]:
+def processAdapt(fns:FileNames,
+                 lines:str,
+                 timeout:float=1.0)->Tuple[ReadResult,RunResult]:
   """ Push `lines` to the interpreter and wait for `timeout` seconds for
   immediate answer. In case of delay, return intermediate answer with
   the continuation."""
-  runr=processAsync(lines)
-  rr=processCont(runr,timeout=timeout)
+  runr=processAsync(fns,lines)
+  rr=processCont(fns,runr,timeout=timeout)
   return rr,runr
 
 PRESULT_RE=re.compile(r"(.*)\[BG:([a-zA-Z0-9_\/\.-]+)\]\n.*",

@@ -6,12 +6,13 @@ from litrepl import __version__
 
 if __name__=='__main__':
   ap=ArgumentParser(prog='litrepl.py')
-  ap.add_argument('--version',action='version',version=__version__ or '?', help='Print the version')
+  ap.add_argument('-v','--version',action='version',version=__version__ or '?',help='Print the version')
   ap.add_argument('--filetype',metavar='STR',default='markdown',help='ft help')
   ap.add_argument('--interpreter',metavar='EXE',default='auto',help='python|ipython|auto')
   ap.add_argument('--timeout-initial',type=str,metavar='SEC',default='inf')
   ap.add_argument('--timeout-continue',type=str,metavar='SEC',default='inf')
-  ap.add_argument('--debug',type=int,metavar='LEVEL',default=0)
+  ap.add_argument('-d','--debug',type=int,metavar='LEVEL',default=0)
+  ap.add_argument('--workdir',type=str,metavar='DIR',default=None)
   sps=ap.add_subparsers(help='command help', dest='command')
   sps.add_parser('start',help='Start the interpreter in the background')
   sps.add_parser('stop',help='Stop the interpreter')
@@ -37,9 +38,9 @@ if __name__=='__main__':
   if a.command=='start':
     start(a)
   elif a.command=='stop':
-    stop()
+    stop(a)
   elif a.command=='restart':
-    start(a); stop()
+    start(a); stop(a)
   elif a.command=='parse':
     t=parse_(GRAMMARS[a.filetype])
     print(t.pretty())
