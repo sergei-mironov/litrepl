@@ -21,6 +21,41 @@ nnoremap <F6> :LitEvalWait1<CR>
 nnoremap <F9> :unlet g:litrepl_bin<CR>:unlet g:litrepl_loaded<CR>:runtime plugin/litrepl.vim<CR>
 
 if &filetype == 'tex'
+  let g:vimtex_compiler_latexmk = {
+    \ 'build_dir' : '',
+    \ 'callback' : 1,
+    \ 'continuous' : 1,
+    \ 'executable' : 'latexmk',
+    \ 'hooks' : [],
+    \ 'options' : [
+    \   '-verbose',
+    \   '-file-line-error',
+    \   '-synctex=1',
+    \   '-interaction=nonstopmode',
+    \   '-latex="pdflatex -shell-escape"',
+    \   '-latexoption=-shell-escape',
+    \ ],
+    \}
+
+  let g:vimtex_compiler_latexrun = {
+    \ 'build_dir' : '',
+    \ 'options' : [
+    \   '--verbose-cmds',
+    \   '--latex-args="-synctex=1 -shell-escape"',
+    \ ],
+    \}
+
+  let g:vimtex_compiler_method='latexmk'
+
+  if !exists("g:vimtex_reloaded")
+    execute "VimtexReload"
+    let g:vimtex_reloaded = 1
+  end
+
+  call vimtex#syntax#nested#include('python')
+  call vimtex#syntax#core#new_region_env('texLitreplZone', 'l[a-zA-Z0-9]*code',
+    \ {'contains': '@vimtex_nested_python'})
+
   syn region texZone start="\\begin{shellcode}"
         \ end="\\end{shellcode}\|%stopzone\>" contains=@Spell
   syn region texZone start="\\begin{pythoncode}"
@@ -33,34 +68,9 @@ if &filetype == 'tex'
     call vimtex#syntax#core#new_region_math('eq')
   endtry
 
-  let g:vimtex_compiler_latexmk = {
-      \ 'build_dir' : '',
-      \ 'callback' : 1,
-      \ 'continuous' : 1,
-      \ 'executable' : 'latexmk',
-      \ 'hooks' : [],
-      \ 'options' : [
-      \   '-verbose',
-      \   '-file-line-error',
-      \   '-synctex=1',
-      \   '-interaction=nonstopmode',
-      \   '-latex="pdflatex -shell-escape"',
-      \   '-latexoption=-shell-escape',
-      \ ],
-      \}
 
-    let g:vimtex_compiler_latexrun = {
-        \ 'build_dir' : '',
-        \ 'options' : [
-        \   '--verbose-cmds',
-        \   '--latex-args="-synctex=1 -shell-escape"',
-        \ ],
-        \}
-
-    let g:vimtex_compiler_method='latexmk'
-    execute "VimtexReload"
-    set conceallevel=0
-    nnoremap <F5> :LitEval1<CR>:w<CR>:VimtexView<CR>
-    nnoremap <F2> :w<CR>
+  set conceallevel=0
+  nnoremap <F5> :LitEval1<CR>:w<CR>:VimtexView<CR>
+  nnoremap <F2> :w<CR>
 endif
 

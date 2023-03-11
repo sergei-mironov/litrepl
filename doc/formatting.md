@@ -1,9 +1,18 @@
 Formatting
-----------
+==========
 
-### Markdown
 
-#### Syntax
+1. [Markdown](#markdown)
+   * [Syntax](#syntax)
+   * [Converting to Jupyter Notebook](#converting-to-jupyter-notebook)
+2. [Latex](#latex)
+   * [Syntax](#syntax)
+   * [Python code highlighting](#python-code-highlighting)
+
+Markdown
+--------
+
+### Syntax
 
 ````{.markdown}
 Executable sections are marked with either "python", "lpython" or "code" tags.
@@ -41,7 +50,7 @@ Hello, LitREPL
 -->
 ````
 
-#### Converting to Jupyter Notebook
+### Converting to Jupyter Notebook
 
 [Pandoc](https://pandoc.org) could be used to conver LitREPL-frinedly markdown
 documents to the Jupyter Notebook format. In order make it recognize code and
@@ -61,13 +70,12 @@ result fields addtional efforts are required. Currently we aware of two options:
       :::
       ::::::
       ````
-   2. It is recognized by both `LitREPL` and `Pandoc`, so to convert it to the
-      Jupyter Notebook format one may run
+   2. The above format is recognized by both `LitREPL` and `Pandoc`, so to
+      convert it to the Jupyter Notebook format one may run
       ```sh
       $ pandoc file.md -o file.ipynb
       ```
-   3. Unfortunately, other renderers may interpret fenced divs directly,
-      bloating the output.
+   3. Unfortunately, other renderers may interpret fenced divs incorrectly.
 
 2. Alternatively, native divs could be used.
    1. Consider the following Markdown `file.md`
@@ -93,9 +101,10 @@ result fields addtional efforts are required. Currently we aware of two options:
       $ pandoc -f markdown+native_divs test.md -o test.ipynb
       ```
 
-### Latex
+Latex
+-----
 
-#### Syntax
+### Syntax
 
 ````latex
 \documentclass{article}
@@ -146,4 +155,16 @@ prints its first argument and pastes the result in place of the second argument.
 
 \end{document}
 ````
+
+### Python code highlighting
+
+The following `.vimrc` Vimtex configuration enables highlighting of Python
+code sections in LaTeX documents.
+
+``` vim
+" .vimrc
+call vimtex#syntax#nested#include('python')
+call vimtex#syntax#core#new_region_env('texLitreplZone', 'l[a-zA-Z0-9]*code',
+  \ {'contains': '@vimtex_nested_python'})
+```
 
