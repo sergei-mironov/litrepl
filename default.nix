@@ -12,6 +12,8 @@
 let
   local = rec {
 
+    litrepl_root = src;
+
     inherit (pkgs) lib stdenv fetchFromGitHub imagemagick makeWrapper cloc
     gnumake socat latexrun;
 
@@ -81,6 +83,17 @@ let
       '';
 
       doCheck = true;
+    });
+
+    litrepl-pypy = (python: python.pkgs.buildPythonPackage rec {
+      pname = "litrepl";
+      version = lib.fileContents "${litrepl_root}/version.txt";
+      propagatedBuildInputs = [(lark-parser112 python.pkgs) pkgs.socat];
+      src = python.pkgs.fetchPypi {
+        inherit pname version;
+        sha256 = "sha256-tiNqmVMM3JttYc8LNnmMdxw6cenogCAhFu9feVMsnq4=";
+        # sha256 = "sha256:0vq2igzfi3din1fah18fzp7wdh089hf28s3lwm321k11jhycqgy9";
+      };
     });
 
     mytexlive =
@@ -201,7 +214,8 @@ let
         start = [
           vim-colorschemes
           vim-litrepl-release
-          vimtex-local
+          # vimtex-local
+          vimtex
           vim-terminal-images
           vim-markdown
           nerdtree
@@ -336,14 +350,14 @@ let
         latexrun
         mytexlive
         grechanik-st
-        (litrepl-release)
+        (litrepl-release-pypy)
       ] ++ (with pkgs ; [
         peek
         tmux
       ]);
       shellHook = with pkgs; ''
         export PS1="\n[DEMO] \[\033[1;32m\][nix-shell:\w]\$\[\033[0m\] "
-        exec ${grechanik-st}/bin/st
+        # exec ${grechanik-st}/bin/st
       '';
     };
 
@@ -352,6 +366,7 @@ let
 
     litrepl-dev = litrepl python-dev;
     litrepl-release = litrepl python-release;
+    litrepl-release-pypy = litrepl-pypy python-release;
     vim-litrepl-release = vim-litrepl python-release;
 
     collection = rec {

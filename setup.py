@@ -40,7 +40,7 @@ setup(
   python_requires='>=3.6',
   author="Sergei Mironov",
   author_email="grrwlf@gmail.com",
-  description="LitREPL a macroprocessing Python library for Litrate "\
+  description="LitREPL is a macroprocessing Python library for Litrate "\
               "programming and code execution.",
   classifiers=[
     "Programming Language :: Python :: 3",
