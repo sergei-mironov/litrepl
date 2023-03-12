@@ -86,23 +86,28 @@ in the Vim text editor.
 ~~~~ markdown
 Consider this Markdown document.
 
+
 ``` python
 print("Hello, World!")
 ```
-Having LitREPL tool and plugin installed, the users can type the
-`:LitEval1`,`:LitEvalAll` and other commands to evaluate the code blocks of the
+
+
+Having LitREPL tool and plugin installed, the users can type the **LitEval1**,
+**LitEvalAll** and other Vim commands to evaluate the code blocks of the
 document.
+
+
 
 ``` result
 Hello, World!
 ```
 
-Any printed messages will be pasted back into the corresponding result sections.
-~~~~
 
+Any printed messages will be pasted back into the corresponding result sections.
 The execution takes place in a background interpreter, tied to the UNIX pipes
 residing in the filesystem. Thus, the state of the interpreter is persistent
 between the executions and in fact between the Vim editing sessions.
+~~~~
 
 Alternatively, one could evaluate the document from the command line as follows:
 
