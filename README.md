@@ -83,9 +83,9 @@ LitREPL is a command-line utility and a Vim plugin for processing text documents
 containing Python code blocks. The whole editing workflow is supposed to be run
 in the Vim text editor.
 
-Consider the following `Markdown` document:
+Consider the following Markdown document:
 
-````{.markdown}
+~~~~ markdown
 Some text text
 
 <!-- Code block 1 -->
@@ -101,7 +101,7 @@ Hello, World!
 ```
 
 More text text
-````
+~~~~
 
 Having LitREPL tool and plugin installed, the users can type the `:LitEvalAll`
 command to evaluate the code blocks of the document. Any printed messages will

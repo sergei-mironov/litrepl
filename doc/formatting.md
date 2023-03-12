@@ -14,7 +14,7 @@ Markdown
 
 ### Syntax
 
-```` {markdown}
+~~~~ markdown
 Executable sections are marked with either "python", "lpython" or "code" tags.
 Putting the cursor on one of the typing the :LitEval1 command executes its code
 in a background Python interpreter.
@@ -48,7 +48,7 @@ Hello, LitREPL
 <!-- result
 Hello, LitREPL
 -->
-````
+~~~~
 
 ### Converting to Jupyter Notebook
 
@@ -106,7 +106,7 @@ Latex
 
 ### Syntax
 
-````latex
+~~~~ latex
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \begin{document}
@@ -159,7 +159,7 @@ ignore the first argument and paste the second to the LaTeX processor as-is.
 \linline{W}{Hello, World!}
 
 \end{document}
-````
+~~~~
 
 ### Python code highlighting
 
