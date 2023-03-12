@@ -27,10 +27,7 @@ residing in the filesystem. Thus, the state of the interpreter is persistent
 between the executions and in fact between the Vim editing sessions.
 ~~~~
 
-<details>
-<summary>
-Features
-</summary>
+<details><summary>Features</summary><p>
 
 * Lightweight: Has only a few dependencies.
 * Supported document formats: Markdown [[MD]](./doc/example.md), Latex
@@ -38,22 +35,18 @@ Features
 * Supported interpreters: Python, IPython
 * Supported editor: Vim
 
-</details>
+</p></details>
 
-<details>
-<summary>
-Requirements
-</summary>
+<details><summary>Requirements</summary><p>
 
 * POSIX-compatible OS, typically a Linux. The plugin relies on POSIX pipes and
   depends on certain shell commands.
 * More or less recent `Vim`
 * Python3 with the following libraries: `lark-parser` (Required).
 * Command line tools: `GNU socat` (Optional), `ipython` (Optional).
-</details>
+</p></details>
 
-<details>
-<summary> <h2>Contents</h2> </summary>
+<details><summary> <h2>Contents</h2> </summary><p>
 <!-- vim-markdown-toc GFM -->
 
 * [Installation](#installation)
@@ -69,7 +62,7 @@ Requirements
 * [Third-party issues](#third-party-issues)
 
 <!-- vim-markdown-toc -->
-</details>
+</p></details>
 
 Installation
 ------------
@@ -80,7 +73,7 @@ available via the system `PATH`. We advise users to git-clone the same
 repository with all the package managers involved to match the versions. Below
 are the instructions for some packaging system combinations.
 
-<details><summary><h4>Pip and Plug</h4></summary>
+<details><summary><h4>Pip and Plug</h4></summary><p>
 Instructions for the Pip and [Plug](https://github.com/junegunn/vim-plug)
 manager of Vim:
 
@@ -94,10 +87,10 @@ manager of Vim:
    ```vim
    Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
    ```
-</details>
-<details><summary><h4>Nix</h4></summary>
+</p></details>
+<details><summary><h4>Nix</h4></summary><p>
 Consider following the [Development guide](./doc/develop.md)
-</details>
+</p></details>
 
 Usage
 -----
