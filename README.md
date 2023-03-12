@@ -13,9 +13,9 @@ Consider this Markdown document.
 print("Hello, World!")
 ```
 
-Having LitREPL tool and plugin installed, the users get **:LitEval1**,
-**:LitEvalAll** and other Vim commands for running of Python code blocks right
-inside the editor .
+Having LitREPL tool and plugin installed, users get **:LitEval1**,
+**:LitEvalAll** and alike Vim commands to run Python code sections right
+in the editor.
 
 ``` result
 Hello, World!
@@ -147,13 +147,6 @@ $ cat doc/example.md | \
 
 ### Vim variables and Command line arguments
 
-The plugin does not define any Vim key bindings, users are expected to do it by
-themselves, for example:
-
-```vim
-nnoremap <F5> :LitEval1<CR>
-nnoremap <F6> :LitEvalBreak1<CR>
-```
 
 | Vim setting               | CLI argument         | Description                       |
 |---------------------------|----------------------|-----------------------------------|
@@ -167,6 +160,14 @@ nnoremap <F6> :LitEvalBreak1<CR>
 
 * `I` is taken into account by the `start` command or by the first call to
   `eval-sections`.
+
+The plugin does not define any Vim key bindings, users are expected to do it by
+themselves, for example:
+
+```vim
+nnoremap <F5> :LitEval1<CR>
+nnoremap <F6> :LitEvalBreak1<CR>
+```
 
 Development
 -----------
