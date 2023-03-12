@@ -92,7 +92,7 @@ print("Hello, World!")
 ```
 
 
-Having LitREPL tool and plugin installed, the users can type the **LitEval1**,
+Having LitREPL tool and plugin installed, users can type the **LitEval1**,
 **LitEvalAll** and other Vim commands to evaluate the code blocks of the
 document.
 
