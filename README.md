@@ -96,10 +96,8 @@ manager of Vim:
    Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
    ```
 </details>
-
 <details>
 <summary><h3>Nix</h3></summary>
-
 Consider following the [Development guide](./doc/develop.md)
 </details>
 
