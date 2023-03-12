@@ -80,7 +80,7 @@ available via the system `PATH`. We advise users to git-clone the same
 repository with all the package managers involved to match the versions. Below
 are the instructions for some packaging system combinations.
 
-<details><summary><h3>Pip and Plug</h3></summary>
+<details><summary><h4>Pip and Plug</h4></summary>
 Instructions for the Pip and [Plug](https://github.com/junegunn/vim-plug)
 manager of Vim:
 
@@ -95,7 +95,7 @@ manager of Vim:
    Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
    ```
 </details>
-<details><summary><h3>Nix</h3></summary>
+<details><summary><h4>Nix</h4></summary>
 Consider following the [Development guide](./doc/develop.md)
 </details>
 
