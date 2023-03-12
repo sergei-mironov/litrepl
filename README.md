@@ -13,9 +13,9 @@ Consider this Markdown document.
 print("Hello, World!")
 ```
 
-Having LitREPL tool and plugin installed, users can type the **LitEval1**,
-**LitEvalAll** and other Vim commands to evaluate the code blocks of the
-document.
+Having LitREPL tool and plugin installed, the users get **:LitEval1**,
+**:LitEvalAll** and other Vim commands for running of Python code blocks right
+inside the editor .
 
 ``` result
 Hello, World!
