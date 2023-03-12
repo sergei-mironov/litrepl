@@ -55,6 +55,8 @@ Requirements
 Contents
 --------
 
+<details>
+<summary> Show </summary>
 <!-- vim-markdown-toc GFM -->
 
 * [Installation](#installation)
@@ -62,7 +64,7 @@ Contents
   * [Nix](#nix)
 * [Usage](#usage)
   * [Text formatting](#text-formatting)
-  * [Vim and Command line](#vim-and-command-line)
+  * [Vim and Command line commands](#vim-and-command-line-commands)
   * [Vim variables and Command line arguments](#vim-variables-and-command-line-arguments)
 * [Development](#development)
 * [Gallery](#gallery)
@@ -72,6 +74,7 @@ Contents
 * [Third-party issues](#third-party-issues)
 
 <!-- vim-markdown-toc -->
+</details>
 
 Installation
 ------------
@@ -114,7 +117,7 @@ Usage
 * [Formatting Markdown documents](./doc/formatting.md#markdown)
 * [Formatting LaTeX documents](./doc/formatting.md#latex)
 
-### Vim and Command line
+### Vim and Command line commands
 
 | Vim             | Command line         | Description                          |
 |-----------------|----------------------|--------------------------------------|
