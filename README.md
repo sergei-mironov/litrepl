@@ -88,14 +88,12 @@ Consider the following Markdown document:
 ~~~~ markdown
 Some text text
 
-<!-- Code block 1 -->
 ```python
 print("Hello, World!")
 ```
 
 More text text
 
-<!-- Result block 1 -->
 ```lresult
 Hello, World!
 ```
@@ -103,12 +101,13 @@ Hello, World!
 More text text
 ~~~~
 
-Having LitREPL tool and plugin installed, the users can type the `:LitEvalAll`
-command to evaluate the code blocks of the document. Any printed messages will
-be pasted back into the corresponding result sections. The execution will take
-place in a background interpreter which is tied to the UNIX pipes saved in the
-filesystem. Thus, the state of the interpreter is persistent between the
-executions and in fact even between the Vim editing sessions.
+Having LitREPL tool and plugin installed, the users can type the
+`:LitEval1`,`:LitEvalAll` and other commands to evaluate the code blocks of the
+document.  Any printed messages will be pasted back into the corresponding
+result sections. The execution takes place in a background interpreter, tied to
+the UNIX pipes residing in the filesystem. Thus, the state of the interpreter is
+persistent between the executions and in fact between the Vim editing
+sessions.
 
 Alternatively, one could evaluate the document from the command line as follows:
 
