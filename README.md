@@ -52,11 +52,8 @@ Requirements
 * Command line tools: `GNU socat` (Optional), `ipython` (Optional).
 </details>
 
-Contents
---------
-
 <details>
-<summary> Show </summary>
+<summary> <h2>Contents</h2> </summary>
 <!-- vim-markdown-toc GFM -->
 
 * [Installation](#installation)
