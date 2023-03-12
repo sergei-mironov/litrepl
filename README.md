@@ -47,7 +47,10 @@ between the executions and in fact between the Vim editing sessions.
 
 </p></details>
 
-<details><summary> <h2>Contents</h2> </summary><p>
+Contents
+--------
+
+<details><summary>Show</summary><p>
 <!-- vim-markdown-toc GFM -->
 
 * [Installation](#installation)
