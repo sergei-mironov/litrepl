@@ -9,22 +9,17 @@ providing the text-friendly code editing and execution workflow.
 ~~~~ markdown
 Consider this Markdown document.
 
-
 ``` python
 print("Hello, World!")
 ```
-
 
 Having LitREPL tool and plugin installed, users can type the **LitEval1**,
 **LitEvalAll** and other Vim commands to evaluate the code blocks of the
 document.
 
-
-
 ``` result
 Hello, World!
 ```
-
 
 Any printed messages will be pasted back into the corresponding result sections.
 The execution takes place in a background interpreter, tied to the UNIX pipes
