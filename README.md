@@ -34,7 +34,7 @@ between the executions and in fact between the Vim editing sessions.
 
 <details>
 <summary>
-**Features**
+Features
 </summary>
 
 * Lightweight: Has only a few dependencies.
@@ -47,7 +47,7 @@ between the executions and in fact between the Vim editing sessions.
 
 <details>
 <summary>
-**Requirements:**
+Requirements
 </summary>
 
 * POSIX-compatible OS, typically a Linux. The plugin relies on POSIX pipes and
