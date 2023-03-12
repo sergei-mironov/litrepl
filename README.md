@@ -57,8 +57,6 @@ Requirements
 <!-- vim-markdown-toc GFM -->
 
 * [Installation](#installation)
-  * [Pip and Plug](#pip-and-plug)
-  * [Nix](#nix)
 * [Usage](#usage)
   * [Text formatting](#text-formatting)
   * [Vim and Command line commands](#vim-and-command-line-commands)
@@ -82,10 +80,8 @@ available via the system `PATH`. We advise users to git-clone the same
 repository with all the package managers involved to match the versions. Below
 are the instructions for some packaging system combinations.
 
-### Pip and Plug
-
 <details>
-<summary>Show</summary>
+<summary><h3>Pip and Plug</h3></summary>
 Instructions for the Pip and [Plug](https://github.com/junegunn/vim-plug)
 manager of Vim:
 
@@ -99,12 +95,13 @@ manager of Vim:
    ```vim
    Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
    ```
-
 </details>
 
-### Nix
+<details>
+<summary><h3>Nix</h3></summary>
 
 Consider following the [Development guide](./doc/develop.md)
+</details>
 
 Usage
 -----
