@@ -60,21 +60,23 @@ Requirements
 Contents
 --------
 
-1. [Contents](#contents)
-2. [Installation](#installation)
-   * [Pip and Plug](#pip-and-plug)
-   * [Nix](#nix)
-3. [Usage](#usage)
-   * [Basics](#basics)
-   * [Vim and Command line](#vim-and-command-line)
-   * [Vim variables and Command line arguments](#vim-variables-and-command-line-arguments)
-4. [Development](#development)
-5. [Gallery](#gallery)
-6. [Technical details](#technical-details)
-7. [Limitations](#limitations)
-8. [Related projects](#related-projects)
-9. [Third-party issues](#third-party-issues)
+<!-- vim-markdown-toc GFM -->
 
+* [Installation](#installation)
+  * [Pip and Plug](#pip-and-plug)
+  * [Nix](#nix)
+* [Usage](#usage)
+  * [Text formatting](#text-formatting)
+  * [Vim and Command line](#vim-and-command-line)
+  * [Vim variables and Command line arguments](#vim-variables-and-command-line-arguments)
+* [Development](#development)
+* [Gallery](#gallery)
+* [Technical details](#technical-details)
+* [Limitations](#limitations)
+* [Related projects](#related-projects)
+* [Third-party issues](#third-party-issues)
+
+<!-- vim-markdown-toc -->
 
 Installation
 ------------
@@ -87,6 +89,8 @@ are the instructions for some packaging system combinations.
 
 ### Pip and Plug
 
+<details>
+<summary>Show</summary>
 Instructions for the Pip and [Plug](https://github.com/junegunn/vim-plug)
 manager of Vim:
 
@@ -101,6 +105,8 @@ manager of Vim:
    Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
    ```
 
+</details>
+
 ### Nix
 
 Consider following the [Development guide](./doc/develop.md)
@@ -108,22 +114,10 @@ Consider following the [Development guide](./doc/develop.md)
 Usage
 -----
 
-### Basics
+### Text formatting
 
-LitREPL is a command-line utility and a Vim plugin for processing text documents
-containing Python code blocks. The whole editing workflow is supposed to be run
-in the Vim text editor.
-
-Alternatively, one could evaluate the document from the command line as follows:
-
-```sh
-$ cat doc/example.md | \
-  litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
-```
-
-For more formatting options, See the [Markdown](./doc/formatting.md#markdown)
-section of the formatting guide. For LaTeX options, see the
-[LaTeX](./doc/formatting.md#latex) section.
+* [Formatting Markdown documents](./doc/formatting.md#markdown)
+* [Formatting LaTeX documents](./doc/formatting.md#latex)
 
 ### Vim and Command line
 
@@ -148,6 +142,13 @@ Where
 * `F` denotes the document file path
 * `N` denotes the number of code section starting from 0.
 * `L:C` denotes line:column of the cursor.
+
+To evaluate the whole document:
+
+```sh
+$ cat doc/example.md | \
+  litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
+```
 
 ### Vim variables and Command line arguments
 
