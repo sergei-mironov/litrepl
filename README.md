@@ -44,6 +44,7 @@ between the executions and in fact between the Vim editing sessions.
 * More or less recent `Vim`
 * Python3 with the following libraries: `lark-parser` (Required).
 * Command line tools: `GNU socat` (Optional), `ipython` (Optional).
+
 </p></details>
 
 <details><summary> <h2>Contents</h2> </summary><p>
@@ -74,6 +75,7 @@ repository with all the package managers involved to match the versions. Below
 are the instructions for some packaging system combinations.
 
 <details><summary><h4>Pip and Plug</h4></summary><p>
+
 Instructions for the Pip and [Plug](https://github.com/junegunn/vim-plug)
 manager of Vim:
 
@@ -89,7 +91,9 @@ manager of Vim:
    ```
 </p></details>
 <details><summary><h4>Nix</h4></summary><p>
+
 Consider following the [Development guide](./doc/develop.md)
+
 </p></details>
 
 Usage
