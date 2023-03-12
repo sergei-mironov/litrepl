@@ -88,13 +88,13 @@ Consider the following Markdown document:
 ~~~~ markdown
 Some text text
 
-```python
+``` python
 print("Hello, World!")
 ```
 
 More text text
 
-```lresult
+``` result
 Hello, World!
 ```
 
