@@ -99,6 +99,16 @@ if __name__=='__main__':
           print(f"pending section {nsec} reader: {line}")
       except CalledProcessError:
         print(f"pending section {nsec} reader: -")
+    try:
+      interpreter_path=eval_code(a, '\n'.join(["import os","print(os.environ.get('PATH',''))"]))
+      print(f"interpreter PATH: {interpreter_path.strip()}")
+    except Exception:
+      print(f"interpreter PATH: ?")
+    try:
+      interpreter_pythonpath=eval_code(a, '\n'.join(["import sys","print(':'.join(sys.path))"]))
+      print(f"interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
+    except Exception:
+      print(f"interpreter PYTHONPATH: ?")
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)
