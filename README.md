@@ -21,7 +21,6 @@ in the editor.
 Hello, World!
 ```
 
-Any messages printed are pasted back into the corresponding result sections.
 The execution takes place in a background interpreter, tied to the UNIX pipes
 residing in the filesystem. Thus, the state of the interpreter is persistent
 between the executions and in fact between the Vim editing sessions.
