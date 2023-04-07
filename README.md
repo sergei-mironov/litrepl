@@ -120,6 +120,7 @@ Usage
 | `:LitEvalAbove` | `lirtepl eval-sections '0..(N\|L:C)' <F`| Run sections above and under the cursor and wait until the completion |
 | `:LitEvalBelow` | `lirtepl eval-sections '(N\|L:C)..$' <F`| Run sections below and under the cursor and wait until the completion |
 | `:LitEvalAll`   | `lirtepl eval-sections '0..$' <F`       | Evaluate all code sections |
+|                 | `lirtepl eval-code <P`                  | Evaluate the given Python code |
 | `:LitRestart`   | `litrepl restart`    | Restart the interpreter   |
 | `:LitRepl`      | `lirtepl repl`       | Open the terminal to the interpreter |
 | `:LitOpenErr`   | N/A                  | Open the stderr window    |
@@ -127,7 +128,8 @@ Usage
 
 Where
 
-* `F` denotes the document file path
+* `F` denotes the document
+* `P` denotes the Python code
 * `N` denotes the number of code section starting from 0.
 * `L:C` denotes line:column of the cursor.
 

@@ -370,6 +370,22 @@ grep -q 'BG' out2.md
 runlitrepl stop
 )} #}}}
 
+test_eval_code() {( #{{{
+mktest "_test_eval_code"
+runlitrepl start
+cat >source.py <<"EOF"
+def hello(name):
+  print(f"Hello, {name}!")
+
+hello('World')
+EOF
+cat source.py | runlitrepl eval-code >out.txt
+diff -u out.txt - <<"EOF"
+Hello, World!
+
+EOF
+runlitrepl stop
+)} #}}}
 
 interpreters() {
   echo "$(which python)"
@@ -382,6 +398,7 @@ tests() {
   echo test_tqdm
   echo test_eval_tex
   echo test_async
+  echo test_eval_code
 }
 
 runlitrepl() {

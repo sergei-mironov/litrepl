@@ -274,6 +274,18 @@ def escape(text,pat):
   epat=''.join(['\\'+c for c in pat])
   return text.replace(pat,epat)
 
+def eval_code(a, code:str, runr:Optional[RunResult]=None) -> str:
+  fns=pipenames(a)
+  if runr is None:
+    code2,runr=rresultLoad(code)
+  else:
+    code2=code
+  if runr is None:
+    rr,runr=processAdapt(fns,code2,a.timeout_initial)
+  else:
+    rr=processCont(fns,runr,a.timeout_continue)
+  return rresultSave(rr.text,runr) if rr.timeout else rr.text
+
 def eval_section_(a, tree, secrec:SecRec)->None:
   """ Evaluate sections as specify by the `secrec` request.  """
   fns=pipenames(a)
@@ -301,12 +313,7 @@ def eval_section_(a, tree, secrec:SecRec)->None:
       code=unindent(bm.column-1,t)
       ssrc[self.nsec]=code
       if self.nsec in nsecs:
-        runr:Optional[RunResult]=secrec.pending.get(self.nsec)
-        if runr is None:
-          rr,runr=processAdapt(fns,code,a.timeout_initial)
-        else:
-          rr=processCont(fns,runr,a.timeout_continue)
-        sres[self.nsec]=rresultSave(rr.text,runr) if rr.timeout else rr.text
+        sres[self.nsec]=eval_code(a,code,secrec.pending.get(self.nsec))
     def ocodesection(self,tree):
       bmarker=tree.children[0].children[0].value
       emarker=tree.children[2].children[0].value

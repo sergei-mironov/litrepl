@@ -16,7 +16,7 @@ if __name__=='__main__':
   ap.add_argument('-d','--debug',type=int,metavar='LEVEL',default=0)
   ap.add_argument('--auxdir',type=str,metavar='DIR',default=None,help="Directory to store auxilary files")
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,help="Directory to run from")
-  sps=ap.add_subparsers(help='command help', dest='command')
+  sps=ap.add_subparsers(dest='command',help='commands to execute')
   sps.add_parser('start',help='Start the interpreter in the background')
   sps.add_parser('stop',help='Stop the interpreter')
   sps.add_parser('restart',help='Restart the interpreter')
@@ -28,6 +28,7 @@ if __name__=='__main__':
   apes.add_argument('--col',type=int,default=None)
   eps=sps.add_parser('eval-sections',help='Evaluate one or more sections by location')
   eps.add_argument('locs',metavar='LOCS',default='*',help='locs help')
+  ecs=sps.add_parser('eval-code',help='Evaluate the given lines of code')
   repl=sps.add_parser('repl',help='Connect interactive shell to the terminal')
   ips=sps.add_parser('interrupt',help='Raise KeyboardInterrupt exception to the interpreter')
   ips.add_argument('locs',metavar='LOCS',default='*',help='locs help')
@@ -73,6 +74,8 @@ if __name__=='__main__':
     sr=solve_sloc(a.locs,t)
     sr.nsecs|=set(sr.pending.keys())
     eval_section_(a,t,sr)
+  elif a.command=='eval-code':
+    print(eval_code(a,sys.stdin.read()))
   elif a.command=='status':
     auxd,inp,outp,pidf=astuple(pipenames(a))
     print(f"version: {__version__}")

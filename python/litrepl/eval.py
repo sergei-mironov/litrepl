@@ -202,6 +202,7 @@ def process(fns:FileNames, lines:str)->str:
       os.close(fdr)
 
 def processCont(fns:FileNames, r:RunResult, timeout:float=1.0)->ReadResult:
+  """ Continue reading from the already running readout process"""
   fdr=0
   rr:ReadResult
   try:
