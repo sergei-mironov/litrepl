@@ -54,8 +54,11 @@ Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
-  * [Text formatting](#text-formatting)
-  * [Vim and Command line commands](#vim-and-command-line-commands)
+  * [Examples](#examples)
+    * [In Vim](#in-vim)
+    * [As a command line tool](#as-a-command-line-tool)
+  * [Document formatting](#document-formatting)
+  * [Command reference](#command-reference)
   * [Vim variables and Command line arguments](#vim-variables-and-command-line-arguments)
 * [Development](#development)
 * [Gallery](#gallery)
@@ -70,11 +73,14 @@ Contents
 Installation
 ------------
 
-To run the setup, one needs to install a Python package and a Vim plugin. The
-Vim plugin relies on the `litrepl` script and on some third-party UNIX tools
-available via the system `PATH`. We advise users to git-clone the same
-repository with all the package managers involved to match the versions. Below
-are the instructions for some packaging system combinations.
+The repository currently includes a Python module and a Vim plugin. We advise
+users to git-clone the repository and install packages from source to keep
+versions in sync. The Python modules could be installed using `pip install` or
+`pip install -e`. The Vim plugin typically requires adding certain lines to the
+Vim configuration or using third-party plugin managers such as `Vim-Plug`.
+
+Both project reliy on certain UNIX tools available via the system `PATH`. The
+detailed instructions are below:
 
 <details><summary>Pip and Plug</summary><p>
 
@@ -101,12 +107,35 @@ Consider following the [Development guide](./doc/develop.md)
 Usage
 -----
 
-### Text formatting
+### Examples
+
+#### In Vim
+
+1. Open Markdown or Latex document in Vim
+2. Put the cursor on the executable code section or on the `result` section
+3. Execute `:LitEval1` Vim command.
+
+The plugin does not define any Vim key bindings, users are expected to do it by
+themselves, for example:
+
+```vim
+nnoremap <F5> :LitEval1<CR>
+nnoremap <F6> :LitEvalBreak1<CR>
+```
+
+#### As a command line tool
+
+```sh
+$ cat doc/example.md | \
+  litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
+```
+
+### Document formatting
 
 * [Formatting Markdown documents](./doc/formatting.md#markdown)
 * [Formatting LaTeX documents](./doc/formatting.md#latex)
 
-### Vim and Command line commands
+### Command reference
 
 | Vim             | Command line         | Description                          |
 |-----------------|----------------------|--------------------------------------|
@@ -132,12 +161,6 @@ Where
 * `N` denotes the number of code section starting from 0.
 * `L:C` denotes line:column of the cursor.
 
-To evaluate the whole document:
-
-```sh
-$ cat doc/example.md | \
-  litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
-```
 
 ### Vim variables and Command line arguments
 
@@ -154,14 +177,6 @@ $ cat doc/example.md | \
 
 * `I` is taken into account by the `start` command or by the first call to
   `eval-sections`.
-
-The plugin does not define any Vim key bindings, users are expected to do it by
-themselves, for example:
-
-```vim
-nnoremap <F5> :LitEval1<CR>
-nnoremap <F6> :LitEvalBreak1<CR>
-```
 
 Development
 -----------
