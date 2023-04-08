@@ -125,9 +125,18 @@ nnoremap <F6> :LitEvalBreak1<CR>
 
 #### As a command line tool
 
+To evaluate all Python section in a document:
+
 ```sh
 $ cat doc/example.md | \
   litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
+```
+
+To evaluate a Python script:
+
+```sh
+$ cat script.py | \
+  litrepl --interpreter=ipython eval-code
 ```
 
 ### Document formatting
