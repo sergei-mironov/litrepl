@@ -36,7 +36,7 @@ endfun
 command! -nargs=0 LitStop call <SID>SessionStop()
 
 fun! s:SessionRestart()
-  execute '!'.<SID>SessionCmd().' restart'
+  execute '!'.<SID>SessionCmd().' --interpreter='.g:litrepl_interpreter.' restart'
 endfun
 command! -nargs=0 LitRestart call <SID>SessionRestart()
 
