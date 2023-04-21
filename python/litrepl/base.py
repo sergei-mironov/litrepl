@@ -36,8 +36,6 @@ def pipenames(a)->FileNames:
   auxdir=a.auxdir if a.auxdir is not None else \
     join(gettempdir(),f"litrepl_{getuid()}_"+
          sha256(getcwd().encode('utf-8')).hexdigest()[:6])
-  pdebug(f"Auxdir: {auxdir}")
-  makedirs(auxdir, exist_ok=True)
   return FileNames(auxdir, join(auxdir,"_in.pipe"), join(auxdir,"_out.pipe"),
                    join(auxdir,"_pid.txt"))
 
@@ -92,14 +90,15 @@ def start_(a, fork_handler:Callable[...,None])->None:
   """ Starts the background Python interpreter. Kill an existing interpreter if
   any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`."""
   wd,inp,outp,pid=astuple(pipenames(a))
+  makedirs(wd, exist_ok=True)
   if isfile(pid):
-    system(f'kill "$(cat {pid})" >/dev/null 2>&1')
+    system(f'kill -9 "$(cat {pid})" >/dev/null 2>&1')
   system(f"mkfifo '{inp}' '{outp}' 2>/dev/null")
   if os.fork()==0:
     sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
     fork_handler()
   else:
-    for i in range(10):
+    for i in range(20):
       if isfile(pid):
         break
       sleep(0.5)
