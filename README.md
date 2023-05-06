@@ -7,7 +7,7 @@ providing the text-friendly code editing and execution workflow.
 
 
 ~~~~ markdown
-Consider this Markdown document.
+Consider a Markdown document.
 
 ``` python
 print("Hello, World!")
@@ -248,14 +248,11 @@ Limitations
 Related projects
 ----------------
 
-Format conversion
+Edititng
 
-* https://pandoc.org/
-
-Documenting
-
-* https://github.com/lervag/vimtex
-* https://github.com/preservim/vim-markdown
+* https://github.com/lervag/vimtex (LaTeX editing, LaTeX preview)
+* https://github.com/shime/vim-livedown (Markdown preview)
+* https://github.com/preservim/vim-markdown (Markdown editing)
 
 Code execution
 
@@ -271,9 +268,14 @@ Code execution
   - https://github.com/mwouts/jupytext
 * https://github.com/ivanov/ipython-vimception
 
-Graphics
+Useful Vim plugins
 
-* https://github.com/sergei-grechanik/vim-terminal-images
+* https://github.com/sergei-grechanik/vim-terminal-images (Graphics in vim
+  terminals)
+
+Useful tools
+
+* https://pandoc.org/
 
 Third-party issues
 ------------------
