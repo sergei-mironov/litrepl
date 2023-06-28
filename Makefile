@@ -4,7 +4,7 @@ WHEEL = dist/litrepl-$(VERSION)-py3-none-any.whl
 PY = $(shell find -name '*\.py' | grep -v semver.py | grep -v revision.py)
 TESTS = ./sh/test.sh
 
-.stamp_test: $(PY) $(TESTS) Makefile
+.stamp_test: $(PY) $(TESTS) Makefile python/bin/litrepl
 	LITREPL_BIN="python `pwd`/python/bin/litrepl" \
 	LITREPL_ROOT=`pwd`/python \
 	sh ./sh/test.sh

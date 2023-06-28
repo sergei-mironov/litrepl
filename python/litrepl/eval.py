@@ -83,31 +83,39 @@ def readout(fdr,
         return "<LitREPL: Non-unicode output>"
   return "<LitREPL: timeout waiting the interpreter response>"
 
-def readout_asis(fdr:int, fo:int, prompt, timeout:Optional[int]=None)->None:
+def readout_asis(fdr:int, fdw:int, fo:int, pattern, prompt, timeout:Optional[int]=None)->bool:
   """ Read everything from FD `fdr` until `prompt` is found. Write everything to
-  FD `fo`. """
+  FD `fo`. Return True on success, False indicates a problem (timeout). """
   acc:bytes=b''
-  while select([fdr],[],[],timeout)[0] != []:
-    r=os.read(fdr, 1024)
-    if r==b'':
-      return
-    w=os.write(fo,r)
-    assert w==len(r), "LitREPL failed to copy input stream"
-    acc+=r # TODO: don't store everything
-    m=re_match(prompt,acc)
-    if m:
-      return
-  os.write(fo,"<LitREPL: timeout waiting for the interpreter response>\n".encode())
+  os.write(fdw,pattern.encode())
+  while True:
+    rlist = select([fdr],[],[],timeout)[0]
+    if rlist == []:
+      # Timeout, repeat the query
+      os.write(fdw,pattern.encode())
+    else:
+      r=os.read(fdr, 1024)
+      if r==b'':
+        return True
+      w=os.write(fo,r)
+      if w!=len(r):
+        os.write(fo,"<LitREPL failed to copy input stream>\n".encode())
+        assert True
+      acc+=r # TODO: don't store everything
+      m=re_match(prompt,acc)
+      if m:
+        return True
 
+PATTERN1='325674801010\n'
 PATTERN='3256748426384\n'
+TIMEOUT_SEC=3
 
 def interact(fdr, fdw, text:str, fo:int, pattern)->None:
-  os.write(fdw,pattern.encode())
-  x=readout(fdr,prompt=mkre(pattern),merge=merge_rn2)
+  os.write(fdw,PATTERN1.encode())
+  x=readout(fdr,prompt=mkre(PATTERN1),merge=merge_rn2)
   os.write(fdw,text.encode())
   os.write(fdw,'\n'.encode())
-  os.write(fdw,pattern.encode())
-  readout_asis(fdr,fo,prompt=mkre(pattern))
+  readout_asis(fdr,fdw,fo,pattern,prompt=mkre(pattern),timeout=TIMEOUT_SEC)
 
 def pusererror(fname,err)->None:
   with open(fname,"w") as f:
@@ -118,6 +126,7 @@ def processAsync(fns:FileNames, lines:str)->RunResult:
   wd,inp,outp,pidf=astuple(fns)
   codehash=abs(hash(lines))
   fname=join(wd,f"litrepl_eval_{codehash}.txt")
+  pdebug(f"Interacting via {fname}")
   pattern=PATTERN
   fo=os.open(fname,os.O_WRONLY|os.O_SYNC|os.O_TRUNC|os.O_CREAT)
   assert fo>0

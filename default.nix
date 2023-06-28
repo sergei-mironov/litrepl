@@ -51,6 +51,7 @@ let
         tqdm
         matplotlib
         numpy
+        bpython
       ]
     );
 

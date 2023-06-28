@@ -6,10 +6,12 @@ from litrepl import __version__
 from os import chdir
 from subprocess import check_output, DEVNULL, CalledProcessError
 
+LOCSHELP='(N|$|N..N)[,(...)] where N is either: number,$,ROW:COL'
+
 if __name__=='__main__':
   ap=ArgumentParser(prog='litrepl.py')
   ap.add_argument('-v','--version',action='version',version=__version__ or '?',help='Print the version')
-  ap.add_argument('--filetype',metavar='STR',default='markdown',help='ft help')
+  ap.add_argument('--filetype',metavar='STR',default='markdown',help='markdown|tex')
   ap.add_argument('--interpreter',metavar='EXE',default='auto',help='python|ipython|auto')
   ap.add_argument('--timeout-initial',type=str,metavar='SEC',default='inf')
   ap.add_argument('--timeout-continue',type=str,metavar='SEC',default='inf')
@@ -27,11 +29,11 @@ if __name__=='__main__':
   apes.add_argument('--line',type=int,default=None)
   apes.add_argument('--col',type=int,default=None)
   eps=sps.add_parser('eval-sections',help='Evaluate one or more sections by location')
-  eps.add_argument('locs',metavar='LOCS',default='*',help='locs help')
+  eps.add_argument('locs',metavar='LOCS',default='*', help=LOCSHELP)
   ecs=sps.add_parser('eval-code',help='Evaluate the given lines of code')
   repl=sps.add_parser('repl',help='Connect interactive shell to the terminal')
   ips=sps.add_parser('interrupt',help='Raise KeyboardInterrupt exception to the interpreter')
-  ips.add_argument('locs',metavar='LOCS',default='*',help='locs help')
+  ips.add_argument('locs',metavar='LOCS',default='*',help=LOCSHELP)
   a=ap.parse_args(sys.argv[1:])
 
   a.timeout_initial=float(a.timeout_initial)
