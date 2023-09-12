@@ -226,8 +226,8 @@ To enter the shell where all the dependencies are available, run
 $ nix develop
 ```
 
-[Makefile](./Makefile) encodes common procedures available through the
-development shell: running tests, building Python wheels, uploading PyPI
+[Makefile](./Makefile) encodes common procedures available in the
+development shell: running tests, building Python wheels, uploading PyPi
 packages.
 
 To build individual Nix expressions, run the `nix build '.#NAME'` passing it
@@ -239,7 +239,7 @@ $ ./result/bin/vim-demo  # Runs the self-contained demo instance of Vim
 ```
 
 Optionally one can use `nix-env -i ./result` to install the available expression
-into OS-wide user profile.
+into the OS-wide user profile.
 
 The list of output expressions includes:
 
