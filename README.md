@@ -28,7 +28,6 @@ between the executions and in fact between the Vim editing sessions.
 
 <details><summary>Features</summary><p>
 
-* Lightweight: Has only a few dependencies.
 * Supported document formats: Markdown [[MD]](./doc/example.md), Latex
   [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf).
 * Supported interpreters: Python, IPython
@@ -73,21 +72,20 @@ Contents
 Installation
 ------------
 
-The repository currently includes a Python module and a Vim plugin. We advise
-users to git-clone the repository and install packages from source to keep
+The repository includes (a) Python application and (b) Vim plugin. We advise
+users to git-clone the repository and install the packages from source to keep
 versions in sync. The Python modules could be installed using `pip install` or
 `pip install -e`. The Vim plugin typically requires adding certain lines to the
-Vim configuration or using third-party plugin managers such as `Vim-Plug`.
+Vim configuration or using third-party plugin managers such as `Vim-Plug`.  Both
+parts rely on certain UNIX tools available in the system `PATH`.
 
-Both project reliy on certain UNIX tools available via the system `PATH`. The
-detailed instructions are below:
+Installation instructions for some popular package managers are below:
 
 <details><summary>Pip and Plug</summary><p>
 
-Instructions for the Pip and [Plug](https://github.com/junegunn/vim-plug)
-manager of Vim:
+Instructions for the Python Pip and [Vim Plug](https://github.com/junegunn/vim-plug):
 
-1. Install the Python package.
+1. Install the `litrepl` Python package with pip:
    ```sh
    $ pip install --user git+https://github.com/grwlf/litrepl.vim
    $ litrepl --version
@@ -97,10 +95,38 @@ manager of Vim:
    ```vim
    Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
    ```
-</p></details>
-<details><summary>Nix</summary><p>
+   Note: `rtp` sets the custom vim-plugin source directory of the plugin.
 
-Consider following the [Development guide](./doc/develop.md)
+</p></details>
+
+<details><summary>Nix + vim_configurable</summary><p>
+
+Nix supports
+[configurable Vim expressions](https://nixos.wiki/wiki/Vim#System_wide_vim.2Fnvim_configuration).
+To enable the Litrepl plugin, just add the `vim-litrepl.vim-litrepl-release` to the
+list of Vim packages.
+
+``` nix
+let
+  vim-litrepl = import <path/to/litrepl.vim> {};
+in
+vim_configurable.customize {
+  name = "vim";
+  vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
+    start = [
+      ...
+      vim-litrepl.vim-litrepl-release
+      ...
+    ];
+  };
+}
+```
+
+Note: `vim-demo` expression from the [default.nix](./default.nix) provides
+an example Vim configuration. Use `nix build '.#vim-demo'` to build it and then
+`./result/bin/vim-demo` to run the editor.
+
+See the [Development](#development) section for more details.
 
 </p></details>
 
@@ -190,7 +216,39 @@ Where
 Development
 -----------
 
-See the [Development guide](./doc/develop.md)
+This project uses [Nix](https://nixos.org/nix) as a primary development
+framework.  [flake.nix](./flake.nix) handles the source-level Nix dependencies.
+[default.nix](./default.nix) declares build outputs including Pypi and Vim
+packages, demo Vim configurations, development shells, etc.
+
+To enter the development shell with all the dependencies, run
+``` sh
+$ nix develop
+```
+
+To build individual expressions, run the `nix build .#NAME` command passing it
+with the name of the expression to build. For example, to build and run an
+example Vim instance with all the dependencies:
+
+``` sh
+$ nix build '.#vim-demo'
+$ ./result/bin/vim-demo
+```
+
+Optionally one can use `nix-env -i ./result` to install the available expression
+into a user profile.
+
+The list of output expressions includes:
+
+* `litrepl-release` - Litrepl script and Python lib
+* `litrepl-release-pypi` - Litrepl script and Python lib
+* `vim-litrepl-release` - Vim with locally built litrepl plugin
+* `vim-litrepl-release-pypi` - Vim with litrepl plugin built from PYPI
+* `vim-test` - A minimalistic Vim with a single litrepl plugin
+* `vim-demo` - Vim with litrepl for recording screencasts
+* `vim-plug` - vim configured to use the Plug manager
+* `shell-dev` - The main development shell
+* `shell-demo` - The shell for recording demonstrations
 
 Gallery
 -------
