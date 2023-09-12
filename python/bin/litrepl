@@ -5,6 +5,7 @@ from litrepl import *
 from litrepl import __version__
 from os import chdir
 from subprocess import check_output, DEVNULL, CalledProcessError
+from argparse import ArgumentParser
 
 LOCSHELP='(N|$|N..N)[,(...)] where N is either: number,$,ROW:COL'
 

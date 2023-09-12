@@ -121,10 +121,10 @@ def pusererror(fname,err)->None:
   with open(fname,"w") as f:
     f.write(err)
 
-def processAsync(fns:FileNames, lines:str)->RunResult:
-  """ Send `lines` to the interpreter and fork the response reader """
+def processAsync(fns:FileNames, code:str)->RunResult:
+  """ Send `code` to the interpreter and fork the response reader """
   wd,inp,outp,pidf=astuple(fns)
-  codehash=abs(hash(lines))
+  codehash=abs(hash(code))
   fname=join(wd,f"litrepl_eval_{codehash}.txt")
   pdebug(f"Interacting via {fname}")
   pattern=PATTERN
@@ -147,7 +147,7 @@ def processAsync(fns:FileNames, lines:str)->RunResult:
       def _handler(signum,frame):
         pass
       signal(SIGINT,_handler)
-      interact(fdr,fdw,lines,fo,pattern)
+      interact(fdr,fdw,code,fo,pattern)
     except BlockingIOError:
       pusererror(fname,"ERROR: litrepl.py couldn't lock the sessions pipes\n")
     finally:
@@ -235,12 +235,12 @@ def processCont(fns:FileNames, r:RunResult, timeout:float=1.0)->ReadResult:
       os.close(fdr)
 
 def processAdapt(fns:FileNames,
-                 lines:str,
+                 code:str,
                  timeout:float=1.0)->Tuple[ReadResult,RunResult]:
-  """ Push `lines` to the interpreter and wait for `timeout` seconds for
-  immediate answer. In case of delay, return intermediate answer with
-  the continuation."""
-  runr=processAsync(fns,lines)
+  """ Push `code` to the interpreter and wait for `timeout` seconds for
+  the immediate answer. In case of delay, return intermediate answer and
+  the continuation context."""
+  runr=processAsync(fns,code)
   rr=processCont(fns,runr,timeout=timeout)
   return rr,runr
 

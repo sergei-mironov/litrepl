@@ -28,12 +28,13 @@ class PrepInfo:
 @dataclass
 class SecRec:
   """ Request for section evaluation """
-  nsecs:Set[NSec]
-  pending:Dict[NSec,RunResult]
+  nsecs:Set[NSec]                   # Sections to evaluate
+  pending:Dict[NSec,RunResult]      # Contexts of already running sections
 
 @dataclass
 class FileNames:
-  wd:str
-  inp:str
-  outp:str
-  pidf:str
+  """ Interpreter filenames """
+  wd:str     # Working directory
+  inp:str    # Input pipe
+  outp:str   # Output pipe
+  pidf:str   # File containing PID

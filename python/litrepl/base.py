@@ -4,7 +4,7 @@ import sys
 import fcntl
 
 from copy import deepcopy
-from typing import List, Optional, Tuple, Set, Dict, Callable
+from typing import List, Optional, Tuple, Set, Dict, Callable, Any
 from re import search, match as re_match
 from select import select
 from os import environ, system
@@ -26,12 +26,13 @@ from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont)
 
 DEBUG:bool=False
+LitreplArgs=Any
 
 def pdebug(*args,**kwargs):
   if DEBUG:
     print(*args, file=sys.stderr, **kwargs, flush=True)
 
-def pipenames(a)->FileNames:
+def pipenames(a:LitreplArgs)->FileNames:
   """ Return file names of in.pipe, out.pip and log """
   auxdir=a.auxdir if a.auxdir is not None else \
     join(gettempdir(),f"litrepl_{getuid()}_"+
@@ -39,7 +40,8 @@ def pipenames(a)->FileNames:
   return FileNames(auxdir, join(auxdir,"_in.pipe"), join(auxdir,"_out.pipe"),
                    join(auxdir,"_pid.txt"))
 
-def fork_python(a, name):
+def fork_python(a:LitreplArgs, name:str):
+  """ Forks an instance of Python interpreter `name` """
   assert 'python' in name
   wd,inp,outp,pid=astuple(pipenames(a))
   system((f'{name} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
@@ -53,7 +55,8 @@ def fork_python(a, name):
     '_=signal.signal(signal.SIGINT,_handler)\n')
   exit(0)
 
-def fork_ipython(a, name):
+def fork_ipython(a:LitreplArgs, name:str):
+  """ Forks an instance of IPython interpreter `name` """
   assert 'ipython' in name
   wd,inp,outp,pid=astuple(pipenames(a))
   cfg=join(wd,'litrepl_ipython_config.py')
@@ -86,7 +89,7 @@ def fork_ipython(a, name):
   )
   exit(0)
 
-def start_(a, fork_handler:Callable[...,None])->None:
+def start_(a:LitreplArgs, fork_handler:Callable[...,None])->None:
   """ Starts the background Python interpreter. Kill an existing interpreter if
   any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`."""
   wd,inp,outp,pid=astuple(pipenames(a))
@@ -105,7 +108,7 @@ def start_(a, fork_handler:Callable[...,None])->None:
     if not isfile(pid):
       raise ValueError(f"Couldn't see '{pid}'. Did the fork fail?")
 
-def start(a):
+def start(a:LitreplArgs):
   if 'ipython' in a.interpreter:
     start_(a, partial(fork_ipython,a=a,name=a.interpreter))
   elif 'python' in a.interpreter:
@@ -118,12 +121,12 @@ def start(a):
   else:
     raise ValueError(f"Unsupported interpreter '{a.interpreter}'")
 
-def running(a)->bool:
+def running(a:LitreplArgs)->bool:
   """ Checks if the background session was run or not. """
   wd,inp,outp,pid=astuple(pipenames(a))
   return 0==system(f"test -f '{pid}' && test -p '{inp}' && test -p '{outp}'")
 
-def stop(a):
+def stop(a:LitreplArgs)->None:
   """ Stops the background Python session. """
   wd,inp,outp,pid=astuple(pipenames(a))
   system(f'kill "$(cat {pid})" >/dev/null 2>&1')
@@ -261,31 +264,62 @@ def cursor_within(pos, posA, posB)->bool:
     else:
       return False
 
-def unindent(col:int,lines:str)->str:
+def unindent(col:int, lines:str)->str:
   def _rmspaces(l):
     return l[col:] if l.startswith(' '*col) else l
   return '\n'.join(map(_rmspaces,lines.split('\n')))
 
-def indent(col,lines:str)->str:
+def indent(col:int, lines:str)->str:
   return '\n'.join([' '*col+l for l in lines.split('\n')])
 
-def escape(text,pat):
+def escape(text, pat:str):
+  """ Escapes every letter of a pattern with (\) """
   epat=''.join(['\\'+c for c in pat])
   return text.replace(pat,epat)
 
-def eval_code(a, code:str, runr:Optional[RunResult]=None) -> str:
+LEADSPACES=re.compile('^([ \t]*)')
+
+def fillspaces(code:str, suffix:str)->str:
+  """ Replace empty lines of multi-line code snippet with lines filled with
+  previous line's leading spaces, followed by suffix (e.g. a Python comment)."""
+  def _leadspaces(line:str)->str:
+    m=re_match(LEADSPACES,line)
+    return str(m.group(1)) if m else ''
+  lines=code.split('\n')
+  if len(lines)<=0:
+    return code
+  acc=[lines[0]]
+  nempty=0
+  spaces=_leadspaces(lines[0])
+  for line in lines[1:]:
+    if len(line)==0:
+      nempty+=1
+    else:
+      spaces2=_leadspaces(line)
+      if nempty>0:
+        acc.extend(['' if len(spaces2)<len(spaces) else spaces+suffix]*nempty)
+        nempty=0
+      acc.append(line)
+      spaces=spaces2
+  acc.extend(['']*nempty)
+  return '\n'.join(acc)
+
+def eval_code(a:LitreplArgs, code:str, runr:Optional[RunResult]=None) -> str:
+  """ Start or complete the code snippet evaluation process.
+  `RunResult` may contain the existing runner's context. Alternatively, the
+  reference to the context could be encoded in the code section itself.
+
+  The function returns either the evaluation result or the running context
+  encoded in the result for later reference.
+  """
   fns=pipenames(a)
   if runr is None:
-    code2,runr=rresultLoad(code)
-  else:
-    code2=code
-  if runr is None:
-    rr,runr=processAdapt(fns,code2,a.timeout_initial)
+    rr,runr=processAdapt(fns,fillspaces(code, '# spaces'),a.timeout_initial)
   else:
     rr=processCont(fns,runr,a.timeout_continue)
   return rresultSave(rr.text,runr) if rr.timeout else rr.text
 
-def eval_section_(a, tree, secrec:SecRec)->None:
+def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->None:
   """ Evaluate sections as specify by the `secrec` request.  """
   fns=pipenames(a)
   nsecs=secrec.nsecs

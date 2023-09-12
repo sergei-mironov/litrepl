@@ -387,6 +387,25 @@ EOF
 runlitrepl stop
 )} #}}}
 
+test_eval_with_empty_lines() {( #{{{
+mktest "_test_eval_code"
+runlitrepl start
+cat >source.py <<"EOF"
+def hello():
+  var = 33  # EMPTY LINE BELOW
+
+  print(f"Hello, {var}!")
+
+hello()
+EOF
+cat source.py | runlitrepl eval-code >out.txt
+diff -u out.txt - <<"EOF"
+Hello, 33!
+
+EOF
+runlitrepl stop
+)} #}}}
+
 interpreters() {
   echo "$(which python)"
   echo "$(which ipython)"
@@ -399,6 +418,7 @@ tests() {
   echo test_eval_tex
   echo test_async
   echo test_eval_code
+  echo test_eval_with_empty_lines
 }
 
 runlitrepl() {
