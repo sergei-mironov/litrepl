@@ -238,7 +238,7 @@ $ nix build '.#vim-demo'
 $ ./result/bin/vim-demo  # Runs the self-contained demo instance of Vim
 ```
 
-Optionally one can use `nix-env -i ./result` to install the available expression
+Optionally one can run `nix-env -i ./result` to install the available expression
 into the OS-wide user profile.
 
 The list of output expressions includes:
