@@ -217,26 +217,29 @@ Development
 -----------
 
 This project uses [Nix](https://nixos.org/nix) as a primary development
-framework.  [flake.nix](./flake.nix) handles the source-level Nix dependencies.
+framework. [flake.nix](./flake.nix) handles the source-level Nix dependencies.
 [default.nix](./default.nix) declares build outputs including Pypi and Vim
 packages, demo Vim configurations, development shells, etc.
 
-To enter the development shell with all the dependencies, run
+To enter the shell where all the dependencies are available, run
 ``` sh
 $ nix develop
 ```
 
-To build individual expressions, run the `nix build .#NAME` command passing it
-with the name of the expression to build. For example, to build and run an
-example Vim instance with all the dependencies:
+[Makefile](./Makefile) encodes common procedures available through the
+development shell: running tests, building Python wheels, uploading PyPI
+packages.
+
+To build individual Nix expressions, run the `nix build '.#NAME'` passing it
+with the name of the expression to build:
 
 ``` sh
 $ nix build '.#vim-demo'
-$ ./result/bin/vim-demo
+$ ./result/bin/vim-demo  # Runs the self-contained demo instance of Vim
 ```
 
 Optionally one can use `nix-env -i ./result` to install the available expression
-into a user profile.
+into OS-wide user profile.
 
 The list of output expressions includes:
 
@@ -245,10 +248,10 @@ The list of output expressions includes:
 * `vim-litrepl-release` - Vim with locally built litrepl plugin
 * `vim-litrepl-release-pypi` - Vim with litrepl plugin built from PYPI
 * `vim-test` - A minimalistic Vim with a single litrepl plugin
-* `vim-demo` - Vim with litrepl for recording screencasts
-* `vim-plug` - vim configured to use the Plug manager
-* `shell-dev` - The main development shell
-* `shell-demo` - The shell for recording demonstrations
+* `vim-demo` - Vim configured to use litrepl suitable for recording screencasts
+* `vim-plug` - Vim configured to use litrepl via the Plug manager
+* `shell-dev` - The development shell
+* `shell-demo` - The shell for recording demonstrations, includes `vim-demo`.
 
 Gallery
 -------
