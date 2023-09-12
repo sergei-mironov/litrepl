@@ -403,6 +403,27 @@ diff -u out.txt - <<"EOF"
 Hello, 33!
 
 EOF
+
+cat >source.py <<"EOF"
+def hello():
+  try:
+    var = 33  # EMPTY LINE BELOW
+
+    print(f"Try-finally, {var}!")
+  finally:
+    print('Done')
+
+hello()
+EOF
+cat source.py | runlitrepl eval-code >out.txt
+diff -u out.txt - <<"EOF"
+Try-finally, 33!
+Done
+
+EOF
+
+
+
 runlitrepl stop
 )} #}}}
 
