@@ -422,7 +422,17 @@ Done
 
 EOF
 
+cat >source.py <<"EOF"
+if True:
+    var = 33  # EMPTY LINE BELOW
 
+    print(f"If-true, {var}!")
+EOF
+cat source.py | runlitrepl eval-code >out.txt
+diff -u out.txt - <<"EOF"
+If-true, 33!
+
+EOF
 
 runlitrepl stop
 )} #}}}
