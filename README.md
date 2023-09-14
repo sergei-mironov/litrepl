@@ -341,8 +341,9 @@ Useful tools
 Third-party issues
 ------------------
 
-* https://github.com/junegunn/vim-plug/issues/1010#issuecomment-1221614232
-* https://github.com/jgm/pandoc/issues/8598
-* https://github.com/mwouts/jupytext/issues/220#issuecomment-1418209581
+* Vim-plug https://github.com/junegunn/vim-plug/issues/1010#issuecomment-1221614232
+* Pandoc https://github.com/jgm/pandoc/issues/8598
+* Jupytext https://github.com/mwouts/jupytext/issues/220#issuecomment-1418209581
+* Vim-LSC https://github.com/natebosch/vim-lsc/issues/469
 
 
