@@ -72,14 +72,13 @@ Contents
 Installation
 ------------
 
-The repository includes a Python application and Vim plugin. The Python part
-could be installed with `pip install`. The Vim plugin requires just copying or
-using plugin manager like `Plug`.  Both parts rely on certain UNIX tools visible
-in the system `PATH`.
+The repository includes a Python tool and an interface Vim plugin. The Python
+part should be installed with `pip install` as usual. The Vim part requires
+plugin manager like `Plug` or hand-copying files to a .vim config folder.
 
-The generic installation procedure is:
+The generic installation procedure is fllows:
 
-<details><summary>Pip and Plug</summary><p>
+<details><summary>Pip-install and Plug</summary><p>
 
 Instructions for the Python Pip and [Vim Plug](https://github.com/junegunn/vim-plug):
 
@@ -99,7 +98,7 @@ Instructions for the Python Pip and [Vim Plug](https://github.com/junegunn/vim-p
 
 Alternatively, Nix/NixOS users can follow the formalized path:
 
-<details><summary>Nix + vim_configurable</summary><p>
+<details><summary>Nix and vim_configurable</summary><p>
 
 Nix supports
 [configurable Vim expressions](https://nixos.wiki/wiki/Vim#System_wide_vim.2Fnvim_configuration).
