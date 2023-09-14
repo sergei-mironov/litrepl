@@ -309,32 +309,33 @@ Limitations
 Related projects
 ----------------
 
-Edititng
+Edititng:
 
 * https://github.com/lervag/vimtex (LaTeX editing, LaTeX preview)
 * https://github.com/shime/vim-livedown (Markdown preview)
 * https://github.com/preservim/vim-markdown (Markdown editing)
 
-Code execution
+Code execution:
 
-* https://www.ctan.org/pkg/pyluatex
-* https://github.com/dccsillag/magma-nvim
-* https://github.com/metakirby5/codi.vim
-* https://github.com/gpoore/pythontex
-* https://github.com/gpoore/pythontex
-* https://github.com/gpoore/codebraid
-* https://github.com/hanschen/vim-ipython-cell
-* https://github.com/ivanov/vim-ipython
-* https://github.com/goerz/jupytext.vim
-  - https://github.com/mwouts/jupytext
-* https://github.com/ivanov/ipython-vimception
+* Vim-medieval https://github.com/gpanders/vim-medieval
+  - Evaluates Markdown code sections
+* Pyluatex https://www.ctan.org/pkg/pyluatex
+* Magma-nvim https://github.com/dccsillag/magma-nvim
+* Codi https://github.com/metakirby5/codi.vim
+* Pythontex https://github.com/gpoore/pythontex
+  - Evaluates Latex code sections
+* Codebraid https://github.com/gpoore/codebraid
+* Vim-ipython-cell https://github.com/hanschen/vim-ipython-cell
+* Vim-ipython https://github.com/ivanov/vim-ipython
+* Jupytext https://github.com/goerz/jupytext.vim
+  - Alternative? https://github.com/mwouts/jupytext
+* Ipython-vimception https://github.com/ivanov/ipython-vimception
 
-Useful Vim plugins
+Useful Vim plugins:
 
-* https://github.com/sergei-grechanik/vim-terminal-images (Graphics in vim
-  terminals)
+* https://github.com/sergei-grechanik/vim-terminal-images (Graphics in vim terminals)
 
-Useful tools
+Useful tools:
 
 * https://pandoc.org/
 
