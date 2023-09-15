@@ -76,9 +76,9 @@ The repository includes a Python tool and an interface Vim plugin. The Python
 part should be installed with `pip install` as usual. The Vim part requires
 plugin manager like `Plug` or hand-copying files to a .vim config folder.
 
-The generic installation procedure is fllows:
+The generic installation procedure:
 
-<details><summary>Pip-install and Plug</summary><p>
+<details><summary>Pip-install and Vim-Plug</summary><p>
 
 Instructions for the Python Pip and [Vim Plug](https://github.com/junegunn/vim-plug):
 
