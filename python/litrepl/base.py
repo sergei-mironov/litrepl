@@ -297,7 +297,7 @@ def fillspaces(code:str, suffix:str)->str:
     else:
       spaces2=_leadspaces(line)
       if nempty>0:
-        acc.extend(['' if len(spaces2)<len(spaces) else spaces+suffix]*nempty)
+        acc.extend(['' if len(spaces2)==0 else spaces+suffix]*nempty)
         nempty=0
       acc.append(line)
       spaces=spaces2

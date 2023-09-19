@@ -434,6 +434,21 @@ If-true, 33!
 
 EOF
 
+cat >source.py <<"EOF"
+def foo():
+    def _bar():
+      return 33
+
+    print(_bar())
+
+foo()
+EOF
+cat source.py | runlitrepl eval-code >out.txt
+diff -u out.txt - <<"EOF"
+33
+
+EOF
+
 runlitrepl stop
 )} #}}}
 
