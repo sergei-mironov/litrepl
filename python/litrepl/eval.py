@@ -30,13 +30,43 @@ def pdebug(*args,**kwargs):
   if DEBUG:
     print(f"[{time():14.3f}]", *args, file=sys.stderr, **kwargs, flush=True)
 
-def mkre(prompt:str):
-  """ Create the regexp that matches everything ending with a `prompt` """
-  return re.compile(f"(.*)(?={prompt})|{prompt}".encode('utf-8'),
-                    re.A|re.MULTILINE|re.DOTALL)
+def pusererror(fname,err)->None:
+  with open(fname,"w") as f:
+    f.write(err)
 
-def merge_basic2(acc,r,xxx)->Tuple[bytes,int]:
-  return (acc+r,xxx)
+@contextmanager
+def with_sigint(fns:FileNames, brk=False,ipid:Optional[int]=None):
+  ipid_=int(open(fns.pidf).read()) if ipid is None else ipid
+  def _handler(signum,frame):
+    pdebug(f"Sending SIGINT to {ipid_}")
+    os.kill(ipid_,SIGINT)
+  prev=signal(SIGINT,_handler)
+  try:
+    yield
+  finally:
+    signal(SIGINT,prev)
+
+@contextmanager
+def with_alarm(timeout:float):
+  """ Set the alarm if the timeout is known. Zero or infinite timeout means no
+  timeout is set. """
+  prev=None
+  try:
+    if timeout>0 and timeout<float('inf'):
+      def _handler(signum,frame):
+        pdebug(f"SIGALARM received")
+        raise TimeoutError()
+      prev=signal(SIGALRM,_handler)
+      setitimer(ITIMER_REAL,timeout)
+    yield
+  finally:
+    if prev is not None:
+      setitimer(ITIMER_REAL,0)
+      signal(SIGALRM,prev)
+
+
+def merge_basic2(acc,r,x)->Tuple[bytes,int]:
+  return (acc+r,x)
 
 def merge_rn2(buf_,r,i_n=-1)->Tuple[bytes,int]:
   buf=deepcopy(buf_)
@@ -63,6 +93,12 @@ def merge_rn2(buf_,r,i_n=-1)->Tuple[bytes,int]:
     assert buf[i_n]==(b'\n'[0]), f"{buf}, {i_n}, {buf[i_n]}"
   return buf,sz+i_n if i_n<0 else sz+i_n
 
+def mkre(prompt:str):
+  """ Create the regexp that matches everything ending with a `prompt` """
+  return re.compile(f"(.*)(?={prompt})|{prompt}".encode('utf-8'),
+                    re.A|re.MULTILINE|re.DOTALL)
+
+
 def readout(fdr,
             prompt=mkre('>>>'),
             merge=merge_basic2)->str:
@@ -85,15 +121,18 @@ def readout(fdr,
 
 def readout_asis(fdr:int, fdw:int, fo:int, pattern, prompt,
                  timeout:Optional[int]=None)->None:
-  """ Read everything from FD `fdr` until `prompt` is found. Write everything to
-  FD `fo`. Return True on success, False indicates a problem (timeout). """
+  """ Read everything from FD `fdr` and send to `fo` until `prompt` is found. If
+  the `propmt` is not found within the `timeout` seconds, re-send the `pattern`
+  and continue working the interaction. This function is intended to be run from
+  a separate process, governing the process of interaction with an intepreter.
+  """
   acc:bytes=b''
-  os.write(fdw,(pattern+"\n").encode())
+  os.write(fdw,pattern.encode())
   while True:
     rlist = select([fdr],[],[],timeout)[0]
     if rlist == []:
       pdebug(f"readout_asis timeout, repeating the query")
-      os.write(fdw,(pattern+"\n").encode())
+      os.write(fdw,pattern.encode())
     else:
       pdebug(f"readout_asis ready to read")
       r=os.read(fdr, 1024)
@@ -122,12 +161,28 @@ def interact(fdr, fdw, text:str, fo:int, pattern)->None:
   pdebug(f"interact main text ({len(text)} chars) sent")
   readout_asis(fdr,fdw,fo,pattern,prompt=mkre(pattern),timeout=TIMEOUT_SEC)
 
-def pusererror(fname,err)->None:
-  with open(fname,"w") as f:
-    f.write(err)
+def process(fns:FileNames, lines:str)->str:
+  """ Evaluate `lines` synchronously. """
+  pdebug("process started")
+  r=processAsync(fns, lines)
+  fdr=0
+  try:
+    with with_sigint(fns):
+      fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
+      assert fdr>0
+      fcntl.flock(fdr,LOCK_EX)
+      pdebug("process readout")
+      res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
+      pdebug("process readout complete")
+      return res
+  finally:
+    if fdr!=0:
+      os.close(fdr)
 
 def processAsync(fns:FileNames, code:str)->RunResult:
-  """ Send `code` to the interpreter and fork the response reader """
+  """ Send `code` to the interpreter and fork the response reader. The output
+  file is locked and its name is saved into the resulting `RunResult` object.
+  """
   wd,inp,outp,pidf=astuple(fns)
   codehash=abs(hash(code))
   fname=join(wd,f"litrepl_eval_{codehash}.txt")
@@ -169,81 +224,35 @@ def processAsync(fns:FileNames, code:str)->RunResult:
     exit(0)
   else:
     # Parent
-    pdebug(f"Forked reader {pid}")
+    pdebug(f"processAsync forked reader {pid}")
     fcntl.fcntl(fo,fcntl.LOCK_UN)
     os.close(fo)
     return RunResult(fname,pattern)
 
-@contextmanager
-def with_sigint(fns:FileNames, brk=False,ipid:Optional[int]=None):
-  ipid_=int(open(fns.pidf).read()) if ipid is None else ipid
-  def _handler(signum,frame):
-    pdebug(f"Sending SIGINT to {ipid_}")
-    os.kill(ipid_,SIGINT)
-  prev=signal(SIGINT,_handler)
-  try:
-    yield
-  finally:
-    signal(SIGINT,prev)
-
-@contextmanager
-def with_alarm(timeout:float):
-  """ Set the alarm if the timeout is known. Zero or infinite timeout means no
-  timeout is set. """
-  prev=None
-  try:
-    if timeout>0 and timeout<float('inf'):
-      def _handler(signum,frame):
-        pdebug(f"SIGALARM received")
-        raise TimeoutError()
-      prev=signal(SIGALRM,_handler)
-      setitimer(ITIMER_REAL,timeout)
-    yield
-  finally:
-    if prev is not None:
-      setitimer(ITIMER_REAL,0)
-      signal(SIGALRM,prev)
-
-
-def process(fns:FileNames, lines:str)->str:
-  """ Evaluate `lines` synchronously. """
-  pdebug("process started")
-  r=processAsync(fns, lines)
-  fdr=0
-  try:
-    with with_sigint(fns):
-      fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
-      assert fdr>0
-      fcntl.flock(fdr,LOCK_EX)
-      pdebug("process readout")
-      res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
-      pdebug("process readout complete")
-      return res
-  finally:
-    if fdr!=0:
-      os.close(fdr)
-
 def processCont(fns:FileNames, r:RunResult, timeout:float=1.0)->ReadResult:
-  """ Continue reading from the already running readout process"""
+  """ Read from the running readout process. """
   fdr=0
   rr:ReadResult
   try:
     with with_sigint(fns):
-      pdebug(f"processCont started")
+      pdebug(f"processCont started via {r.fname}")
       fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
       assert fdr>0
       try:
         with with_alarm(timeout):
+          # Raises exception immediately if used with zero timeout. Waits for
+          # the lock with non-zero or infinite timeout.
           fcntl.flock(fdr,LOCK_EX|(0 if timeout>0 else LOCK_NB))
-        pdebug(f"processCont readout start")
+        pdebug(f"processCont final readout start")
         res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
-        pdebug(f"processCont readout finish")
+        pdebug(f"processCont final readout finish")
         rr=ReadResult(res,False)
         os.unlink(r.fname)
         pdebug(f"processCont unlinked {r.fname}")
       except (BlockingIOError,TimeoutError):
-        pdebug("processCont receieved Timeout or BlockingIOError")
+        pdebug("processCont readout(nonblocking) start")
         res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
+        pdebug(f"processCont readout(nonblocking) finish")
         rr=ReadResult(res,True)
       return rr
   finally:
