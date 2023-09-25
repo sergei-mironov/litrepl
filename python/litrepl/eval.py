@@ -88,12 +88,12 @@ def readout_asis(fdr:int, fdw:int, fo:int, pattern, prompt,
   """ Read everything from FD `fdr` until `prompt` is found. Write everything to
   FD `fo`. Return True on success, False indicates a problem (timeout). """
   acc:bytes=b''
-  os.write(fdw,pattern.encode())
+  os.write(fdw,(pattern+"\n").encode())
   while True:
     rlist = select([fdr],[],[],timeout)[0]
     if rlist == []:
       # Timeout, repeat the query
-      os.write(fdw,pattern.encode())
+      os.write(fdw,(pattern+"\n").encode())
     else:
       r=os.read(fdr, 1024)
       if r==b'':
@@ -114,7 +114,7 @@ TIMEOUT_SEC=3
 def interact(fdr, fdw, text:str, fo:int, pattern)->None:
   os.write(fdw,PATTERN1.encode())
   x=readout(fdr,prompt=mkre(PATTERN1),merge=merge_rn2)
-  pdebug(f"readout returned {x}")
+  pdebug(f"readout returned '{x}'")
   os.write(fdw,text.encode())
   os.write(fdw,'\n'.encode())
   readout_asis(fdr,fdw,fo,pattern,prompt=mkre(pattern),timeout=TIMEOUT_SEC)
