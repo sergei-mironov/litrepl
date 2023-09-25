@@ -366,7 +366,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->None:
       spaces=tree.children[2].children[0].value if tree.children[2].children else ''
       im=tree.children[0].children[0].value
       if self.nsec in nsecs:
-        result=process(fns,'print('+code+');\n').rstrip('\n')
+        result=process(fns,'print('+code+');\n')[0].rstrip('\n')
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
       print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}", end='')

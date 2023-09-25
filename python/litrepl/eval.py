@@ -161,23 +161,24 @@ def interact(fdr, fdw, text:str, fo:int, pattern)->None:
   pdebug(f"interact main text ({len(text)} chars) sent")
   readout_asis(fdr,fdw,fo,pattern,prompt=mkre(pattern),timeout=TIMEOUT_SEC)
 
-def process(fns:FileNames, lines:str)->str:
+def process(fns:FileNames, lines:str)->Tuple[str,RunResult]:
   """ Evaluate `lines` synchronously. """
   pdebug("process started")
-  r=processAsync(fns, lines)
+  runr=processAsync(fns, lines)
+  res=''
   fdr=0
   try:
     with with_sigint(fns):
-      fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
+      fdr=os.open(runr.fname,os.O_RDONLY|os.O_SYNC)
       assert fdr>0
       fcntl.flock(fdr,LOCK_EX)
       pdebug("process readout")
-      res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
+      res=readout(fdr,prompt=mkre(runr.pattern),merge=merge_rn2)
       pdebug("process readout complete")
-      return res
   finally:
     if fdr!=0:
       os.close(fdr)
+  return res,runr
 
 def processAsync(fns:FileNames, code:str)->RunResult:
   """ Send `code` to the interpreter and fork the response reader. The output
@@ -265,9 +266,13 @@ def processAdapt(fns:FileNames,
   """ Push `code` to the interpreter and wait for `timeout` seconds for
   the immediate answer. In case of delay, return intermediate answer and
   the continuation context."""
-  runr=processAsync(fns,code)
-  rr=processCont(fns,runr,timeout=timeout)
-  return rr,runr
+  if timeout == float('inf'):
+    lines2,runr=process(fns,code)
+    return ReadResult(lines2,False),runr
+  else:
+    runr=processAsync(fns,code)
+    rr=processCont(fns,runr,timeout=timeout)
+    return rr,runr
 
 PRESULT_RE=re.compile(r"(.*)\[BG:([a-zA-Z0-9_\/\.-]+)\]\n.*",
                       re.A|re.MULTILINE|re.DOTALL)
