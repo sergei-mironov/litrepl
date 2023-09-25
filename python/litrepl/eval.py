@@ -28,7 +28,7 @@ DEBUG:bool=False
 
 def pdebug(*args,**kwargs):
   if DEBUG:
-    print(f"[{time():>20}]", *args, file=sys.stderr, **kwargs, flush=True)
+    print(f"[{time():14.3f}]", *args, file=sys.stderr, **kwargs, flush=True)
 
 def mkre(prompt:str):
   """ Create the regexp that matches everything ending with a `prompt` """
@@ -114,6 +114,7 @@ TIMEOUT_SEC=3
 def interact(fdr, fdw, text:str, fo:int, pattern)->None:
   os.write(fdw,PATTERN1.encode())
   x=readout(fdr,prompt=mkre(PATTERN1),merge=merge_rn2)
+  pdebug(f"readout returned {x}")
   os.write(fdw,text.encode())
   os.write(fdw,'\n'.encode())
   readout_asis(fdr,fdw,fo,pattern,prompt=mkre(pattern),timeout=TIMEOUT_SEC)
@@ -127,7 +128,7 @@ def processAsync(fns:FileNames, code:str)->RunResult:
   wd,inp,outp,pidf=astuple(fns)
   codehash=abs(hash(code))
   fname=join(wd,f"litrepl_eval_{codehash}.txt")
-  pdebug(f"Interacting via {fname}")
+  pdebug(f"processAsync starting via {fname}")
   pattern=PATTERN
   fo=os.open(fname,os.O_WRONLY|os.O_SYNC|os.O_TRUNC|os.O_CREAT)
   assert fo>0
@@ -139,6 +140,7 @@ def processAsync(fns:FileNames, code:str)->RunResult:
     # Child
     fdr=0; fdw=0
     try:
+      pdebug(f"processAsync opening pipes")
       fdw=os.open(inp, os.O_WRONLY|os.O_SYNC)
       fdr=os.open(outp, os.O_RDONLY|os.O_SYNC)
       if fdw<0 or fdr<0:
@@ -148,8 +150,9 @@ def processAsync(fns:FileNames, code:str)->RunResult:
       def _handler(signum,frame):
         pass
       signal(SIGINT,_handler)
+      pdebug("processAsync interact start")
       interact(fdr,fdw,code,fo,pattern)
-      pdebug("Interaction complete")
+      pdebug("processAsync interact finish")
     except BlockingIOError:
       pusererror(fname,"ERROR: litrepl.py couldn't lock the sessions pipes\n")
     finally:
@@ -201,6 +204,7 @@ def with_alarm(timeout:float):
 
 def process(fns:FileNames, lines:str)->str:
   """ Evaluate `lines` synchronously. """
+  pdebug("process started")
   r=processAsync(fns, lines)
   fdr=0
   try:
@@ -208,7 +212,9 @@ def process(fns:FileNames, lines:str)->str:
       fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
       assert fdr>0
       fcntl.flock(fdr,LOCK_EX)
+      pdebug("process readout")
       res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
+      pdebug("process readout complete")
       return res
   finally:
     if fdr!=0:
@@ -220,13 +226,15 @@ def processCont(fns:FileNames, r:RunResult, timeout:float=1.0)->ReadResult:
   rr:ReadResult
   try:
     with with_sigint(fns):
+      pdebug(f"processCont started")
       fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
       assert fdr>0
       try:
         with with_alarm(timeout):
           fcntl.flock(fdr,LOCK_EX|(0 if timeout>0 else LOCK_NB))
-        pdebug(f"Starting readout")
+        pdebug(f"processCont readout start")
         res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
+        pdebug(f"processCont readout finish")
         rr=ReadResult(res,False)
         os.unlink(r.fname)
         pdebug(f"processCont unlinked {r.fname}")
