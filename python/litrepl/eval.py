@@ -92,10 +92,12 @@ def readout_asis(fdr:int, fdw:int, fo:int, pattern, prompt,
   while True:
     rlist = select([fdr],[],[],timeout)[0]
     if rlist == []:
-      # Timeout, repeat the query
+      pdebug(f"readout_asis timeout, repeating the query")
       os.write(fdw,(pattern+"\n").encode())
     else:
+      pdebug(f"readout_asis ready to read")
       r=os.read(fdr, 1024)
+      pdebug(f"readout_asis read {len(r)} bytes")
       if r==b'':
         return
       w=os.write(fo,r)
@@ -114,9 +116,10 @@ TIMEOUT_SEC=3
 def interact(fdr, fdw, text:str, fo:int, pattern)->None:
   os.write(fdw,PATTERN1.encode())
   x=readout(fdr,prompt=mkre(PATTERN1),merge=merge_rn2)
-  pdebug(f"readout returned '{x}'")
+  pdebug(f"interact readout returned '{x}'")
   os.write(fdw,text.encode())
   os.write(fdw,'\n'.encode())
+  pdebug(f"interact main text ({len(text)} chars) sent")
   readout_asis(fdr,fdw,fo,pattern,prompt=mkre(pattern),timeout=TIMEOUT_SEC)
 
 def pusererror(fname,err)->None:
