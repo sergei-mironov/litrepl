@@ -305,9 +305,9 @@ def fillspaces(code:str, suffix:str)->str:
   return '\n'.join(acc)
 
 def eval_code(a:LitreplArgs, code:str, runr:Optional[RunResult]=None) -> str:
-  """ Start or complete the code snippet evaluation process.
-  `RunResult` may contain the existing runner's context. Alternatively, the
-  reference to the context could be encoded in the code section itself.
+  """ Start or complete the code snippet evaluation process.  `RunResult` may
+  contain the existing runner's context. Alternatively, the context may be
+  encoded in the code section itself as text.
 
   The function returns either the evaluation result or the running context
   encoded in the result for later reference.
@@ -320,7 +320,8 @@ def eval_code(a:LitreplArgs, code:str, runr:Optional[RunResult]=None) -> str:
   return rresultSave(rr.text,runr) if rr.timeout else rr.text
 
 def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->None:
-  """ Evaluate sections as specify by the `secrec` request.  """
+  """ Evaluate code sections of the parsed `tree`, as specified in the `secrec`
+  request.  """
   fns=pipenames(a)
   nsecs=secrec.nsecs
   if not running(a):

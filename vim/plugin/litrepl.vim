@@ -87,13 +87,14 @@ fun! s:SessionEval(mode,timeout_initial,timeout_continue,p)
   execute "normal! I "
   execute "normal! x"
   " Execute the selected code blocks
-  execute '%!'.<SID>SessionCmd().
+  let cmdline = '%!'.<SID>SessionCmd().
         \ ' --interpreter='.g:litrepl_interpreter.
         \ ' --timeout-initial='.a:timeout_initial.
         \ ' --timeout-continue='.a:timeout_continue.
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.
         \ ' '.cmd.' 2>'.g:litrepl_errfile
+  execute cmdline
   let errcode = v:shell_error
   call setcharpos('.',cur)
   if errcode != 0

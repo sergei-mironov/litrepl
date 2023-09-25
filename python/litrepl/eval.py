@@ -13,7 +13,7 @@ from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
 from os.path import isfile, join
 from signal import signal, SIGINT, SIGALRM, setitimer, ITIMER_REAL
-from time import sleep
+from time import sleep, time
 from dataclasses import dataclass, astuple
 from functools import partial
 from argparse import ArgumentParser
@@ -28,7 +28,7 @@ DEBUG:bool=False
 
 def pdebug(*args,**kwargs):
   if DEBUG:
-    print(*args, file=sys.stderr, **kwargs, flush=True)
+    print(f"[{time():>20}]", *args, file=sys.stderr, **kwargs, flush=True)
 
 def mkre(prompt:str):
   """ Create the regexp that matches everything ending with a `prompt` """
@@ -83,7 +83,8 @@ def readout(fdr,
         return "<LitREPL: Non-unicode output>"
   return "<LitREPL: timeout waiting the interpreter response>"
 
-def readout_asis(fdr:int, fdw:int, fo:int, pattern, prompt, timeout:Optional[int]=None)->bool:
+def readout_asis(fdr:int, fdw:int, fo:int, pattern, prompt,
+                 timeout:Optional[int]=None)->None:
   """ Read everything from FD `fdr` until `prompt` is found. Write everything to
   FD `fo`. Return True on success, False indicates a problem (timeout). """
   acc:bytes=b''
@@ -96,15 +97,15 @@ def readout_asis(fdr:int, fdw:int, fo:int, pattern, prompt, timeout:Optional[int
     else:
       r=os.read(fdr, 1024)
       if r==b'':
-        return True
+        return
       w=os.write(fo,r)
       if w!=len(r):
         os.write(fo,"<LitREPL failed to copy input stream>\n".encode())
-        assert True
+        # assert True
       acc+=r # TODO: don't store everything
       m=re_match(prompt,acc)
       if m:
-        return True
+        return
 
 PATTERN1='325674801010\n'
 PATTERN='3256748426384\n'
@@ -148,6 +149,7 @@ def processAsync(fns:FileNames, code:str)->RunResult:
         pass
       signal(SIGINT,_handler)
       interact(fdr,fdw,code,fo,pattern)
+      pdebug("Interaction complete")
     except BlockingIOError:
       pusererror(fname,"ERROR: litrepl.py couldn't lock the sessions pipes\n")
     finally:
@@ -180,6 +182,8 @@ def with_sigint(fns:FileNames, brk=False,ipid:Optional[int]=None):
 
 @contextmanager
 def with_alarm(timeout:float):
+  """ Set the alarm if the timeout is known. Zero or infinite timeout means no
+  timeout is set. """
   prev=None
   try:
     if timeout>0 and timeout<float('inf'):
@@ -221,6 +225,7 @@ def processCont(fns:FileNames, r:RunResult, timeout:float=1.0)->ReadResult:
       try:
         with with_alarm(timeout):
           fcntl.flock(fdr,LOCK_EX|(0 if timeout>0 else LOCK_NB))
+        pdebug(f"Starting readout")
         res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
         rr=ReadResult(res,False)
         os.unlink(r.fname)
