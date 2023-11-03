@@ -10,7 +10,7 @@ from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
 from os.path import isfile, join
 from signal import signal, SIGINT
-from time import sleep
+from time import sleep, time
 from dataclasses import dataclass, astuple
 from functools import partial
 from argparse import ArgumentParser
@@ -29,7 +29,7 @@ LitreplArgs=Any
 
 def pdebug(*args,**kwargs):
   if DEBUG:
-    print(*args, file=sys.stderr, **kwargs, flush=True)
+    print(f"[{time():14.3f}]", *args, file=sys.stderr, **kwargs, flush=True)
 
 def pipenames(a:LitreplArgs)->FileNames:
   """ Return file names of in.pipe, out.pip and log """
@@ -243,10 +243,12 @@ cbr : "{CBR}"
 """
 
 def parse_(grammar):
+  pdebug(f"parsing start")
   parser = Lark(grammar,propagate_positions=True)
   # print(parser)
   tree=parser.parse(sys.stdin.read())
   # print(tree.pretty())
+  pdebug(f"parsing finish")
   return tree
 
 GRAMMARS={'markdown':grammar_md,'tex':grammar_latex,'latex':grammar_latex}
