@@ -2,7 +2,7 @@
 
 import litrepl
 from litrepl import *
-from litrepl import __version__
+from litrepl import __version__, eval_section_
 from os import chdir
 from subprocess import check_output, DEVNULL, CalledProcessError
 from argparse import ArgumentParser

@@ -1,11 +1,9 @@
-import re
 import os
 import sys
 import fcntl
 
 from copy import deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable, Any
-from re import search, match as re_match
 from select import select
 from os import environ, system
 from lark import Lark, Visitor, Transformer, Token, Tree
@@ -24,6 +22,7 @@ from hashlib import sha256
 from .types import PrepInfo, RunResult, NSec, FileName, SecRec, FileNames
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont)
+from .utils import(unindent, indent, escape, fillspaces)
 
 DEBUG:bool=False
 LitreplArgs=Any
@@ -60,7 +59,7 @@ def fork_ipython(a:LitreplArgs, name:str):
   assert 'ipython' in name
   wd,inp,outp,pid=astuple(pipenames(a))
   cfg=join(wd,'litrepl_ipython_config.py')
-  log=join(wd,'_ipython.log')
+  log=f"--logfile={join(wd,'_ipython.log')}" if DEBUG else ""
   open(cfg,'w').write(
     'from IPython.terminal.prompts import Prompts, Token\n'
     'class EmptyPrompts(Prompts):\n'
@@ -76,7 +75,7 @@ def fork_ipython(a:LitreplArgs, name:str):
     'c.TerminalInteractiveShell.separate_in = ""\n'
     'c.TerminalInteractiveShell.separate_out = ""\n'
     )
-  system((f'{name} -um IPython --config={cfg} --colors=NoColor --logfile={log} -c '
+  system((f'{name} -um IPython --config={cfg} --colors=NoColor {log} -c '
           f'"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
           f'os.open(\'{inp}\',os.O_RDWR|os.O_SYNC);'
           f'os.open(\'{outp}\',os.O_RDWR|os.O_SYNC);"'
@@ -264,46 +263,6 @@ def cursor_within(pos, posA, posB)->bool:
     else:
       return False
 
-def unindent(col:int, lines:str)->str:
-  def _rmspaces(l):
-    return l[col:] if l.startswith(' '*col) else l
-  return '\n'.join(map(_rmspaces,lines.split('\n')))
-
-def indent(col:int, lines:str)->str:
-  return '\n'.join([' '*col+l for l in lines.split('\n')])
-
-def escape(text, pat:str):
-  """ Escapes every letter of a pattern with (\) """
-  epat=''.join(['\\'+c for c in pat])
-  return text.replace(pat,epat)
-
-LEADSPACES=re.compile('^([ \t]*)')
-
-def fillspaces(code:str, suffix:str)->str:
-  """ Replace empty lines of multi-line code snippet with lines filled with
-  previous line's leading spaces, followed by suffix (e.g. a Python comment)."""
-  def _leadspaces(line:str)->str:
-    m=re_match(LEADSPACES,line)
-    return str(m.group(1)) if m else ''
-  lines=code.split('\n')
-  if len(lines)<=0:
-    return code
-  acc=[lines[0]]
-  nempty=0
-  spaces=_leadspaces(lines[0])
-  for line in lines[1:]:
-    if len(line)==0:
-      nempty+=1
-    else:
-      spaces2=_leadspaces(line)
-      if nempty>0:
-        acc.extend(['' if len(spaces2)==0 else spaces+suffix]*nempty)
-        nempty=0
-      acc.append(line)
-      spaces=spaces2
-  acc.extend(['']*nempty)
-  return '\n'.join(acc)
-
 def eval_code(a:LitreplArgs, code:str, runr:Optional[RunResult]=None) -> str:
   """ Start or complete the code snippet evaluation process.  `RunResult` may
   contain the existing runner's context. Alternatively, the context may be
@@ -376,7 +335,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->None:
       print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
   C().visit(tree)
 
-def solve_cpos(tree,cs:List[Tuple[int,int]])->PrepInfo:
+def solve_cpos(tree, cs:List[Tuple[int,int]])->PrepInfo:
   """ Solve the list of cursor positions into a set of section numbers. Also
   return the number of the last section. """
   acc:dict={}
@@ -424,7 +383,7 @@ const : num -> s_const_num
 num : /[0-9]+/
 """
 
-def solve_sloc(s:str,tree)->SecRec:
+def solve_sloc(s:str, tree)->SecRec:
   p=Lark(grammar_sloc)
   t=p.parse(s)
   nknown:Dict[int,int]={}

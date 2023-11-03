@@ -6,6 +6,7 @@ info=logger.info
 warning=logger.warning
 
 from .types import *
+from .utils import *
 from .eval import *
 from .base import *
 
