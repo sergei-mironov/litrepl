@@ -109,11 +109,11 @@ def fork_ipython(a:LitreplArgs, name:str):
 def code_preprocess_ipython(code:str) -> str:
   # IPython seems to not echo the terminating cpaste pattern '----' into the
   # output which is good.
-  return ('\n%cpaste -q -s ----\n' + code + '\n----\n')
+  paste_pattern='12341234213423'
+  return (f'\n%cpaste -q -s {paste_pattern}\n{code}\n{paste_pattern}\n')
 
 def text_postprocess_ipython(text:str) -> str:
   # A workaround for https://github.com/ipython/ipython/issues/13622
-  pdebug("post-process\n", text, "END\n")
   r=re.compile('ERROR! Session/line number was not unique in database. '
                'History logging moved to new session [0-9]+\\n')
   return re.sub(r,'',text)

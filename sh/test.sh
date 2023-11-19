@@ -388,7 +388,7 @@ runlitrepl stop
 )} #}}}
 
 test_eval_with_empty_lines() {( #{{{
-mktest "_test_eval_code"
+mktest "_test_eval_with_empty_lines"
 runlitrepl start
 cat >source.py <<"EOF"
 def hello():
@@ -448,6 +448,27 @@ diff -u out.txt - <<"EOF"
 33
 
 EOF
+
+if echo $LITREPL_INTERPRETER | grep -q ipython ; then
+
+cat >source.py <<"EOF"
+from textwrap import dedent
+def foo():
+  print(dedent('''
+    aa
+
+    bb
+    ''').strip())
+foo()
+EOF
+cat source.py | runlitrepl --debug=0 eval-code >out.txt
+diff -u out.txt - <<"EOF"
+aa
+
+bb
+
+EOF
+fi
 
 runlitrepl stop
 )} #}}}

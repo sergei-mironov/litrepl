@@ -139,7 +139,7 @@ def readout_asis(fdr:int, fdw:int, fo:int, pattern:str, prompt,
   while True:
     rlist = select([fdr],[],[],timeout)[0]
     if rlist == []:
-      pdebug(f"readout_asis timeout, repeating the query")
+      pdebug(f"readout_asis timeout, repeating the prompt pattern")
       os.write(fdw,pattern.encode())
     else:
       pdebug(f"readout_asis ready to read")
