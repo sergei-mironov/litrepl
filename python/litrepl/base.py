@@ -1,6 +1,7 @@
 import os
 import sys
 import fcntl
+import re
 
 from copy import deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable, Any
@@ -18,11 +19,13 @@ from collections import defaultdict
 from os import makedirs, getuid, getcwd
 from tempfile import gettempdir
 from hashlib import sha256
+from psutil import Process
 
-from .types import PrepInfo, RunResult, NSec, FileName, SecRec, FileNames
+from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
+                    FileNames, IType, Settings, CursorPos)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont)
-from .utils import(unindent, indent, escape, fillspaces)
+from .utils import(unindent, indent, escape, fillspaces, fmterror, cursor_within)
 
 DEBUG:bool=False
 LitreplArgs=Any
@@ -32,12 +35,26 @@ def pdebug(*args,**kwargs):
     print(f"[{time():14.3f}]", *args, file=sys.stderr, **kwargs, flush=True)
 
 def pipenames(a:LitreplArgs)->FileNames:
-  """ Return file names of in.pipe, out.pip and log """
+  """ Return the interpreter state: input and output pipe names, pid, etc. If
+  not explicitly specified in the config, the state is shared for all files in
+  the current directory. """
   auxdir=a.auxdir if a.auxdir is not None else \
     join(gettempdir(),f"litrepl_{getuid()}_"+
          sha256(getcwd().encode('utf-8')).hexdigest()[:6])
   return FileNames(auxdir, join(auxdir,"_in.pipe"), join(auxdir,"_out.pipe"),
                    join(auxdir,"_pid.txt"))
+
+def settings(fns:FileNames) -> Settings:
+  pid=int(open(fns.pidf).read())
+  p=Process(pid)
+  cmd=p.cmdline()
+  itype = None
+  if any('ipython' in w for w in cmd):
+    itype = IType.IPython
+  elif any('python' in w for w in cmd):
+    itype = IType.Python
+  pdebug(f"interpreter pid {pid} cmd '{cmd}' leads to type '{itype}'")
+  return Settings(itype)
 
 def fork_python(a:LitreplArgs, name:str):
   """ Forks an instance of Python interpreter `name` """
@@ -87,6 +104,48 @@ def fork_ipython(a:LitreplArgs, name:str):
     '_=signal.signal(signal.SIGINT,_handler)\n'
   )
   exit(0)
+
+
+def code_preprocess_ipython(code:str) -> str:
+  # IPython seems to not echo the terminating cpaste pattern '----' into the
+  # output which is good.
+  return ('\n%cpaste -q -s ----\n' + code + '\n----\n')
+
+def text_postprocess_ipython(text:str) -> str:
+  # A workaround for https://github.com/ipython/ipython/issues/13622
+  pdebug("post-process\n", text, "END\n")
+  r=re.compile('ERROR! Session/line number was not unique in database. '
+               'History logging moved to new session [0-9]+\\n')
+  return re.sub(r,'',text)
+
+
+def code_preprocess_python(code:str) -> str:
+  return fillspaces(code, '# spaces')
+def text_postprocess_python(text:str) -> str:
+  return text
+
+
+def code_preprocess(ss:Settings, code:str) -> str:
+  if (ss.itype is None) or ss.itype == IType.IPython:
+    return code_preprocess_ipython(code)
+  elif ss.itype == IType.Python:
+    return code_preprocess_python(code)
+  else:
+    raise ValueError(fmterr(f'''
+      Interpreter type {ss.itype} is not supported for pre-processing. Did you
+      restart LitRepl after an update?
+    '''))
+
+def text_postprocess(ss:Settings, text:str) -> str:
+  if (ss.itype is None) or ss.itype == IType.IPython:
+    return text_postprocess_ipython(text)
+  elif ss.itype == IType.Python:
+    return text_postprocess_python(text)
+  else:
+    raise ValueError(fmterr(f'''
+      Interpreter type {ss.itype} is not supported for post-processing. Did you
+      restart LitRepl after an update?
+    '''))
 
 def start_(a:LitreplArgs, fork_handler:Callable[...,None])->None:
   """ Starts the background Python interpreter. Kill an existing interpreter if
@@ -254,36 +313,28 @@ def parse_(grammar):
 GRAMMARS={'markdown':grammar_md,'tex':grammar_latex,'latex':grammar_latex}
 SYMBOLS={'markdown':symbols_md,'tex':symbols_latex,'latex':symbols_latex}
 
-def cursor_within(pos, posA, posB)->bool:
-  if pos[0]>posA[0] and pos[0]<posB[0]:
-    return True
-  else:
-    if pos[0]==posA[0]:
-      return pos[1]>=posA[1]
-    elif pos[0]==posB[0]:
-      return pos[1]<posB[1]
-    else:
-      return False
-
-def eval_code(a:LitreplArgs, code:str, runr:Optional[RunResult]=None) -> str:
+def eval_code(a:LitreplArgs,
+              fns:FileNames,
+              ss:Settings,
+              code:str,
+              runr:Optional[RunResult]=None) -> str:
   """ Start or complete the code snippet evaluation process.  `RunResult` may
-  contain the existing runner's context. Alternatively, the context may be
-  encoded in the code section itself as text.
+  contain the existing runner's context.
 
   The function returns either the evaluation result or the running context
   encoded in the result for later reference.
   """
-  fns=pipenames(a)
   if runr is None:
-    rr,runr=processAdapt(fns,fillspaces(code, '# spaces'),a.timeout_initial)
+    rr,runr=processAdapt(fns,code_preprocess(ss,code),a.timeout_initial)
   else:
     rr=processCont(fns,runr,a.timeout_continue)
-  return rresultSave(rr.text,runr) if rr.timeout else rr.text
+  return rresultSave(rr.text,runr) if rr.timeout else text_postprocess(ss,rr.text)
 
 def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->None:
   """ Evaluate code sections of the parsed `tree`, as specified in the `secrec`
   request.  """
   fns=pipenames(a)
+  ss=settings(fns)
   nsecs=secrec.nsecs
   if not running(a):
     start(a)
@@ -308,7 +359,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->None:
       code=unindent(bm.column-1,t)
       ssrc[self.nsec]=code
       if self.nsec in nsecs:
-        sres[self.nsec]=eval_code(a,code,secrec.pending.get(self.nsec))
+        sres[self.nsec]=eval_code(a,fns,ss,code,secrec.pending.get(self.nsec))
     def ocodesection(self,tree):
       bmarker=tree.children[0].children[0].value
       emarker=tree.children[2].children[0].value
@@ -337,9 +388,9 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->None:
       print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
   C().visit(tree)
 
-def solve_cpos(tree, cs:List[Tuple[int,int]])->PrepInfo:
-  """ Solve the list of cursor positions into a set of section numbers. Also
-  return the number of the last section. """
+def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
+  """ Preprocess the document tree. Resolve the list of cursor locations `cs`
+  into code section numbers. """
   acc:dict={}
   rres:Dict[NSec,Set[RunResult]]=defaultdict(set)
   class C(Interpreter):
@@ -386,10 +437,12 @@ num : /[0-9]+/
 """
 
 def solve_sloc(s:str, tree)->SecRec:
+  """ Translate "sloc" string `s` into a `SecRec` processing request on the
+  given parsed document `tree`. """
   p=Lark(grammar_sloc)
   t=p.parse(s)
   nknown:Dict[int,int]={}
-  nqueries:Dict[int,Tuple[int,int]]={}
+  nqueries:Dict[int,CursorPos]={}
   # print(t.pretty())
   lastq=0
   class T(Transformer):

@@ -158,7 +158,7 @@ print("-->")
 EOF
 cat source.md | runlitrepl --filetype=markdown parse-print >out.md
 diff -u source.md out.md
-cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
+cat source.md | runlitrepl --debug=0 --filetype=markdown eval-sections '0..$' >out.md
 diff -u out.md - <<"EOF"
 ```python
 def hello(name):

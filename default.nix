@@ -52,12 +52,14 @@ let
         matplotlib
         numpy
         bpython
+        psutil
       ]
     );
 
     python-release = pkgs.python3.withPackages (
       pp: with pp; [
         (lark-parser112 pp)
+        pp.psutil
       ]
     );
 
@@ -67,11 +69,11 @@ let
       inherit src;
       LITREPL_REVISION = revision;
       LITREPL_ROOT = src;
-      propagatedBuildInputs = [(lark-parser112 py.pkgs) pkgs.socat];
+      propagatedBuildInputs = [(lark-parser112 py.pkgs) py.pkgs.psutil pkgs.socat];
       checkInputs = with pkgs; [
         socat py.pkgs.ipython py.pkgs.tqdm which git
       ];
-      # We cut off the python PATH to allows users to use litrepl in custom
+      # We cut off the python PATH to allow users to use litrepl in custom
       # Python environments
       postFixup = ''
         sed -i '/PATH.*python/d' $out/bin/litrepl

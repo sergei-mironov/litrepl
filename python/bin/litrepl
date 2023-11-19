@@ -78,7 +78,9 @@ if __name__=='__main__':
     sr.nsecs|=set(sr.pending.keys())
     eval_section_(a,t,sr)
   elif a.command=='eval-code':
-    print(eval_code(a,sys.stdin.read()))
+    fns=pipenames(a)
+    ss=settings(fns)
+    print(eval_code(a,fns,ss,sys.stdin.read()))
   elif a.command=='status':
     auxd,inp,outp,pidf=astuple(pipenames(a))
     print(f"version: {__version__}")
@@ -103,7 +105,9 @@ if __name__=='__main__':
       except CalledProcessError:
         print(f"pending section {nsec} reader: -")
     try:
-      interpreter_path=eval_code(a, '\n'.join(["import os","print(os.environ.get('PATH',''))"]))
+      fns=pipenames(a)
+      ss=settings(fns)
+      interpreter_path=eval_code(a,fns,ss,'\n'.join(["import os","print(os.environ.get('PATH',''))"]))
       print(f"interpreter PATH: {interpreter_path.strip()}")
     except Exception:
       print(f"interpreter PATH: ?")

@@ -1,4 +1,6 @@
+from textwrap import dedent
 from re import match as re_match, compile as re_compile
+from .types import CursorPos
 
 def unindent(col:int, lines:str)->str:
   def _rmspaces(l):
@@ -40,3 +42,18 @@ def fillspaces(code:str, suffix:str)->str:
       spaces=spaces2
   acc.extend(['']*nempty)
   return '\n'.join(acc)
+
+def fmterror(s:str) -> str:
+  return ' '.join(dedent(s).split('\n'))
+
+def cursor_within(pos:CursorPos, posA:CursorPos, posB:CursorPos)->bool:
+  if pos[0]>posA[0] and pos[0]<posB[0]:
+    return True
+  else:
+    if pos[0]==posA[0]:
+      return pos[1]>=posA[1]
+    elif pos[0]==posB[0]:
+      return pos[1]<posB[1]
+    else:
+      return False
+

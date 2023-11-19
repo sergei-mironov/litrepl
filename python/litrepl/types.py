@@ -1,27 +1,31 @@
 from typing import (Set, List, Dict, Tuple, Callable, Optional)
 from dataclasses import dataclass
+from enum import Enum
 
 FileName=str
 
 @dataclass(frozen=True)
 class RunResult:
   """ Result of launchng the readout job """
-  fname:FileName     # File to read the incoming data from.
-  pattern:str        # Terminate patter.
+  fname:FileName     # File where the output data is piped into
+  pattern:str        # Termination patter to search for in the output stream.
 
 @dataclass
 class ReadResult:
   """ Result of reading from the readout job """
   text:str           # Current contents of the readout file.
-  timeout:bool       # Did the read timeout?
+  timeout:bool       # Did the current read attmept timeout? If so, Litrepl
+                     # would return control to the user with a
+                     # continuation-looking result..
 
 NSec=int
+CursorPos=Tuple[int,int]
 
 @dataclass
 class PrepInfo:
-  """ Data extracted while preprocessing the document """
+  """ Results of the document preprocessing """
   nsec:NSec                         # Number of code sections
-  cursors:Dict[Tuple[int,int],NSec] # Resolved cursor locations
+  cursors:Dict[CursorPos,NSec] # Resolved cursor locations
   pending:Dict[NSec,RunResult]      # Async job markers
 
 
@@ -33,8 +37,19 @@ class SecRec:
 
 @dataclass
 class FileNames:
-  """ Interpreter filenames """
-  wd:str     # Working directory
-  inp:str    # Input pipe
-  outp:str   # Output pipe
-  pidf:str   # File containing PID
+  """ Interpreter state """
+  wd:str                   # Working directory
+  inp:str                  # Input pipe
+  outp:str                 # Output pipe
+  pidf:str                 # File containing PID
+
+
+class IType(Enum):
+  Python = 0,
+  IPython = 1
+
+@dataclass
+class Settings:
+  """ Interpreter settings required to share among the runners """
+  itype:IType
+

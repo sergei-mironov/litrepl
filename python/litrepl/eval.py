@@ -66,9 +66,13 @@ def with_alarm(timeout:float):
 
 
 def merge_basic2(acc,r,x)->Tuple[bytes,int]:
+  """ Merges a buffer and a new text without any post-processing. """
   return (acc+r,x)
 
 def merge_rn2(buf_,r,i_n=-1)->Tuple[bytes,int]:
+  """ Merges a buffer `buf_` and a newly-arrived text `r`, taking standatd
+  terminal line-wrapping codes `\\r\\n` into account. Return the new buffer and
+  the position of the last `\\n` in it."""
   buf=deepcopy(buf_)
   sz=len(buf)
   i_n=-(sz-i_n)
@@ -100,8 +104,12 @@ def mkre(prompt:str):
 
 
 def readout(fdr,
-            prompt=mkre('>>>'),
-            merge=merge_basic2)->str:
+            prompt,
+            merge)->str:
+  """ Read the `fdr` until the prompt regexp is found. The prompt must define
+  exactly one group to query after the match is detected. See `mkre`.
+  """
+  # [1] - Here we query the single matched group, see `mkre`
   acc:bytes=b''
   i_n=-1
   while select([fdr],[],[],None)[0] != []:
@@ -110,7 +118,7 @@ def readout(fdr,
       acc,i_n=merge(acc,r,i_n)
     m=re_match(prompt,acc)
     if m:
-      acc=m.group(1)
+      acc=m.group(1) # [1]
       r=b''
     if r==b'':
       try:
@@ -119,12 +127,12 @@ def readout(fdr,
         return "<LitREPL: Non-unicode output>"
   return "<LitREPL: timeout waiting the interpreter response>"
 
-def readout_asis(fdr:int, fdw:int, fo:int, pattern, prompt,
+def readout_asis(fdr:int, fdw:int, fo:int, pattern:str, prompt,
                  timeout:Optional[int]=None)->None:
   """ Read everything from FD `fdr` and send to `fo` until `prompt` is found. If
   the `propmt` is not found within the `timeout` seconds, re-send the `pattern`
-  and continue working the interaction. This function is intended to be run from
-  a separate process, governing the process of interaction with an intepreter.
+  and continue the interaction. This function is intended to be run from a
+  separate process, governing the interaction with intepreters like Python.
   """
   acc:bytes=b''
   os.write(fdw,pattern.encode())
@@ -153,6 +161,18 @@ PATTERN='3256748426384\n'
 TIMEOUT_SEC=3
 
 def interact(fdr, fdw, text:str, fo:int, pattern)->None:
+  """ Interpreter interaction procedure, running in a forked process. Its goal
+  is to sent the code to the interpreter, to read the response and, most
+  importantly, to detect when to stop reading.
+
+  Args:
+    fdr (int): Interpreter's stdout pipe, available for reading
+    fdw (int): Interpreter's stdin pipe, available for writing
+    text (str): Text to send to the interpreter
+    fo (int): Output desctiptor, available for writing
+    pattern (str): String pattern to use as an indication that processing is
+                   complete
+  """
   os.write(fdw,PATTERN1.encode())
   x=readout(fdr,prompt=mkre(PATTERN1),merge=merge_rn2)
   pdebug(f"interact readout returned '{x}'")
@@ -177,6 +197,7 @@ def process(fns:FileNames, lines:str)->Tuple[str,RunResult]:
       pdebug("process readout complete")
   finally:
     if fdr!=0:
+      os.unlink(runr.fname)
       os.close(fdr)
   return res,runr
 
@@ -238,7 +259,7 @@ def processCont(fns:FileNames, r:RunResult, timeout:float=1.0)->ReadResult:
     with with_sigint(fns):
       pdebug(f"processCont started via {r.fname}")
       fdr=os.open(r.fname,os.O_RDONLY|os.O_SYNC)
-      assert fdr>0
+      assert fdr>0, f"Failed to open readout file '{r.fname}' for reading"
       try:
         with with_alarm(timeout):
           # Raises exception immediately if used with zero timeout. Waits for
@@ -247,14 +268,14 @@ def processCont(fns:FileNames, r:RunResult, timeout:float=1.0)->ReadResult:
         pdebug(f"processCont final readout start")
         res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
         pdebug(f"processCont final readout finish")
-        rr=ReadResult(res,False)
+        rr=ReadResult(res,False) # Return final result
         os.unlink(r.fname)
         pdebug(f"processCont unlinked {r.fname}")
       except (BlockingIOError,TimeoutError):
         pdebug("processCont readout(nonblocking) start")
         res=readout(fdr,prompt=mkre(r.pattern),merge=merge_rn2)
         pdebug(f"processCont readout(nonblocking) finish")
-        rr=ReadResult(res,True)
+        rr=ReadResult(res,True) # Timeout ==> Return continuation
       return rr
   finally:
     if fdr!=0:
@@ -285,6 +306,8 @@ def rresultLoad(text:str)->Tuple[str,Optional[RunResult]]:
     return text,None
 
 def rresultSave(text:str, presult:RunResult)->str:
+  """ Saves uncompleted RunRestult into the response text in order to load and
+  check it later. """
   return (text+f"\n[BG:{presult.fname}]\n"
           "<Re-evaluate to update>\n")
 
