@@ -45,7 +45,7 @@ setup(
   version=LITREPL_SEMVER if LITREPL_SEMVER else "999",
   package_dir={'':'python'},
   packages=find_packages(where='python'),
-  install_requires=['lark'],
+  install_requires=['lark', 'psutil'],
   scripts=['./python/bin/litrepl'],
   python_requires='>=3.6',
   author="Sergei Mironov",

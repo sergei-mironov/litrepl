@@ -106,18 +106,22 @@ def fork_ipython(a:LitreplArgs, name:str):
   exit(0)
 
 
+# TODO: Re-enable when https://github.com/ipython/ipython/issues/14246 is fixed
+# def code_preprocess_ipython(code:str) -> str:
+#   # IPython seems to not echo the terminating cpaste pattern '----' into the
+#   # output which is good.
+#   paste_pattern='12341234213423'
+#   return (f'\n%cpaste -q -s {paste_pattern}\n{code}\n{paste_pattern}\n')
+# def text_postprocess_ipython(text:str) -> str:
+#   # A workaround for https://github.com/ipython/ipython/issues/13622
+#   r=re.compile('ERROR! Session/line number was not unique in database. '
+#                'History logging moved to new session [0-9]+\\n')
+#   return re.sub(r,'',text)
+
 def code_preprocess_ipython(code:str) -> str:
-  # IPython seems to not echo the terminating cpaste pattern '----' into the
-  # output which is good.
-  paste_pattern='12341234213423'
-  return (f'\n%cpaste -q -s {paste_pattern}\n{code}\n{paste_pattern}\n')
-
+  return fillspaces(code, '# spaces')
 def text_postprocess_ipython(text:str) -> str:
-  # A workaround for https://github.com/ipython/ipython/issues/13622
-  r=re.compile('ERROR! Session/line number was not unique in database. '
-               'History logging moved to new session [0-9]+\\n')
-  return re.sub(r,'',text)
-
+  return text
 
 def code_preprocess_python(code:str) -> str:
   return fillspaces(code, '# spaces')

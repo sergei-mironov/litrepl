@@ -449,29 +449,62 @@ diff -u out.txt - <<"EOF"
 
 EOF
 
-if echo $LITREPL_INTERPRETER | grep -q ipython ; then
-
-cat >source.py <<"EOF"
-from textwrap import dedent
-def foo():
-  print(dedent('''
-    aa
-
-    bb
-    ''').strip())
-foo()
-EOF
-cat source.py | runlitrepl --debug=0 eval-code >out.txt
-diff -u out.txt - <<"EOF"
-aa
-
-bb
-
-EOF
-fi
+# TODO: Re-enable when https://github.com/ipython/ipython/issues/14246 is fixed
+# if echo $LITREPL_INTERPRETER | grep -q ipython ; then
+# cat >source.py <<"EOF"
+# from textwrap import dedent
+# def foo():
+#   print(dedent('''
+#     aa
+#
+#     bb
+#     ''').strip())
+# foo()
+# EOF
+# cat source.py | runlitrepl --debug=0 eval-code >out.txt
+# diff -u out.txt - <<"EOF"
+# aa
+#
+# bb
+#
+# EOF
+# fi
 
 runlitrepl stop
 )} #}}}
+
+test_print_system_order() {( #{{{
+# See https://github.com/ipython/ipython/issues/14246
+mktest "_test_eval_behavior"
+runlitrepl start
+
+cat >in.md <<"EOF"
+``` python
+from os import system
+print("1")
+_=system("echo 2")
+```
+
+``` result
+```
+EOF
+cat in.md | runlitrepl --debug=0 --filetype=markdown eval-sections '0..$' >out.md
+diff -u out.md - <<"EOF"
+``` python
+from os import system
+print("1")
+_=system("echo 2")
+```
+
+``` result
+1
+2
+```
+EOF
+
+runlitrepl stop
+)}
+#}}}
 
 interpreters() {
   echo "$(which python)"
@@ -486,6 +519,7 @@ tests() {
   echo test_async
   echo test_eval_code
   echo test_eval_with_empty_lines
+  echo test_print_system_order
 }
 
 runlitrepl() {

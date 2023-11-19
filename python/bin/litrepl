@@ -104,15 +104,15 @@ if __name__=='__main__':
           print(f"pending section {nsec} reader: {line}")
       except CalledProcessError:
         print(f"pending section {nsec} reader: -")
+    fns=pipenames(a)
+    ss=settings(fns)
     try:
-      fns=pipenames(a)
-      ss=settings(fns)
       interpreter_path=eval_code(a,fns,ss,'\n'.join(["import os","print(os.environ.get('PATH',''))"]))
       print(f"interpreter PATH: {interpreter_path.strip()}")
     except Exception:
       print(f"interpreter PATH: ?")
     try:
-      interpreter_pythonpath=eval_code(a, '\n'.join(["import sys","print(':'.join(sys.path))"]))
+      interpreter_pythonpath=eval_code(a,fns,ss,'\n'.join(["import sys","print(':'.join(sys.path))"]))
       print(f"interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
     except Exception:
       print(f"interpreter PYTHONPATH: ?")
