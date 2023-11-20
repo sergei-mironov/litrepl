@@ -450,25 +450,25 @@ diff -u out.txt - <<"EOF"
 EOF
 
 # TODO: Re-enable when https://github.com/ipython/ipython/issues/14246 is fixed
-# if echo $LITREPL_INTERPRETER | grep -q ipython ; then
-# cat >source.py <<"EOF"
-# from textwrap import dedent
-# def foo():
-#   print(dedent('''
-#     aa
-#
-#     bb
-#     ''').strip())
-# foo()
-# EOF
-# cat source.py | runlitrepl --debug=0 eval-code >out.txt
-# diff -u out.txt - <<"EOF"
-# aa
-#
-# bb
-#
-# EOF
-# fi
+if echo $LITREPL_INTERPRETER | grep -q ipython ; then
+cat >source.py <<"EOF"
+from textwrap import dedent
+def foo():
+  print(dedent('''
+    aa
+
+    bb
+    ''').strip())
+foo()
+EOF
+cat source.py | runlitrepl --debug=0 eval-code >out.txt
+diff -u out.txt - <<"EOF"
+aa
+
+bb
+
+EOF
+fi
 
 runlitrepl stop
 )} #}}}
