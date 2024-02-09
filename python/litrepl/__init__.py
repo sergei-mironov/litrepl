@@ -11,7 +11,7 @@ from .eval import *
 from .base import *
 
 # Determine the package version using the following source priorities:
-# 1) version.txt+git 2) version.txt 3) version.py
+# 1) semver.txt+git 2) semver.txt 3) version.py
 __revision__:Optional[str]
 try:
   __revision__=environ["LITREPL_REVISION"]
@@ -31,7 +31,7 @@ except Exception:
 
 __semver__:Optional[str]
 try:
-  __semver__=open(join(environ['LITREPL_ROOT'],'version.txt')).read().strip()
+  __semver__=open(join(environ['LITREPL_ROOT'],'semver.txt')).read().strip()
 except Exception:
     try:
       from litrepl.semver import __semver__ as __sv__
