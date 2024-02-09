@@ -25,7 +25,7 @@ LITREPL_SEMVER:Optional[str]
 try:
   LITREPL_SEMVER=open(join(dirname(__file__),'semver.txt')).read().strip()
 except Exception:
-  warning("Couldn't read 'version.txt', no metadata will be set")
+  warning("Couldn't read 'semver.txt', no metadata will be set")
   LITREPL_SEMVER=None
 
 
