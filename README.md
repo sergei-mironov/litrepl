@@ -1,9 +1,9 @@
 LitREPL.vim
 ===========
 
-**LitREPL** is a command-line tool and a Vim plugin for Python [literate
-programming](https://en.wikipedia.org/wiki/Literate_programming), aimed at
-providing the text-friendly code editing and execution workflow.
+**LitREPL** is a command-line tool and a Vim plugin for [literate
+programming](https://en.wikipedia.org/wiki/Literate_programming) in Python,
+aimed at providing user-friendly code editing and execution workflow.
 
 
 ~~~~ markdown
@@ -14,7 +14,7 @@ print("Hello, World!")
 ```
 
 Having LitREPL tool and plugin installed, users get **:LitEval1**,
-**:LitEvalAll** and alike Vim commands to run Python code sections right
+**:LitEvalAll** or other commands to run Python code sections right
 in the editor.
 
 ``` result
@@ -22,16 +22,15 @@ Hello, World!
 ```
 
 The execution takes place in a background interpreter, tied to the UNIX pipes
-residing in the filesystem. Thus, the state of the interpreter is persistent
-between the executions and in fact between the Vim editing sessions.
+residing in the filesystem.
 ~~~~
 
 <details><summary>Features</summary><p>
 
 * Supported document formats: Markdown [[MD]](./doc/example.md), Latex
   [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf).
-* Supported interpreters: Python, IPython
-* Supported editor: Vim
+* Supported Python interpreters: Python, IPython
+* Supported modes: Vim, Command-line
 
 </p></details>
 
@@ -216,16 +215,17 @@ Development
 -----------
 
 This project uses [Nix](https://nixos.org/nix) as a primary development
-framework. [flake.nix](./flake.nix) handles the source-level Nix dependencies.
-[default.nix](./default.nix) declares build outputs including Pypi and Vim
-packages, demo Vim configurations, development shells, etc.
+framework. [flake.nix](./flake.nix) handles the source-level Nix dependencies
+while the [default.nix](./default.nix) defines the common build targets
+including Pypi and Vim packages, demo Vim configurations, development shells,
+etc.
 
 To enter the shell where all the dependencies are available, run
 ``` sh
 $ nix develop
 ```
 
-[Makefile](./Makefile) encodes common procedures available in the
+The top-level [Makefile](./Makefile) encodes common procedures available in the
 development shell: running tests, building Python wheels, uploading PyPi
 packages.
 
