@@ -19,75 +19,64 @@ endif
 if ! exists("g:litrepl_interpreter")
   let g:litrepl_interpreter = 'auto'
 endif
+if ! exists("g:litrepl_timeout")
+  let g:litrepl_timeout = 0.5
+endif
 let $PATH=g:litrepl_bin.":".$PATH
 
-fun! s:SessionCmd()
+fun! LitReplCmd()
   return g:litrepl_exe.' --workdir='.expand('%:p:h')
 endfun
 
-fun! s:SessionStart()
-  execute '!'.<SID>SessionCmd().' --interpreter='.g:litrepl_interpreter.' start'
+fun! LitReplStart()
+  execute '!'.LitReplCmd().' --interpreter='.g:litrepl_interpreter.' start'
 endfun
-command! -nargs=0 LitStart call <SID>SessionStart()
+command! -nargs=0 LStart call LitReplStart()
 
-fun! s:SessionStop()
-  execute '!'.<SID>SessionCmd().' stop'
+fun! LitReplStop()
+  execute '!'.LitReplCmd().' stop'
 endfun
-command! -nargs=0 LitStop call <SID>SessionStop()
+command! -nargs=0 LStop call LitReplStop()
 
-fun! s:SessionRestart()
-  execute '!'.<SID>SessionCmd().' --interpreter='.g:litrepl_interpreter.' restart'
+fun! LitReplRestart()
+  execute '!'.LitReplCmd().' --interpreter='.g:litrepl_interpreter.' restart'
 endfun
-command! -nargs=0 LitRestart call <SID>SessionRestart()
+command! -nargs=0 LRestart call LitReplRestart()
 
-fun! s:SessionParsePrint()
-  execute '%!'.<SID>SessionCmd().' parse-print'
+fun! LitReplParsePrint()
+  execute '%!'.LitReplCmd().' parse-print'
 endfun
-command! -nargs=0 LitPP call <SID>SessionParsePrint()
+command! -nargs=0 LPP call LitReplParsePrint()
 
-fun! s:SessionRepl()
-  execute "terminal ".<SID>SessionCmd()." repl"
+fun! LitReplTerm()
+  execute "terminal ".LitReplCmd()." repl"
 endfun
-command! -nargs=0 LitRepl call <SID>SessionRepl()
+command! -nargs=0 LTerm call LitReplTerm()
 
-fun! s:OpenErr(file)
+fun! LitReplOpenErr(file)
   if bufwinnr(a:file) <= 0
     execute "botright vs ".a:file
     execute "setlocal autoread"
   endif
 endfun
-command! -nargs=0 LitOpenErr call <SID>OpenErr(g:litrepl_errfile)
+command! -nargs=0 LOpenErr call LitReplOpenErr(g:litrepl_errfile)
 
-fun! s:Version()
-  echomsg systemlist(<SID>SessionCmd()." --version")[0]
+fun! LitReplVersion()
+  echomsg systemlist(LitReplCmd()." --version")[0]
 endfun
-command! -nargs=0 LitVersion call <SID>Version()
+command! -nargs=0 LVersion call LitReplVersion()
 
-let g:litrepl_lastcur = [0,0,0,0]
-fun! s:SessionEval(mode,timeout_initial,timeout_continue,p)
+let g:litrepl_lastpos = "0:0"
+
+fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
   let ft = &filetype
   let cur = getcharpos('.')
-  let p = a:p
-  let g:litrepl_lastcur = a:p
-  if a:mode == 'Here'
-    let cmd = "eval-sections '".p[1].":".p[2]."'"
-  elseif a:mode == 'Int'
-    let cmd = "interrupt '".p[1].":".p[2]."'"
-  elseif a:mode == 'Above'
-    let cmd = "eval-sections '0..".p[1].":".p[2]."'"
-  elseif a:mode == 'Below'
-    let cmd = "eval-sections '".p[1].":".p[2]."..$'"
-  elseif a:mode == 'All'
-    let cmd = "eval-sections '0..$'"
-  else
-    echomsg "Invalid mode '".a:mode."'"
-    return
-  end
+  let cmd = a:command . " " . a:pos
   " A hack to remember the undo position
   execute "normal! I "
   execute "normal! x"
   " Execute the selected code blocks
-  let cmdline = '%!'.<SID>SessionCmd().
+  let cmdline = '%!'.LitReplCmd().
         \ ' --interpreter='.g:litrepl_interpreter.
         \ ' --timeout-initial='.a:timeout_initial.
         \ ' --timeout-continue='.a:timeout_continue.
@@ -99,37 +88,49 @@ fun! s:SessionEval(mode,timeout_initial,timeout_continue,p)
   call setcharpos('.',cur)
   if errcode != 0
     execute "u"
-    call s:OpenErr(g:litrepl_errfile)
+    call LitReplOpenErr(g:litrepl_errfile)
   else
+    let g:litrepl_laspos = a:pos
     if g:litrepl_always_show_stderr != 0
-      call s:OpenErr(g:litrepl_errfile)
+      call LitReplOpenErr(g:litrepl_errfile)
     endif
   endif
 endfun
-command! -nargs=0 LitEval1 call <SID>SessionEval('Here',0.5,0.0,getcharpos('.'))
-command! -nargs=0 LitEvalLast1 call <SID>SessionEval('Here',0.5,0.0,g:litrepl_lastcur)
-command! -nargs=0 LitEvalWait1 call <SID>SessionEval('Here',"inf","inf",getcharpos('.'))
-command! -nargs=0 LitEvalAbove call <SID>SessionEval("Above","inf","inf",getcharpos('.'))
-command! -nargs=0 LitEvalBelow call <SID>SessionEval("Below","inf","inf",getcharpos('.'))
-command! -nargs=0 LitEvalAll call <SID>SessionEval("All","inf","inf",getcharpos('.'))
-command! -nargs=0 LitEvalBreak1 call <SID>SessionEval('Int',1.0,1.0,getcharpos('.'))
 
-fun! s:SessionStatus()
+fun! LitReplStatus()
   let ft = &filetype
   let cur = getcharpos('.')
   " A hack to remember the undo position
   execute "normal! I "
   execute "normal! x"
   " Execute the status command
-  silent execute '%!'.<SID>SessionCmd().
+  silent execute '%!'.LitReplCmd().
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.
         \ ' status 2>'.g:litrepl_errfile.' >&2'
   call setcharpos('.',cur)
   execute "u"
-  call s:OpenErr(g:litrepl_errfile)
+  call LitReplOpenErr(g:litrepl_errfile)
 endfun
-command! -nargs=0 LitStatus call <SID>SessionStatus()
+
+fun! s:Pos(arg)
+  if a:arg == ""
+    let p = getcharpos('.')
+    return p[1].":".p[2]
+  else
+    return a:arg
+  endif
+endfun
+
+command! -nargs=? LEval call LitReplRun("eval-sections", "inf", "inf", <SID>Pos(<q-args>))
+command! -nargs=? LEvalAsync call LitReplRun("eval-sections", g:litrepl_timeout, 0.0, <SID>Pos(<q-args>))
+command! -nargs=0 LEvalLast call LitReplRun("eval-sections", "inf", "inf", g:litrepl_lastcur)
+command! -nargs=? LEvalAbove call LitReplRun("eval-sections", "inf", "inf", "0..".<SID>Pos(<q-args>))
+command! -nargs=? LEvalBelow call LitReplRun("eval-sections", "inf", "inf", <SID>Pos(<q-args>)."..$")
+command! -nargs=0 LEvalAll call LitReplRun("eval-sections", "inf", "inf", "0..$")
+command! -nargs=? LInterrupt call LitReplRun("interrupt", 1.0, 1.0, <SID>Pos(<q-args>))
+
+command! -nargs=0 LStatus call LitReplStatus()
 
 let g:litrepl_loaded = 1
 
