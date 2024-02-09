@@ -316,7 +316,7 @@ let
            \   '-latex="pdflatex -shell-escape"',
            \   '-latexoption=-shell-escape',
            \ ],
-           \}
+           \ }
         let g:vimtex_syntax_packages = { 'litrepl' : { 'load' : 2 } }
 
 
