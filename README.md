@@ -1,9 +1,9 @@
-LitREPL.vim
-===========
+LitREPL
+=======
 
 **LitREPL** is a command-line tool and a Vim plugin for [literate
 programming](https://en.wikipedia.org/wiki/Literate_programming) in Python,
-aimed at providing user-friendly code editing and execution workflow.
+aimed at providing user-friendly code editing and execution workflows.
 
 
 ~~~~ markdown
@@ -13,8 +13,8 @@ Consider a Markdown document.
 print("Hello, World!")
 ```
 
-Having LitREPL tool and plugin installed, users get **:LitEval1**,
-**:LitEvalAll** or other commands to run Python code sections right
+Having LitREPL tool and plugin installed, users get :LEval,
+:LEvalAsync or other commands to run Python code sections right
 in the editor.
 
 ``` result
@@ -47,7 +47,6 @@ residing in the filesystem.
 Contents
 --------
 
-<details><summary>Show</summary><p>
 <!-- vim-markdown-toc GFM -->
 
 * [Installation](#installation)
@@ -66,7 +65,6 @@ Contents
 * [Third-party issues](#third-party-issues)
 
 <!-- vim-markdown-toc -->
-</p></details>
 
 Installation
 ------------
@@ -135,16 +133,18 @@ Usage
 
 #### In Vim
 
-1. Open Markdown or Latex document in Vim
-2. Put the cursor on the executable code section or on the `result` section
-3. Execute `:LitEval1` Vim command.
+1. Open Markdown or Latex document in Vim.
+2. Format the code and result sections.
+3. Put the cursor on the code section or on the result section.
+4. Execute `:LEval` Vim command. The contents of the result section will be
+   set to contain the output of the code section.
 
 The plugin does not define any Vim key bindings, users are expected to do it by
 themselves, for example:
 
 ```vim
-nnoremap <F5> :LitEval1<CR>
-nnoremap <F6> :LitEvalBreak1<CR>
+nnoremap <F5> :LEval<CR>
+nnoremap <F6> :LEvalAsync<CR>
 ```
 
 #### As a command line tool
@@ -172,20 +172,20 @@ $ cat script.py | \
 
 | Vim             | Command line         | Description                          |
 |-----------------|----------------------|--------------------------------------|
-| `:LitStart`     | `litepl start`       | Start the interpreter     |
-| `:LitStop`      | `litepl stop`        | Stop the interpreter      |
-| `:LitStatus`    | `litepl status <F`     | Print the daemon status |
-| `:LitEval1`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C) <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
-| `:LitEvalBreak1`| `lirtepl interrupt (N\|L:C) <F`       | Send Ctrl+C signal to the interpreter and get a feedback |
-| `:LitEvalWait1` | `lirtepl eval-sections (N\|L:C) <F`   | Run or update section under the cursor and wait until the completion |
-| `:LitEvalAbove` | `lirtepl eval-sections '0..(N\|L:C)' <F`| Run sections above and under the cursor and wait until the completion |
-| `:LitEvalBelow` | `lirtepl eval-sections '(N\|L:C)..$' <F`| Run sections below and under the cursor and wait until the completion |
-| `:LitEvalAll`   | `lirtepl eval-sections '0..$' <F`       | Evaluate all code sections |
+| `:LStart`       | `litepl start`       | Start the interpreter     |
+| `:LStop`        | `litepl stop`        | Stop the interpreter      |
+| `:LStatus`      | `litepl status <F`     | Print the daemon status |
+| `:LRestart`     | `litrepl restart`    | Restart the interpreter   |
+| `:LEval N`      | `lirtepl eval-sections (N\|L:C) <F`   | Run or update section under the cursor and wait until the completion |
+| `:LEvalAbove N` | `lirtepl eval-sections '0..(N\|L:C)' <F`| Run sections above and under the cursor and wait until the completion |
+| `:LEvalBelow N` | `lirtepl eval-sections '(N\|L:C)..$' <F`| Run sections below and under the cursor and wait until the completion |
+| `:LEvalAsync N` | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C) <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
+| `:LInterrupt`   | `lirtepl interrupt (N\|L:C) <F`       | Send Ctrl+C signal to the interpreter and get a feedback |
+| `:LEvalAll`     | `lirtepl eval-sections '0..$' <F`       | Evaluate all code sections |
 |                 | `lirtepl eval-code <P`                  | Evaluate the given Python code |
-| `:LitRestart`   | `litrepl restart`    | Restart the interpreter   |
-| `:LitRepl`      | `lirtepl repl`       | Open the terminal to the interpreter |
-| `:LitOpenErr`   | N/A                  | Open the stderr window    |
-| `:LitVersion`   | `litrepl --version`  | Show version              |
+| `:LTerm`        | `lirtepl repl`       | Open the terminal to the interpreter |
+| `:LOpenErr`     | N/A                  | Open the stderr window    |
+| `:LVersion`     | `litrepl --version`  | Show version              |
 
 Where
 
