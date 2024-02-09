@@ -28,7 +28,10 @@ version:
 
 .PHONY: upload
 upload: $(WHEEL)
-	twine upload dist/*
+	twine upload \
+		--username __token__ \
+		--password $(shell cat _token.pypi) \
+		dist/*
 
 .PHONY: all
 all: wheel
