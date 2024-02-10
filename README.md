@@ -54,9 +54,9 @@ Contents
     * [Examples](#examples)
         * [In Vim](#in-vim)
         * [As a command line tool](#as-a-command-line-tool)
-    * [Document formatting](#document-formatting)
+    * [Formatting](#formatting)
     * [Command reference](#command-reference)
-    * [Vim variables and Command line arguments](#vim-variables-and-command-line-arguments)
+    * [Variables and command line arguments](#variables-and-command-line-arguments)
 * [Development](#development)
     * [Development shells](#development-shells)
     * [Common workflows](#common-workflows)
@@ -137,36 +137,61 @@ Usage
 #### In Vim
 
 1. Open Markdown or Latex document in Vim.
-2. Format the code and result sections.
-3. Put the cursor on the code section or on the result section.
+2. Type the code and result sections.
+3. Move the cursor on the code section or on the result section.
 4. Execute `:LEval` Vim command. The contents of the result section will be
    set to contain the output of the code section.
 
-The plugin does not define any Vim key bindings, users are expected to do it by
-themselves, for example:
+The plugin does not define any key bindings, users could do it by themselves,
+for example:
 
 ```vim
 nnoremap <F5> :LEval<CR>
 nnoremap <F6> :LEvalAsync<CR>
 ```
 
-#### As a command line tool
+#### In shell
 
-To evaluate all Python section in a document:
+To evaluate code section in a document:
 
 ```sh
-$ cat doc/example.md | \
-  litrepl --filetype=markdown --interpreter=ipython eval-sections 0..$
+$ cat doc/example.md | litrepl --filetype=markdown --interpreter=ipython \
+                               eval-sections 0..$ >output.md
 ```
 
 To evaluate a Python script:
 
 ```sh
-$ cat script.py | \
-  litrepl --interpreter=ipython eval-code
+$ cat script.py | litrepl --interpreter=ipython eval-code
 ```
 
-### Document formatting
+### Formatting
+
+LaTex:
+
+``` tex
+\begin{lcode}
+print('Code here!')
+\end{lcode}
+
+\begin{lresult}
+Code here!
+\end{lresult}
+```
+
+For Markdown:
+
+~~~~ markdown
+``` python
+print('Code here!')
+```
+
+``` result
+Code here!
+```
+~~~~
+
+For more options, see the documents:
 
 * [Formatting Markdown documents](./doc/formatting.md#markdown)
 * [Formatting LaTeX documents](./doc/formatting.md#latex)
@@ -198,7 +223,7 @@ Where
 * `L:C` denotes line:column of the cursor.
 
 
-### Vim variables and Command line arguments
+### Variables and command line arguments
 
 
 | Vim setting               | CLI argument         | Description                       |
@@ -207,9 +232,9 @@ Where
 | N/A                       | `--interpreter=I`    | The interpreter to use: `python`\|`ipython`\|`auto` (the default) |
 | `let g:litrepl_debug=0/1` |  `--debug=1`         | Print debug messages to the stderr |
 | `let g:litrepl_errfile="/tmp/litrepl.vim"` |  N/A  | Intermediary file for debug and error messages |
-| `let g:litrepl_always_show_stderr=0/1`   |  N/A  | Set to auto-open stderr window after each execution |
-| N/A                 |  `--timeout-initial=FLOAT` | Timeout to wait for the new executions, in seconds, defaults to inf |
-| N/A                 |  `--timeout-continue=FLOAT`| Timeout to wait for executions which are already running, in seconds, defaults to inf |
+| `let g:litrepl_always_show_stderr=0/1`     |  N/A  | Set to auto-open stderr window after each execution |
+| `let g:litrepl_timeout=FLOAT` |  `--timeout-initial=FLOAT` | Timeout to wait for the new executions, in seconds, defaults to inf |
+| N/A                           |  `--timeout-continue=FLOAT`| Timeout to wait for executions which are already running, in seconds, defaults to inf |
 
 * `I` is taken into account by the `start` command or by the first call to
   `eval-sections`.
