@@ -27,8 +27,8 @@ residing in the filesystem.
 
 Features
 
-* Supported document formats: [[MD]](./doc/example.md), Latex
-  [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf).
+* Supported document formats: Markdown [[Example]](./doc/example.md), Latex
+  [[Example]](./doc/example.tex)[[Example (PDF)]](./doc/example.pdf).
 * Supported Python interpreters: Python, IPython
 * Supported modes: Vim, Command-line
 
