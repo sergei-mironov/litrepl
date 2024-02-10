@@ -51,12 +51,16 @@ Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
+    * [Text formatting](#text-formatting)
+    * [Reference](#reference)
+        * [Commands](#commands)
+        * [Variables and arguments](#variables-and-arguments)
     * [Examples](#examples)
-        * [In Vim](#in-vim)
-        * [As a command line tool](#as-a-command-line-tool)
-    * [Formatting](#formatting)
-    * [Command reference](#command-reference)
-    * [Variables and command line arguments](#variables-and-command-line-arguments)
+        * [Vim, basic usage](#vim-basic-usage)
+        * [Vim, basic keybindings](#vim-basic-keybindings)
+        * [Vim, basic keybindings](#vim-basic-keybindings-1)
+    * [Vim, shell command in a section](#vim-shell-command-in-a-section)
+        * [Shell, basic usage](#shell-basic-usage)
 * [Development](#development)
     * [Development shells](#development-shells)
     * [Common workflows](#common-workflows)
@@ -132,42 +136,9 @@ See the [Development](#development) section for more details.
 Usage
 -----
 
-### Examples
+### Text formatting
 
-#### In Vim
-
-1. Open Markdown or Latex document in Vim.
-2. Type the code and result sections.
-3. Move the cursor on the code section or on the result section.
-4. Execute `:LEval` Vim command. The contents of the result section will be
-   set to contain the output of the code section.
-
-The plugin does not define any key bindings, users could do it by themselves,
-for example:
-
-```vim
-nnoremap <F5> :LEval<CR>
-nnoremap <F6> :LEvalAsync<CR>
-```
-
-#### In shell
-
-To evaluate code section in a document:
-
-```sh
-$ cat doc/example.md | litrepl --filetype=markdown --interpreter=ipython \
-                               eval-sections 0..$ >output.md
-```
-
-To evaluate a Python script:
-
-```sh
-$ cat script.py | litrepl --interpreter=ipython eval-code
-```
-
-### Formatting
-
-LaTex:
+LaTeX:
 
 ``` tex
 \begin{lcode}
@@ -179,7 +150,7 @@ Code here!
 \end{lresult}
 ```
 
-For Markdown:
+Markdown:
 
 ~~~~ markdown
 ``` python
@@ -191,12 +162,14 @@ Code here!
 ```
 ~~~~
 
-For more options, see the documents:
+For more options, see:
 
 * [Formatting Markdown documents](./doc/formatting.md#markdown)
 * [Formatting LaTeX documents](./doc/formatting.md#latex)
 
-### Command reference
+### Reference
+
+#### Commands
 
 | Vim             | Command line         | Description                          |
 |-----------------|----------------------|--------------------------------------|
@@ -223,7 +196,7 @@ Where
 * `L:C` denotes line:column of the cursor.
 
 
-### Variables and command line arguments
+#### Variables and arguments
 
 
 | Vim setting               | CLI argument         | Description                       |
@@ -238,6 +211,82 @@ Where
 
 * `I` is taken into account by the `start` command or by the first call to
   `eval-sections`.
+
+### Examples
+
+#### Vim, basic usage
+
+1. Open Markdown or Latex document in Vim.
+2. Type the code and result sections, for example:
+    ~~~~ markdown
+    ``` python
+    print('Code here!')
+    ```
+
+    ``` result
+    Code here!
+    ```
+    ~~~~
+3. Move the cursor to either of sections.
+4. Execute `:LEval` Vim command. The contents of the result section will be
+   set to contain the output of the code section.
+
+#### Vim, basic keybindings
+
+The plugin does not define any key bindings, but users could do it by themselves,
+for example:
+
+```vim
+nnoremap <F5> :LEval<CR>
+nnoremap <F6> :LEvalAsync<CR>
+```
+
+#### Vim, basic keybindings
+
+The plugin does not define any key bindings, but users could do it by themselves,
+for example:
+
+```vim
+nnoremap <F5> :LEval<CR>
+nnoremap <F6> :LEvalAsync<CR>
+```
+
+### Vim, shell command in a section
+
+Thanks to the IPython features, we can use exclamation to run shell commands
+directly from Python code sections.
+
+~~~~
+``` python
+!cowsay "Hi Litrepl"
+```
+
+``` result
+ ____________ 
+< Hi Litrepl >
+ ------------ 
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+```
+~~~~
+
+#### Shell, basic usage
+
+To evaluate code section in a document:
+
+```sh
+$ cat doc/example.md | litrepl --filetype=markdown --interpreter=ipython \
+                               eval-sections 0..$ >output.md
+```
+
+To evaluate a Python script:
+
+```sh
+$ cat script.py | litrepl --interpreter=ipython eval-code
+```
 
 Development
 -----------
