@@ -5,11 +5,12 @@
     bash-prompt = "\[LitREPL-develop\]$ ";
   };
 
-  # inputs.nixpkgs.url = "github:grwlf/nixpkgs/local13";
   inputs = {
     # nixpkgs.url = "path:/home/grwlf/proj/nixcfg/nixpkgs";
     # nixpkgs.url = "nixpkgs";
-    nixpkgs.url = "github:grwlf/nixpkgs/local14";
+    # nixpkgs.url = "github:grwlf/nixpkgs/local13";
+    # nixpkgs.url = "github:grwlf/nixpkgs/local14";
+    nixpkgs.url = "github:grwlf/nixpkgs/local15";
   };
 
   outputs = { self, nixpkgs }:

@@ -51,13 +51,16 @@ Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
-  * [Examples](#examples)
-    * [In Vim](#in-vim)
-    * [As a command line tool](#as-a-command-line-tool)
-  * [Document formatting](#document-formatting)
-  * [Command reference](#command-reference)
-  * [Vim variables and Command line arguments](#vim-variables-and-command-line-arguments)
+    * [Examples](#examples)
+        * [In Vim](#in-vim)
+        * [As a command line tool](#as-a-command-line-tool)
+    * [Document formatting](#document-formatting)
+    * [Command reference](#command-reference)
+    * [Vim variables and Command line arguments](#vim-variables-and-command-line-arguments)
 * [Development](#development)
+    * [Development shells](#development-shells)
+    * [Common workflows](#common-workflows)
+    * [Other Nix targets](#other-nix-targets)
 * [Gallery](#gallery)
 * [Technical details](#technical-details)
 * [Limitations](#limitations)
@@ -220,27 +223,51 @@ while the [default.nix](./default.nix) defines the common build targets
 including Pypi and Vim packages, demo Vim configurations, development shells,
 etc.
 
-To enter the shell where all the dependencies are available, run
+### Development shells
+
+The default development shell is defined in the `./default.nix` as a Nix
+expression named `shell`. Nix makes sure that all the dependencies are available
+inside. To enter this shell, run:
+
 ``` sh
 $ nix develop
 ```
 
-The top-level [Makefile](./Makefile) encodes common procedures available in the
-development shell: running tests, building Python wheels, uploading PyPi
-packages.
+Another shell which might be useful is `shell-screencast`. To run it, specify
+the full Nix-flake path as follows:
 
-To build individual Nix expressions, run the `nix build '.#NAME'` passing it
-with the name of the expression to build:
+``` sh
+$ nix develop '.#shell-screencast'
+```
+
+### Common workflows
+
+The top-level [Makefile](./Makefile) encodes typical workflows to be executed
+from within the development shell:
+
+``` sh
+[LitREPL-develop] $ make help
+LitREPL is a macroprocessing Python library for Litrate programming and code execution
+Build targets:
+help:       Print help
+test:       Run the test script (./sh/test.sh)
+wheel:      Build Python wheel (the DEFAULT target)
+version:    Print the version
+upload:     Upload wheel to Pypi.org (./_token.pypi is required)
+```
+
+### Other Nix targets
+
+To build individual Nix expressions, run the `nix build '.#NAME'` passing the
+name of the expression to build. If succeeded, Nix publishes the last build
+results under the `./result` symlink.
 
 ``` sh
 $ nix build '.#vim-demo'
-$ ./result/bin/vim-demo  # Runs the self-contained demo instance of Vim
+$ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
 ```
 
-Optionally one can run `nix-env -i ./result` to install the available expression
-into the OS-wide user profile.
-
-The list of output expressions includes:
+The list of Nix build targets includes:
 
 * `litrepl-release` - Litrepl script and Python lib
 * `litrepl-release-pypi` - Litrepl script and Python lib
@@ -250,7 +277,7 @@ The list of output expressions includes:
 * `vim-demo` - Vim configured to use litrepl suitable for recording screencasts
 * `vim-plug` - Vim configured to use litrepl via the Plug manager
 * `shell-dev` - The development shell
-* `shell-demo` - The shell for recording demonstrations, includes `vim-demo`.
+* `shell-screencast` - The shell for recording demonstrations, includes `vim-demo`.
 
 Gallery
 -------

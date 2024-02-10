@@ -59,7 +59,7 @@ let
     python-release = pkgs.python3.withPackages (
       pp: with pp; [
         (lark-parser112 pp)
-        pp.psutil
+        psutil
       ]
     );
 
@@ -91,10 +91,11 @@ let
     litrepl-pypi = (python: python.pkgs.buildPythonPackage rec {
       pname = "litrepl";
       version = lib.fileContents "${litrepl_root}/semver.txt";
-      propagatedBuildInputs = [(lark-parser112 python.pkgs) pkgs.socat];
+      propagatedBuildInputs = [(lark-parser112 python.pkgs) pkgs.socat python.pkgs.psutil];
       src = python.pkgs.fetchPypi {
         inherit pname version;
-        sha256 = "sha256-eOr+64tSPXPUrqI9w4UUNLtvf0ziE/vHmuU5050VS1s=";
+        sha256 = "sha256-oWcX+5GFL3sDGKYYYlJoeglBdcufro6Sk9KZSJMt0t0=";
+        # sha256 = "sha256-eOr+64tSPXPUrqI9w4UUNLtvf0ziE/vHmuU5050VS1s=";
         # sha256 = "sha256-Ex06917+Grhhv8hGEr59CUK0+5tsQ6+wNv+7to2WDrg=";
         # sha256 = "sha256-tiNqmVMM3JttYc8LNnmMdxw6cenogCAhFu9feVMsnq4=";
         # sha256 = "sha256:0vq2igzfi3din1fah18fzp7wdh089hf28s3lwm321k11jhycqgy9";
@@ -353,8 +354,8 @@ let
       '';
     };
 
-    shell-demo = pkgs.mkShell {
-      name = "shell-demo";
+    shell-screencast = pkgs.mkShell {
+      name = "shell-screencast";
       buildInputs = [
         vim-demo
         latexrun
@@ -362,7 +363,7 @@ let
         grechanik-st
         (litrepl-release-pypi)
       ] ++ (with pkgs ; [
-        peek
+        obs-studio
         tmux
       ]);
       shellHook = with pkgs; ''
@@ -381,7 +382,7 @@ let
     vim-litrepl-release-pypi = vim-litrepl-pypi python-release;
 
     collection = rec {
-      inherit pkgs shell shell-dev shell-demo vim-litrepl-release vim-test
+      inherit pkgs shell shell-dev shell-screencast vim-litrepl-release vim-test
       vim-demo grechanik-st vimtex-local litrepl-release litrepl-dev
       litrepl-release-pypi vim-litrepl-release-pypi;
     };
