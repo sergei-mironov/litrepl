@@ -1,16 +1,23 @@
 .DEFAULT_GOAL = all
-VERSION = $(shell python3 setup.py --version)
+VERSION = $(shell python3 setup.py --version 2>/dev/null)
 WHEEL = dist/litrepl-$(VERSION)-py3-none-any.whl
 PY = $(shell find -name '*\.py' | grep -v semver.py | grep -v revision.py)
+VIM = $(shell find -name '*\.vim')
 TESTS = ./sh/test.sh
 
-.stamp_test: $(PY) $(TESTS) Makefile python/bin/litrepl
+.stamp_test: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
 	LITREPL_BIN="python `pwd`/python/bin/litrepl" \
 	LITREPL_ROOT=`pwd`/python \
 	sh ./sh/test.sh
 	touch $@
 
-.PHONY: test
+.PHONY: help # Print help
+help:
+	@echo "LitREPL is a macroprocessing Python library for Litrate programming and code execution"
+	@echo Build targets:
+	@cat Makefile | sed -n 's@^.PHONY: \([a-z]\+\) # \(.*\)@    \1:   \2@p' | column -t -l2
+
+.PHONY: test # Run the test script (./sh/test.sh)
 test: .stamp_test
 
 $(WHEEL): $(PY) Makefile .stamp_test
@@ -19,14 +26,14 @@ $(WHEEL): $(PY) Makefile .stamp_test
 	python3 setup.py sdist bdist_wheel
 	test -f $@
 
-.PHONY: wheel
+.PHONY: wheel # Build Python wheel (the DEFAULT target)
 wheel: $(WHEEL)
 
-.PHONY: version
+.PHONY: version # Print the version
 version:
 	@echo $(VERSION)
 
-.PHONY: upload
+.PHONY: upload # Upload wheel to Pypi.org (./_token.pypi is required)
 upload: $(WHEEL)
 	twine upload \
 		--username __token__ \
