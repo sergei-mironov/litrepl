@@ -57,9 +57,10 @@ Contents
         * [Variables and arguments](#variables-and-arguments)
     * [Examples](#examples)
         * [Vim, basic usage](#vim-basic-usage)
-        * [Vim, basic keybindings](#vim-basic-keybindings)
-        * [Vim, basic keybindings](#vim-basic-keybindings-1)
-        * [Vim, shell commands in code sections](#vim-shell-commands-in-code-sections)
+        * [Vim, useful keybindings](#vim-useful-keybindings)
+        * [Vim, inserting new sections](#vim-inserting-new-sections)
+        * [Vim, executing first section after restart](#vim-executing-first-section-after-restart)
+        * [Vim, running shell commands](#vim-running-shell-commands)
         * [Shell, basic usage](#shell-basic-usage)
 * [Development](#development)
     * [Development shells](#development-shells)
@@ -231,29 +232,35 @@ Where
 4. Execute `:LEval` Vim command. The contents of the result section will be
    set to contain the output of the code section.
 
-#### Vim, basic keybindings
+#### Vim, useful keybindings
 
-The plugin does not define any key bindings, but users could do it by themselves,
+The plugin does not define any keybindings, but users could do it by themselves,
 for example:
 
-```vim
+``` vim
 nnoremap <F5> :LEval<CR>
 nnoremap <F6> :LEvalAsync<CR>
 ```
 
-#### Vim, basic keybindings
+#### Vim, inserting new sections
 
-The plugin does not define any key bindings, but users could do it by themselves,
-for example:
+Lets define a handful command `:C<CR>` for inserting new sections.
 
-```vim
-nnoremap <F5> :LEval<CR>
-nnoremap <F6> :LEvalAsync<CR>
+``` vim
+command! -buffer -nargs=0 C normal 0i``` python<CR>```<CR><CR>``` result<CR>```<Esc>4k
 ```
 
-#### Vim, shell commands in code sections
+#### Vim, executing first section after restart
 
-Thanks to the IPython features, we can use exclamation to run shell commands
+We define the `:LR` command running first section after the restart.
+
+``` vim
+command! -nargs=0 LR LRestart | LEval 0
+```
+
+#### Vim, running shell commands
+
+Thanks to IPython features, we can use exclamation to run shell commands
 directly from Python code sections.
 
 ~~~~
