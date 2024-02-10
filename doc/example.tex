@@ -1,6 +1,9 @@
 \documentclass{article}
+\usepackage{verbatim}
 \usepackage[utf8]{inputenc}
 \begin{document}
+
+\section{Basics}
 
 LitREPL treats \texttt{lcode} environment as code sections and \texttt{lresult}
 environment as result sections. The names are currently hardcoded into the
@@ -9,8 +12,8 @@ simplified LitREPL parser. Wrapping it in other tags is not allowed.
 LaTeX does not know anything about these environments by default, we need to
 introduce them to be able to compile the document using e.g. \texttt{pdflatex}.
 
-\newenvironment{lcode}{\begin{texttt}}{\end{texttt}}
-\newenvironment{lresult}{\begin{texttt}}{\end{texttt}}
+\newenvironment{lcode}{\verbatim}{\endverbatim}
+\newenvironment{lresult}{\verbatim}{\endverbatim}
 \newcommand{\linline}[2]{#2}
 
 Executable section is the text between the \texttt{lcode} begin/end tags.
@@ -20,7 +23,7 @@ W='Hello, World!'
 print(W)
 \end{lcode}
 
-Putting the cursor on it and typing the \texttt{:LitEval1} runs the code in the
+Putting the cursor on it and typing the \texttt{:LEval1} runs the code in the
 background Python interpreter.
 
 \texttt{lresult} begin/end tags mark the result section.  LitREPL replaces its
@@ -30,17 +33,21 @@ content with the above code section's execution result.
 Hello, World!
 \end{lresult}
 
+\section{Producing LaTeX}
+
 LitREPL recognizes \texttt{l[no]code}/\texttt{l[no]result} comments as
 code/result section markers. This way we can use Python to produce LaTeX markup
 as output.
 
-%lcode
-print("Hi!")
-%lnocode
+\begin{lcode}
+print("\\textbf{Hi}")
+\end{lcode}
 
 %lresult
-Hi!
+\textbf{Hi}
 %lnoresult
+
+\section{Inline output}
 
 Additionally, VimREPL recognises \texttt{linline} 2-argument tags. The first
 arguement is treaten as a Python printable expression. The second arguemnt is to

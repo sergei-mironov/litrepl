@@ -25,14 +25,12 @@ The execution takes place in a background interpreter, tied to the UNIX pipes
 residing in the filesystem.
 ~~~~
 
-<details><summary>Features</summary><p>
+Features
 
-* Supported document formats: Markdown [[MD]](./doc/example.md), Latex
+* Supported document formats: [[MD]](./doc/example.md), Latex
   [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf).
 * Supported Python interpreters: Python, IPython
 * Supported modes: Vim, Command-line
-
-</p></details>
 
 <details><summary>Requirements</summary><p>
 
