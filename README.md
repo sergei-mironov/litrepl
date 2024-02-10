@@ -59,7 +59,7 @@ Contents
         * [Vim, basic usage](#vim-basic-usage)
         * [Vim, basic keybindings](#vim-basic-keybindings)
         * [Vim, basic keybindings](#vim-basic-keybindings-1)
-    * [Vim, shell command in a section](#vim-shell-command-in-a-section)
+        * [Vim, shell commands in code sections](#vim-shell-commands-in-code-sections)
         * [Shell, basic usage](#shell-basic-usage)
 * [Development](#development)
     * [Development shells](#development-shells)
@@ -251,7 +251,7 @@ nnoremap <F5> :LEval<CR>
 nnoremap <F6> :LEvalAsync<CR>
 ```
 
-### Vim, shell command in a section
+#### Vim, shell commands in code sections
 
 Thanks to the IPython features, we can use exclamation to run shell commands
 directly from Python code sections.
