@@ -50,6 +50,6 @@ class IType(Enum):
 
 @dataclass
 class Settings:
-  """ Interpreter settings required to share among the runners """
+  """ Interpreter settings to share among the runners """
   itype:IType
 
