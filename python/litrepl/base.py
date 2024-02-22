@@ -45,6 +45,8 @@ def pipenames(a:LitreplArgs)->FileNames:
                    join(auxdir,"_pid.txt"))
 
 def settings(fns:FileNames) -> Settings:
+  """ Determines the session settings. Currently just finds out the type of the
+  interpreter. """
   pid=int(open(fns.pidf).read())
   p=Process(pid)
   cmd=p.cmdline()
