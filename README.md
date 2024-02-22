@@ -44,8 +44,8 @@ Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
-    * [LaTeX](#latex)
     * [Markdown](#markdown)
+    * [LaTeX](#latex)
     * [Reference](#reference)
         * [Commands](#commands)
         * [Variables and arguments](#variables-and-arguments)
@@ -130,42 +130,54 @@ See the [Development](#development) section for more details.
 Usage
 -----
 
-### LaTeX
-
-1. Define `lcode`/`lresult` Latex environments according to the style of your
-   document.
-
-2. Create code and result sections:
-   ``` tex
-   \begin{lcode}
-   print('Code here!')
-   \end{lcode}
-
-   \begin{lresult}
-   Code here!
-   \end{lresult}
-   ```
-
-3. Place the cursor on any of the secions and run the `:LEval` command.
-
-See also: [Formatting LaTeX documents](./doc/formatting.md#latex)
-
 ### Markdown
 
-1. Format the document
+1. Create code and result sections. Put some Python code into the code section.
+   Leave the result section emtpy.
    ~~~~ markdown
    ``` python
    print('Code here!')
    ```
 
    ``` result
-   Code here!
    ```
    ~~~~
 
-2. Place the cursor on any of the secions and run the `:LEval` command.
+2. Place the cursor on any of the secions and run the `:LEval` command. Litrepl
+   will run the Python interpreter, evaluate the code and paste the output into
+   the result section.
+3. Re-evaluate sections as needed. The interpreter will preserve its internal
+   state between runs.
 
 See also: [Formatting Markdown documents](./doc/formatting.md#markdown)
+
+### LaTeX
+
+1. Define `lcode`/`lresult` Latex environments according to the style of your
+   document. The minimal working example might look like this:
+
+   ``` tex
+   \newenvironment{lcode}{\verbatim}{\endverbatim}
+   \newenvironment{lresult}{\verbatim}{\endverbatim}
+   ```
+
+2. Create code and result sections. Put some Python code into the code section.
+   Leave the result section emtpy.
+   ``` tex
+   \begin{lcode}
+   print('Code here!')
+   \end{lcode}
+
+   \begin{lresult}
+   \end{lresult}
+   ```
+
+3. Place the cursor on any of the secions and run the `:LEval` command.
+
+4. Re-evaluate sections as needed. The interpreter will preserve its internal
+   state between runs.
+
+See also: [Formatting LaTeX documents](./doc/formatting.md#latex)
 
 ### Reference
 
