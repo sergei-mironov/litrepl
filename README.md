@@ -44,17 +44,17 @@ Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
-    * [Text formatting](#text-formatting)
+    * [LaTeX](#latex)
+    * [Markdown](#markdown)
     * [Reference](#reference)
         * [Commands](#commands)
         * [Variables and arguments](#variables-and-arguments)
-    * [Examples](#examples)
-        * [Vim, basic usage](#vim-basic-usage)
-        * [Vim, useful keybindings](#vim-useful-keybindings)
+    * [Hints](#hints)
+        * [Vim, adding keybindings](#vim-adding-keybindings)
         * [Vim, inserting new sections](#vim-inserting-new-sections)
         * [Vim, executing first section after restart](#vim-executing-first-section-after-restart)
         * [Vim, running shell commands](#vim-running-shell-commands)
-        * [Shell, basic usage](#shell-basic-usage)
+        * [Command line, basic usage](#command-line-basic-usage)
 * [Development](#development)
     * [Development shells](#development-shells)
     * [Common workflows](#common-workflows)
@@ -130,57 +130,63 @@ See the [Development](#development) section for more details.
 Usage
 -----
 
-### Text formatting
+### LaTeX
 
-LaTeX:
+1. Define `lcode`/`lresult` Latex environments according to the style of your
+   document.
 
-``` tex
-\begin{lcode}
-print('Code here!')
-\end{lcode}
+2. Create code and result sections:
+   ``` tex
+   \begin{lcode}
+   print('Code here!')
+   \end{lcode}
 
-\begin{lresult}
-Code here!
-\end{lresult}
-```
+   \begin{lresult}
+   Code here!
+   \end{lresult}
+   ```
 
-Markdown:
+3. Place the cursor on any of the secions and run the `:LEval` command.
 
-~~~~ markdown
-``` python
-print('Code here!')
-```
+See also: [Formatting LaTeX documents](./doc/formatting.md#latex)
 
-``` result
-Code here!
-```
-~~~~
+### Markdown
 
-For more options, see:
+1. Format the document
+   ~~~~ markdown
+   ``` python
+   print('Code here!')
+   ```
 
-* [Formatting Markdown documents](./doc/formatting.md#markdown)
-* [Formatting LaTeX documents](./doc/formatting.md#latex)
+   ``` result
+   Code here!
+   ```
+   ~~~~
+
+2. Place the cursor on any of the secions and run the `:LEval` command.
+
+See also: [Formatting Markdown documents](./doc/formatting.md#markdown)
 
 ### Reference
 
 #### Commands
 
-| Vim             | Command line         | Description                          |
-|-----------------|----------------------|--------------------------------------|
-| `:LStart`       | `litepl start`       | Start the interpreter     |
-| `:LStop`        | `litepl stop`        | Stop the interpreter      |
-| `:LStatus`      | `litepl status <F`     | Print the daemon status |
-| `:LRestart`     | `litrepl restart`    | Restart the interpreter   |
-| `:LEval N`      | `lirtepl eval-sections (N\|L:C) <F`   | Run or update section under the cursor and wait until the completion |
-| `:LEvalAbove N` | `lirtepl eval-sections '0..(N\|L:C)' <F`| Run sections above and under the cursor and wait until the completion |
-| `:LEvalBelow N` | `lirtepl eval-sections '(N\|L:C)..$' <F`| Run sections below and under the cursor and wait until the completion |
-| `:LEvalAsync N` | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C) <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
-| `:LInterrupt`   | `lirtepl interrupt (N\|L:C) <F`       | Send Ctrl+C signal to the interpreter and get a feedback |
-| `:LEvalAll`     | `lirtepl eval-sections '0..$' <F`       | Evaluate all code sections |
-|                 | `lirtepl eval-code <P`                  | Evaluate the given Python code |
-| `:LTerm`        | `lirtepl repl`       | Open the terminal to the interpreter |
-| `:LOpenErr`     | N/A                  | Open the stderr window    |
-| `:LVersion`     | `litrepl --version`  | Show version              |
+| Vim                 | Command line         | Description                          |
+|---------------------|----------------------|--------------------------------------|
+| `:LStart`           | `litepl start`       | Start the interpreter     |
+| `:LStop`            | `litepl stop`        | Stop the interpreter      |
+| `:LStatus`          | `litepl status <F`     | Print the daemon status |
+| `:LRestart`         | `litrepl restart`    | Restart the interpreter   |
+| `:LEval N`          | `lirtepl eval-sections (N\|L:C) <F`   | Run or update section under the cursor and wait until the completion |
+| `:LEvalAbove N`     | `lirtepl eval-sections '0..(N\|L:C)' <F`| Run sections above and under the cursor and wait until the completion |
+| `:LEvalBelow N`     | `lirtepl eval-sections '(N\|L:C)..$' <F`| Run sections below and under the cursor and wait until the completion |
+| `:LEvalAsync N`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C) <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
+| `:LInterrupt`       | `lirtepl interrupt (N\|L:C) <F`       | Send Ctrl+C signal to the interpreter and get a feedback |
+| `:LEvalAll`         | `lirtepl eval-sections '0..$' <F`       | Evaluate all code sections |
+|                     | `lirtepl eval-code <P`                  | Evaluate the given Python code |
+| `:LTerm`            | `lirtepl repl`       | Open the terminal to the interpreter |
+| `:LOpenErr`         | N/A                  | Open the stderr window    |
+| `:LVersion`         | `litrepl --version`  | Show version              |
 
 Where
 
@@ -206,26 +212,9 @@ Where
 * `I` is taken into account by the `start` command or by the first call to
   `eval-sections`.
 
-### Examples
+### Hints
 
-#### Vim, basic usage
-
-1. Open Markdown or Latex document in Vim.
-2. Type the code and result sections, for example:
-    ~~~~ markdown
-    ``` python
-    print('Code here!')
-    ```
-
-    ``` result
-    Code here!
-    ```
-    ~~~~
-3. Move the cursor to either of sections.
-4. Execute `:LEval` Vim command. The contents of the result section will be
-   set to contain the output of the code section.
-
-#### Vim, useful keybindings
+#### Vim, adding keybindings
 
 The plugin does not define any keybindings, but users could do it by themselves,
 for example:
@@ -273,7 +262,7 @@ directly from Python code sections.
 ```
 ~~~~
 
-#### Shell, basic usage
+#### Command line, basic usage
 
 To evaluate code section in a document:
 
