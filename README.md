@@ -153,7 +153,7 @@ See also: [Formatting Markdown documents](./doc/formatting.md#markdown)
 
 ### LaTeX
 
-1. Define `lcode`/`lresult` Latex environments according to the style of your
+1. Define `lcode` and `lresult` LaTeX environments according to the style of your
    document. The minimal working example might look like this:
 
    ``` tex
@@ -161,8 +161,9 @@ See also: [Formatting Markdown documents](./doc/formatting.md#markdown)
    \newenvironment{lresult}{\verbatim}{\endverbatim}
    ```
 
-2. Create code and result sections. Put some Python code into the code section.
-   Leave the result section emtpy.
+2. Create code and result sections in the body of your document. Put some Python
+   code into the code section.  Leave the result section emtpy.
+
    ``` tex
    \begin{lcode}
    print('Code here!')
