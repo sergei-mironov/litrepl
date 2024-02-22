@@ -339,11 +339,11 @@ def eval_code(a:LitreplArgs,
 def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->None:
   """ Evaluate code sections of the parsed `tree`, as specified in the `secrec`
   request.  """
+  if not running(a):
+    start(a)
   fns=pipenames(a)
   ss=settings(fns)
   nsecs=secrec.nsecs
-  if not running(a):
-    start(a)
   ssrc:Dict[int,str]={} # Section sources
   sres:Dict[int,str]={} # Section results
   class C(Interpreter):
