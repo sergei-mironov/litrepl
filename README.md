@@ -5,20 +5,7 @@ LitREPL
 programming](https://en.wikipedia.org/wiki/Literate_programming) in Python,
 aimed at providing user-friendly code editing and execution workflows.
 
-Consider a Markdown document:
-~~~~ markdown
-
-``` python
-print("Hello, World!")
-```
-
-With LitREPL users get :LEval command executing the code above. The execution
-takes place in a persistent background Python interpreter session.
-
-``` result
-Hello, World!
-```
-~~~~
+![demo](https://github.com/grwlf/litrepl.vim/assets/4477729/44b2ebdb-9a16-4f49-9d09-ecf20c1dedcc)
 
 Features
 
