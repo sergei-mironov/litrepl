@@ -60,6 +60,7 @@ let
       pp: with pp; [
         (lark-parser112 pp)
         psutil
+        ipython
       ]
     );
 
@@ -94,7 +95,8 @@ let
       propagatedBuildInputs = [(lark-parser112 python.pkgs) pkgs.socat python.pkgs.psutil];
       src = python.pkgs.fetchPypi {
         inherit pname version;
-        sha256 = "sha256-oWcX+5GFL3sDGKYYYlJoeglBdcufro6Sk9KZSJMt0t0=";
+        sha256 = "sha256-kf/gx5f7VIKfDBxpTG/E1ghdBGRulbFoVHoNqT/FoSM=";
+        # sha256 = "sha256-oWcX+5GFL3sDGKYYYlJoeglBdcufro6Sk9KZSJMt0t0=";
         # sha256 = "sha256-eOr+64tSPXPUrqI9w4UUNLtvf0ziE/vHmuU5050VS1s=";
         # sha256 = "sha256-Ex06917+Grhhv8hGEr59CUK0+5tsQ6+wNv+7to2WDrg=";
         # sha256 = "sha256-tiNqmVMM3JttYc8LNnmMdxw6cenogCAhFu9feVMsnq4=";
@@ -213,6 +215,22 @@ let
       '';
     });
 
+    grechanik-st-light = pkgs.st.overrideDerivation (old:{
+      pname = "grechanik-st";
+
+      src = fetchFromGitHub {
+        owner = "grwlf";
+        repo = "st";
+        rev = "local";
+        sha256 = "sha256-6WJncoeJRwhDSiurLgoTe5lpIShcOWyYKcBOKulnJXQ=";
+      };
+      buildInputs = old.buildInputs ++ [pkgs.imlib2.dev];
+      preBuild = ''
+        cp ${./nix/st-config-light.h} config.def.h
+      '';
+      CFLAGS = "-DCOLORSCHEME=2";
+    });
+
     vimtex-local = pkgs.vimPlugins.vimtex.overrideAttrs (old: {
       version = "master";
       src = ./modules/vimtex;
@@ -230,11 +248,12 @@ let
           vim-terminal-images
           vim-markdown
           nerdtree
+          changeColorScheme-vim
         ];
       };
 
       vimrcConfig.customRC = ''
-        colorscheme blackboard
+        colorscheme C64
         syntax on
         filetype plugin indent on
         set backspace=indent,eol,start
@@ -286,12 +305,11 @@ let
         nnoremap p "+p
         nnoremap P "+P
 
-
-        " Save
         nnoremap <F2> :noh<CR>:w!<CR>
         inoremap <F2> <ESC>:noh<CR>:w!<CR>
-        nnoremap <F5> :LitEval1<CR>
-        nnoremap <F6> :LitEvalLast1<CR>
+        nnoremap <F5> :LEval<CR>
+        nnoremap <F9> :call NextColorScheme()<CR>:colorscheme<CR>
+        nnoremap <F10> :call PreviousColorScheme()<CR>:colorscheme<CR>
 
         " vim-terminal-images
         let g:terminal_images_command = "${tupimage}/bin/tupimage"
@@ -362,6 +380,7 @@ let
         mytexlive
         grechanik-st
         (litrepl-release-pypi)
+        python-release
       ] ++ (with pkgs ; [
         obs-studio
         tmux
