@@ -5,7 +5,8 @@ LitREPL
 programming](https://en.wikipedia.org/wiki/Literate_programming) in Python,
 aimed at providing user-friendly code editing and execution workflows.
 
-![demo](https://github.com/grwlf/litrepl.vim/assets/4477729/44b2ebdb-9a16-4f49-9d09-ecf20c1dedcc)
+![2024-02-24 02-29-19](https://github.com/grwlf/litrepl.vim/assets/4477729/73fd31f6-2b2a-4193-b63e-5c163272a9d8)
+
 
 Features
 
