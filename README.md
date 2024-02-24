@@ -172,7 +172,7 @@ See also: [Formatting LaTeX documents](./doc/formatting.md#latex)
 
 #### Commands
 
-| Vim                 | Command line         | Description                          |
+| Vim <img width=200/> | Command line <img width=200/> | Description                          |
 |---------------------|----------------------|--------------------------------------|
 | `:LStart`           | `litepl start`       | Start the interpreter     |
 | `:LStop`            | `litepl stop`        | Stop the interpreter      |
