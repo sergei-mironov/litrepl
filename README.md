@@ -7,8 +7,8 @@ aimed at providing user-friendly code editing and execution workflows.
 
 ![2024-02-24 02-29-19](https://github.com/grwlf/litrepl.vim/assets/4477729/73fd31f6-2b2a-4193-b63e-5c163272a9d8)
 
-
 Features
+--------
 
 * Supported document formats: Markdown [[Example]](./doc/example.md), Latex
   [[Example]](./doc/example.tex)[[Example (PDF)]](./doc/example.pdf).
