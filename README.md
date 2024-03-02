@@ -10,7 +10,7 @@ aimed at providing user-friendly code editing and execution workflows.
 Features
 --------
 
-* Formats:
+* Document formats:
   + Markdown [[Example]](./doc/example.md)
   + Latex [[Example]](./doc/example.tex)[[Example (PDF)]](./doc/example.pdf).
 * Interpreters: Python, IPython
