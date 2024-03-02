@@ -10,8 +10,9 @@ aimed at providing user-friendly code editing and execution workflows.
 Features
 --------
 
-* Formats: Markdown [[Example]](./doc/example.md), Latex
-  [[Example]](./doc/example.tex)[[Example (PDF)]](./doc/example.pdf).
+* Formats:
+  + Markdown [[Example]](./doc/example.md)
+  + Latex [[Example]](./doc/example.tex)[[Example (PDF)]](./doc/example.pdf).
 * Interpreters: Python, IPython
 * Works in both Vim and in command line
 
