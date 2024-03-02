@@ -506,6 +506,75 @@ runlitrepl stop
 )}
 #}}}
 
+test_vim_leval_cursor() {( #{{{
+mktest "_test_vim"
+
+cat >file.md <<"EOF"
+``` python
+print("result-1")
+```
+
+``` result
+```
+
+``` python
+print("result-2")
+```
+
+``` result
+```
+EOF
+
+vim -c "
+  let g:litrepl_interpreter='$LITREPL_INTERPRETER'
+  call feedkeys(\"9G\")
+  LEval
+  wq!
+" file.md >/dev/null 2>_vim.log
+cat file.md | grep -v '^result-1' >/dev/null
+cat file.md | grep '^result-2' >/dev/null
+
+runlitrepl stop
+)}
+#}}}
+
+test_vim_leval_explicit() {( #{{{
+mktest "_test_vim"
+
+cat >file.md <<"EOF"
+``` python
+print("result-1")
+```
+
+``` result
+```
+
+``` python
+print("result-2")
+```
+
+``` result
+```
+EOF
+
+vim -c "
+  let g:litrepl_interpreter='$LITREPL_INTERPRETER'
+  LEval 1
+  wq!
+" file.md >/dev/null 2>_vim.log
+cat file.md | grep -v '^result-1' >/dev/null
+cat file.md | grep '^result-2' >/dev/null
+
+runlitrepl stop
+)}
+#}}}
+
+
+die() {
+  echo "$@" >&2
+  exit 1
+}
+
 interpreters() {
   echo "$(which python)"
   echo "$(which ipython)"
@@ -520,6 +589,8 @@ tests() {
   echo test_eval_code
   echo test_eval_with_empty_lines
   echo test_print_system_order
+  echo test_vim_leval_cursor
+  echo test_vim_leval_explicit
 }
 
 runlitrepl() {
@@ -544,11 +615,22 @@ while test -n "$1" ; do
   shift
 done
 
+if test "$INTERPS" = "?" ; then
+  interpreters
+fi
+if test "$TESTS" = "?" ; then
+  tests
+fi
+if test "$INTERPS" = "?" -o "$TESTS" = "?" ; then
+  exit 1
+fi
+
 if test -z "$LITREPL_BIN"; then
   LITREPL_BIN=$LITREPL_ROOT/python/bin/litrepl
 fi
 
 trap "echo FAIL" EXIT
+NRUN=0
 for t in $(tests) ; do
   for i in $(interpreters) ; do
     if echo "$INTERPS" | grep -q "$i" && \
@@ -556,8 +638,10 @@ for t in $(tests) ; do
 
       echo "Running test '$t' interpreter '$i'"
       LITREPL_INTERPRETER="$i" $t
+      NRUN=$(expr $NRUN '+' 1)
     fi
   done
 done
+test $NRUN = 0 && die "No tests were run"
 trap "" EXIT
 echo OK
