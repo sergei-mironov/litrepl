@@ -18,6 +18,7 @@ from dataclasses import dataclass, astuple
 from functools import partial
 from argparse import ArgumentParser
 from contextlib import contextmanager
+from errno import ESRCH
 
 from .types import RunResult, ReadResult, FileNames
 
@@ -47,17 +48,17 @@ def with_sigint(fns:FileNames, brk=False,ipid:Optional[int]=None):
     signal(SIGINT,prev)
 
 @contextmanager
-def with_alarm(timeout:float):
+def with_alarm(timeout_sec:float):
   """ Set the alarm if the timeout is known. Zero or infinite timeout means no
   timeout is set. """
   prev=None
   try:
-    if timeout>0 and timeout<float('inf'):
+    if timeout_sec>0 and timeout_sec<float('inf'):
       def _handler(signum,frame):
         pdebug(f"SIGALARM received")
         raise TimeoutError()
       prev=signal(SIGALRM,_handler)
-      setitimer(ITIMER_REAL,timeout)
+      setitimer(ITIMER_REAL,timeout_sec)
     yield
   finally:
     if prev is not None:
@@ -201,11 +202,37 @@ def process(fns:FileNames, lines:str)->Tuple[str,RunResult]:
       os.close(fdr)
   return res,runr
 
+def interpIsRunning(fns:FileNames)->bool:
+  try:
+    ipid=int(open(fns.pidf).read())
+    os.kill(ipid, 0)
+  except FileNotFoundError:
+    return False
+  except OSError as err:
+    if err.errno == ESRCH:
+      return False
+  return True
+
+def interpExitCode(fns:FileNames,poll_sec=0.5,poll_attempts=4,default=-1)->Optional[int]:
+  """ Returns: <int>: exit code; None: still running; -1: unknown """
+  while interpIsRunning(fns):
+    poll_attempts-=1
+    if poll_attempts<=0:
+      return None
+    sleep(poll_sec)
+  try:
+    return int(open(fns.ecodef).read())
+  except FileNotFoundError:
+    return default
+
+def interpExitCodeNB(fns:FileNames,notfound=-1)->Optional[int]:
+  return interpExitCode(fns,poll_attempts=1,default=notfound)
+
 def processAsync(fns:FileNames, code:str)->RunResult:
   """ Send `code` to the interpreter and fork the response reader. The output
   file is locked and its name is saved into the resulting `RunResult` object.
   """
-  wd,inp,outp,pidf=astuple(fns)
+  wd,inp,outp,pidf,_=astuple(fns)
   codehash=abs(hash(code))
   fname=join(wd,f"litrepl_eval_{codehash}.txt")
   pdebug(f"processAsync starting via {fname}")
@@ -218,11 +245,13 @@ def processAsync(fns:FileNames, code:str)->RunResult:
   pid=os.fork()
   if pid==0:
     # Child
+    ecode=0
     fdr=0; fdw=0
     try:
       pdebug(f"processAsync opening pipes")
-      fdw=os.open(inp, os.O_WRONLY|os.O_SYNC)
-      fdr=os.open(outp, os.O_RDONLY|os.O_SYNC)
+      with with_alarm(0.5):
+        fdw=os.open(inp, os.O_WRONLY|os.O_SYNC)
+        fdr=os.open(outp, os.O_RDONLY|os.O_SYNC)
       if fdw<0 or fdr<0:
         pusererror(fname,f"ERROR: litrepl.py couldn't open session pipes\n")
       fcntl.flock(fdw,fcntl.LOCK_EX|fcntl.LOCK_NB)
@@ -233,8 +262,12 @@ def processAsync(fns:FileNames, code:str)->RunResult:
       pdebug("processAsync interact start")
       interact(fdr,fdw,code,fo,pattern)
       pdebug("processAsync interact finish")
+    except TimeoutError:
+      ecode=interpExitCode(fns)
+      pusererror(fname,f"ERROR: litrepl couldn't open the sessions pipes: {ecode}\n")
     except BlockingIOError:
-      pusererror(fname,"ERROR: litrepl.py couldn't lock the sessions pipes\n")
+      ecode=interpExitCode(fns)
+      pusererror(fname,"ERROR: litrepl couldn't lock the sessions pipes: {ecode}\n")
     finally:
       if fo!=0:
         fcntl.fcntl(fo,fcntl.LOCK_UN)
@@ -243,7 +276,7 @@ def processAsync(fns:FileNames, code:str)->RunResult:
         os.close(fdr)
       if fdw!=0:
         os.close(fdw)
-    exit(0)
+    exit(ecode)
   else:
     # Parent
     pdebug(f"processAsync forked reader {pid}")

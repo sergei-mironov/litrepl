@@ -24,7 +24,7 @@ from psutil import Process
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
                     FileNames, IType, Settings, CursorPos)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
-                   processCont)
+                   processCont, interpExitCodeNB)
 from .utils import(unindent, indent, escape, fillspaces, fmterror, cursor_within)
 
 DEBUG:bool=False
@@ -42,7 +42,7 @@ def pipenames(a:LitreplArgs)->FileNames:
     join(gettempdir(),f"litrepl_{getuid()}_"+
          sha256(getcwd().encode('utf-8')).hexdigest()[:6])
   return FileNames(auxdir, join(auxdir,"_in.pipe"), join(auxdir,"_out.pipe"),
-                   join(auxdir,"_pid.txt"))
+                   join(auxdir,"_pid.txt"),join(auxdir,"_ecode.txt"))
 
 def settings(fns:FileNames) -> Settings:
   """ Determines the session settings. Currently just finds out the type of the
@@ -61,53 +61,82 @@ def settings(fns:FileNames) -> Settings:
 def fork_python(a:LitreplArgs, name:str):
   """ Forks an instance of Python interpreter `name` """
   assert 'python' in name
-  wd,inp,outp,pid=astuple(pipenames(a))
-  system((f'{name} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
+  wd,inp,outp,pid,ecode=astuple(pipenames(a))
+  system(('{ '
+          f'rm "{ecode}" 2>/dev/null;'
+          f'{name} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
           f'os.open(\'{inp}\',os.O_RDWR|os.O_SYNC);'
           f'os.open(\'{outp}\',os.O_RDWR|os.O_SYNC);"'
-          f'<"{inp}" >"{outp}" 2>&1 & echo $! >"{pid}"'))
-  open(inp,'w').write(
-    'import signal\n'
+          f'<"{inp}" >"{outp}" 2>&1 ;'
+          f'echo "$?">"{ecode}";'
+          '} & '
+          f'echo $! >"{pid}"'))
+  inp=open(inp,'w')
+  inp.write(
+    '\nimport signal\n'
     'def _handler(signum,frame):\n'
     '  raise KeyboardInterrupt()\n\n'
-    '_=signal.signal(signal.SIGINT,_handler)\n')
+    '_=signal.signal(signal.SIGINT,_handler)\n'
+  )
+  if a.exception_exit is not None:
+    inp.write(
+      'import sys\n'
+      'import os\n'
+      'def _exceptexithook(type,value,traceback):\n'
+      f'  os._exit({int(a.exception_exit)})\n\n'
+      'sys.excepthook=_exceptexithook\n'
+    )
   exit(0)
 
 def fork_ipython(a:LitreplArgs, name:str):
   """ Forks an instance of IPython interpreter `name` """
   assert 'ipython' in name
-  wd,inp,outp,pid=astuple(pipenames(a))
+  wd,inp,outp,pid,ecode=astuple(pipenames(a))
   cfg=join(wd,'litrepl_ipython_config.py')
   log=f"--logfile={join(wd,'_ipython.log')}" if DEBUG else ""
-  open(cfg,'w').write(
-    'import sys\n'
-    # See https://github.com/ipython/ipython/issues/14246
-    'sys.stdout.reconfigure(line_buffering=True)\n'
-    'from IPython.terminal.prompts import Prompts, Token\n'
-    'class EmptyPrompts(Prompts):\n'
-    '  def in_prompt_tokens(self):\n'
-    '    return [(Token.Prompt, "")]\n'
-    '  def continuation_prompt_tokens(self, width=None):\n'
-    '    return [(Token.Prompt, "") ]\n'
-    '  def rewrite_prompt_tokens(self):\n'
-    '    return []\n'
-    '  def out_prompt_tokens(self):\n'
-    '    return []\n'
-    'c.TerminalInteractiveShell.prompts_class = EmptyPrompts\n'
-    'c.TerminalInteractiveShell.separate_in = ""\n'
-    'c.TerminalInteractiveShell.separate_out = ""\n'
+  with open(cfg,'w') as f:
+    f.write(
+      'import sys\n'
+      # See https://github.com/ipython/ipython/issues/14246
+      'sys.stdout.reconfigure(line_buffering=True)\n'
+      'from IPython.terminal.prompts import Prompts, Token\n'
+      'class EmptyPrompts(Prompts):\n'
+      '  def in_prompt_tokens(self):\n'
+      '    return [(Token.Prompt, "")]\n'
+      '  def continuation_prompt_tokens(self, width=None):\n'
+      '    return [(Token.Prompt, "") ]\n'
+      '  def rewrite_prompt_tokens(self):\n'
+      '    return []\n'
+      '  def out_prompt_tokens(self):\n'
+      '    return []\n'
+      'c.TerminalInteractiveShell.prompts_class = EmptyPrompts\n'
+      'c.TerminalInteractiveShell.separate_in = ""\n'
+      'c.TerminalInteractiveShell.separate_out = ""\n'
     )
-  system((f'{name} -um IPython --config={cfg} --colors=NoColor {log} -c '
+  system(('{ '
+          f'rm "{ecode}" 2>/dev/null;'
+          f'{name} -um IPython --config={cfg} --colors=NoColor {log} -c '
           f'"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
           f'os.open(\'{inp}\',os.O_RDWR|os.O_SYNC);'
           f'os.open(\'{outp}\',os.O_RDWR|os.O_SYNC);"'
-          f' -i <"{inp}" >"{outp}" 2>&1 & echo $! >"{pid}"'))
-  open(inp,'w').write(
-    'import signal\n'
+          f' -i <"{inp}" >"{outp}" 2>&1 ;'
+          f'echo "$?">"{ecode}";'
+          '} & '
+          f'echo $! >"{pid}"'))
+  f=open(inp,'w')
+  f.write(
+    '\nimport signal\n'
     'def _handler(signum,frame):\n'
     '  raise KeyboardInterrupt()\n\n'
     '_=signal.signal(signal.SIGINT,_handler)\n'
   )
+  if a.exception_exit is not None:
+    f.write(
+      'import IPython\n'
+      'def _exithandler(*args, **kwargs):\n'
+      f'  os._exit({int(a.exception_exit)})\n\n'
+      'IPython.get_ipython().set_custom_exc((Exception,), _exithandler)\n'
+    )
   exit(0)
 
 
@@ -158,7 +187,7 @@ def text_postprocess(ss:Settings, text:str) -> str:
 def start_(a:LitreplArgs, fork_handler:Callable[...,None])->None:
   """ Starts the background Python interpreter. Kill an existing interpreter if
   any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`."""
-  wd,inp,outp,pid=astuple(pipenames(a))
+  wd,inp,outp,pid,_=astuple(pipenames(a))
   makedirs(wd, exist_ok=True)
   if isfile(pid):
     system(f'kill -9 "$(cat {pid})" >/dev/null 2>&1')
@@ -189,12 +218,12 @@ def start(a:LitreplArgs):
 
 def running(a:LitreplArgs)->bool:
   """ Checks if the background session was run or not. """
-  wd,inp,outp,pid=astuple(pipenames(a))
+  wd,inp,outp,pid,_=astuple(pipenames(a))
   return 0==system(f"test -f '{pid}' && test -p '{inp}' && test -p '{outp}'")
 
 def stop(a:LitreplArgs)->None:
   """ Stops the background Python session. """
-  wd,inp,outp,pid=astuple(pipenames(a))
+  wd,inp,outp,pid,_=astuple(pipenames(a))
   system(f'kill "$(cat {pid})" >/dev/null 2>&1')
   system(f"rm '{inp}' '{outp}' '{pid}'")
 

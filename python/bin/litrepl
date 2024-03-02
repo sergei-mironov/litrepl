@@ -19,6 +19,7 @@ if __name__=='__main__':
   ap.add_argument('-d','--debug',type=int,metavar='LEVEL',default=0)
   ap.add_argument('--auxdir',type=str,metavar='DIR',default=None,help="Directory to store auxilary files")
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,help="Directory to run from")
+  ap.add_argument('-e','--exception-exit',type=str,metavar='ERRCODE',default=None, help='Return error code at first exception')
   sps=ap.add_subparsers(dest='command',help='commands to execute')
   sps.add_parser('start',help='Start the interpreter in the background')
   sps.add_parser('stop',help='Stop the interpreter')
@@ -47,6 +48,7 @@ if __name__=='__main__':
   if a.workdir:
     chdir(a.workdir)
 
+  fns=pipenames(a)
   if a.command=='start':
     start(a)
   elif a.command=='stop':
@@ -63,24 +65,32 @@ if __name__=='__main__':
     t=parse_(GRAMMARS[a.filetype])
     nsecs=SecRec(set(solve_cpos(t,[(a.line,a.col)]).cursors.values()),{})
     eval_section_(a,t,nsecs)
+    ecode=interpExitCodeNB(fns)
+    ecode=interpExitCodeNB(fns,notfound=200)
+    exit(0 if ecode is None else ecode)
   elif a.command=='eval-sections':
     t=parse_(GRAMMARS[a.filetype])
     nsecs=solve_sloc(a.locs,t)
     eval_section_(a,t,nsecs)
+    ecode=interpExitCodeNB(fns,notfound=200)
+    exit(0 if ecode is None else ecode)
   elif a.command=='repl':
-    _,inp,outp,_=astuple(pipenames(a))
     print("Opening the interpreter terminal (NO PROMPT, USE `Ctrl+D` TO EXIT)")
-    system(f"socat - 'PIPE:{outp},flock-ex-nb=1!!PIPE:{inp},flock-ex-nb=1'")
+    system(f"socat - 'PIPE:{fns.outp},flock-ex-nb=1!!PIPE:{fns.inp},flock-ex-nb=1'")
+    ecode=interpExitCodeNB(fns,notfound=200)
+    exit(0 if ecode is None else ecode)
   elif a.command=='interrupt':
     os.kill(int(open('_pid.txt').read()),SIGINT)
     t=parse_(GRAMMARS[a.filetype])
     sr=solve_sloc(a.locs,t)
     sr.nsecs|=set(sr.pending.keys())
     eval_section_(a,t,sr)
+    exit(0)
   elif a.command=='eval-code':
-    fns=pipenames(a)
     ss=settings(fns)
     print(eval_code(a,fns,ss,sys.stdin.read()))
+    ecode=interpExitCodeNB(fns,notfound=200)
+    exit(0 if ecode is None else ecode)
   elif a.command=='status':
     auxd,inp,outp,pidf=astuple(pipenames(a))
     print(f"version: {__version__}")
@@ -116,6 +126,7 @@ if __name__=='__main__':
       print(f"interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
     except Exception:
       print(f"interpreter PYTHONPATH: ?")
+    exit(0)
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)

@@ -42,6 +42,7 @@ class FileNames:
   inp:str                  # Input pipe
   outp:str                 # Output pipe
   pidf:str                 # File containing PID
+  ecodef:str               # File containing exit code
 
 
 class IType(Enum):

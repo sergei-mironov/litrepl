@@ -473,6 +473,75 @@ fi
 runlitrepl stop
 )} #}}}
 
+test_exit_errcode() {( #{{{
+mktest "_test_exit_errcode"
+runlitrepl start
+
+cat >source.md <<"EOF"
+``` python
+print("before-exit")
+```
+``` result
+```
+``` python
+import os
+os._exit(123)
+```
+``` result
+```
+
+``` python
+print("after-exit")
+```
+``` result
+```
+EOF
+(
+set +e
+cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
+echo $?>ret.txt
+)
+test `cat ret.txt` = "123"
+grep -q "before-exit" out.md
+grep -q "123" out.md
+grep -q -v "after-exit" out.md
+runlitrepl stop
+)} #}}}
+
+test_exception_errcode() {( #{{{
+mktest "_test_exception_errcode"
+runlitrepl --exception-exit=123 start
+
+cat >source.md <<"EOF"
+``` python
+print("before-exception")
+```
+``` result
+```
+``` python
+raise Exception("exception")
+```
+``` result
+```
+``` python
+print("after-exception")
+```
+``` result
+```
+EOF
+(
+set +e
+cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
+echo $?>ret.txt
+)
+test `cat ret.txt` = "123"
+grep -q "before-exception" out.md
+grep -q "123" out.md
+grep -q -v "after-exception" out.md
+runlitrepl stop
+)} #}}}
+
+
 test_print_system_order() {( #{{{
 # See https://github.com/ipython/ipython/issues/14246
 mktest "_test_eval_behavior"
@@ -589,6 +658,8 @@ tests() {
   echo test_eval_code
   echo test_eval_with_empty_lines
   echo test_print_system_order
+  echo test_exit_errcode
+  echo test_exception_errcode
   echo test_vim_leval_cursor
   echo test_vim_leval_explicit
 }
