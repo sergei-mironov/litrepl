@@ -14,7 +14,7 @@ Features
   + Markdown [[Example]](./doc/example.md)
   + Latex [[Example]](./doc/example.tex)[[Example (PDF)]](./doc/example.pdf).
 * Interpreters: Python, IPython
-* Works in both Vim and in command line
+* Works both in Vim and on the command line
 
 <details><summary>Requirements</summary><p>
 
