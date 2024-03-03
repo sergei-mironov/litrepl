@@ -6,6 +6,7 @@ from litrepl import __version__, eval_section_
 from os import chdir
 from subprocess import check_output, DEVNULL, CalledProcessError
 from argparse import ArgumentParser
+from tempfile import mkdtemp
 
 LOCSHELP='(N|$|N..N)[,(...)] where N is either: number,$,ROW:COL'
 
@@ -20,6 +21,7 @@ if __name__=='__main__':
   ap.add_argument('--auxdir',type=str,metavar='DIR',default=None,help="Directory to store auxilary files")
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,help="Directory to run from")
   ap.add_argument('-e','--exception-exit',type=str,metavar='ERRCODE',default=None, help='Return error code at first exception')
+  ap.add_argument('--standalone-session',action='store_true',help='Do not reuse the interpreter session of the current directory')
   sps=ap.add_subparsers(dest='command',help='commands to execute')
   sps.add_parser('start',help='Start the interpreter in the background')
   sps.add_parser('stop',help='Stop the interpreter')
@@ -48,85 +50,71 @@ if __name__=='__main__':
   if a.workdir:
     chdir(a.workdir)
 
+  if a.standalone_session:
+    if a.auxdir is None:
+      a.auxdir=mkdtemp(prefix="litrepl-auxdir")
+    else:
+      assert not running(a), \
+        f"Explicitly-specified auxdir ({a.auxdir}) already contains a running session"
+
   fns=pipenames(a)
   if a.command=='start':
+    assert not a.standalone_session, f"`--new-session` is not compatible with `{a.commandd}`"
     start(a)
   elif a.command=='stop':
+    assert not a.standalone_session, f"`--new-session` is not compatible with `{a.commandd}`"
     stop(a)
   elif a.command=='restart':
+    assert not a.standalone_session, f"`--new-session` is not compatible with `{a.commandd}`"
     stop(a); start(a)
   elif a.command=='parse':
+    assert not a.standalone_session, f"`--new-session` is not compatible with `{a.commandd}`"
     t=parse_(GRAMMARS[a.filetype])
     print(t.pretty())
+    exit(0)
   elif a.command=='parse-print':
     sr0=SecRec(set(),{})
-    eval_section_(a,parse_(GRAMMARS[a.filetype]),sr0)
+    ecode=eval_section_(a,parse_(GRAMMARS[a.filetype]),sr0)
+    exit(0 if ecode is None else ecode)
   elif a.command=='eval-section':
     t=parse_(GRAMMARS[a.filetype])
     nsecs=SecRec(set(solve_cpos(t,[(a.line,a.col)]).cursors.values()),{})
-    eval_section_(a,t,nsecs)
-    ecode=interpExitCodeNB(fns)
-    ecode=interpExitCodeNB(fns,notfound=200)
+    ecode=eval_section_(a,t,nsecs)
     exit(0 if ecode is None else ecode)
   elif a.command=='eval-sections':
     t=parse_(GRAMMARS[a.filetype])
     nsecs=solve_sloc(a.locs,t)
-    eval_section_(a,t,nsecs)
-    ecode=interpExitCodeNB(fns,notfound=200)
+    ecode=eval_section_(a,t,nsecs)
     exit(0 if ecode is None else ecode)
   elif a.command=='repl':
+    if not running(a) or a.standalone_session:
+      start(a)
     print("Opening the interpreter terminal (NO PROMPT, USE `Ctrl+D` TO EXIT)")
     system(f"socat - 'PIPE:{fns.outp},flock-ex-nb=1!!PIPE:{fns.inp},flock-ex-nb=1'")
     ecode=interpExitCodeNB(fns,notfound=200)
+    if a.standalone_session:
+      stop(a)
     exit(0 if ecode is None else ecode)
   elif a.command=='interrupt':
+    assert not a.standalone_session, f"`--new-session` is not compatible with `{a.commandd}`"
     os.kill(int(open('_pid.txt').read()),SIGINT)
     t=parse_(GRAMMARS[a.filetype])
     sr=solve_sloc(a.locs,t)
     sr.nsecs|=set(sr.pending.keys())
-    eval_section_(a,t,sr)
-    exit(0)
+    ecode=eval_section_(a,t,sr)
+    exit(ecode)
   elif a.command=='eval-code':
+    if not running(a) or a.standalone_session:
+      start(a)
     ss=settings(fns)
     print(eval_code(a,fns,ss,sys.stdin.read()))
     ecode=interpExitCodeNB(fns,notfound=200)
+    if a.standalone_session:
+      stop(a)
     exit(0 if ecode is None else ecode)
   elif a.command=='status':
-    auxd,inp,outp,pidf=astuple(pipenames(a))
-    print(f"version: {__version__}")
-    print(f"workdir: {getcwd()}")
-    print(f"auxdir: {auxd}")
-    try:
-      pid=open(pidf).read().strip()
-      print(f"interpreter pid: {pid}")
-    except Exception:
-      print(f"interpreter pid: -")
-    t=parse_(GRAMMARS[a.filetype])
-    sr=solve_sloc('0..$',t)
-    for nsec,pend in sr.pending.items():
-      fname=pend.fname
-      print(f"pending section {nsec} buffer: {fname}")
-      try:
-        for bline in check_output(['lsof','-t',fname], stderr=DEVNULL).split(b'\n'):
-          line=bline.decode('utf-8')
-          if len(line)==0:
-            continue
-          print(f"pending section {nsec} reader: {line}")
-      except CalledProcessError:
-        print(f"pending section {nsec} reader: -")
-    fns=pipenames(a)
-    ss=settings(fns)
-    try:
-      interpreter_path=eval_code(a,fns,ss,'\n'.join(["import os","print(os.environ.get('PATH',''))"]))
-      print(f"interpreter PATH: {interpreter_path.strip()}")
-    except Exception:
-      print(f"interpreter PATH: ?")
-    try:
-      interpreter_pythonpath=eval_code(a,fns,ss,'\n'.join(["import sys","print(':'.join(sys.path))"]))
-      print(f"interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
-    except Exception:
-      print(f"interpreter PYTHONPATH: ?")
-    exit(0)
+    ecode=status(a)
+    exit(0 if ecode is None else ecode)
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)

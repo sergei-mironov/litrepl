@@ -6,6 +6,8 @@ mktest() {
   rm -rf  "$T" || true
   mkdir -p "$T"
   cd "$T"
+  runlitrepl stop || true
+  trap "runlitrepl stop" EXIT
 }
 
 test_parse_print() {( # {{{
@@ -158,7 +160,7 @@ print("-->")
 EOF
 cat source.md | runlitrepl --filetype=markdown parse-print >out.md
 diff -u source.md out.md
-cat source.md | runlitrepl --debug=0 --filetype=markdown eval-sections '0..$' >out.md
+cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
 diff -u out.md - <<"EOF"
 ```python
 def hello(name):
@@ -217,7 +219,6 @@ print("-->")
 \-\-\>
 -->
 EOF
-runlitrepl stop
 )} #}}}
 
 test_eval_tex() {( #{{{
@@ -299,7 +300,6 @@ ZZZZZ
 \begin{lresult}
 \end{lresult}
 EOF
-runlitrepl stop
 )} #}}}
 
 test_eval_ignore() {( #{{{
@@ -502,10 +502,9 @@ cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
 echo $?>ret.txt
 )
 test `cat ret.txt` = "123"
-grep -q "before-exit" out.md
+grep -q "^before-exit" out.md
 grep -q "123" out.md
-grep -q -v "after-exit" out.md
-runlitrepl stop
+grep -q -v "^after-exit" out.md
 )} #}}}
 
 test_exception_errcode() {( #{{{
@@ -535,12 +534,11 @@ cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
 echo $?>ret.txt
 )
 test `cat ret.txt` = "123"
-grep -q "before-exception" out.md
+grep -q "^before-exception" out.md
 grep -q "123" out.md
-grep -q -v "after-exception" out.md
+grep -q -v "^after-exception" out.md
 runlitrepl stop
 )} #}}}
-
 
 test_print_system_order() {( #{{{
 # See https://github.com/ipython/ipython/issues/14246
@@ -594,7 +592,7 @@ print("result-2")
 ```
 EOF
 
-vim -c "
+runvim -c "
   let g:litrepl_interpreter='$LITREPL_INTERPRETER'
   call feedkeys(\"9G\")
   LEval
@@ -626,7 +624,7 @@ print("result-2")
 ```
 EOF
 
-vim -c "
+runvim -c "
   let g:litrepl_interpreter='$LITREPL_INTERPRETER'
   LEval 1
   wq!
@@ -638,6 +636,30 @@ runlitrepl stop
 )}
 #}}}
 
+test_standalone_session() {( #{{{
+mktest "_test_standalone_session"
+runlitrepl start
+
+cat >source.md <<"EOF"
+``` python
+session='common-session'
+```
+``` python
+session='standalone-session'
+```
+``` python
+print(session)
+```
+``` result
+```
+EOF
+cat source.md | runlitrepl --filetype=markdown eval-sections '0,2' >out1.md
+grep -q "^common-session" out1.md
+cat source.md | runlitrepl --standalone-session --filetype=markdown eval-sections '1,2' >out2.md
+grep -q "^standalone-session" out2.md
+cat source.md | runlitrepl --filetype=markdown eval-sections '2' >out3.md
+grep -q "^common-session" out3.md
+)} #}}}
 
 die() {
   echo "$@" >&2
@@ -662,18 +684,24 @@ tests() {
   echo test_exception_errcode
   echo test_vim_leval_cursor
   echo test_vim_leval_explicit
+  echo test_standalone_session
 }
 
 runlitrepl() {
   test -n "$LITREPL_INTERPRETER"
   test -n "$LITREPL_BIN"
-  $LITREPL_BIN --interpreter="$LITREPL_INTERPRETER" "$@"
+  $LITREPL_BIN --debug="$LITREPL_DEBUG" --interpreter="$LITREPL_INTERPRETER" "$@"
+}
+
+runvim() {
+  $LITREPL_ROOT/sh/vim_litrepl_dev "$@"
 }
 
 set -e
 
 INTERPS=`interpreters`
 TESTS=`tests`
+LITREPL_DEBUG=0
 while test -n "$1" ; do
   case "$1" in
     -i) INTERPS="$2"; shift ;;
@@ -681,7 +709,7 @@ while test -n "$1" ; do
     -t) TESTS="$2"; shift ;;
     --tests) TESTS=$(echo "$1" | sed 's/.*=//g') ;;
     -h|--help) echo "Usage: test.sh [-i I(,I)*] [-t T(,T)*]" >&1 ; exit 1 ;;
-    -V|--verbose) set -x ;;
+    -d|-V|--verbose) set -x; LITREPL_DEBUG=1 ;;
   esac
   shift
 done

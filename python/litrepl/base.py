@@ -34,13 +34,17 @@ def pdebug(*args,**kwargs):
   if DEBUG:
     print(f"[{time():14.3f}]", *args, file=sys.stderr, **kwargs, flush=True)
 
+def defauxdir(suffix:Optional[str]=None)->str:
+  """ Generate the default name of working directory. """
+  suffix_=f"{suffix}_" if suffix is not None else ""
+  return join(gettempdir(),f"litrepl_{getuid()}_"+suffix_+
+              sha256(getcwd().encode('utf-8')).hexdigest()[:6])
+
 def pipenames(a:LitreplArgs)->FileNames:
   """ Return the interpreter state: input and output pipe names, pid, etc. If
   not explicitly specified in the config, the state is shared for all files in
   the current directory. """
-  auxdir=a.auxdir if a.auxdir is not None else \
-    join(gettempdir(),f"litrepl_{getuid()}_"+
-         sha256(getcwd().encode('utf-8')).hexdigest()[:6])
+  auxdir=a.auxdir if a.auxdir is not None else defauxdir()
   return FileNames(auxdir, join(auxdir,"_in.pipe"), join(auxdir,"_out.pipe"),
                    join(auxdir,"_pid.txt"),join(auxdir,"_ecode.txt"))
 
@@ -218,14 +222,14 @@ def start(a:LitreplArgs):
 
 def running(a:LitreplArgs)->bool:
   """ Checks if the background session was run or not. """
-  wd,inp,outp,pid,_=astuple(pipenames(a))
-  return 0==system(f"test -f '{pid}' && test -p '{inp}' && test -p '{outp}'")
+  fns=pipenames(a)
+  return 0==system(f"test -f '{fns.pidf}' && test -p '{fns.inp}' && test -p '{fns.outp}'")
 
 def stop(a:LitreplArgs)->None:
   """ Stops the background Python session. """
-  wd,inp,outp,pid,_=astuple(pipenames(a))
-  system(f'kill "$(cat {pid})" >/dev/null 2>&1')
-  system(f"rm '{inp}' '{outp}' '{pid}'")
+  fns=pipenames(a)
+  system(f'kill "$(cat {fns.pidf} 2>/dev/null)" >/dev/null 2>&1')
+  system(f"rm '{fns.inp}' '{fns.outp}' '{fns.pidf}' >/dev/null 2>&1")
 
 
 @dataclass
@@ -367,10 +371,10 @@ def eval_code(a:LitreplArgs,
     rr=processCont(fns,runr,a.timeout_continue)
   return rresultSave(rr.text,runr) if rr.timeout else text_postprocess(ss,rr.text)
 
-def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->None:
+def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
   """ Evaluate code sections of the parsed `tree`, as specified in the `secrec`
   request.  """
-  if not running(a):
+  if not running(a) or a.standalone_session:
     start(a)
   fns=pipenames(a)
   ss=settings(fns)
@@ -424,6 +428,10 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->None:
       emarker=tree.children[2].children[0].value
       print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
   C().visit(tree)
+  ecode=interpExitCodeNB(fns,notfound=200)
+  if a.standalone_session:
+    stop(a)
+  return ecode
 
 def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
   """ Preprocess the document tree. Resolve the list of cursor locations `cs`
@@ -523,3 +531,44 @@ def solve_sloc(s:str, tree)->SecRec:
                 else _safeset(lambda:[_get(q[0])]) for q in qs]),
     ppi.pending)
 
+def status(a:LitreplArgs)->int:
+  if a.standalone_session:
+    start(a)
+  fns=pipenames(a)
+  auxd,inp,outp,pidf,_=astuple(fns)
+  print(f"version: {__version__}")
+  print(f"workdir: {getcwd()}")
+  print(f"auxdir: {auxd}")
+  try:
+    pid=open(pidf).read().strip()
+    print(f"interpreter pid: {pid}")
+  except Exception:
+    print(f"interpreter pid: -")
+  t=parse_(GRAMMARS[a.filetype])
+  sr=solve_sloc('0..$',t)
+  for nsec,pend in sr.pending.items():
+    fname=pend.fname
+    print(f"pending section {nsec} buffer: {fname}")
+    try:
+      for bline in check_output(['lsof','-t',fname], stderr=DEVNULL).split(b'\n'):
+        line=bline.decode('utf-8')
+        if len(line)==0:
+          continue
+        print(f"pending section {nsec} reader: {line}")
+    except CalledProcessError:
+      print(f"pending section {nsec} reader: -")
+  ss=settings(fns)
+  try:
+    interpreter_path=eval_code(a,fns,ss,'\n'.join(["import os","print(os.environ.get('PATH',''))"]))
+    print(f"interpreter PATH: {interpreter_path.strip()}")
+  except Exception:
+    print(f"interpreter PATH: ?")
+  try:
+    interpreter_pythonpath=eval_code(a,fns,ss,'\n'.join(["import sys","print(':'.join(sys.path))"]))
+    print(f"interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
+  except Exception:
+    print(f"interpreter PYTHONPATH: ?")
+  ecode=interpExitCodeNB(fns,notfound=200)
+  if a.standalone_session:
+    stop(a)
+  return ecode
