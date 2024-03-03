@@ -574,7 +574,7 @@ runlitrepl stop
 #}}}
 
 test_vim_leval_cursor() {( #{{{
-mktest "_test_vim"
+mktest "_test_vim_leval_cursor"
 
 cat >file.md <<"EOF"
 ``` python
@@ -600,8 +600,6 @@ runvim -c "
 " file.md >/dev/null 2>_vim.log
 cat file.md | grep -v '^result-1' >/dev/null
 cat file.md | grep '^result-2' >/dev/null
-
-runlitrepl stop
 )}
 #}}}
 
@@ -709,7 +707,7 @@ tests() {
 runlitrepl() {
   test -n "$LITREPL_INTERPRETER"
   test -n "$LITREPL_BIN"
-  $LITREPL_BIN --debug="$LITREPL_DEBUG" --interpreter="$LITREPL_INTERPRETER" "$@"
+  $LITREPL_BIN/litrepl --debug="$LITREPL_DEBUG" --interpreter="$LITREPL_INTERPRETER" "$@"
 }
 
 runvim() {
@@ -744,7 +742,7 @@ if test "$INTERPS" = "?" -o "$TESTS" = "?" ; then
 fi
 
 if test -z "$LITREPL_BIN"; then
-  LITREPL_BIN=$LITREPL_ROOT/python/bin/litrepl
+  LITREPL_BIN=$LITREPL_ROOT/python/bin
 fi
 
 trap "echo FAIL" EXIT
