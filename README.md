@@ -44,6 +44,7 @@ Contents
         * [Vim, executing first section after restart](#vim-executing-first-section-after-restart)
         * [Vim, running shell commands](#vim-running-shell-commands)
         * [Command line, basic usage](#command-line-basic-usage)
+        * [Command line, stop on unhandled exception](#command-line-stop-on-unhandled-exception)
 * [Development](#development)
     * [Development shells](#development-shells)
     * [Common workflows](#common-workflows)
@@ -228,7 +229,7 @@ nnoremap <F6> :LEvalAsync<CR>
 
 #### Vim, inserting new sections
 
-Lets define a handful command `:C<CR>` for inserting new sections.
+Below we define `:C` command inserting new sections.
 
 ``` vim
 command! -buffer -nargs=0 C normal 0i``` python<CR>```<CR><CR>``` result<CR>```<Esc>4k
@@ -278,6 +279,35 @@ To evaluate a Python script:
 ```sh
 $ cat script.py | litrepl --interpreter=ipython eval-code
 ```
+
+Note that both commands above share the same background interpreter session.
+
+#### Command line, stop on unhandled exception
+
+For processing software documents one might find useful to use a separated
+interpreter session, stopping it when first unhandled exception happens.
+
+~~~~ sh
+$ cat >document.md.in <<EOF
+Failing Python example
+``` python
+raise Exception("D'oh!")
+```
+EOF
+$ cat document.md.in \
+  | litrepl \
+    --filetype=markdown  \
+    --standalone-session \
+    --exception-exit=200 \
+    eval-sections '0..$' \
+  >document.md
+$ echo $?
+200
+~~~~
+
+Here, the `--standalone-session` tells Litrepl to run this document in a new
+session and stop it before exiting, `--exception-exit=200` sets the exit code
+returned in the case of unhandled exceptions.
 
 Development
 -----------
