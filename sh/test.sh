@@ -661,6 +661,24 @@ cat source.md | runlitrepl --filetype=markdown eval-sections '2' >out3.md
 grep -q "^common-session" out3.md
 )} #}}}
 
+test_status() {( #{{{
+mktest "_test_status"
+runlitrepl status >status1.txt || true
+grep -q '\?' status1.txt
+
+cat >source.md <<"EOF"
+``` python
+var='value'
+```
+``` python
+```
+EOF
+cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
+runlitrepl status >status2.txt
+grep -q -v '\?' status2.txt
+
+)} #}}}
+
 die() {
   echo "$@" >&2
   exit 1
@@ -685,6 +703,7 @@ tests() {
   echo test_vim_leval_cursor
   echo test_vim_leval_explicit
   echo test_standalone_session
+  echo test_status
 }
 
 runlitrepl() {

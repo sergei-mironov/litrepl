@@ -6,7 +6,7 @@ import re
 from copy import deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable, Any
 from select import select
-from os import environ, system
+from os import environ, system, isatty
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
 from os.path import isfile, join
@@ -48,19 +48,22 @@ def pipenames(a:LitreplArgs)->FileNames:
   return FileNames(auxdir, join(auxdir,"_in.pipe"), join(auxdir,"_out.pipe"),
                    join(auxdir,"_pid.txt"),join(auxdir,"_ecode.txt"))
 
-def settings(fns:FileNames) -> Settings:
+def settings(fns:FileNames)->Optional[Settings]:
   """ Determines the session settings. Currently just finds out the type of the
   interpreter. """
-  pid=int(open(fns.pidf).read())
-  p=Process(pid)
-  cmd=p.cmdline()
-  itype = None
-  if any('ipython' in w for w in cmd):
-    itype = IType.IPython
-  elif any('python' in w for w in cmd):
-    itype = IType.Python
-  pdebug(f"interpreter pid {pid} cmd '{cmd}' leads to type '{itype}'")
-  return Settings(itype)
+  try:
+    pid=int(open(fns.pidf).read())
+    p=Process(pid)
+    cmd=p.cmdline()
+    itype = None
+    if any('ipython' in w for w in cmd):
+      itype = IType.IPython
+    elif any('python' in w for w in cmd):
+      itype = IType.Python
+    pdebug(f"interpreter pid {pid} cmd '{cmd}' leads to type '{itype}'")
+    return Settings(itype)
+  except FileNotFoundError:
+    return None
 
 def fork_python(a:LitreplArgs, name:str):
   """ Forks an instance of Python interpreter `name` """
@@ -342,12 +345,11 @@ obr : "{OBR}"
 cbr : "{CBR}"
 """
 
-def parse_(grammar):
+def parse_(grammar, tty_ok=True):
   pdebug(f"parsing start")
-  parser = Lark(grammar,propagate_positions=True)
-  # print(parser)
-  tree=parser.parse(sys.stdin.read())
-  # print(tree.pretty())
+  parser=Lark(grammar,propagate_positions=True)
+  inp=sys.stdin.read() if (not isatty(sys.stdin.fileno()) or tty_ok) else ""
+  tree=parser.parse(inp)
   pdebug(f"parsing finish")
   return tree
 
@@ -378,6 +380,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
     start(a)
   fns=pipenames(a)
   ss=settings(fns)
+  assert ss is not None
   nsecs=secrec.nsecs
   ssrc:Dict[int,str]={} # Section sources
   sres:Dict[int,str]={} # Section results
@@ -531,12 +534,12 @@ def solve_sloc(s:str, tree)->SecRec:
                 else _safeset(lambda:[_get(q[0])]) for q in qs]),
     ppi.pending)
 
-def status(a:LitreplArgs)->int:
+def status(a:LitreplArgs,version:str)->int:
   if a.standalone_session:
     start(a)
   fns=pipenames(a)
   auxd,inp,outp,pidf,_=astuple(fns)
-  print(f"version: {__version__}")
+  print(f"version: {version}")
   print(f"workdir: {getcwd()}")
   print(f"auxdir: {auxd}")
   try:
@@ -544,7 +547,7 @@ def status(a:LitreplArgs)->int:
     print(f"interpreter pid: {pid}")
   except Exception:
     print(f"interpreter pid: -")
-  t=parse_(GRAMMARS[a.filetype])
+  t=parse_(GRAMMARS[a.filetype], a.tty)
   sr=solve_sloc('0..$',t)
   for nsec,pend in sr.pending.items():
     fname=pend.fname
@@ -559,11 +562,13 @@ def status(a:LitreplArgs)->int:
       print(f"pending section {nsec} reader: -")
   ss=settings(fns)
   try:
+    assert ss is not None
     interpreter_path=eval_code(a,fns,ss,'\n'.join(["import os","print(os.environ.get('PATH',''))"]))
     print(f"interpreter PATH: {interpreter_path.strip()}")
   except Exception:
     print(f"interpreter PATH: ?")
   try:
+    assert ss is not None
     interpreter_pythonpath=eval_code(a,fns,ss,'\n'.join(["import sys","print(':'.join(sys.path))"]))
     print(f"interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
   except Exception:

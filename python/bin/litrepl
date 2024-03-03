@@ -28,7 +28,8 @@ if __name__=='__main__':
   sps.add_parser('restart',help='Restart the interpreter')
   sps.add_parser('parse',help='Parse the input file (diagnostics)')
   sps.add_parser('parse-print',help='Parse and print the input file (diagnostics, no changes are expected)')
-  sps.add_parser('status',help='Print the status of the worker')
+  spes=sps.add_parser('status',help='Print the status of the worker')
+  spes.add_argument('--tty',action='store_true',help='Read from interactive terminal')
   apes=sps.add_parser('eval-section',help='Evaluate the section under the cursor')
   apes.add_argument('--line',type=int,default=None)
   apes.add_argument('--col',type=int,default=None)
@@ -113,7 +114,7 @@ if __name__=='__main__':
       stop(a)
     exit(0 if ecode is None else ecode)
   elif a.command=='status':
-    ecode=status(a)
+    ecode=status(a, __version__)
     exit(0 if ecode is None else ecode)
   else:
     pstderr(f'Unknown command: {a.command}')
