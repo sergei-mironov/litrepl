@@ -80,9 +80,8 @@ let
         sed -i '/PATH.*python/d' $out/bin/litrepl
       '';
       checkPhase = ''
-        CWD=`pwd`
         LITREPL_BIN="$out/bin" \
-        LITREPL_ROOT=$CWD \
+        LITREPL_ROOT=`pwd` \
         ${./sh/test.sh}
       '';
 

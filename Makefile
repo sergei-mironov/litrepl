@@ -6,8 +6,8 @@ VIM = $(shell find -name '*\.vim')
 TESTS = ./sh/test.sh
 
 .stamp_test: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
-	LITREPL_BIN="python `pwd`/python/bin" \
-	LITREPL_ROOT=`pwd`/python \
+	LITREPL_BIN="`pwd`/python/bin" \
+	LITREPL_ROOT=`pwd` \
 	sh ./sh/test.sh
 	touch $@
 
