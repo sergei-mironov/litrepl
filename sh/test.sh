@@ -756,7 +756,7 @@ for t in $(tests) ; do
     if echo "$INTERPS" | grep -q "$i" && \
        echo "$TESTS" | grep -q "$t" ; then
 
-      echo "Running test $t interpreter $i"
+      echo "Running test \"$t\" interpreter \"$i\""
       LITREPL_INTERPRETER="$i" $t
       NRUN=$(expr $NRUN '+' 1)
     fi
