@@ -8,8 +8,12 @@ if ! test -f "$LITREPL_ROOT/vim/plugin/litrepl.vim" ; then
   exit 1
 fi
 exec vim -c "
-unlet g:litrepl_bin
-unlet g:litrepl_loaded
+if exists('g:litrepl_bin')
+  unlet g:litrepl_bin
+endif
+if exists('g:litrepl_loaded')
+  unlet g:litrepl_loaded
+endif
 let &runtimepath = '$LITREPL_ROOT/vim,'.&runtimepath
 runtime plugin/litrepl.vim
 echomsg \"LitREPL: litrepl_bin=\".g:litrepl_bin

@@ -71,8 +71,8 @@ let
       LITREPL_REVISION = revision;
       LITREPL_ROOT = src;
       propagatedBuildInputs = [(lark-parser112 py.pkgs) py.pkgs.psutil pkgs.socat];
-      checkInputs = with pkgs; [
-        socat py.pkgs.ipython py.pkgs.tqdm which git
+      nativeCheckInputs = with pkgs; [
+        socat py.pkgs.ipython py.pkgs.tqdm which git vim
       ];
       # We cut off the python PATH to allow users to use litrepl in custom
       # Python environments

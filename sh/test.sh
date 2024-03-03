@@ -593,13 +593,14 @@ print("result-2")
 EOF
 
 runvim -c "
-  let g:litrepl_interpreter='$LITREPL_INTERPRETER'
+  redir > _vim_messages.log
+  let g:litrepl_interpreter=\"$LITREPL_INTERPRETER\"
   call feedkeys(\"9G\")
   LEval
   wq!
-" file.md >/dev/null 2>_vim.log
-cat file.md | grep -v '^result-1' >/dev/null
-cat file.md | grep '^result-2' >/dev/null
+" file.md >_vim.log 2>&1 || true
+grep -q -v '^result-1' file.md
+grep -q '^result-2' file.md
 )}
 #}}}
 
@@ -626,9 +627,9 @@ runvim -c "
   let g:litrepl_interpreter='$LITREPL_INTERPRETER'
   LEval 1
   wq!
-" file.md >/dev/null 2>_vim.log
-cat file.md | grep -v '^result-1' >/dev/null
-cat file.md | grep '^result-2' >/dev/null
+" file.md >/dev/null 2>_vim.log || true
+grep -q -v '^result-1' file.md
+grep -q '^result-2' file.md
 
 runlitrepl stop
 )}
