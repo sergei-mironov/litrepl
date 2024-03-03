@@ -17,10 +17,10 @@ try:
   __revision__=environ["LITREPL_REVISION"]
 except Exception:
   try:
-    from subprocess import check_output
-    import sys
+    from subprocess import check_output, DEVNULL
     __revision__=check_output(['git', 'rev-parse', 'HEAD'],
-                            cwd=environ['LITREPL_ROOT']).decode().strip()
+                            cwd=environ['LITREPL_ROOT'],
+                            stderr=DEVNULL).decode().strip()
   except Exception:
     try:
       from litrepl.revision import __revision__ as __rv__

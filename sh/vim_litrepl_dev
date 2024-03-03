@@ -16,7 +16,4 @@ if exists('g:litrepl_loaded')
 endif
 let &runtimepath = '$LITREPL_ROOT/vim,'.&runtimepath
 runtime plugin/litrepl.vim
-echomsg \"LitREPL: litrepl_bin=\".g:litrepl_bin
-echomsg \"LitREPL: PATH=\".\$PATH
 " "$@"
-

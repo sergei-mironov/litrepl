@@ -81,8 +81,8 @@ let
       '';
       checkPhase = ''
         CWD=`pwd`
-        LITREPL_BIN="python $CWD/python/bin/litrepl" \
-        LITREPL_ROOT="`pwd`/python" \
+        LITREPL_BIN="$out/bin" \
+        LITREPL_ROOT=$CWD \
         ${./sh/test.sh}
       '';
 

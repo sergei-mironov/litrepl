@@ -22,10 +22,9 @@ endif
 if ! exists("g:litrepl_timeout")
   let g:litrepl_timeout = 0.5
 endif
-let $PATH=g:litrepl_bin.":".$PATH
 
 fun! LitReplCmd()
-  return g:litrepl_exe.' --workdir='.expand('%:p:h')
+  return 'PATH='.g:litrepl_bin.':$PATH '.g:litrepl_exe.' --workdir='.expand('%:p:h')
 endfun
 
 fun! LitReplStart()

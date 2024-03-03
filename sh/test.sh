@@ -592,13 +592,11 @@ print("result-2")
 ```
 EOF
 
-runvim -c "
-  redir > _vim_messages.log
-  let g:litrepl_interpreter=\"$LITREPL_INTERPRETER\"
-  call feedkeys(\"9G\")
-  LEval
-  wq!
-" file.md >_vim.log 2>&1 || true
+runvim file.md >_vim.log 2>&1 <<EOF
+9G
+:LEval
+:wqa!
+EOF
 grep -q -v '^result-1' file.md
 grep -q '^result-2' file.md
 )}
@@ -623,15 +621,13 @@ print("result-2")
 ```
 EOF
 
-runvim -c "
-  let g:litrepl_interpreter='$LITREPL_INTERPRETER'
-  LEval 1
-  wq!
-" file.md >/dev/null 2>_vim.log || true
+runvim file.md >_vim.log 2>&1 <<"EOF"
+:LEval 1
+:wq!
+EOF
 grep -q -v '^result-1' file.md
 grep -q '^result-2' file.md
 
-runlitrepl stop
 )}
 #}}}
 
@@ -712,6 +708,13 @@ runlitrepl() {
 }
 
 runvim() {
+  {
+    echo ":redir > _vim_messages.log"
+    echo ":let g:litrepl_bin=\"$LITREPL_BIN\""
+    echo ":let g:litrepl_interpreter=\"$LITREPL_INTERPRETER\""
+    echo ":let g:litrepl_errfile='_litrepl.err'"
+    cat
+  } | \
   $LITREPL_ROOT/sh/vim_litrepl_dev "$@"
 }
 
@@ -753,7 +756,7 @@ for t in $(tests) ; do
     if echo "$INTERPS" | grep -q "$i" && \
        echo "$TESTS" | grep -q "$t" ; then
 
-      echo "Running test '$t' interpreter '$i'"
+      echo "Running test $t interpreter $i"
       LITREPL_INTERPRETER="$i" $t
       NRUN=$(expr $NRUN '+' 1)
     fi
