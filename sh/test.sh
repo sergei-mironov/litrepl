@@ -659,7 +659,7 @@ grep -q "^common-session" out3.md
 test_status() {( #{{{
 mktest "_test_status"
 runlitrepl status >status1.txt || true
-grep -q '\?' status1.txt
+grep -q '?' status1.txt
 
 cat >source.md <<"EOF"
 ``` python
@@ -670,7 +670,7 @@ var='value'
 EOF
 cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
 runlitrepl status >status2.txt
-grep -q -v '\?' status2.txt
+grep -q -v '?' status2.txt
 
 )} #}}}
 
