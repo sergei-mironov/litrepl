@@ -11,7 +11,8 @@
     # nixpkgs.url = "github:grwlf/nixpkgs/local13";
     # nixpkgs.url = "github:grwlf/nixpkgs/local14";
     nixpkgs = {
-      url = "github:grwlf/nixpkgs/local15";
+      # url = "github:grwlf/nixpkgs/local15";
+      url = "github:grwlf/nixpkgs/local17";
     };
   };
 

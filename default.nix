@@ -21,7 +21,7 @@ let
 
     python = pkgs.python3;
 
-    lark-parser112 = pp : (pp.lark.overrideAttrs (o : rec {
+    lark112 = pp : (pp.lark.overrideAttrs (o : rec {
       version = "1.1.2";
       src = pkgs.fetchFromGitHub {
         owner = "lark-parser";
@@ -30,6 +30,23 @@ let
         sha256 = "sha256:02sdg8zppdh2hlhmyn776bfqikxm42hg27c7jj9h5a37455c6mk3";
       };
     }));
+
+    lark119 = pp : (pp.lark.overrideAttrs (o : rec {
+      pname = "lark";
+      version = "1.1.9";
+      src = pkgs.fetchFromGitHub {
+        owner = "lark-parser";
+        repo = "lark";
+        rev = "refs/tags/${version}";
+        hash = "sha256-pWLKjELy10VNumpBHjBYCO2TltKsZx1GhQcGMHsYJNk=";
+      };
+      format = "pyproject";
+      nativeBuildInputs = [ pp.setuptools pp.wrapPython ];
+    }));
+
+    lark-latest = pp : pp.lark;
+
+    lark-current = lark-latest;
 
     python-dev = python.withPackages (
       pp: let
@@ -45,7 +62,7 @@ let
         pytest
         pytest-mypy
         wheel
-        (lark-parser112 pp)
+        (lark-current pp)
         twine
         sympy
         tqdm
@@ -58,7 +75,7 @@ let
 
     python-release = pkgs.python3.withPackages (
       pp: with pp; [
-        (lark-parser112 pp)
+        (lark-current pp)
         psutil
         ipython
       ]
@@ -70,7 +87,7 @@ let
       inherit src;
       LITREPL_REVISION = revision;
       LITREPL_ROOT = src;
-      propagatedBuildInputs = [(lark-parser112 py.pkgs) py.pkgs.psutil pkgs.socat];
+      propagatedBuildInputs = [(lark-current py.pkgs) py.pkgs.psutil pkgs.socat];
       nativeCheckInputs = with pkgs; [
         socat py.pkgs.ipython py.pkgs.tqdm which git vim
       ];
@@ -91,7 +108,7 @@ let
     litrepl-pypi = (python: python.pkgs.buildPythonPackage rec {
       pname = "litrepl";
       version = lib.fileContents "${litrepl_root}/semver.txt";
-      propagatedBuildInputs = [(lark-parser112 python.pkgs) pkgs.socat python.pkgs.psutil];
+      propagatedBuildInputs = [(lark-current python.pkgs) pkgs.socat python.pkgs.psutil];
       src = python.pkgs.fetchPypi {
         inherit pname version;
         sha256 = "sha256-kf/gx5f7VIKfDBxpTG/E1ghdBGRulbFoVHoNqT/FoSM=";
@@ -402,7 +419,7 @@ let
     collection = rec {
       inherit pkgs shell shell-dev shell-screencast vim-litrepl-release vim-test
       vim-demo grechanik-st vimtex-local litrepl-release litrepl-dev
-      litrepl-release-pypi vim-litrepl-release-pypi;
+      litrepl-release-pypi vim-litrepl-release-pypi python-release;
     };
   };
 
