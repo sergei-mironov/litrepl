@@ -271,7 +271,7 @@ To evaluate code section in a document:
 
 ```sh
 $ cat doc/example.md | litrepl --filetype=markdown --interpreter=ipython \
-                               eval-sections 0..$ >output.md
+                               eval-sections '0..$' >output.md
 ```
 
 To evaluate a Python script:
