@@ -33,8 +33,6 @@ Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
-    * [Markdown](#markdown)
-    * [LaTeX](#latex)
     * [Reference](#reference)
         * [Commands](#commands)
         * [Variables and arguments](#variables-and-arguments)
@@ -120,17 +118,17 @@ See the [Development](#development) section for more details.
 Usage
 -----
 
-### Markdown
+1. Create code and result sections in your Markdown or Latex document. Put some
+   Python code into the code section. Leave the result section emtpy.
 
-1. Create code and result sections. Put some Python code into the code section.
-   Leave the result section emtpy.
-   ~~~~ markdown
-   ``` python
-   print('Code here!')
-   ```
+   ~~~~
+   ``` python                                    \begin{lcode}
+   print('Hello Markdown!')                      print('Hello LaTeX!')
+   ```                                           \end{lcode}
 
-   ``` result
-   ```
+   ``` result                                    \begin{lresult}
+   Hello Markdown!                               Hello LaTeX!
+   ```                                           \end{lresult}
    ~~~~
 
 2. Place the cursor on any of the secions and run the `:LEval` command. Litrepl
@@ -139,36 +137,10 @@ Usage
 3. Re-evaluate sections as needed. The interpreter will preserve its internal
    state between runs.
 
-See also: [Formatting Markdown documents](./doc/formatting.md#markdown)
+See also:
+- [Formatting Markdown documents](./doc/formatting.md#markdown)
+- [Formatting LaTeX documents](./doc/formatting.md#latex)
 
-### LaTeX
-
-1. Define `lcode` and `lresult` LaTeX environments according to the style of your
-   document. The minimal working example might look like this:
-
-   ``` tex
-   \newenvironment{lcode}{\verbatim}{\endverbatim}
-   \newenvironment{lresult}{\verbatim}{\endverbatim}
-   ```
-
-2. Create code and result sections in the body of your document. Put some Python
-   code into the code section.  Leave the result section emtpy.
-
-   ``` tex
-   \begin{lcode}
-   print('Code here!')
-   \end{lcode}
-
-   \begin{lresult}
-   \end{lresult}
-   ```
-
-3. Place the cursor on any of the secions and run the `:LEval` command.
-
-4. Re-evaluate sections as needed. The interpreter will preserve its internal
-   state between runs.
-
-See also: [Formatting LaTeX documents](./doc/formatting.md#latex)
 
 ### Reference
 
