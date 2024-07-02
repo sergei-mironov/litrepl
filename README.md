@@ -34,7 +34,7 @@ Contents
 * [Installation](#installation)
 * [Usage](#usage)
     * [Reference](#reference)
-        * [Commands](#commands)
+        * [Vim and command-line commands](#vim-and-command-line-commands)
         * [Variables and arguments](#variables-and-arguments)
     * [Hints](#hints)
         * [Vim, adding keybindings](#vim-adding-keybindings)
@@ -144,7 +144,7 @@ See also:
 
 ### Reference
 
-#### Commands
+#### Vim and command-line commands
 
 | Vim <img width=200/> | Command line <img width=200/> | Description                          |
 |---------------------|----------------------|--------------------------------------|
