@@ -137,35 +137,35 @@ Usage
 
 <div align="center">
 <table >
- <tr>
-    <td>1</td>
-    <td>2</td>
- </tr>
- <tr>
-   <td>
-   ~~~~ markdown
-   ``` python
-   print('Hello Markdown!')
-   ```
+<tr>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>
+~~~~ markdown
+``` python
+print('Hello Markdown!')
+```
 
-   ``` result
-   Hello Markdown!
-   ```
-   ~~~~
-   </td>
-   <td>
-   ~~~~ latex
-   \begin{lcode}
-   print('Hello LaTeX!')
-   \end{lcode}
+``` result
+Hello Markdown!
+```
+~~~~
+</td>
+<td>
+~~~~ latex
+\begin{lcode}
+print('Hello LaTeX!')
+\end{lcode}
 
-   \begin{lresult}
-   Hello LaTeX!
-   \end{lresult}
-   ```
-   ~~~~
-   </td>
- </tr>
+\begin{lresult}
+Hello LaTeX!
+\end{lresult}
+```
+~~~~
+</td>
+</tr>
 </table>
 </div>
 
