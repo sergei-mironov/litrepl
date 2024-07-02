@@ -25,7 +25,8 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
                     FileNames, IType, Settings, CursorPos)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCodeNB)
-from .utils import(unindent, indent, escape, fillspaces, fmterror, cursor_within)
+from .utils import(unindent, indent, escape, fillspaces, fmterror,
+                   cursor_within, nlines)
 
 DEBUG:bool=False
 LitreplArgs=Any
@@ -384,21 +385,24 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
   nsecs=secrec.nsecs
   ssrc:Dict[int,str]={} # Section sources
   sres:Dict[int,str]={} # Section results
+  ledder:Dict[int,int]={}
   class C(Interpreter):
     def __init__(self):
       self.nsec=-1
+    def _print(self, s:str):
+      print(s, end='')
     def text(self,tree):
-      print(tree.children[0].value, end='')
+      self._print(tree.children[0].value)
     def topleveltext(self,tree):
       return self.text(tree)
     def innertext(self,tree):
       return self.text(tree)
     def icodesection(self,tree):
       self.nsec+=1
-      t=tree.children[1].children[0].value
       bmarker=tree.children[0].children[0].value
+      t=tree.children[1].children[0].value
       emarker=tree.children[2].children[0].value
-      print(f"{bmarker}{t}{emarker}", end='')
+      self._print(f"{bmarker}{t}{emarker}")
       bm,em=tree.children[0].meta,tree.children[2].meta
       code=unindent(bm.column-1,t)
       ssrc[self.nsec]=code
@@ -406,15 +410,17 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
         sres[self.nsec]=eval_code(a,fns,ss,code,secrec.pending.get(self.nsec))
     def ocodesection(self,tree):
       bmarker=tree.children[0].children[0].value
+      t=tree.children[1].children[0].value
       emarker=tree.children[2].children[0].value
       bm,em=tree.children[0].meta,tree.children[2].meta
       if self.nsec in nsecs:
         assert self.nsec in sres
-        print(bmarker+"\n"+indent(bm.column-1,
-                                  escape(sres[self.nsec],emarker)+
-                                  emarker), end='')
+        t2=bmarker+"\n"+indent(bm.column-1,
+                               escape(sres[self.nsec],emarker)+emarker)
+        ledder[bm.line]=nlines(t2)-nlines(t)
+        self._print(t2)
       else:
-        print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
+        self._print(f"{bmarker}{tree.children[1].children[0].value}{emarker}")
     def inlinesection(self,tree):
       # FIXME: Latex-only
       bm,em=tree.children[0].meta,tree.children[4].meta
@@ -425,12 +431,19 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
         result=process(fns,'print('+code+');\n')[0].rstrip('\n')
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
-      print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}", end='')
+      self._print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}")
     def comsection(self,tree):
       bmarker=tree.children[0].children[0].value
       emarker=tree.children[2].children[0].value
-      print(f"{bmarker}{tree.children[1].children[0].value}{emarker}", end='')
+      self._print(f"{bmarker}{tree.children[1].children[0].value}{emarker}")
   C().visit(tree)
+  if a.map_cursor:
+    cl=a.map_cursor[0] # cursor line
+    for threshold,diff in sorted(ledder.items()):
+      if cl>threshold:
+        cl=max(threshold,cl+diff)
+    with open(join(a.cwd,"_cursor.txt"),"w") as f:
+      f.write(str(cl))
   ecode=interpExitCodeNB(fns,notfound=200)
   if a.standalone_session:
     stop(a)

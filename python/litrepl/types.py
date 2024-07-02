@@ -25,9 +25,8 @@ CursorPos=Tuple[int,int]
 class PrepInfo:
   """ Results of the document preprocessing """
   nsec:NSec                         # Number of code sections
-  cursors:Dict[CursorPos,NSec] # Resolved cursor locations
+  cursors:Dict[CursorPos,NSec]      # Resolved cursor locations
   pending:Dict[NSec,RunResult]      # Async job markers
-
 
 @dataclass
 class SecRec:
@@ -38,11 +37,11 @@ class SecRec:
 @dataclass
 class FileNames:
   """ Interpreter state """
-  wd:str                   # Working directory
-  inp:str                  # Input pipe
-  outp:str                 # Output pipe
-  pidf:str                 # File containing PID
-  ecodef:str               # File containing exit code
+  wd:str             # Working directory
+  inp:str            # Input pipe
+  outp:str           # Output pipe
+  pidf:str           # File containing PID
+  ecodef:str         # File containing exit code
 
 
 class IType(Enum):

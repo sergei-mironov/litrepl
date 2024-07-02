@@ -3,7 +3,7 @@
 import litrepl
 from litrepl import *
 from litrepl import __version__, eval_section_
-from os import chdir
+from os import chdir, getcwd
 from subprocess import check_output, DEVNULL, CalledProcessError
 from argparse import ArgumentParser
 from tempfile import mkdtemp
@@ -22,6 +22,7 @@ if __name__=='__main__':
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,help="Directory to run from")
   ap.add_argument('-e','--exception-exit',type=str,metavar='ERRCODE',default=None, help='Return error code at first exception')
   ap.add_argument('--standalone-session',action='store_true',help='Do not reuse the interpreter session of the current directory')
+  ap.add_argument('--map-cursor',type=str,metavar='LINE:COL',default=None,help="Calculate cursor coordinates, see documentation")
   sps=ap.add_subparsers(dest='command',help='commands to execute')
   sps.add_parser('start',help='Start the interpreter in the background')
   sps.add_parser('stop',help='Stop the interpreter')
@@ -43,6 +44,11 @@ if __name__=='__main__':
 
   a.timeout_initial=float(a.timeout_initial)
   a.timeout_continue=float(a.timeout_continue)
+
+  if a.map_cursor:
+    line,col=a.map_cursor.split(":")
+    a.map_cursor=(int(line),int(col))
+    a.cwd=getcwd()
 
   if a.debug>0:
     litrepl.eval.DEBUG=True

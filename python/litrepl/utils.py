@@ -57,3 +57,7 @@ def cursor_within(pos:CursorPos, posA:CursorPos, posB:CursorPos)->bool:
     else:
       return False
 
+def nlines(lines:str)->int:
+  """ Return number of visual lines in `lines`. """
+  return len(lines.split('\n'))
+

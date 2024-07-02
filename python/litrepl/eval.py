@@ -214,7 +214,11 @@ def interpIsRunning(fns:FileNames)->bool:
   return True
 
 def interpExitCode(fns:FileNames,poll_sec=0.5,poll_attempts=4,default=-1)->Optional[int]:
-  """ Returns: <int>: exit code; None: still running; -1: unknown """
+  """ Returns:
+    * <int>: interpreter exited with this exit code
+    * None: interpreter is still running
+    * -1: unknown
+  """
   while interpIsRunning(fns):
     poll_attempts-=1
     if poll_attempts<=0:

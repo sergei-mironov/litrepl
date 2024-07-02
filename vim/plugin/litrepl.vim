@@ -81,9 +81,11 @@ fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
         \ ' --timeout-continue='.a:timeout_continue.
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.
+        \ ' --map-cursor='.cur[1].':'.cur[2].
         \ ' '.cmd.' 2>'.g:litrepl_errfile
   execute cmdline
   let errcode = v:shell_error
+  let cur[1]=str2nr(readfile('_cursor.txt')[0])
   call setcharpos('.',cur)
   if errcode != 0
     execute "u"
