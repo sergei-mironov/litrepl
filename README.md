@@ -118,24 +118,22 @@ See the [Development](#development) section for more details.
 Usage
 -----
 
-1. Create code and result sections in your Markdown or Latex document. Put some
+1. Create the code and result sections in your Markdown or Latex document. Put
    Python code into the code section. Leave the result section emtpy.
+2. Place the cursor on any of the secions and run the `:LEval` command.
 
    ~~~~
-   ``` python                                    \begin{lcode}
-   print('Hello Markdown!')                      print('Hello LaTeX!')
-   ```                                           \end{lcode}
+   Markdown                                   Latex
+   --------                                   -----
 
-   ``` result                                    \begin{lresult}
-   Hello Markdown!                               Hello LaTeX!
-   ```                                           \end{lresult}
+   ``` python                                 \begin{lcode}
+   print('Hello Markdown!')                   print('Hello LaTeX!')
+   ```                                        \end{lcode}
+
+   ``` result                                 \begin{lresult}
+   Hello Markdown!                            Hello LaTeX!
+   ```                                        \end{lresult}
    ~~~~
-
-2. Place the cursor on any of the secions and run the `:LEval` command. Litrepl
-   will run the Python interpreter, evaluate the code and paste the output into
-   the result section.
-3. Re-evaluate sections as needed. The interpreter will preserve its internal
-   state between runs.
 
 See also:
 - [Formatting Markdown documents](./doc/formatting.md#markdown)
