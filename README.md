@@ -64,7 +64,7 @@ plugin manager like `Plug` or hand-copying files to a .vim config folder.
 
 The generic installation procedure:
 
-<details><summary>Pip-install and Vim-Plug</summary><p>
+<details><summary><b>pip-install and Vim-Plug</b></summary><p>
 
 Instructions for the Python Pip and [Vim Plug](https://github.com/junegunn/vim-plug):
 
@@ -84,7 +84,7 @@ Instructions for the Python Pip and [Vim Plug](https://github.com/junegunn/vim-p
 
 Alternatively, Nix/NixOS users can follow the formalized path:
 
-<details><summary>Nix and vim_configurable</summary><p>
+<details><summary><b>Nix and vim_configurable</b></summary><p>
 
 Nix supports
 [configurable Vim expressions](https://nixos.wiki/wiki/Vim#System_wide_vim.2Fnvim_configuration).
