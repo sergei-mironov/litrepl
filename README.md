@@ -66,7 +66,7 @@ The generic installation procedure:
 
 <details><summary><b>pip-install and Vim-Plug</b></summary><p>
 
-Instructions for the Python Pip and [Vim Plug](https://github.com/junegunn/vim-plug):
+Instructions for the [Pip](https://pypi.org) and [Vim-plug](https://github.com/junegunn/vim-plug):
 
 1. Install the `litrepl` Python package with pip:
    ```sh
@@ -82,9 +82,9 @@ Instructions for the Python Pip and [Vim Plug](https://github.com/junegunn/vim-p
 
 </p></details>
 
-Alternatively, Nix/NixOS users can follow the formalized path:
-
 <details><summary><b>Nix and vim_configurable</b></summary><p>
+
+Nix/NixOS users can follow the formalized path:
 
 Nix supports
 [configurable Vim expressions](https://nixos.wiki/wiki/Vim#System_wide_vim.2Fnvim_configuration).
