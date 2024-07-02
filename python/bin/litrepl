@@ -46,9 +46,9 @@ if __name__=='__main__':
   a.timeout_continue=float(a.timeout_continue)
 
   if a.map_cursor:
-    line,col=a.map_cursor.split(":")
+    line,col,output=a.map_cursor.split(":")
     a.map_cursor=(int(line),int(col))
-    a.cwd=getcwd()
+    a.map_cursor_output=output
 
   if a.debug>0:
     litrepl.eval.DEBUG=True

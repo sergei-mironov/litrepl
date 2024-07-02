@@ -442,7 +442,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
     for threshold,diff in sorted(ledder.items()):
       if cl>threshold:
         cl=max(threshold,cl+diff)
-    with open(join(a.cwd,"_cursor.txt"),"w") as f:
+    with open(a.map_cursor_output,"w") as f:
       f.write(str(cl))
   ecode=interpExitCodeNB(fns,notfound=200)
   if a.standalone_session:

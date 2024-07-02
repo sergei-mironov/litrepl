@@ -16,6 +16,10 @@ endif
 if ! exists("g:litrepl_errfile")
   let g:litrepl_errfile = '/tmp/litrepl.err'
 endif
+if ! exists("g:litrepl_map_cursor_output")
+  " No `:` are allowed in the file name
+  let g:litrepl_map_cursor_output = '/tmp/litrepl_cursor.txt'
+endif
 if ! exists("g:litrepl_interpreter")
   let g:litrepl_interpreter = 'auto'
 endif
@@ -81,16 +85,17 @@ fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
         \ ' --timeout-continue='.a:timeout_continue.
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.
-        \ ' --map-cursor='.cur[1].':'.cur[2].
+        \ ' --map-cursor='.cur[1].':'.cur[2].':'.g:litrepl_map_cursor_output.
         \ ' '.cmd.' 2>'.g:litrepl_errfile
   execute cmdline
   let errcode = v:shell_error
-  let cur[1]=str2nr(readfile('_cursor.txt')[0])
-  call setcharpos('.',cur)
   if errcode != 0
+    " call setcharpos('.',cur)
     execute "u"
     call LitReplOpenErr(g:litrepl_errfile)
   else
+    let cur[1]=str2nr(readfile(g:litrepl_map_cursor_output)[0])
+    call setcharpos('.',cur)
     let g:litrepl_laspos = a:pos
     if g:litrepl_always_show_stderr != 0
       call LitReplOpenErr(g:litrepl_errfile)
