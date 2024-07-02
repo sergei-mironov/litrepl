@@ -124,50 +124,17 @@ Usage
 
    ~~~~
    Markdown                                   Latex
-   --------                                   -----                     
+   --------                                   -----
 
    ``` python                                 \begin{lcode}
    print('Hello Markdown!')                   print('Hello LaTeX!')
    ```                                        \end{lcode}
 
+
    ``` result                                 \begin{lresult}
    Hello Markdown!                            Hello LaTeX!
    ```                                        \end{lresult}
    ~~~~
-
-<div align="center">
-<table >
-<tr>
-<td>1</td>
-<td>2</td>
-</tr>
-<tr>
-<td>
-~~~~ markdown
-``` python
-print('Hello Markdown!')
-```
-
-``` result
-Hello Markdown!
-```
-~~~~
-</td>
-<td>
-~~~~ latex
-\begin{lcode}
-print('Hello LaTeX!')
-\end{lcode}
-
-\begin{lresult}
-Hello LaTeX!
-\end{lresult}
-```
-~~~~
-</td>
-</tr>
-</table>
-</div>
 
 
 See also:
