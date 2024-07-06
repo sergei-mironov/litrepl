@@ -68,15 +68,20 @@ def settings(fns:FileNames)->Optional[Settings]:
 
 def fork_python(a:LitreplArgs, name:str):
   """ Forks an instance of Python interpreter `name` """
+  # This funciton does: [1] - runs python with empty command line prompts; [2] -
+  # locks i/o file descriptors to avoid closing on error; [3] - preserving
+  # exit-code into a file; [4] - instructs Python to raise keyboard interrupt on
+  # SIGINT despite not using a tty; [5] - (optionally) instruct Python to exit
+  # on first exception.
   assert 'python' in name
   wd,inp,outp,pid,ecode=astuple(pipenames(a))
   system(('{ '
           f'rm "{ecode}" 2>/dev/null;'
-          f'{name} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
-          f'os.open(\'{inp}\',os.O_RDWR|os.O_SYNC);'
+          f'{name} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';' # [1]
+          f'os.open(\'{inp}\',os.O_RDWR|os.O_SYNC);' # [2]
           f'os.open(\'{outp}\',os.O_RDWR|os.O_SYNC);"'
           f'<"{inp}" >"{outp}" 2>&1 ;'
-          f'echo "$?">"{ecode}";'
+          f'echo "$?">"{ecode}";' # [3]
           '} & '
           f'echo $! >"{pid}"'))
   inp=open(inp,'w')
@@ -84,7 +89,7 @@ def fork_python(a:LitreplArgs, name:str):
     '\nimport signal\n'
     'def _handler(signum,frame):\n'
     '  raise KeyboardInterrupt()\n\n'
-    '_=signal.signal(signal.SIGINT,_handler)\n'
+    '_=signal.signal(signal.SIGINT,_handler)\n' # [4]
   )
   if a.exception_exit is not None:
     inp.write(
@@ -92,7 +97,7 @@ def fork_python(a:LitreplArgs, name:str):
       'import os\n'
       'def _exceptexithook(type,value,traceback):\n'
       f'  os._exit({int(a.exception_exit)})\n\n'
-      'sys.excepthook=_exceptexithook\n'
+      'sys.excepthook=_exceptexithook\n' # [5]
     )
   exit(0)
 
