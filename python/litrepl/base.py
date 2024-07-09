@@ -20,6 +20,7 @@ from os import makedirs, getuid, getcwd
 from tempfile import gettempdir
 from hashlib import sha256
 from psutil import Process
+from textwrap import dedent
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
                     FileNames, IType, Settings, CursorPos)
@@ -49,6 +50,11 @@ def pipenames(a:LitreplArgs)->FileNames:
   return FileNames(auxdir, join(auxdir,"_in.pipe"), join(auxdir,"_out.pipe"),
                    join(auxdir,"_pid.txt"),join(auxdir,"_ecode.txt"))
 
+PATTERN_PYTHON_1=('3256748426384\n',)*2
+PATTERN_PYTHON_2=('325674801010\n',)*2
+PATTERN_GPT4ALLCLI_1=('/echo 1121312\n', '1121312\n')
+PATTERN_GPT4ALLCLI_2=('/echo 8893223\n', '8893223\n')
+
 def settings(fns:FileNames)->Optional[Settings]:
   """ Determines the session settings. Currently just finds out the type of the
   interpreter. """
@@ -56,13 +62,20 @@ def settings(fns:FileNames)->Optional[Settings]:
     pid=int(open(fns.pidf).read())
     p=Process(pid)
     cmd=p.cmdline()
-    itype = None
-    if any('ipython' in w for w in cmd):
+    itype=None
+    if any('gpt4all' in w for w in cmd):
+      itype=IType.GPT4AllCli
+      pattern1,pattern2=PATTERN_GPT4ALLCLI_1,PATTERN_GPT4ALLCLI_2
+    elif any('ipython' in w for w in cmd):
       itype = IType.IPython
+      pattern1,pattern2=PATTERN_PYTHON_1,PATTERN_PYTHON_2
     elif any('python' in w for w in cmd):
-      itype = IType.Python
+      itype=IType.Python
+      pattern1,pattern2=PATTERN_PYTHON_1,PATTERN_PYTHON_2
+    else:
+      assert False, f"Unknown interpreter {cmd}"
     pdebug(f"interpreter pid {pid} cmd '{cmd}' leads to type '{itype}'")
-    return Settings(itype)
+    return Settings(itype,pattern1,pattern2)
   except FileNotFoundError:
     return None
 
@@ -84,12 +97,12 @@ def fork_python(a:LitreplArgs, interpreter:str):
           f'echo "$?">"{ecode}";' # [3]
           '} & '
           f'echo $! >"{pid}"'))
-  inp=open(inp,'w')
+  inp=open(inp,'w') # [4]
   inp.write(
     '\nimport signal\n'
     'def _handler(signum,frame):\n'
     '  raise KeyboardInterrupt()\n\n'
-    '_=signal.signal(signal.SIGINT,_handler)\n' # [4]
+    '_=signal.signal(signal.SIGINT,_handler)\n' # [5]
   )
   if a.exception_exit is not None:
     inp.write(
@@ -97,7 +110,7 @@ def fork_python(a:LitreplArgs, interpreter:str):
       'import os\n'
       'def _exceptexithook(type,value,traceback):\n'
       f'  os._exit({int(a.exception_exit)})\n\n'
-      'sys.excepthook=_exceptexithook\n' # [5]
+      'sys.excepthook=_exceptexithook\n' # [6]
     )
   exit(0)
 
@@ -152,6 +165,13 @@ def fork_ipython(a:LitreplArgs, interpreter:str):
     )
   exit(0)
 
+def fork_gpt4all(a:LitreplArgs):
+  assert 'gpt4all' in a.interpreter
+  assert not a.exception_exit, "Not supported"
+  wd,inp,outp,pid,ecode=astuple(pipenames(a))
+  system(f'rm \'{ecode}\' 2>/dev/null; python -c \'import os; os.open("{inp}",os.O_RDWR|os.O_SYNC); os.open("{outp}",os.O_RDWR|os.O_SYNC);os.system("{a.interpreter} --model=/home/grwlf/proj/litrepl.vim/_model/Meta-Llama-3-8B-Instruct.Q4_0.gguf --no-prompts");\' <\'{inp}\' >\'{outp}\' 2>&1 & echo $! >"{pid}"')
+  inp=open(inp,'w')
+  exit(0)
 
 def code_preprocess_ipython(code:str) -> str:
   # IPython seems to not echo the terminating cpaste pattern into the output
@@ -171,7 +191,11 @@ def text_postprocess_ipython(text:str) -> str:
 
 def code_preprocess_python(code:str) -> str:
   return fillspaces(code, '# spaces')
+def code_preprocess_gpt4allcli(code:str) -> str:
+  return code + "/ask\n"
 def text_postprocess_python(text:str) -> str:
+  return text
+def text_postprocess_gpt4allcli(text:str) -> str:
   return text
 
 
@@ -180,8 +204,10 @@ def code_preprocess(ss:Settings, code:str) -> str:
     return code_preprocess_ipython(code)
   elif ss.itype == IType.Python:
     return code_preprocess_python(code)
+  elif ss.itype == IType.GPT4AllCli:
+    return code_preprocess_gpt4allcli(code)
   else:
-    raise ValueError(fmterr(f'''
+    raise ValueError(fmterror(f'''
       Interpreter type {ss.itype} is not supported for pre-processing. Did you
       restart LitRepl after an update?
     '''))
@@ -191,8 +217,10 @@ def text_postprocess(ss:Settings, text:str) -> str:
     return text_postprocess_ipython(text)
   elif ss.itype == IType.Python:
     return text_postprocess_python(text)
+  elif ss.itype == IType.GPT4AllCli:
+    return text_postprocess_gpt4allcli(text)
   else:
-    raise ValueError(fmterr(f'''
+    raise ValueError(fmterror(f'''
       Interpreter type {ss.itype} is not supported for post-processing. Did you
       restart LitRepl after an update?
     '''))
@@ -221,6 +249,8 @@ def start(a:LitreplArgs):
     start_(a, partial(fork_ipython,a=a,interpreter=a.interpreter))
   elif 'python' in a.interpreter:
     start_(a, partial(fork_python,a=a,interpreter=a.interpreter))
+  elif 'gpt4all' in a.interpreter:
+    start_(a,partial(fork_gpt4all,a=a))
   elif a.interpreter=='auto':
     if system('python -m IPython -c \'print("OK")\' >/dev/null 2>&1')==0:
       start_(a, partial(fork_ipython,a=a,interpreter='python -m IPython'))
@@ -243,7 +273,7 @@ def stop(a:LitreplArgs)->None:
 
 @dataclass
 class SymbolsMarkdown:
-  icodebeginmarker="```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}"
+  icodebeginmarker="```[ ]*ai|```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}"
   icodendmarker="```"
   ocodebeginmarker="```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
   ocodendmarker="```"
@@ -258,6 +288,7 @@ class SymbolsMarkdown:
 
 symbols_md=SymbolsMarkdown()
 
+# For the `?!` syntax, see https://stackoverflow.com/questions/56098140/how-to-exclude-certain-possibilities-from-a-regular-expression
 grammar_md = fr"""
 start: (text)? (snippet (text)?)*
 snippet : icodesection -> e_icodesection
@@ -374,7 +405,7 @@ def eval_code(a:LitreplArgs,
   encoded in the result for later reference.
   """
   if runr is None:
-    rr,runr=processAdapt(fns,code_preprocess(ss,code),a.timeout_initial)
+    rr,runr=processAdapt(fns,ss,code_preprocess(ss,code),a.timeout_initial)
   else:
     rr=processCont(fns,runr,a.timeout_continue)
   return rresultSave(rr.text,runr) if rr.timeout else text_postprocess(ss,rr.text)
@@ -433,7 +464,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
       spaces=tree.children[2].children[0].value if tree.children[2].children else ''
       im=tree.children[0].children[0].value
       if self.nsec in nsecs:
-        result=process(fns,'print('+code+');\n')[0].rstrip('\n')
+        result=process(fns,ss,'print('+code+');\n')[0].rstrip('\n')
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
       self._print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}")

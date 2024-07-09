@@ -8,7 +8,6 @@ FileName=str
 class RunResult:
   """ Result of launchng the readout job """
   fname:FileName     # File where the output data is piped into
-  pattern:str        # Termination patter to search for in the output stream.
 
 @dataclass
 class ReadResult:
@@ -37,19 +36,23 @@ class SecRec:
 @dataclass
 class FileNames:
   """ Interpreter state """
-  wd:str             # Working directory
-  inp:str            # Input pipe
-  outp:str           # Output pipe
-  pidf:str           # File containing PID
-  ecodef:str         # File containing exit code
+  wd:str                            # Working directory
+  inp:str                           # Input pipe
+  outp:str                          # Output pipe
+  pidf:str                          # File containing PID
+  ecodef:str                        # File containing exit code
 
 
 class IType(Enum):
   Python = 0,
   IPython = 1
+  GPT4AllCli = 2
+
 
 @dataclass
 class Settings:
   """ Interpreter settings to share among the runners """
   itype:IType
+  pattern1:Tuple[str,str]           # Request-response pair 1
+  pattern2:Tuple[str,str]           # Request-response pair 2
 
