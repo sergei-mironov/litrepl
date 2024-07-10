@@ -223,7 +223,7 @@ def start(a:LitreplArgs):
     start_(a, partial(fork_python,a=a,interpreter=a.interpreter))
   elif a.interpreter=='auto':
     if system('python -m IPython -c \'print("OK")\' >/dev/null 2>&1')==0:
-      start_(a, partial(fork_ipython,a=a,interpreter='python -m IPpython'))
+      start_(a, partial(fork_ipython,a=a,interpreter='python -m IPython'))
     else:
       start_(a, partial(fork_python,a=a,interpreter='python'))
   else:
