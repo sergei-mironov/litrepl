@@ -66,18 +66,18 @@ def settings(fns:FileNames)->Optional[Settings]:
   except FileNotFoundError:
     return None
 
-def fork_python(a:LitreplArgs, name:str):
+def fork_python(a:LitreplArgs, interpreter:str):
   """ Forks an instance of Python interpreter `name` """
   # This funciton does: [1] - runs python with empty command line prompts; [2] -
   # locks i/o file descriptors to avoid closing on error; [3] - preserving
   # exit-code into a file; [4] - instructs Python to raise keyboard interrupt on
   # SIGINT despite not using a tty; [5] - (optionally) instruct Python to exit
   # on first exception.
-  assert 'python' in name
+  assert 'python' in interpreter.lower()
   wd,inp,outp,pid,ecode=astuple(pipenames(a))
   system(('{ '
           f'rm "{ecode}" 2>/dev/null;'
-          f'{name} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';' # [1]
+          f'{interpreter} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';' # [1]
           f'os.open(\'{inp}\',os.O_RDWR|os.O_SYNC);' # [2]
           f'os.open(\'{outp}\',os.O_RDWR|os.O_SYNC);"'
           f'<"{inp}" >"{outp}" 2>&1 ;'
@@ -101,9 +101,9 @@ def fork_python(a:LitreplArgs, name:str):
     )
   exit(0)
 
-def fork_ipython(a:LitreplArgs, name:str):
-  """ Forks an instance of IPython interpreter `name` """
-  assert 'ipython' in name
+def fork_ipython(a:LitreplArgs, interpreter:str):
+  """ Forks an instance of IPython interpreter """
+  assert 'ipython' in interpreter.lower()
   wd,inp,outp,pid,ecode=astuple(pipenames(a))
   cfg=join(wd,'litrepl_ipython_config.py')
   log=f"--logfile={join(wd,'_ipython.log')}" if DEBUG else ""
@@ -128,7 +128,7 @@ def fork_ipython(a:LitreplArgs, name:str):
     )
   system(('{ '
           f'rm "{ecode}" 2>/dev/null;'
-          f'{name} -um IPython --config={cfg} --colors=NoColor {log} -c '
+          f'{interpreter} -um IPython --config={cfg} --colors=NoColor {log} -c '
           f'"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
           f'os.open(\'{inp}\',os.O_RDWR|os.O_SYNC);'
           f'os.open(\'{outp}\',os.O_RDWR|os.O_SYNC);"'
@@ -217,15 +217,15 @@ def start_(a:LitreplArgs, fork_handler:Callable[...,None])->None:
       raise ValueError(f"Couldn't see '{pid}'. Did the fork fail?")
 
 def start(a:LitreplArgs):
-  if 'ipython' in a.interpreter:
-    start_(a, partial(fork_ipython,a=a,name=a.interpreter))
+  if 'ipython' in a.interpreter.lower():
+    start_(a, partial(fork_ipython,a=a,interpreter=a.interpreter))
   elif 'python' in a.interpreter:
-    start_(a, partial(fork_python,a=a,name=a.interpreter))
+    start_(a, partial(fork_python,a=a,interpreter=a.interpreter))
   elif a.interpreter=='auto':
     if system('python -m IPython -c \'print("OK")\' >/dev/null 2>&1')==0:
-      start_(a, partial(fork_ipython,a=a,name='ipython'))
+      start_(a, partial(fork_ipython,a=a,interpreter='python -m IPpython'))
     else:
-      start_(a, partial(fork_python,a=a,name='python'))
+      start_(a, partial(fork_python,a=a,interpreter='python'))
   else:
     raise ValueError(f"Unsupported interpreter '{a.interpreter}'")
 

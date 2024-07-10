@@ -2,7 +2,7 @@
   description = "LitREPL developement environment";
 
   nixConfig = {
-    bash-prompt = "[ \\w LitREPL-DEV] $ ";
+    bash-prompt = "[LitREPL-DEV  \\w ]$ ";
   };
 
   inputs = {
