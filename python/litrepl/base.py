@@ -579,6 +579,7 @@ def status(a:LitreplArgs,version:str)->int:
     except CalledProcessError:
       print(f"pending section {nsec} reader: -")
   ss=settings(fns)
+  print(f"litrepl PATH: {environ.get('PATH','')}")
   try:
     assert ss is not None
     interpreter_path=eval_code(a,fns,ss,'\n'.join(["import os","print(os.environ.get('PATH',''))"]))
