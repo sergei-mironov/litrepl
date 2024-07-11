@@ -210,24 +210,26 @@ def interpIsRunning(fns:FileNames)->bool:
       return False
   return True
 
-def interpExitCode(fns:FileNames,poll_sec=0.5,poll_attempts=4,default=-1)->Optional[int]:
+def interpExitCode(fns:FileNames,poll_sec=0.5,poll_attempts=4,undefined=-1)->Optional[int]:
   """ Returns:
     * <int>: interpreter exited with this exit code
     * None: interpreter is still running
-    * -1: unknown
+    * unde: unable to determine the code
   """
-  while interpIsRunning(fns):
+  ecode:int|None=None
+  while ecode is None:
+    if interpIsRunning(fns):
+      return None
+    else:
+      try:
+        return int(open(fns.ecodef).read())
+      except FileNotFoundError:
+        pass
     poll_attempts-=1
     if poll_attempts<=0:
-      return None
+      break
     sleep(poll_sec)
-  try:
-    return int(open(fns.ecodef).read())
-  except FileNotFoundError:
-    return default
-
-def interpExitCodeNB(fns:FileNames,notfound=-1)->Optional[int]:
-  return interpExitCode(fns,poll_attempts=1,default=notfound)
+  return undefined
 
 def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
   """ Send `code` to the interpreter and fork the response reader. The output

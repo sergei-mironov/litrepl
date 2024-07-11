@@ -23,9 +23,9 @@ from psutil import Process
 from textwrap import dedent
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
-                    FileNames, IType, Settings, CursorPos)
+                    FileNames, IType, Settings, CursorPos, ReadResult)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
-                   processCont, interpExitCodeNB)
+                   processCont, interpExitCode)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
                    cursor_within, nlines)
 
@@ -109,7 +109,7 @@ def fork_python(a:LitreplArgs, interpreter:str):
       'import sys\n'
       'import os\n'
       'def _exceptexithook(type,value,traceback):\n'
-      f'  os._exit({int(a.exception_exit)})\n\n'
+      f'  os._exit({a.exception_exit})\n\n'
       'sys.excepthook=_exceptexithook\n' # [6]
     )
   exit(0)
@@ -267,7 +267,7 @@ def running(a:LitreplArgs)->bool:
 def stop(a:LitreplArgs)->None:
   """ Stops the background Python session. """
   fns=pipenames(a)
-  system(f'kill "$(cat {fns.pidf} 2>/dev/null)" >/dev/null 2>&1')
+  system(f'pkill -P "$(cat {fns.pidf} 2>/dev/null)" >/dev/null 2>&1')
   system(f"rm '{fns.inp}' '{fns.outp}' '{fns.pidf}' >/dev/null 2>&1")
 
 
@@ -393,22 +393,28 @@ def parse_(grammar, tty_ok=True):
 GRAMMARS={'markdown':grammar_md,'tex':grammar_latex,'latex':grammar_latex}
 SYMBOLS={'markdown':symbols_md,'tex':symbols_latex,'latex':symbols_latex}
 
-def eval_code(a:LitreplArgs,
-              fns:FileNames,
-              ss:Settings,
-              code:str,
-              runr:Optional[RunResult]=None) -> str:
+def eval_code(*args, **kwargs) -> str:
+  res,_=eval_code_(*args, **kwargs)
+  return res
+
+def eval_code_(a:LitreplArgs,
+               fns:FileNames,
+               ss:Settings,
+               code:str,
+               runr:Optional[RunResult]=None) -> Tuple[str,ReadResult]:
   """ Start or complete the code snippet evaluation process.  `RunResult` may
   contain the existing runner's context.
 
   The function returns either the evaluation result or the running context
   encoded in the result for later reference.
   """
+  rr:ReadResult
   if runr is None:
     rr,runr=processAdapt(fns,ss,code_preprocess(ss,code),a.timeout_initial)
   else:
-    rr=processCont(fns,runr,a.timeout_continue)
-  return rresultSave(rr.text,runr) if rr.timeout else text_postprocess(ss,rr.text)
+    rr=processCont(fns,ss,runr,a.timeout_continue)
+  res=rresultSave(rr.text,runr) if rr.timeout else text_postprocess(ss,rr.text)
+  return res,rr
 
 def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
   """ Evaluate code sections of the parsed `tree`, as specified in the `secrec`
@@ -422,6 +428,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
   ssrc:Dict[int,str]={} # Section sources
   sres:Dict[int,str]={} # Section results
   ledder:Dict[int,int]={}
+  pending:bool=True
   class C(Interpreter):
     def __init__(self):
       self.nsec=-1
@@ -443,7 +450,9 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
       code=unindent(bm.column-1,t)
       ssrc[self.nsec]=code
       if self.nsec in nsecs:
-        sres[self.nsec]=eval_code(a,fns,ss,code,secrec.pending.get(self.nsec))
+        sres[self.nsec],rr=eval_code_(a,fns,ss,code,secrec.pending.get(self.nsec))
+        nonlocal pending
+        pending=pending or rr.timeout
     def ocodesection(self,tree):
       bmarker=tree.children[0].children[0].value
       t=tree.children[1].children[0].value
@@ -480,9 +489,13 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
         cl=max(threshold,cl+diff)
     with open(a.map_cursor_output,"w") as f:
       f.write(str(cl))
-  ecode=interpExitCodeNB(fns,notfound=200)
+  ecode=interpExitCode(fns,undefined=200)
+  if ecode is None:
+    if a.pending_exit is not None and pending:
+      ecode=a.pending_exit
   if a.standalone_session:
     stop(a)
+  pdebug(f"Returning {ecode}")
   return ecode
 
 def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
@@ -623,7 +636,7 @@ def status(a:LitreplArgs,version:str)->int:
     print(f"interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
   except Exception:
     print(f"interpreter PYTHONPATH: ?")
-  ecode=interpExitCodeNB(fns,notfound=200)
+  ecode=interpExitCode(fns,undefined=200)
   if a.standalone_session:
     stop(a)
   return ecode

@@ -20,7 +20,8 @@ if __name__=='__main__':
   ap.add_argument('-d','--debug',type=int,metavar='LEVEL',default=0)
   ap.add_argument('--auxdir',type=str,metavar='DIR',default=None,help="Directory to store auxilary files")
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,help="Directory to run from")
-  ap.add_argument('-e','--exception-exit',type=str,metavar='ERRCODE',default=None, help='Return error code at first exception')
+  ap.add_argument('-e','--exception-exit',type=str,metavar='ERRCODE',default=None, help='Return this error code at first exception')
+  ap.add_argument('--pending-exit',type=str,metavar='ERRCODE',default=None, help='Return this error code at pending execution')
   ap.add_argument('--standalone-session',action='store_true',help='Do not reuse the interpreter session of the current directory')
   ap.add_argument('--map-cursor',type=str,metavar='LINE:COL',default=None,help="Calculate cursor coordinates, see documentation")
   sps=ap.add_subparsers(dest='command',help='commands to execute')
@@ -45,6 +46,11 @@ if __name__=='__main__':
   a.timeout_initial=float(a.timeout_initial)
   a.timeout_continue=float(a.timeout_continue)
 
+  if a.exception_exit:
+    a.exception_exit=int(a.exception_exit)
+  if a.pending_exit:
+    a.pending_exit=int(a.pending_exit)
+
   if a.map_cursor:
     line,col,output=a.map_cursor.split(":")
     a.map_cursor=(int(line),int(col))
@@ -66,16 +72,16 @@ if __name__=='__main__':
 
   fns=pipenames(a)
   if a.command=='start':
-    assert not a.standalone_session, f"`--new-session` is not compatible with `{a.commandd}`"
+    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.commandd}`"
     start(a)
   elif a.command=='stop':
-    assert not a.standalone_session, f"`--new-session` is not compatible with `{a.commandd}`"
+    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.commandd}`"
     stop(a)
   elif a.command=='restart':
-    assert not a.standalone_session, f"`--new-session` is not compatible with `{a.commandd}`"
+    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.commandd}`"
     stop(a); start(a)
   elif a.command=='parse':
-    assert not a.standalone_session, f"`--new-session` is not compatible with `{a.commandd}`"
+    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.commandd}`"
     t=parse_(GRAMMARS[a.filetype])
     print(t.pretty())
     exit(0)
@@ -98,7 +104,7 @@ if __name__=='__main__':
       start(a)
     print("Opening the interpreter terminal (NO PROMPT, USE `Ctrl+D` TO EXIT)")
     system(f"socat - 'PIPE:{fns.outp},flock-ex-nb=1!!PIPE:{fns.inp},flock-ex-nb=1'")
-    ecode=interpExitCodeNB(fns,notfound=200)
+    ecode=interpExitCode(fns,undefined=200)
     if a.standalone_session:
       stop(a)
     exit(0 if ecode is None else ecode)
@@ -115,7 +121,7 @@ if __name__=='__main__':
       start(a)
     ss=settings(fns)
     print(eval_code(a,fns,ss,sys.stdin.read()))
-    ecode=interpExitCodeNB(fns,notfound=200)
+    ecode=interpExitCode(fns,undefined=200)
     if a.standalone_session:
       stop(a)
     exit(0 if ecode is None else ecode)

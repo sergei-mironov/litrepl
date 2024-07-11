@@ -365,7 +365,12 @@ for i in tqdm(range(4)):
 ```
 EOF
 cat source.md | runlitrepl --filetype=markdown --timeout-initial=1 eval-sections '0..$' >out1.md
-cat out1.md | runlitrepl --filetype=markdown --timeout-continue=1 eval-sections '0..$' >out2.md
+cat out1.md | runlitrepl \
+  --filetype=markdown \
+  --timeout-continue=1 \
+  --pending-exit=33 \
+  eval-sections '0..$' >out2.md ||
+test "$?" = "33"
 grep -q 'BG' out2.md
 runlitrepl stop
 )} #}}}
@@ -749,7 +754,7 @@ if test -z "$LITREPL_BIN"; then
   LITREPL_BIN=$LITREPL_ROOT/python/bin
 fi
 
-trap "echo FAIL" EXIT
+trap "echo FAIL\(\$?\)" EXIT
 NRUN=0
 for t in $(tests) ; do
   for i in $(interpreters) ; do
