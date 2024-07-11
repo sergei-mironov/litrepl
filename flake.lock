@@ -3,69 +3,32 @@
     "gpt4all-cli": {
       "inputs": {
         "litrepl": "litrepl",
-        "nixpkgs": "nixpkgs_4"
-      },
-      "locked": {
-        "lastModified": 1720531803,
-        "narHash": "sha256-B1TiyWjNirLH0bYmY7MDIO7lN0H9SNVrdX1aa0Dk3s8=",
-        "owner": "sergei-mironov",
-        "repo": "nix-gpt4all-cli",
-        "rev": "7d628b4ac3e89fb22c9d5fcb16f3c7827895e8db",
-        "type": "github"
-      },
-      "original": {
-        "owner": "sergei-mironov",
-        "repo": "nix-gpt4all-cli",
-        "type": "github"
-      }
-    },
-    "gpt4all-cli_2": {
-      "inputs": {
-        "litrepl": "litrepl_2",
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1720289115,
-        "narHash": "sha256-j0D0YKBQrtWXwlz6dErJlU77D0Ta5wty3m+nWKIrHsU=",
+        "lastModified": 1720703396,
+        "narHash": "sha256-/B21F+0xB1g9/NyYSVuK/MGE//XwJZ0hWw8PCnlaus4=",
         "owner": "sergei-mironov",
-        "repo": "nix-gpt4all-cli",
-        "rev": "a3352f609731f984e904bd40804c321cab4aa3af",
+        "repo": "gpt4all-cli",
+        "rev": "ece4e4581f8d08ae077194854e077d663da5ab61",
         "type": "github"
       },
       "original": {
         "owner": "sergei-mironov",
-        "repo": "nix-gpt4all-cli",
+        "repo": "gpt4all-cli",
         "type": "github"
       }
     },
     "litrepl": {
       "inputs": {
-        "gpt4all-cli": "gpt4all-cli_2",
-        "nixpkgs": "nixpkgs_3"
-      },
-      "locked": {
-        "dirtyRev": "b725273fbd6e7527fa5145df50792a60b0d31901-dirty",
-        "dirtyShortRev": "b725273-dirty",
-        "lastModified": 1720288659,
-        "narHash": "sha256-lKXRJylf/igVD1cjmuMPWaXMqunis3/OKOZic0KltPg=",
-        "type": "git",
-        "url": "file:/home/grwlf/proj/litrepl.vim/"
-      },
-      "original": {
-        "type": "git",
-        "url": "file:/home/grwlf/proj/litrepl.vim/"
-      }
-    },
-    "litrepl_2": {
-      "inputs": {
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1719949781,
-        "narHash": "sha256-NIaKd5mKRJ5IGRjkG1BAy2cyv8Ekjys0bz6pVX4VzQw=",
+        "lastModified": 1720615920,
+        "narHash": "sha256-sJ+ob6Pfe2v0Z7nfWpcF/LFcisMtQAmIGMUNmPX5S24=",
         "ref": "refs/heads/main",
-        "rev": "9290c113fdd14c9bc1ccfc84bf53e176ba23fe96",
-        "revCount": 313,
+        "rev": "1f82b89f3b334e846aa1f4cccbc5e15a073b28a5",
+        "revCount": 315,
         "type": "git",
         "url": "file:/home/grwlf/proj/litrepl.vim/"
       },
@@ -122,42 +85,10 @@
         "type": "github"
       }
     },
-    "nixpkgs_4": {
-      "locked": {
-        "lastModified": 1719420079,
-        "narHash": "sha256-lGqaOuxLGT6/MUd/w3epHDCr3stOoVge06zI0fmPhr0=",
-        "owner": "grwlf",
-        "repo": "nixpkgs",
-        "rev": "d7fdc02f1e36ecb6545bdd55bc02e5b0dd9e12cf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "grwlf",
-        "ref": "local17",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_5": {
-      "locked": {
-        "lastModified": 1719420079,
-        "narHash": "sha256-lGqaOuxLGT6/MUd/w3epHDCr3stOoVge06zI0fmPhr0=",
-        "owner": "grwlf",
-        "repo": "nixpkgs",
-        "rev": "d7fdc02f1e36ecb6545bdd55bc02e5b0dd9e12cf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "grwlf",
-        "ref": "local17",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "gpt4all-cli": "gpt4all-cli",
-        "nixpkgs": "nixpkgs_5"
+        "nixpkgs": "nixpkgs_3"
       }
     }
   },

@@ -16,7 +16,7 @@
     };
 
     gpt4all-cli = {
-      url = "github:sergei-mironov/nix-gpt4all-cli";
+      url = "github:sergei-mironov/gpt4all-cli";
     };
   };
 
