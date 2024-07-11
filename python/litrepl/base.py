@@ -170,7 +170,7 @@ def fork_gpt4all(a:LitreplArgs):
   assert 'gpt4all' in a.interpreter
   assert not a.exception_exit, "Not supported"
   wd,inp,outp,pid,ecode=astuple(pipenames(a))
-  system(f'rm \'{ecode}\' 2>/dev/null; python -c \'import os; os.open("{inp}",os.O_RDWR|os.O_SYNC); os.open("{outp}",os.O_RDWR|os.O_SYNC);os.system("{a.interpreter} --model=/home/grwlf/proj/litrepl.vim/_model/Meta-Llama-3-8B-Instruct.Q4_0.gguf --no-prompts");\' <\'{inp}\' >\'{outp}\' 2>&1 & echo $! >"{pid}"')
+  system(f'rm \'{ecode}\' 2>/dev/null; python -c \'import os; os.open("{inp}",os.O_RDWR|os.O_SYNC); os.open("{outp}",os.O_RDWR|os.O_SYNC);os.system("{a.interpreter} --model=/home/grwlf/proj/litrepl.vim/_model/Meta-Llama-3-8B-Instruct.Q4_0.gguf --readline-prompt=\'\'");\' <\'{inp}\' >\'{outp}\' 2>&1 & echo $! >"{pid}"')
   inp=open(inp,'w')
   exit(0)
 
