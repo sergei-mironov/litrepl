@@ -83,16 +83,21 @@ fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
         \ ' --interpreter='.g:litrepl_interpreter.
         \ ' --timeout-initial='.a:timeout_initial.
         \ ' --timeout-continue='.a:timeout_continue.
+        \ ' --pending-exit=33'.
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.
         \ ' --map-cursor='.cur[1].':'.cur[2].':'.g:litrepl_map_cursor_output.
         \ ' '.cmd.' 2>'.g:litrepl_errfile
-  execute cmdline
+  silent execute cmdline
   let errcode = v:shell_error
   if errcode != 0
-    " call setcharpos('.',cur)
-    execute "u"
-    call LitReplOpenErr(g:litrepl_errfile)
+    if errcode == 33
+      return 1
+    else
+      " call setcharpos('.',cur)
+      execute "u"
+      call LitReplOpenErr(g:litrepl_errfile)
+    endif
   else
     let cur[1]=str2nr(readfile(g:litrepl_map_cursor_output)[0])
     call setcharpos('.',cur)
@@ -101,6 +106,16 @@ fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
       call LitReplOpenErr(g:litrepl_errfile)
     endif
   endif
+  return 0
+endfun
+
+fun! LitReplMonitor(command, pos)
+  let cont = 1
+  while cont
+    let cont = LitReplRun(a:command, g:litrepl_timeout, 0.0, a:pos)
+    silent execute "sleep 1"
+    silent execute "redraw"
+  endwhile
 endfun
 
 fun! LitReplStatus()
@@ -135,6 +150,7 @@ command! -bar -nargs=? LEvalAbove call LitReplRun("eval-sections", "inf", "inf",
 command! -bar -nargs=? LEvalBelow call LitReplRun("eval-sections", "inf", "inf", <SID>Pos(<q-args>)."..$")
 command! -bar -nargs=0 LEvalAll call LitReplRun("eval-sections", "inf", "inf", "0..$")
 command! -bar -nargs=? LInterrupt call LitReplRun("interrupt", 1.0, 1.0, <SID>Pos(<q-args>))
+command! -bar -nargs=? LMon call LitReplMonitor("eval-sections", <SID>Pos(<q-args>))
 
 command! -bar -nargs=0 LStatus call LitReplStatus()
 

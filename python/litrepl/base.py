@@ -21,6 +21,7 @@ from tempfile import gettempdir
 from hashlib import sha256
 from psutil import Process
 from textwrap import dedent
+from subprocess import check_output, DEVNULL, CalledProcessError
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
                     FileNames, IType, Settings, CursorPos, ReadResult)
@@ -428,7 +429,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
   ssrc:Dict[int,str]={} # Section sources
   sres:Dict[int,str]={} # Section results
   ledder:Dict[int,int]={}
-  pending:bool=True
+  pending:bool=False
   class C(Interpreter):
     def __init__(self):
       self.nsec=-1
