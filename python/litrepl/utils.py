@@ -1,5 +1,6 @@
-from textwrap import dedent
+from textwrap import dedent, wrap
 from re import match as re_match, compile as re_compile
+from typing import Iterable,List
 from .types import CursorPos
 
 def unindent(col:int, lines:str)->str:
@@ -60,4 +61,10 @@ def cursor_within(pos:CursorPos, posA:CursorPos, posB:CursorPos)->bool:
 def nlines(lines:str)->int:
   """ Return number of visual lines in `lines`. """
   return len(lines.split('\n'))
+
+
+def wraplong(lines:str, tw:int)->str:
+  s='\n'.join(wrap(lines, width=tw))
+  s=s+'\n' if lines and lines[-1]=='\n' else s
+  return s
 

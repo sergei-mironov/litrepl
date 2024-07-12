@@ -87,6 +87,7 @@ fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.
         \ ' --map-cursor='.cur[1].':'.cur[2].':'.g:litrepl_map_cursor_output.
+        \ ' --result-textwidth=80'.
         \ ' '.cmd.' 2>'.g:litrepl_errfile
   silent execute cmdline
   let errcode = v:shell_error

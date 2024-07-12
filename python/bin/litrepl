@@ -24,6 +24,7 @@ if __name__=='__main__':
   ap.add_argument('--pending-exit',type=str,metavar='ERRCODE',default=None, help='Return this error code at pending execution')
   ap.add_argument('--standalone-session',action='store_true',help='Do not reuse the interpreter session of the current directory')
   ap.add_argument('--map-cursor',type=str,metavar='LINE:COL',default=None,help="Calculate cursor coordinates, see documentation")
+  ap.add_argument('--result-textwidth',type=str,metavar='NUM',default=None,help="Wrap long result lines")
   sps=ap.add_subparsers(dest='command',help='commands to execute')
   sps.add_parser('start',help='Start the interpreter in the background')
   sps.add_parser('stop',help='Stop the interpreter')
@@ -50,6 +51,8 @@ if __name__=='__main__':
     a.exception_exit=int(a.exception_exit)
   if a.pending_exit:
     a.pending_exit=int(a.pending_exit)
+  if a.result_textwidth:
+    a.result_textwidth=int(a.result_textwidth)
 
   if a.map_cursor:
     line,col,output=a.map_cursor.split(":")

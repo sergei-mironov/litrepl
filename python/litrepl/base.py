@@ -28,7 +28,7 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
-                   cursor_within, nlines)
+                   cursor_within, nlines, wraplong)
 
 DEBUG:bool=False
 LitreplArgs=Any
@@ -174,12 +174,12 @@ def fork_gpt4all(a:LitreplArgs):
   inp=open(inp,'w')
   exit(0)
 
-def code_preprocess_ipython(code:str) -> str:
+def code_preprocess_ipython(a:LitreplArgs, code:str) -> str:
   # IPython seems to not echo the terminating cpaste pattern into the output
   # which is good.
   paste_pattern='12341234213423'
   return (f'\n%cpaste -q -s {paste_pattern}\n{code}\n{paste_pattern}\n')
-def text_postprocess_ipython(text:str) -> str:
+def result_postprocess_ipython(a:LitreplArgs, text:str) -> str:
   # A workaround for https://github.com/ipython/ipython/issues/13622
   r=re.compile('ERROR! Session/line number was not unique in database. '
                'History logging moved to new session [0-9]+\\n')
@@ -187,44 +187,45 @@ def text_postprocess_ipython(text:str) -> str:
 
 # def code_preprocess_ipython(code:str) -> str:
 #   return fillspaces(code, '# spaces')
-# def text_postprocess_ipython(text:str) -> str:
+# def result_postprocess_ipython(text:str) -> str:
 #   return text
 
-def code_preprocess_python(code:str) -> str:
+def code_preprocess_python(a:LitreplArgs, code:str) -> str:
   return fillspaces(code, '# spaces')
-def code_preprocess_gpt4allcli(code:str) -> str:
+def code_preprocess_gpt4allcli(a:LitreplArgs, code:str) -> str:
   return code + "/ask\n"
-def text_postprocess_python(text:str) -> str:
+def result_postprocess_python(a:LitreplArgs, text:str) -> str:
   return text
-def text_postprocess_gpt4allcli(text:str) -> str:
-  return text
+def result_postprocess_gpt4allcli(a:LitreplArgs, text:str) -> str:
+  return text.strip()+"\n"
 
 
-def code_preprocess(ss:Settings, code:str) -> str:
+def code_preprocess(a:LitreplArgs, ss:Settings, code:str) -> str:
   if (ss.itype is None) or ss.itype == IType.IPython:
-    return code_preprocess_ipython(code)
+    return code_preprocess_ipython(a,code)
   elif ss.itype == IType.Python:
-    return code_preprocess_python(code)
+    return code_preprocess_python(a,code)
   elif ss.itype == IType.GPT4AllCli:
-    return code_preprocess_gpt4allcli(code)
+    return code_preprocess_gpt4allcli(a,code)
   else:
     raise ValueError(fmterror(f'''
       Interpreter type {ss.itype} is not supported for pre-processing. Did you
       restart LitRepl after an update?
     '''))
 
-def text_postprocess(ss:Settings, text:str) -> str:
+def result_postprocess(a:LitreplArgs, ss:Settings, text:str) -> str:
   if (ss.itype is None) or ss.itype == IType.IPython:
-    return text_postprocess_ipython(text)
+    s=result_postprocess_ipython(a,text)
   elif ss.itype == IType.Python:
-    return text_postprocess_python(text)
+    s=result_postprocess_python(a,text)
   elif ss.itype == IType.GPT4AllCli:
-    return text_postprocess_gpt4allcli(text)
+    s=result_postprocess_gpt4allcli(a,text)
   else:
     raise ValueError(fmterror(f'''
       Interpreter type {ss.itype} is not supported for post-processing. Did you
       restart LitRepl after an update?
     '''))
+  return wraplong(s,a.result_textwidth) if a.result_textwidth else s
 
 def start_(a:LitreplArgs, fork_handler:Callable[...,None])->None:
   """ Starts the background Python interpreter. Kill an existing interpreter if
@@ -411,10 +412,11 @@ def eval_code_(a:LitreplArgs,
   """
   rr:ReadResult
   if runr is None:
-    rr,runr=processAdapt(fns,ss,code_preprocess(ss,code),a.timeout_initial)
+    rr,runr=processAdapt(fns,ss,code_preprocess(a,ss,code),a.timeout_initial)
   else:
     rr=processCont(fns,ss,runr,a.timeout_continue)
-  res=rresultSave(rr.text,runr) if rr.timeout else text_postprocess(ss,rr.text)
+  pptext=result_postprocess(a,ss,rr.text)
+  res=rresultSave(pptext,runr) if rr.timeout else pptext
   return res,rr
 
 def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
