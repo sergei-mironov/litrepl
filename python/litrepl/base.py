@@ -84,7 +84,7 @@ def settings(fns:FileNames)->Optional[Settings]:
   interpreter. """
   try:
     pid=int(open(fns.pidf).read())
-    p=Process(pid)
+    p=Process(pid).children()[0]
     cmd=p.cmdline()
     itype=None
     if any('gpt4all' in w for w in cmd):

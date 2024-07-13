@@ -114,9 +114,12 @@ endfun
 
 fun! LitReplMonitor(command, pos)
   let cont = 1
-  while cont
+  while 1
     let cont = LitReplRun(a:command, g:litrepl_timeout, 0.0, a:pos)
-    silent execute "sleep 1"
+    if !cont
+      break
+    endif
+    " silent execute "sleep 1"
     silent execute "redraw"
   endwhile
 endfun
