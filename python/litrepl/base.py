@@ -484,13 +484,13 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
       os.kill(int(open(fns.pidf).read()),SIGINT)
     return fns,ss
 
-  def _checkecode(fns):
+  def _checkecode(fns,pending:bool):
     nonlocal ecode
     if ecode==0:
       ec=interpExitCode(fns,undefined=200)
       pdebug(f"interpreter exit code: {ec}")
       if ec is None:
-        if a.pending_exit:
+        if pending and a.pending_exit:
           ecode=a.pending_exit
       else:
         ecode=ec
@@ -522,8 +522,8 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
       if self.nsec in nsecs:
         fns,ss=_getinterp(bmarker)
         if ss:
-          sres[self.nsec],_=eval_code_(a,fns,ss,code,secrec.pending.get(self.nsec))
-          _checkecode(fns)
+          sres[self.nsec],rr=eval_code_(a,fns,ss,code,secrec.pending.get(self.nsec))
+          _checkecode(fns,rr.timeout)
         else:
           sres[self.nsec]=_failmsg(fns)
     def ocodesection(self,tree):
@@ -549,7 +549,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
         fns,ss=_getinterp("python")
         if ss:
           result=process(fns,ss,'print('+code+');\n')[0].rstrip('\n')
-          _checkecode(fns)
+          _checkecode(fns,False)
         else:
           result=_failmsg(fns)
       else:

@@ -91,23 +91,25 @@ fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
         \ ' '.cmd.' 2>'.g:litrepl_errfile
   silent execute cmdline
   let errcode = v:shell_error
-  if errcode != 0
-    if errcode == 33
-      return 1
-    else
-      " call setcharpos('.',cur)
-      execute "u"
-      call LitReplOpenErr(g:litrepl_errfile)
-    endif
-  else
+  echomsg 'ECODE: '.string(errcode)
+  if errcode == 0 || errcode == 33
     let cur[1]=str2nr(readfile(g:litrepl_map_cursor_output)[0])
     call setcharpos('.',cur)
     let g:litrepl_laspos = a:pos
-    if g:litrepl_always_show_stderr != 0
-      call LitReplOpenErr(g:litrepl_errfile)
+    if errcode == 0
+      if g:litrepl_always_show_stderr != 0
+        call LitReplOpenErr(g:litrepl_errfile)
+      endif
+      return 0
+    else
+      return 1
     endif
+  else
+    " call setcharpos('.',cur)
+    execute "u"
+    call LitReplOpenErr(g:litrepl_errfile)
+    return 0
   endif
-  return 0
 endfun
 
 fun! LitReplMonitor(command, pos)
