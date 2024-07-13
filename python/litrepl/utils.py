@@ -64,6 +64,7 @@ def nlines(lines:str)->int:
 
 
 def wraplong(lines:str, tw:int)->str:
+  """ Wrap long `lines`, preserve trailing newline"""
   s='\n'.join(wrap(lines, width=tw))
   s=s+'\n' if lines and lines[-1]=='\n' else s
   return s

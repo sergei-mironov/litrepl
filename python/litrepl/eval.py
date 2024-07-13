@@ -214,7 +214,7 @@ def interpExitCode(fns:FileNames,poll_sec=0.5,poll_attempts=4,undefined=-1)->Opt
   """ Returns:
     * <int>: interpreter exited with this exit code
     * None: interpreter is still running
-    * unde: unable to determine the code
+    * undefined: unable to determine the code
   """
   ecode:int|None=None
   while ecode is None:
@@ -266,10 +266,10 @@ def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
       pdebug("processAsync interact finish")
     except TimeoutError:
       ecode=interpExitCode(fns)
-      pusererror(fname,f"ERROR: litrepl couldn't open the sessions pipes: {ecode}\n")
+      pusererror(fname,f"ERROR: litrepl couldn't open the sessions pipes ({inp}): {ecode}\n")
     except BlockingIOError:
       ecode=interpExitCode(fns)
-      pusererror(fname,"ERROR: litrepl couldn't lock the sessions pipes: {ecode}\n")
+      pusererror(fname,f"ERROR: litrepl couldn't lock the sessions pipes ({inp}): {ecode}\n")
     finally:
       if fo!=0:
         fcntl.fcntl(fo,fcntl.LOCK_UN)

@@ -8,7 +8,7 @@ from typing import List, Optional, Tuple, Set, Dict, Callable, Any
 from select import select
 from os import environ, system, isatty
 from lark import Lark, Visitor, Transformer, Token, Tree
-from lark.visitors import Interpreter
+from lark.visitors import Interpreter as LarkInterpreter
 from os.path import isfile, join
 from signal import signal, SIGINT
 from time import sleep, time
@@ -16,15 +16,15 @@ from dataclasses import dataclass, astuple
 from functools import partial
 from argparse import ArgumentParser
 from collections import defaultdict
-from os import makedirs, getuid, getcwd
+from os import makedirs, getuid, getcwd, WEXITSTATUS
 from tempfile import gettempdir
 from hashlib import sha256
-from psutil import Process
+from psutil import Process, NoSuchProcess
 from textwrap import dedent
 from subprocess import check_output, DEVNULL, CalledProcessError
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
-                    FileNames, IType, Settings, CursorPos, ReadResult)
+                    FileNames, IType, Settings, CursorPos, ReadResult, SType)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
@@ -43,11 +43,34 @@ def defauxdir(suffix:Optional[str]=None)->str:
   return join(gettempdir(),f"litrepl_{getuid()}_"+suffix_+
               sha256(getcwd().encode('utf-8')).hexdigest()[:6])
 
-def pipenames(a:LitreplArgs)->FileNames:
+def st2name(st:SType)->str:
+  if st==SType.SPython:
+    return "python"
+  elif st==SType.SAI:
+    return "ai"
+  else:
+    raise ValueError(f"Invalid section type: {st}")
+
+def name2st(name:str)->SType:
+  if name=="python":
+    return SType.SPython
+  elif name=="ai":
+    return SType.SAI
+  else:
+    raise ValueError(f"Invalid section name: {name}")
+
+def bmarker2st(bmarker:str)->SType:
+  """ Maps section code marker to section type """
+  if 'ai' in bmarker:
+    return SType.SAI
+  else:
+    return SType.SPython
+
+def pipenames(a:LitreplArgs, st:SType)->FileNames:
   """ Return the interpreter state: input and output pipe names, pid, etc. If
   not explicitly specified in the config, the state is shared for all files in
   the current directory. """
-  auxdir=a.auxdir if a.auxdir is not None else defauxdir()
+  auxdir=join(a.auxdir if a.auxdir is not None else defauxdir(),st2name(st))
   return FileNames(auxdir, join(auxdir,"_in.pipe"), join(auxdir,"_out.pipe"),
                    join(auxdir,"_pid.txt"),join(auxdir,"_ecode.txt"))
 
@@ -79,100 +102,153 @@ def settings(fns:FileNames)->Optional[Settings]:
     return Settings(itype,pattern1,pattern2)
   except FileNotFoundError:
     return None
+  except NoSuchProcess:
+    return None
 
-def fork_python(a:LitreplArgs, interpreter:str):
-  """ Forks an instance of Python interpreter `name` """
-  # This funciton does: [1] - runs python with empty command line prompts; [2] -
-  # locks i/o file descriptors to avoid closing on error; [3] - preserving
-  # exit-code into a file; [4] - instructs Python to raise keyboard interrupt on
-  # SIGINT despite not using a tty; [5] - (optionally) instruct Python to exit
-  # on first exception.
-  assert 'python' in interpreter.lower()
-  wd,inp,outp,pid,ecode=astuple(pipenames(a))
-  system(('{ '
-          f'rm "{ecode}" 2>/dev/null;'
-          f'{interpreter} -uic "import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';' # [1]
-          f'os.open(\'{inp}\',os.O_RDWR|os.O_SYNC);' # [2]
-          f'os.open(\'{outp}\',os.O_RDWR|os.O_SYNC);"'
-          f'<"{inp}" >"{outp}" 2>&1 ;'
-          f'echo "$?">"{ecode}";' # [3]
-          '} & '
-          f'echo $! >"{pid}"'))
-  inp=open(inp,'w') # [4]
-  inp.write(
-    '\nimport signal\n'
-    'def _handler(signum,frame):\n'
-    '  raise KeyboardInterrupt()\n\n'
-    '_=signal.signal(signal.SIGINT,_handler)\n' # [5]
-  )
-  if a.exception_exit is not None:
-    inp.write(
-      'import sys\n'
-      'import os\n'
-      'def _exceptexithook(type,value,traceback):\n'
-      f'  os._exit({a.exception_exit})\n\n'
-      'sys.excepthook=_exceptexithook\n' # [6]
-    )
-  exit(0)
+def open_child_pipes(inp,outp):
+  return os.open(inp,os.O_RDWR|os.O_SYNC),os.open(outp,os.O_RDWR|os.O_SYNC);
+def open_parent_pipes(inp,outp):
+  return open(inp,'w'),open(outp,'r')
 
-def fork_ipython(a:LitreplArgs, interpreter:str):
-  """ Forks an instance of IPython interpreter """
-  assert 'ipython' in interpreter.lower()
-  wd,inp,outp,pid,ecode=astuple(pipenames(a))
-  cfg=join(wd,'litrepl_ipython_config.py')
-  log=f"--logfile={join(wd,'_ipython.log')}" if DEBUG else ""
-  with open(cfg,'w') as f:
-    f.write(
-      'import sys\n'
-      # See https://github.com/ipython/ipython/issues/14246
-      'sys.stdout.reconfigure(line_buffering=True)\n'
-      'from IPython.terminal.prompts import Prompts, Token\n'
-      'class EmptyPrompts(Prompts):\n'
-      '  def in_prompt_tokens(self):\n'
-      '    return [(Token.Prompt, "")]\n'
-      '  def continuation_prompt_tokens(self, width=None):\n'
-      '    return [(Token.Prompt, "") ]\n'
-      '  def rewrite_prompt_tokens(self):\n'
-      '    return []\n'
-      '  def out_prompt_tokens(self):\n'
-      '    return []\n'
-      'c.TerminalInteractiveShell.prompts_class = EmptyPrompts\n'
-      'c.TerminalInteractiveShell.separate_in = ""\n'
-      'c.TerminalInteractiveShell.separate_out = ""\n'
-    )
-  system(('{ '
-          f'rm "{ecode}" 2>/dev/null;'
-          f'{interpreter} -um IPython --config={cfg} --colors=NoColor {log} -c '
-          f'"import os; import sys; sys.ps1=\'\'; sys.ps2=\'\';'
-          f'os.open(\'{inp}\',os.O_RDWR|os.O_SYNC);'
-          f'os.open(\'{outp}\',os.O_RDWR|os.O_SYNC);"'
-          f' -i <"{inp}" >"{outp}" 2>&1 ;'
-          f'echo "$?">"{ecode}";'
-          '} & '
-          f'echo $! >"{pid}"'))
-  f=open(inp,'w')
-  f.write(
-    '\nimport signal\n'
-    'def _handler(signum,frame):\n'
-    '  raise KeyboardInterrupt()\n\n'
-    '_=signal.signal(signal.SIGINT,_handler)\n'
-  )
-  if a.exception_exit is not None:
-    f.write(
-      'import IPython\n'
-      'def _exithandler(*args, **kwargs):\n'
-      f'  os._exit({int(a.exception_exit)})\n\n'
-      'IPython.get_ipython().set_custom_exc((Exception,), _exithandler)\n'
-    )
-  exit(0)
+class Interpreter:
+  def __init__(self,a:LitreplArgs,fns:FileNames,interpreter:str)->None:
+    self.a,self.fns,self.interpreter=a,fns,interpreter
+  def run_child(self)->int:
+    pass
+  def setup_child(self, finp, foutp)->None:
+    pass
 
-def fork_gpt4all(a:LitreplArgs):
-  assert 'gpt4all' in a.interpreter
-  assert not a.exception_exit, "Not supported"
-  wd,inp,outp,pid,ecode=astuple(pipenames(a))
-  system(f'rm \'{ecode}\' 2>/dev/null; python -c \'import os; os.open("{inp}",os.O_RDWR|os.O_SYNC); os.open("{outp}",os.O_RDWR|os.O_SYNC);os.system("{a.interpreter} --model=/home/grwlf/proj/litrepl.vim/_model/Meta-Llama-3-8B-Instruct.Q4_0.gguf --readline-prompt=\'\'");\' <\'{inp}\' >\'{outp}\' 2>&1 & echo $! >"{pid}"')
-  inp=open(inp,'w')
-  exit(0)
+class PythonInterpreter(Interpreter):
+  def run_child(self)->int:
+    a,fns,interpreter=self.a,self.fns,self.interpreter
+    wd,inp,outp,pid,ecode=astuple(fns)
+    ret=system(
+      f"exec {interpreter} -uic 'import sys; sys.ps1=\"\"; sys.ps2=\"\";' "
+      f"<'{inp}' >'{outp}' 2>&1"
+    )
+    return WEXITSTATUS(ret)
+  def setup_child(self, finp, foutp)->None:
+    a=self.a
+    finp.write(
+      '\nimport signal\n'
+      'def _handler(signum,frame):\n'
+      '  raise KeyboardInterrupt()\n\n'
+      '_=signal.signal(signal.SIGINT,_handler)\n'
+    )
+    if a.exception_exit is not None:
+      finp.write(
+        'import sys; import os\n'
+        'def _exceptexithook(type,value,traceback):\n'
+        f'  os._exit({a.exception_exit})\n\n'
+        'sys.excepthook=_exceptexithook\n'
+      )
+
+class IPythonInterpreter(Interpreter):
+  def run_child(self)->int:
+    a,fns,interpreter=self.a,self.fns,self.interpreter
+    assert 'ipython' in interpreter.lower()
+    wd,inp,outp,pid,ecode=astuple(fns)
+    cfg=join(wd,'litrepl_ipython_config.py')
+    log=f"--logfile={join(wd,'_ipython.log')}" if DEBUG else ""
+    with open(cfg,'w') as f:
+      f.write(
+        'import sys\n'
+        # See https://github.com/ipython/ipython/issues/14246
+        'sys.stdout.reconfigure(line_buffering=True)\n'
+        'from IPython.terminal.prompts import Prompts, Token\n'
+        'class EmptyPrompts(Prompts):\n'
+        '  def in_prompt_tokens(self):\n'
+        '    return [(Token.Prompt, "")]\n'
+        '  def continuation_prompt_tokens(self, width=None):\n'
+        '    return [(Token.Prompt, "") ]\n'
+        '  def rewrite_prompt_tokens(self):\n'
+        '    return []\n'
+        '  def out_prompt_tokens(self):\n'
+        '    return []\n'
+        'c.TerminalInteractiveShell.prompts_class = EmptyPrompts\n'
+        'c.TerminalInteractiveShell.separate_in = ""\n'
+        'c.TerminalInteractiveShell.separate_out = ""\n'
+      )
+    ret=system(
+      f"exec {interpreter} -um IPython --config={cfg} --colors=NoColor {log} -i "
+      f"<'{inp}' >'{outp}' 2>&1"
+    )
+    return WEXITSTATUS(ret)
+  def setup_child(self, finp, foutp)->None:
+    a=self.a
+    finp.write(
+      '\nimport signal\n'
+      'def _handler(signum,frame):\n'
+      '  raise KeyboardInterrupt()\n\n'
+      '_=signal.signal(signal.SIGINT,_handler)\n'
+    )
+    if a.exception_exit is not None:
+      finp.write(
+        'import IPython; import os\n'
+        'def _exithandler(*args, **kwargs):\n'
+        f'  os._exit({int(a.exception_exit)})\n\n'
+        'IPython.get_ipython().set_custom_exc((Exception,), _exithandler)\n'
+      )
+
+class GPT4AllInterpreter(Interpreter):
+  def run_child(self)->int:
+    a,fns,interpreter=self.a,self.fns,self.interpreter
+    fns=pipenames(a,SType.SAI)
+    ret=system(
+      f"exec {interpreter} "
+      f"--model=/home/grwlf/proj/litrepl.vim/_model/Meta-Llama-3-8B-Instruct.Q4_0.gguf "
+      f"--readline-prompt='' "
+      f"<'{fns.inp}' >'{fns.outp}' 2>&1"
+    )
+    return WEXITSTATUS(ret)
+  def setup_child(self, finp, foutp)->None:
+    finp.write("/echo ready\n")
+
+def start_(a:LitreplArgs,i:Interpreter)->None:
+  """ Starts the background Python interpreter. Kill an existing interpreter if
+  any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`."""
+  fns=i.fns
+  wd,inp,outp,pid,ecode=astuple(fns)
+  makedirs(wd, exist_ok=True)
+  if isfile(pid):
+    system(f'kill -9 "$(cat {pid})" >/dev/null 2>&1')
+  system(f"mkfifo '{inp}' '{outp}' 2>/dev/null")
+  npid=os.fork()
+  if npid==0:
+    # sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
+    open_child_pipes(inp,outp)
+    ret=i.run_child()
+    pdebug(f"fork records ecode: {ret}")
+    with open(ecode,'w') as f:
+      f.write(str(ret))
+    exit(ret)
+  else:
+    finp,foutp=open_parent_pipes(inp,outp)
+    i.setup_child(finp,foutp)
+    with open(pid,'w') as f:
+      f.write(str(npid))
+
+def start(a:LitreplArgs, st:SType):
+  fns=pipenames(a,st)
+  if st is SType.SPython:
+    if 'ipython' in a.interpreter.lower():
+      start_(a,IPythonInterpreter(a,fns,a.interpreter))
+    elif 'python' in a.interpreter:
+      start_(a,PythonInterpreter(a,fns,a.interpreter))
+    elif a.interpreter=='auto':
+      if system('python3 -m IPython -c \'print("OK")\' >/dev/null 2>&1')==0:
+        start_(a,IPythonInterpreter(a,fns,'python3 -m IPython'))
+      else:
+        start_(a,PythonInterpreter(a,fns,'python3'))
+    else:
+      raise ValueError(f"Unsupported python interpreter: {a.interpreter}")
+  elif st is SType.SAI:
+    assert not a.exception_exit, "Not supported"
+    interpreter='gpt4all-cli' if a.interpreter=='auto' else a.interpreter
+    start_(a,GPT4AllInterpreter(a,fns,interpreter))
+  else:
+    raise ValueError(f"Unsupported section type: {st}")
+
 
 def code_preprocess_ipython(a:LitreplArgs, code:str) -> str:
   # IPython seems to not echo the terminating cpaste pattern into the output
@@ -227,48 +303,14 @@ def result_postprocess(a:LitreplArgs, ss:Settings, text:str) -> str:
     '''))
   return wraplong(s,a.result_textwidth) if a.result_textwidth else s
 
-def start_(a:LitreplArgs, fork_handler:Callable[...,None])->None:
-  """ Starts the background Python interpreter. Kill an existing interpreter if
-  any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`."""
-  wd,inp,outp,pid,_=astuple(pipenames(a))
-  makedirs(wd, exist_ok=True)
-  if isfile(pid):
-    system(f'kill -9 "$(cat {pid})" >/dev/null 2>&1')
-  system(f"mkfifo '{inp}' '{outp}' 2>/dev/null")
-  if os.fork()==0:
-    sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
-    fork_handler()
-  else:
-    for i in range(20):
-      if isfile(pid):
-        break
-      sleep(0.5)
-    if not isfile(pid):
-      raise ValueError(f"Couldn't see '{pid}'. Did the fork fail?")
-
-def start(a:LitreplArgs):
-  if 'ipython' in a.interpreter.lower():
-    start_(a, partial(fork_ipython,a=a,interpreter=a.interpreter))
-  elif 'python' in a.interpreter:
-    start_(a, partial(fork_python,a=a,interpreter=a.interpreter))
-  elif 'gpt4all' in a.interpreter:
-    start_(a,partial(fork_gpt4all,a=a))
-  elif a.interpreter=='auto':
-    if system('python -m IPython -c \'print("OK")\' >/dev/null 2>&1')==0:
-      start_(a, partial(fork_ipython,a=a,interpreter='python -m IPython'))
-    else:
-      start_(a, partial(fork_python,a=a,interpreter='python'))
-  else:
-    raise ValueError(f"Unsupported interpreter '{a.interpreter}'")
-
-def running(a:LitreplArgs)->bool:
+def running(a:LitreplArgs,st:SType)->bool:
   """ Checks if the background session was run or not. """
-  fns=pipenames(a)
+  fns=pipenames(a,st)
   return 0==system(f"test -f '{fns.pidf}' && test -p '{fns.inp}' && test -p '{fns.outp}'")
 
-def stop(a:LitreplArgs)->None:
+def stop(a:LitreplArgs,st:SType)->None:
   """ Stops the background Python session. """
-  fns=pipenames(a)
+  fns=pipenames(a,st)
   system(f'pkill -P "$(cat {fns.pidf} 2>/dev/null)" >/dev/null 2>&1')
   system(f"rm '{fns.inp}' '{fns.outp}' '{fns.pidf}' >/dev/null 2>&1")
 
@@ -419,20 +461,45 @@ def eval_code_(a:LitreplArgs,
   res=rresultSave(pptext,runr) if rr.timeout else pptext
   return res,rr
 
-def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
+def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int:
   """ Evaluate code sections of the parsed `tree`, as specified in the `secrec`
   request.  """
-  if not running(a) or a.standalone_session:
-    start(a)
-  fns=pipenames(a)
-  ss=settings(fns)
-  assert ss is not None
   nsecs=secrec.nsecs
-  ssrc:Dict[int,str]={} # Section sources
-  sres:Dict[int,str]={} # Section results
-  ledder:Dict[int,int]={}
-  pending:bool=False
-  class C(Interpreter):
+  ssrc:Dict[int,str]={}    # Section sources
+  sres:Dict[int,str]={}    # Section results
+  ledder:Dict[int,int]={}  # Facility to restore the cursor
+  stypes:Set[SType]=set()  # Section types which were run
+  ecode:int=0              # Combined exit code
+
+  def _getinterp(bmarker:str)->Tuple[FileNames,Optional[Settings]]:
+    st=bmarker2st(bmarker)
+    stypes.add(st)
+    fns=pipenames(a,st)
+    if not running(a,st):
+      start(a,st)
+    ss=settings(fns)
+    if not ss:
+      return (fns,None)
+    if interrupt:
+      os.kill(int(open(fns.pidf).read()),SIGINT)
+    return fns,ss
+
+  def _checkecode(fns):
+    nonlocal ecode
+    if ecode==0:
+      ec=interpExitCode(fns,undefined=200)
+      pdebug(f"interpreter exit code: {ec}")
+      if ec is None:
+        if a.pending_exit:
+          ecode=a.pending_exit
+      else:
+        ecode=ec
+
+  def _failmsg(fns):
+    ec=interpExitCode(fns,undefined=200)
+    return f"<Interpreter exited with code: {ec}>\n"
+
+  class C(LarkInterpreter):
     def __init__(self):
       self.nsec=-1
     def _print(self, s:str):
@@ -453,9 +520,12 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
       code=unindent(bm.column-1,t)
       ssrc[self.nsec]=code
       if self.nsec in nsecs:
-        sres[self.nsec],rr=eval_code_(a,fns,ss,code,secrec.pending.get(self.nsec))
-        nonlocal pending
-        pending=pending or rr.timeout
+        fns,ss=_getinterp(bmarker)
+        if ss:
+          sres[self.nsec],_=eval_code_(a,fns,ss,code,secrec.pending.get(self.nsec))
+          _checkecode(fns)
+        else:
+          sres[self.nsec]=_failmsg(fns)
     def ocodesection(self,tree):
       bmarker=tree.children[0].children[0].value
       t=tree.children[1].children[0].value
@@ -476,7 +546,12 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
       spaces=tree.children[2].children[0].value if tree.children[2].children else ''
       im=tree.children[0].children[0].value
       if self.nsec in nsecs:
-        result=process(fns,ss,'print('+code+');\n')[0].rstrip('\n')
+        fns,ss=_getinterp("python")
+        if ss:
+          result=process(fns,ss,'print('+code+');\n')[0].rstrip('\n')
+          _checkecode(fns)
+        else:
+          result=_failmsg(fns)
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
       self._print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}")
@@ -492,12 +567,9 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec)->int:
         cl=max(threshold,cl+diff)
     with open(a.map_cursor_output,"w") as f:
       f.write(str(cl))
-  ecode=interpExitCode(fns,undefined=200)
-  if ecode is None:
-    if a.pending_exit is not None and pending:
-      ecode=a.pending_exit
   if a.standalone_session:
-    stop(a)
+    for st in stypes:
+      stop(a,st)
   pdebug(f"Returning {ecode}")
   return ecode
 
@@ -506,7 +578,7 @@ def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
   into code section numbers. """
   acc:dict={}
   rres:Dict[NSec,Set[RunResult]]=defaultdict(set)
-  class C(Interpreter):
+  class C(LarkInterpreter):
     def __init__(self):
       self.nsec=-1
     def _count(self,bm,em):
@@ -599,10 +671,8 @@ def solve_sloc(s:str, tree)->SecRec:
                 else _safeset(lambda:[_get(q[0])]) for q in qs]),
     ppi.pending)
 
-def status(a:LitreplArgs,version:str)->int:
-  if a.standalone_session:
-    start(a)
-  fns=pipenames(a)
+def status(a:LitreplArgs,st:SType,version:str)->int:
+  fns=pipenames(a,st)
   auxd,inp,outp,pidf,_=astuple(fns)
   print(f"version: {version}")
   print(f"workdir: {getcwd()}")
@@ -611,7 +681,7 @@ def status(a:LitreplArgs,version:str)->int:
     pid=open(pidf).read().strip()
     print(f"interpreter pid: {pid}")
   except Exception:
-    print(f"interpreter pid: -")
+    print(f"interpreter pid: ?")
   t=parse_(GRAMMARS[a.filetype], a.tty)
   sr=solve_sloc('0..$',t)
   for nsec,pend in sr.pending.items():
@@ -624,22 +694,26 @@ def status(a:LitreplArgs,version:str)->int:
           continue
         print(f"pending section {nsec} reader: {line}")
     except CalledProcessError:
-      print(f"pending section {nsec} reader: -")
-  ss=settings(fns)
-  print(f"litrepl PATH: {environ.get('PATH','')}")
-  try:
-    assert ss is not None
-    interpreter_path=eval_code(a,fns,ss,'\n'.join(["import os","print(os.environ.get('PATH',''))"]))
-    print(f"interpreter PATH: {interpreter_path.strip()}")
-  except Exception:
-    print(f"interpreter PATH: ?")
-  try:
-    assert ss is not None
-    interpreter_pythonpath=eval_code(a,fns,ss,'\n'.join(["import sys","print(':'.join(sys.path))"]))
-    print(f"interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
-  except Exception:
-    print(f"interpreter PYTHONPATH: ?")
+      print(f"pending section {nsec} reader: ?")
+  if a.verbose:
+    if st==SType.SPython:
+      ss=settings(fns)
+      print(f"litrepl PATH: {environ.get('PATH','')}")
+      try:
+        assert ss is not None
+        interpreter_path=eval_code(a,fns,ss,'\n'.join(["import os","print(os.environ.get('PATH',''))"]))
+        print(f"interpreter PATH: {interpreter_path.strip()}")
+      except Exception:
+        print(f"interpreter PATH: ?")
+      try:
+        assert ss is not None
+        interpreter_pythonpath=eval_code(a,fns,ss,'\n'.join(["import sys","print(':'.join(sys.path))"]))
+        print(f"interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
+      except Exception:
+        print(f"interpreter PYTHONPATH: ?")
+    elif st==SType.SAI:
+      pass
+    else:
+      raise NotImplementedError(f'Unsupported type {st}')
   ecode=interpExitCode(fns,undefined=200)
-  if a.standalone_session:
-    stop(a)
   return ecode

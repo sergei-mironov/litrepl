@@ -4,6 +4,17 @@ from enum import Enum
 
 FileName=str
 
+class SType(Enum):
+  """ Code section types """
+  SPython = 0
+  SAI = 1
+
+class IType(Enum):
+  """ Interpreter types """
+  Python = 0,
+  IPython = 1
+  GPT4AllCli = 2
+
 @dataclass(frozen=True)
 class RunResult:
   """ Result of launchng the readout job """
@@ -23,8 +34,8 @@ CursorPos=Tuple[int,int]
 @dataclass
 class PrepInfo:
   """ Results of the document preprocessing """
-  nsec:NSec                         # Number of code sections
-  cursors:Dict[CursorPos,NSec]      # Resolved cursor locations
+  nsec:NSec                         # Total number of code sections
+  cursors:Dict[CursorPos,NSec]      # Sections, rbesolved from the cursor position
   pending:Dict[NSec,RunResult]      # Async job markers
 
 @dataclass
@@ -41,12 +52,6 @@ class FileNames:
   outp:str                          # Output pipe
   pidf:str                          # File containing PID
   ecodef:str                        # File containing exit code
-
-
-class IType(Enum):
-  Python = 0,
-  IPython = 1
-  GPT4AllCli = 2
 
 
 @dataclass

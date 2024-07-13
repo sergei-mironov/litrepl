@@ -580,6 +580,7 @@ runlitrepl stop
 
 test_vim_leval_cursor() {( #{{{
 mktest "_test_vim_leval_cursor"
+runlitrepl start
 
 cat >file.md <<"EOF"
 ``` python
@@ -608,7 +609,8 @@ grep -q '^result-2' file.md
 #}}}
 
 test_vim_leval_explicit() {( #{{{
-mktest "_test_vim"
+mktest "_test_vim_leval_explicit"
+runlitrepl start
 
 cat >file.md <<"EOF"
 ``` python
@@ -663,18 +665,25 @@ grep -q "^common-session" out3.md
 
 test_status() {( #{{{
 mktest "_test_status"
-runlitrepl status >status1.txt || true
-grep -q '?' status1.txt
-
 cat >source.md <<"EOF"
 ``` python
-var='value'
+from time import sleep
+while True:
+  sleep(1)
 ```
-``` python
+``` result
 ```
 EOF
-cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
-runlitrepl status >status2.txt
+
+runlitrepl stop
+runlitrepl --type=python --verbose status >status1.txt || true
+grep -q '?' status1.txt
+cat source.md | runlitrepl \
+  --filetype=markdown \
+  --timeout-initial=1 \
+  --timeout-continue=1 \
+  eval-sections '0..$' >out.md
+runlitrepl --type=python status >status2.txt
 grep -q -v '?' status2.txt
 
 )} #}}}

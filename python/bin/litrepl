@@ -18,6 +18,7 @@ if __name__=='__main__':
   ap.add_argument('--timeout-initial',type=str,metavar='SEC',default='inf')
   ap.add_argument('--timeout-continue',type=str,metavar='SEC',default='inf')
   ap.add_argument('-d','--debug',type=int,metavar='LEVEL',default=0)
+  ap.add_argument('--verbose',action='store_true',help='Be verbose')
   ap.add_argument('--auxdir',type=str,metavar='DIR',default=None,help="Directory to store auxilary files")
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,help="Directory to run from")
   ap.add_argument('-e','--exception-exit',type=str,metavar='ERRCODE',default=None, help='Return this error code at first exception')
@@ -25,21 +26,22 @@ if __name__=='__main__':
   ap.add_argument('--standalone-session',action='store_true',help='Do not reuse the interpreter session of the current directory')
   ap.add_argument('--map-cursor',type=str,metavar='LINE:COL',default=None,help="Calculate cursor coordinates, see documentation")
   ap.add_argument('--result-textwidth',type=str,metavar='NUM',default=None,help="Wrap long result lines")
+  ap.add_argument('--type',type=str,help='Interpreter type (python|ai)',default='python')
   sps=ap.add_subparsers(dest='command',help='commands to execute')
-  sps.add_parser('start',help='Start the interpreter in the background')
-  sps.add_parser('stop',help='Stop the interpreter')
-  sps.add_parser('restart',help='Restart the interpreter')
+  sstart=sps.add_parser('start',help='Start the interpreter in the background')
+  sstop=sps.add_parser('stop',help='Stop the interpreter')
+  srestart=sps.add_parser('restart',help='Restart the interpreter')
   sps.add_parser('parse',help='Parse the input file (diagnostics)')
   sps.add_parser('parse-print',help='Parse and print the input file (diagnostics, no changes are expected)')
-  spes=sps.add_parser('status',help='Print the status of the worker')
-  spes.add_argument('--tty',action='store_true',help='Read from interactive terminal')
+  sstatus=sps.add_parser('status',help='Print the status of the worker')
+  sstatus.add_argument('--tty',action='store_true',help='Read from interactive terminal')
   apes=sps.add_parser('eval-section',help='Evaluate the section under the cursor')
   apes.add_argument('--line',type=int,default=None)
   apes.add_argument('--col',type=int,default=None)
   eps=sps.add_parser('eval-sections',help='Evaluate one or more sections by location')
   eps.add_argument('locs',metavar='LOCS',default='*', help=LOCSHELP)
   ecs=sps.add_parser('eval-code',help='Evaluate the given lines of code')
-  repl=sps.add_parser('repl',help='Connect interactive shell to the terminal')
+  srepl=sps.add_parser('repl',help='Connect interactive shell to the terminal')
   ips=sps.add_parser('interrupt',help='Raise KeyboardInterrupt exception to the interpreter')
   ips.add_argument('locs',metavar='LOCS',default='*',help=LOCSHELP)
   a=ap.parse_args(sys.argv[1:])
@@ -73,18 +75,19 @@ if __name__=='__main__':
       assert not running(a), \
         f"Explicitly-specified auxdir ({a.auxdir}) already contains a running session"
 
-  fns=pipenames(a)
   if a.command=='start':
-    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.commandd}`"
-    start(a)
+    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.command}`"
+    start(a,name2st(a.type))
   elif a.command=='stop':
-    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.commandd}`"
-    stop(a)
+    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.command}`"
+    for st in SType:
+      if a.type in {st2name(st),"all",None}:
+        stop(a,st)
   elif a.command=='restart':
-    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.commandd}`"
-    stop(a); start(a)
+    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.command}`"
+    stop(a,name2st(a.type)); start(a,name2st(a.type))
   elif a.command=='parse':
-    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.commandd}`"
+    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.command}`"
     t=parse_(GRAMMARS[a.filetype])
     print(t.pretty())
     exit(0)
@@ -103,34 +106,48 @@ if __name__=='__main__':
     ecode=eval_section_(a,t,nsecs)
     exit(0 if ecode is None else ecode)
   elif a.command=='repl':
-    if not running(a) or a.standalone_session:
-      start(a)
+    st=name2st(a.type)
+    fns=pipenames(a,st)
+    if not running(a,st) or a.standalone_session:
+      start(a,st)
     print("Opening the interpreter terminal (NO PROMPT, USE `Ctrl+D` TO EXIT)")
     system(f"socat - 'PIPE:{fns.outp},flock-ex-nb=1!!PIPE:{fns.inp},flock-ex-nb=1'")
     ecode=interpExitCode(fns,undefined=200)
     if a.standalone_session:
-      stop(a)
+      stop(a,st)
     exit(0 if ecode is None else ecode)
   elif a.command=='interrupt':
-    assert not a.standalone_session, f"`--new-session` is not compatible with `{a.commandd}`"
-    os.kill(int(open('_pid.txt').read()),SIGINT)
-    t=parse_(GRAMMARS[a.filetype])
-    sr=solve_sloc(a.locs,t)
+    assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.command}`"
+    tree=parse_(GRAMMARS[a.filetype])
+    sr=solve_sloc(a.locs,tree)
     sr.nsecs|=set(sr.pending.keys())
-    ecode=eval_section_(a,t,sr)
+    ecode=eval_section_(a,t,sr,interrupt=True)
     exit(ecode)
   elif a.command=='eval-code':
-    if not running(a) or a.standalone_session:
-      start(a)
+    st=name2st(a.type)
+    fns=pipenames(a,st)
+    if not running(a,st) or a.standalone_session:
+      start(a,st)
     ss=settings(fns)
     print(eval_code(a,fns,ss,sys.stdin.read()))
     ecode=interpExitCode(fns,undefined=200)
     if a.standalone_session:
-      stop(a)
+      stop(a,st)
     exit(0 if ecode is None else ecode)
   elif a.command=='status':
-    ecode=status(a, __version__)
-    exit(0 if ecode is None else ecode)
+    if a.standalone_session:
+      st=name2st(a.type)
+      start(a,st)
+      ecode=status(a,st,__version__)
+      stop(a,st)
+      exit(0 if ecode is None else ecode)
+    else:
+      ecodes=set()
+      for st in SType:
+        if a.type in {st2name(st),"all",None}:
+          ecodes.add(status(a,st,__version__))
+      pdebug(f"ecodes: {ecodes}")
+      exit(0 if len(ecodes - {0,None})==0 else 1)
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)
