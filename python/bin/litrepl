@@ -121,7 +121,7 @@ if __name__=='__main__':
     tree=parse_(GRAMMARS[a.filetype])
     sr=solve_sloc(a.locs,tree)
     sr.nsecs|=set(sr.pending.keys())
-    ecode=eval_section_(a,t,sr,interrupt=True)
+    ecode=eval_section_(a,tree,sr,interrupt=True)
     exit(ecode)
   elif a.command=='eval-code':
     st=name2st(a.type)

@@ -84,7 +84,7 @@ def settings(fns:FileNames)->Optional[Settings]:
   interpreter. """
   try:
     pid=int(open(fns.pidf).read())
-    p=Process(pid).children()[0]
+    p=Process(pid)
     cmd=p.cmdline()
     itype=None
     if any('gpt4all' in w for w in cmd):
@@ -213,9 +213,10 @@ def start_(a:LitreplArgs,i:Interpreter)->None:
   if isfile(pid):
     system(f'kill -9 "$(cat {pid})" >/dev/null 2>&1')
   system(f"mkfifo '{inp}' '{outp}' 2>/dev/null")
+  sys.stdout.flush(); sys.stderr.flush() # FIXME: to avoid duplicated stdout
   npid=os.fork()
   if npid==0:
-    # sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
+    sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
     open_child_pipes(inp,outp)
     ret=i.run_child()
     pdebug(f"fork records ecode: {ret}")
@@ -226,7 +227,7 @@ def start_(a:LitreplArgs,i:Interpreter)->None:
     finp,foutp=open_parent_pipes(inp,outp)
     i.setup_child(finp,foutp)
     with open(pid,'w') as f:
-      f.write(str(npid))
+      f.write(str(Process(npid).children()[0].pid))
 
 def start(a:LitreplArgs, st:SType):
   fns=pipenames(a,st)
@@ -311,7 +312,7 @@ def running(a:LitreplArgs,st:SType)->bool:
 def stop(a:LitreplArgs,st:SType)->None:
   """ Stops the background Python session. """
   fns=pipenames(a,st)
-  system(f'pkill -P "$(cat {fns.pidf} 2>/dev/null)" >/dev/null 2>&1')
+  system(f'kill "$(cat {fns.pidf} 2>/dev/null)" >/dev/null 2>&1')
   system(f"rm '{fns.inp}' '{fns.outp}' '{fns.pidf}' >/dev/null 2>&1")
 
 
@@ -481,6 +482,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
     if not ss:
       return (fns,None)
     if interrupt:
+      pdebug("Sending SIGINT to the interpreter")
       os.kill(int(open(fns.pidf).read()),SIGINT)
     return fns,ss
 
