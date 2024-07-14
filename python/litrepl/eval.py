@@ -19,6 +19,7 @@ from functools import partial
 from argparse import ArgumentParser
 from contextlib import contextmanager
 from errno import ESRCH
+from signal import pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK
 
 from .types import Settings, RunResult, ReadResult, FileNames
 
@@ -36,34 +37,50 @@ def pusererror(fname,err)->None:
     f.write(err)
 
 @contextmanager
+def with_sigmask():
+  mask=None
+  try:
+    mask=pthread_sigmask(SIG_BLOCK,valid_signals())
+    yield
+  finally:
+    if mask is not None:
+      pthread_sigmask(SIG_UNBLOCK,mask)
+
+@contextmanager
 def with_sigint(fns:FileNames, brk=False,ipid:Optional[int]=None):
   ipid_=int(open(fns.pidf).read()) if ipid is None else ipid
   def _handler(signum,frame):
     pdebug(f"Sending SIGINT to {ipid_}")
     os.kill(ipid_,SIGINT)
-  prev=signal(SIGINT,_handler)
+  prev=None
   try:
+    with with_sigmask():
+      prev=signal(SIGINT,_handler)
     yield
   finally:
-    signal(SIGINT,prev)
+    with with_sigmask():
+      if prev is not None:
+        signal(SIGINT,prev)
 
 @contextmanager
 def with_alarm(timeout_sec:float):
   """ Set the alarm if the timeout is known. Zero or infinite timeout means no
   timeout is set. """
+  def _handler(signum,frame):
+    pdebug(f"SIGALARM received")
+    raise TimeoutError()
   prev=None
   try:
     if timeout_sec>0 and timeout_sec<float('inf'):
-      def _handler(signum,frame):
-        pdebug(f"SIGALARM received")
-        raise TimeoutError()
-      prev=signal(SIGALRM,_handler)
-      setitimer(ITIMER_REAL,timeout_sec)
+      with with_sigmask():
+        prev=signal(SIGALRM,_handler)
+        setitimer(ITIMER_REAL,timeout_sec)
     yield
   finally:
-    if prev is not None:
-      setitimer(ITIMER_REAL,0)
-      signal(SIGALRM,prev)
+    with with_sigmask():
+      if prev is not None:
+        setitimer(ITIMER_REAL,0)
+        signal(SIGALRM,prev)
 
 
 def merge_basic2(acc,r,x)->Tuple[bytes,int]:
@@ -230,6 +247,20 @@ def interpExitCode(fns:FileNames,poll_sec=0.5,poll_attempts=4,undefined=-1)->Opt
       break
     sleep(poll_sec)
   return undefined
+
+@contextmanager
+def with_fd(name:str, flags:int):
+  fd=None
+  try:
+    mask=None
+    with with_sigmask():
+      fd=os.open(name,flags)
+      fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    yield fd
+  finally:
+    with with_sigmask():
+      if fd is not None:
+        os.close(fd)
 
 def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
   """ Send `code` to the interpreter and fork the response reader. The output
