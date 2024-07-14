@@ -688,6 +688,31 @@ grep -q -v '?' status2.txt
 
 )} #}}}
 
+test_interrupt() {( #{{{
+mktest "_test_interrupt"
+runlitrepl start
+cat >source.md <<"EOF"
+```python
+from time import sleep
+while True:
+  sleep(1)
+```
+```result
+```
+EOF
+cat source.md | runlitrepl \
+  --filetype=markdown \
+  --timeout-initial=0 \
+  eval-sections '0..$' >out1.md
+grep -q 'BG' out1.md
+sleep 1 # IPython seems to die without this delay
+cat out1.md | runlitrepl \
+  --filetype=markdown \
+  interrupt '0..$' >out2.md
+
+grep -q 'KeyboardInterrupt' out2.md
+)} #}}}
+
 die() {
   echo "$@" >&2
   exit 1
@@ -713,6 +738,7 @@ tests() {
   echo test_vim_leval_explicit
   echo test_standalone_session
   echo test_status
+  echo test_interrupt
 }
 
 runlitrepl() {

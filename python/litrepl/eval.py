@@ -310,7 +310,7 @@ def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
     pid=os.fork()
     if pid==0:
       # Child
-      # sys.stdout.close(); sys.stdin.close()
+      sys.stdout.close(); sys.stdin.close()
       pdebug(f"processAsync reader opening pipes")
       with with_locked_fd(inp, os.O_WRONLY|os.O_SYNC,
                           fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdw:

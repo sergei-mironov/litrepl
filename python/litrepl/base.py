@@ -25,7 +25,7 @@ from subprocess import check_output, DEVNULL, CalledProcessError
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
                     FileNames, IType, Settings, CursorPos, ReadResult, SType)
-from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
+from .eval import (pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
                    cursor_within, nlines, wraplong)
@@ -216,7 +216,7 @@ def start_(a:LitreplArgs,i:Interpreter)->None:
   sys.stdout.flush(); sys.stderr.flush() # FIXME: to avoid duplicated stdout
   npid=os.fork()
   if npid==0:
-    sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
+    # sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
     open_child_pipes(inp,outp)
     ret=i.run_child()
     pdebug(f"fork records ecode: {ret}")
