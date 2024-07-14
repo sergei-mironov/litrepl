@@ -6,7 +6,7 @@ import re
 from copy import deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable, Any
 from select import select
-from os import environ, system, isatty
+from os import environ, system, isatty, getpid
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter as LarkInterpreter
 from os.path import isfile, join
@@ -35,7 +35,7 @@ LitreplArgs=Any
 
 def pdebug(*args,**kwargs):
   if DEBUG:
-    print(f"[{time():14.3f}]", *args, file=sys.stderr, **kwargs, flush=True)
+    print(f"[{time():14.3f},{getpid()}]", *args, file=sys.stderr, **kwargs, flush=True)
 
 def defauxdir(suffix:Optional[str]=None)->str:
   """ Generate the default name of working directory. """

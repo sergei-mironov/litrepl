@@ -8,7 +8,7 @@ from copy import deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable
 from re import search, match as re_match
 from select import select
-from os import environ, system
+from os import environ, system, getpid
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
 from os.path import isfile, join
@@ -19,7 +19,7 @@ from functools import partial
 from argparse import ArgumentParser
 from contextlib import contextmanager
 from errno import ESRCH
-from signal import pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK
+from signal import pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK, SIG_SETMASK
 
 from .types import Settings, RunResult, ReadResult, FileNames
 
@@ -30,21 +30,28 @@ DEBUG:bool=False
 
 def pdebug(*args,**kwargs):
   if DEBUG:
-    print(f"[{time():14.3f}]", *args, file=sys.stderr, **kwargs, flush=True)
+    print(f"[{time():14.3f},{getpid()}]", *args, file=sys.stderr, **kwargs, flush=True)
 
 def pusererror(fname,err)->None:
   with open(fname,"w") as f:
     f.write(err)
 
+SIGMASK_NESTED=False
+
 @contextmanager
-def with_sigmask():
-  mask=None
+def with_sigmask(signals=None):
+  global SIGMASK_NESTED
+  assert not SIGMASK_NESTED
+  signals=valid_signals() if signals is None else signals
+  old=None
   try:
-    mask=pthread_sigmask(SIG_BLOCK,valid_signals())
+    old=pthread_sigmask(SIG_SETMASK,signals)
+    SIGMASK_NESTED=True
     yield
   finally:
-    if mask is not None:
-      pthread_sigmask(SIG_UNBLOCK,mask)
+    SIGMASK_NESTED=False
+    if old is not None:
+      pthread_sigmask(SIG_SETMASK,old)
 
 @contextmanager
 def with_sigint(fns:FileNames, brk=False,ipid:Optional[int]=None):
@@ -69,18 +76,22 @@ def with_alarm(timeout_sec:float):
   def _handler(signum,frame):
     pdebug(f"SIGALARM received")
     raise TimeoutError()
+
   prev=None
   try:
     if timeout_sec>0 and timeout_sec<float('inf'):
       with with_sigmask():
         prev=signal(SIGALRM,_handler)
         setitimer(ITIMER_REAL,timeout_sec)
+      pdebug(f"Alarm {timeout_sec} set")
     yield
   finally:
-    with with_sigmask():
-      if prev is not None:
-        setitimer(ITIMER_REAL,0)
-        signal(SIGALRM,prev)
+    if timeout_sec>0 and timeout_sec<float('inf'):
+      pdebug(f"Alarm {timeout_sec} cleaning")
+      with with_sigmask():
+        if prev is not None:
+          setitimer(ITIMER_REAL,0)
+          signal(SIGALRM,prev)
 
 
 def merge_basic2(acc,r,x)->Tuple[bytes,int]:
@@ -201,19 +212,11 @@ def process(fns:FileNames, ss:Settings, lines:str)->Tuple[str,RunResult]:
   pdebug("process started")
   runr=processAsync(fns,ss,lines)
   res=''
-  fdr=0
-  try:
-    with with_sigint(fns):
-      fdr=os.open(runr.fname,os.O_RDONLY|os.O_SYNC)
-      assert fdr>0
-      fcntl.flock(fdr,LOCK_EX)
+  with with_sigint(fns):
+    with with_locked_fd(runr.fname,OPEN_RDONLY,LOCK_EX) as fdr:
       pdebug("process readout")
       res=readout(fdr,prompt=mkre(ss.pattern2[1]),merge=merge_rn2)
       pdebug("process readout complete")
-  finally:
-    if fdr!=0:
-      os.unlink(runr.fname)
-      os.close(fdr)
   return res,runr
 
 def interpIsRunning(fns:FileNames)->bool:
@@ -249,18 +252,36 @@ def interpExitCode(fns:FileNames,poll_sec=0.5,poll_attempts=4,undefined=-1)->Opt
   return undefined
 
 @contextmanager
-def with_fd(name:str, flags:int):
+def with_fd(name:str, flags:int, open_timeout_sec=float('inf')):
   fd=None
   try:
     mask=None
-    with with_sigmask():
-      fd=os.open(name,flags)
-      fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    with with_alarm(open_timeout_sec):
+      with with_sigmask(valid_signals()-{SIGALRM}):
+        fd=os.open(name,flags)
+    pdebug(f"Opened {name}")
+    assert fd>0, f"Failed to open file '{name}', retcode: {fd}"
     yield fd
+  except TimeoutError:
+    pdebug(f"unable to open {name}\n")
   finally:
+    pdebug(f"Closing {name}")
     with with_sigmask():
       if fd is not None:
         os.close(fd)
+
+@contextmanager
+def with_locked_fd(name:str, flags:int, lock_flags:int, open_timeout_sec=float('inf')):
+  with with_fd(name,flags,open_timeout_sec) as fd:
+    try:
+      fcntl.flock(fd,lock_flags)
+      yield fd
+    except BlockingIOError:
+      pdebug(f"unable to lock {name}\n")
+
+CREATE_WRONLY_EMPTY=os.O_WRONLY|os.O_SYNC|os.O_TRUNC|os.O_CREAT
+OPEN_RDONLY=os.O_RDONLY|os.O_SYNC
+LOCK_NONBLOCKED=LOCK_EX|LOCK_NB
 
 def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
   """ Send `code` to the interpreter and fork the response reader. The output
@@ -270,52 +291,29 @@ def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
   codehash=abs(hash(code))
   fname=join(wd,f"litrepl_eval_{codehash}.txt")
   pdebug(f"processAsync starting via {fname}")
-  fo=os.open(fname,os.O_WRONLY|os.O_SYNC|os.O_TRUNC|os.O_CREAT)
-  assert fo>0
-  fcntl.flock(fo,fcntl.LOCK_EX|fcntl.LOCK_NB)
-  # pstderr('Got a write lock')
-  sys.stdout.flush(); sys.stderr.flush() # FIXME: crude
-  pid=os.fork()
-  if pid==0:
-    # Child
-    ecode=0
-    fdr=0; fdw=0
-    try:
-      pdebug(f"processAsync opening pipes")
-      with with_alarm(0.5):
-        fdw=os.open(inp, os.O_WRONLY|os.O_SYNC)
-        fdr=os.open(outp, os.O_RDONLY|os.O_SYNC)
-      if fdw<0 or fdr<0:
-        pusererror(fname,f"ERROR: litrepl.py couldn't open session pipes\n")
-      fcntl.flock(fdw,fcntl.LOCK_EX|fcntl.LOCK_NB)
-      fcntl.flock(fdr,fcntl.LOCK_EX|fcntl.LOCK_NB)
-      def _handler(signum,frame):
-        pass
-      signal(SIGINT,_handler)
-      pdebug("processAsync interact start")
-      interact(fdr,fdw,code,fo,ss)
-      pdebug("processAsync interact finish")
-    except TimeoutError:
-      ecode=interpExitCode(fns)
-      pusererror(fname,f"ERROR: litrepl couldn't open the sessions pipes ({inp}): {ecode}\n")
-    except BlockingIOError:
-      ecode=interpExitCode(fns)
-      pusererror(fname,f"ERROR: litrepl couldn't lock the sessions pipes ({inp}): {ecode}\n")
-    finally:
-      if fo!=0:
-        fcntl.fcntl(fo,fcntl.LOCK_UN)
-        os.close(fo)
-      if fdr!=0:
-        os.close(fdr)
-      if fdw!=0:
-        os.close(fdw)
-    exit(ecode)
-  else:
-    # Parent
-    pdebug(f"processAsync forked reader {pid}")
-    fcntl.fcntl(fo,fcntl.LOCK_UN)
-    os.close(fo)
-    return RunResult(fname)
+  with with_locked_fd(fname,CREATE_WRONLY_EMPTY,LOCK_NONBLOCKED) as fo:
+    # pstderr('Got a write lock')
+    sys.stdout.flush(); sys.stderr.flush() # FIXME: crude
+    pid=os.fork()
+    if pid==0:
+      # Child
+      pdebug(f"processAsync reader opening pipes")
+      with with_locked_fd(inp, os.O_WRONLY|os.O_SYNC,
+                          fcntl.LOCK_EX|fcntl.LOCK_NB, 0.5) as fdw:
+        with with_locked_fd(outp, os.O_RDONLY|os.O_SYNC,
+                            fcntl.LOCK_EX|fcntl.LOCK_NB, 0.5) as fdr:
+          def _handler(signum,frame):
+            pass
+          signal(SIGINT,_handler)
+          pdebug("processAsync reader interact start")
+          interact(fdr,fdw,code,fo,ss)
+          pdebug("processAsync reader interact finish")
+      pdebug("Exiting!")
+      exit(0)
+    else:
+      # Parent
+      pdebug(f"processAsync parent forked {pid}")
+      return RunResult(fname)
 
 def processCont(fns:FileNames,
                 ss:Settings,
@@ -326,9 +324,9 @@ def processCont(fns:FileNames,
   rr:ReadResult
   try:
     with with_sigint(fns):
-      pdebug(f"processCont started via {runr.fname}")
+      pdebug(f"processCont starting via {runr.fname}")
       fdr=os.open(runr.fname,os.O_RDONLY|os.O_SYNC)
-      assert fdr>0, f"Failed to open readout file '{runr.fname}' for reading"
+      assert fdr>0, f"Failed to open '{runr.fname}' for reading"
       try:
         with with_alarm(timeout):
           # Raises exception immediately if used with zero timeout. Waits for
