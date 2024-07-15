@@ -13,8 +13,12 @@ Features
 * Document formats:
   + Markdown [[Example]](./doc/example.md)
   + Latex [[Example]](./doc/example.tex)[[Example (PDF)]](./doc/example.pdf).
-* Interpreters: Python, IPython
-* Works both in Vim and on the command line
+* Interpreters:
+  + Python
+  + [IPython](https://ipython.org/)
+  + [GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli)
+* Editor integration:
+  + Vim (plugin)
 
 <details><summary>Requirements</summary><p>
 
@@ -22,7 +26,7 @@ Features
   depends on certain shell commands.
 * More or less recent `Vim`
 * Python3 with the following libraries: `lark-parser` (Required).
-* Command line tools: `GNU socat` (Optional), `ipython` (Optional).
+* Command line tools: `GNU socat` (Optional)
 
 </p></details>
 
@@ -36,7 +40,7 @@ Contents
     * [Reference](#reference)
         * [Vim and command-line commands](#vim-and-command-line-commands)
         * [Variables and arguments](#variables-and-arguments)
-    * [Hints](#hints)
+    * [Usecases](#usecases)
         * [Vim, adding keybindings](#vim-adding-keybindings)
         * [Vim, inserting new sections](#vim-inserting-new-sections)
         * [Vim, executing first section after restart](#vim-executing-first-section-after-restart)
@@ -187,7 +191,7 @@ Where
 * `I` is taken into account by the `start` command or by the first call to
   `eval-sections`.
 
-### Hints
+### Usecases
 
 #### Vim, adding keybindings
 
@@ -222,13 +226,13 @@ directly from Python code sections.
 
 ~~~~
 ``` python
-!cowsay "Hi Litrepl"
+!cowsay "Hello, Litrepl!"
 ```
 
 ``` result
- ____________ 
-< Hi Litrepl >
- ------------ 
+ _________________
+< Hello, Litrepl! >
+ -----------------
         \   ^__^
          \  (oo)\_______
             (__)\       )\/\
@@ -242,8 +246,7 @@ directly from Python code sections.
 To evaluate code section in a document:
 
 ```sh
-$ cat doc/example.md | litrepl --filetype=markdown --interpreter=ipython \
-                               eval-sections '0..$' >output.md
+$ cat doc/example.md | litrepl --interpreter=ipython eval-sections >output.md
 ```
 
 To evaluate a Python script:
@@ -261,17 +264,15 @@ interpreter session, stopping it when first unhandled exception happens.
 
 ~~~~ sh
 $ cat >document.md.in <<EOF
-Failing Python example
 ``` python
 raise Exception("D'oh!")
 ```
 EOF
 $ cat document.md.in \
   | litrepl \
-    --filetype=markdown  \
     --standalone-session \
     --exception-exit=200 \
-    eval-sections '0..$' \
+    eval-sections \
   >document.md
 $ echo $?
 200
