@@ -75,9 +75,8 @@ fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
   let ft = &filetype
   let cur = getcharpos('.')
   let cmd = a:command . " " . a:pos
-  " A hack to remember the undo position
-  execute "normal! I "
-  execute "normal! x"
+  " Open new undo block
+  let &ul=&ul
   " Execute the selected code blocks
   let cmdline = '%!'.LitReplCmd().
         \ ' --interpreter='.g:litrepl_interpreter.
@@ -91,35 +90,34 @@ fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
         \ ' '.cmd.' 2>'.g:litrepl_errfile
   silent execute cmdline
   let errcode = v:shell_error
-  echomsg 'ECODE: '.string(errcode)
   if errcode == 0 || errcode == 33
-    let cur[1]=str2nr(readfile(g:litrepl_map_cursor_output)[0])
-    call setcharpos('.',cur)
     let g:litrepl_laspos = a:pos
     if errcode == 0
+      let cur[1]=str2nr(readfile(g:litrepl_map_cursor_output)[0])
+      call setcharpos('.',cur)
       if g:litrepl_always_show_stderr != 0
         call LitReplOpenErr(g:litrepl_errfile)
       endif
       return 0
     else
+      let cur[1]=str2nr(readfile(g:litrepl_map_cursor_output)[0])
+      call setcharpos('.',cur)
       return 1
     endif
   else
-    " call setcharpos('.',cur)
     execute "u"
+    call setcharpos('.',cur)
     call LitReplOpenErr(g:litrepl_errfile)
     return 0
   endif
 endfun
 
 fun! LitReplMonitor(command, pos)
-  let cont = 1
   while 1
     let cont = LitReplRun(a:command, g:litrepl_timeout, 0.0, a:pos)
     if !cont
       break
     endif
-    " silent execute "sleep 1"
     silent execute "redraw"
   endwhile
 endfun
