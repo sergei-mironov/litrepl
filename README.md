@@ -10,15 +10,9 @@ aimed at providing user-friendly code editing and execution workflows.
 Features
 --------
 
-* Document formats:
-  + Markdown [[Example]](./doc/example.md)
-  + Latex [[Example]](./doc/example.tex)[[Example (PDF)]](./doc/example.pdf).
-* Interpreters:
-  + Python
-  + [IPython](https://ipython.org/)
-  + [GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli)
-* Editor integration:
-  + Vim (plugin)
+* Document formats: Markdown [[Example]](./doc/example.md) | Latex [[Example]](./doc/example.tex)[[Example (PDF)]](./doc/example.pdf).
+* Interpreters: Python | [IPython](https://ipython.org/) | [GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli)
+* Editor integration: Vim (plugin)
 
 <details><summary>Requirements</summary><p>
 
