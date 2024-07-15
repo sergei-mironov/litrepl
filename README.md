@@ -146,19 +146,19 @@ See also:
 
 | Vim <img width=200/> | Command line <img width=200/> | Description                          |
 |---------------------|----------------------|--------------------------------------|
-| `:LStart`           | `litepl start`       | Start the interpreter     |
-| `:LStop`            | `litepl stop`        | Stop the interpreter      |
-| `:LStatus`          | `litepl status <F`     | Print the daemon status |
+| `:LStart`           | `litrepl start`      | Start the interpreter     |
+| `:LStop`            | `litrepl stop`       | Stop the interpreter      |
+| `:LStatus`          | `litrepl status <F`  | Print the daemon status   |
 | `:LRestart`         | `litrepl restart`    | Restart the interpreter   |
-| `:LEval N`          | `lirtepl eval-sections (N\|L:C) <F`   | Run or update section under the cursor and wait until the completion |
-| `:LEvalAbove N`     | `lirtepl eval-sections '0..(N\|L:C)' <F`| Run sections above and under the cursor and wait until the completion |
-| `:LEvalBelow N`     | `lirtepl eval-sections '(N\|L:C)..$' <F`| Run sections below and under the cursor and wait until the completion |
-| `:LEvalAsync N`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections (N\|L:C) <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
-| `:LInterrupt`       | `lirtepl interrupt (N\|L:C) <F`       | Send Ctrl+C signal to the interpreter and get a feedback |
-| `:LEvalAll`         | `lirtepl eval-sections '0..$' <F`       | Evaluate all code sections |
+| `:LEval N`          | `lirtepl eval-sections N <F`   | Run or update section under the cursor and wait until the completion |
+| `:LEvalAbove N`     | `lirtepl eval-sections '0..N' <F`| Run sections above and under the cursor and wait until the completion |
+| `:LEvalBelow N`     | `lirtepl eval-sections 'N..$' <F`| Run sections below and under the cursor and wait until the completion |
+| `:LEvalAll`         | `lirtepl eval-sections <F`       | Evaluate all code sections |
+| `:LEvalAsync N`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections N <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
+| `:LInterrupt N`     | `lirtepl interrupt N <F`       | Send Ctrl+C signal to the interpreter and get a feedback |
 |                     | `lirtepl eval-code <P`                  | Evaluate the given Python code |
 | `:LTerm`            | `lirtepl repl`       | Open the terminal to the interpreter |
-| `:LOpenErr`         | N/A                  | Open the stderr window    |
+| `:LOpenErr`         | `litrepl ...  2>F`   | Open the stderr window    |
 | `:LVersion`         | `litrepl --version`  | Show version              |
 
 Where
