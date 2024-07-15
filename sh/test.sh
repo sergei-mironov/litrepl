@@ -160,7 +160,7 @@ print("-->")
 EOF
 cat source.md | runlitrepl --filetype=markdown parse-print >out.md
 diff -u source.md out.md
-cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
+cat source.md | runlitrepl --filetype=markdown eval-sections >out.md
 diff -u out.md - <<"EOF"
 ```python
 def hello(name):
@@ -365,7 +365,12 @@ for i in tqdm(range(4)):
 ```
 EOF
 cat source.md | runlitrepl --filetype=markdown --timeout-initial=1 eval-sections '0..$' >out1.md
-cat out1.md | runlitrepl --filetype=markdown --timeout-continue=1 eval-sections '0..$' >out2.md
+cat out1.md | runlitrepl \
+  --filetype=markdown \
+  --timeout-continue=1 \
+  --pending-exit=33 \
+  eval-sections '0..$' >out2.md ||
+test "$?" = "33"
 grep -q 'BG' out2.md
 runlitrepl stop
 )} #}}}
@@ -575,6 +580,7 @@ runlitrepl stop
 
 test_vim_leval_cursor() {( #{{{
 mktest "_test_vim_leval_cursor"
+runlitrepl start
 
 cat >file.md <<"EOF"
 ``` python
@@ -603,7 +609,8 @@ grep -q '^result-2' file.md
 #}}}
 
 test_vim_leval_explicit() {( #{{{
-mktest "_test_vim"
+mktest "_test_vim_leval_explicit"
+runlitrepl start
 
 cat >file.md <<"EOF"
 ``` python
@@ -658,20 +665,52 @@ grep -q "^common-session" out3.md
 
 test_status() {( #{{{
 mktest "_test_status"
-runlitrepl status >status1.txt || true
-grep -q '?' status1.txt
-
 cat >source.md <<"EOF"
 ``` python
-var='value'
+from time import sleep
+while True:
+  sleep(1)
 ```
-``` python
+``` result
 ```
 EOF
-cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
-runlitrepl status >status2.txt
+
+runlitrepl stop
+runlitrepl --type=python --verbose status >status1.txt || true
+grep -q '?' status1.txt
+cat source.md | runlitrepl \
+  --filetype=markdown \
+  --timeout-initial=1 \
+  --timeout-continue=1 \
+  eval-sections '0..$' >out.md
+runlitrepl --type=python status >status2.txt
 grep -q -v '?' status2.txt
 
+)} #}}}
+
+test_interrupt() {( #{{{
+mktest "_test_interrupt"
+runlitrepl start
+cat >source.md <<"EOF"
+```python
+from time import sleep
+while True:
+  sleep(1)
+```
+```result
+```
+EOF
+cat source.md | runlitrepl \
+  --filetype=markdown \
+  --timeout-initial=0 \
+  eval-sections '0..$' >out1.md
+grep -q 'BG' out1.md
+sleep 1 # IPython seems to die without this delay
+cat out1.md | runlitrepl \
+  --filetype=markdown \
+  interrupt '0..$' >out2.md
+
+grep -q 'KeyboardInterrupt' out2.md
 )} #}}}
 
 die() {
@@ -699,6 +738,7 @@ tests() {
   echo test_vim_leval_explicit
   echo test_standalone_session
   echo test_status
+  echo test_interrupt
 }
 
 runlitrepl() {
@@ -749,7 +789,7 @@ if test -z "$LITREPL_BIN"; then
   LITREPL_BIN=$LITREPL_ROOT/python/bin
 fi
 
-trap "echo FAIL" EXIT
+trap "echo FAIL\(\$?\)" EXIT
 NRUN=0
 for t in $(tests) ; do
   for i in $(interpreters) ; do

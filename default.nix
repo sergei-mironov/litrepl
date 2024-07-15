@@ -8,6 +8,7 @@
                 !( ((builtins.match "default.nix" (baseNameOf path)) != null)) &&
                 !( baseNameOf path == "result")) ./.
 , revision ? null
+, gpt4all-cli ? null
 } :
 let
   local = rec {
@@ -146,6 +147,7 @@ let
         mytexlive
         pkgs.pandoc
         pkgs.inkscape
+        (gpt4all-cli.gpt4all-cli python-dev.pkgs)
       ];
       shellHook = with pkgs; ''
         if test -f ./env.sh ; then

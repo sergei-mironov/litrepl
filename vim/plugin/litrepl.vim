@@ -26,6 +26,9 @@ endif
 if ! exists("g:litrepl_timeout")
   let g:litrepl_timeout = 0.5
 endif
+if ! exists("g:litrepl_pending")
+  let g:litrepl_pending = 33
+endif
 
 fun! LitReplCmd()
   return 'PATH='.g:litrepl_bin.':$PATH '.g:litrepl_exe.' --workdir='.expand('%:p:h')
@@ -71,36 +74,78 @@ command! -bar -nargs=0 LVersion call LitReplVersion()
 
 let g:litrepl_lastpos = "0:0"
 
-fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
+fun! LitReplUpdateCursor(cur)
+  let cur = a:cur
+  let newrow = str2nr(readfile(g:litrepl_map_cursor_output)[0])
+  if newrow != 0
+    let cur[1] = newrow
+  endif
+  call setcharpos('.',cur)
+endfun
+
+fun LitReplRun_(command,timeout_initial,timeout_continue,pos)
   let ft = &filetype
   let cur = getcharpos('.')
   let cmd = a:command . " " . a:pos
-  " A hack to remember the undo position
-  execute "normal! I "
-  execute "normal! x"
+  " Open a new undo block
+  let &ul=&ul
   " Execute the selected code blocks
   let cmdline = '%!'.LitReplCmd().
         \ ' --interpreter='.g:litrepl_interpreter.
         \ ' --timeout-initial='.a:timeout_initial.
         \ ' --timeout-continue='.a:timeout_continue.
+        \ ' --pending-exit='.g:litrepl_pending.
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.
         \ ' --map-cursor='.cur[1].':'.cur[2].':'.g:litrepl_map_cursor_output.
+        \ ' --result-textwidth=80'.
         \ ' '.cmd.' 2>'.g:litrepl_errfile
-  execute cmdline
-  let errcode = v:shell_error
-  if errcode != 0
-    " call setcharpos('.',cur)
-    execute "u"
-    call LitReplOpenErr(g:litrepl_errfile)
-  else
-    let cur[1]=str2nr(readfile(g:litrepl_map_cursor_output)[0])
-    call setcharpos('.',cur)
+  silent execute cmdline
+  call LitReplUpdateCursor(cur)
+  return v:shell_error
+endfun
+
+fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
+  let cur = getcharpos('.')
+  let command = '--propagate-sigint ' . a:command
+  let errcode = LitReplRun_(command, a:timeout_initial, a:timeout_continue, a:pos)
+  if errcode == 0 || errcode == g:litrepl_pending
     let g:litrepl_laspos = a:pos
-    if g:litrepl_always_show_stderr != 0
-      call LitReplOpenErr(g:litrepl_errfile)
+    if errcode == 0
+      if g:litrepl_always_show_stderr != 0
+        call LitReplOpenErr(g:litrepl_errfile)
+      endif
+      return 0
+    else
+      return 1
     endif
+  else
+    execute "u"
+      call LitReplUpdateCursor(cur)
+    call LitReplOpenErr(g:litrepl_errfile)
+    return 0
   endif
+endfun
+
+" Continuosly run litrepl until an error or complet
+fun! LitReplMonitor(command, pos)
+  let cur = getcharpos('.')
+  try
+    while 1
+      let code = LitReplRun_(a:command, g:litrepl_timeout, 0.0, a:pos)
+      if code == 0
+        call LitReplUpdateCursor(cur)
+        break
+      elseif code != g:litrepl_pending
+        execute "u"
+        call LitReplUpdateCursor(cur)
+        break
+      endif
+      silent execute "redraw"
+    endwhile
+  catch /Vim:Interrupt/
+    call LitReplUpdateCursor(cur)
+  endtry
 endfun
 
 fun! LitReplStatus()
@@ -135,6 +180,7 @@ command! -bar -nargs=? LEvalAbove call LitReplRun("eval-sections", "inf", "inf",
 command! -bar -nargs=? LEvalBelow call LitReplRun("eval-sections", "inf", "inf", <SID>Pos(<q-args>)."..$")
 command! -bar -nargs=0 LEvalAll call LitReplRun("eval-sections", "inf", "inf", "0..$")
 command! -bar -nargs=? LInterrupt call LitReplRun("interrupt", 1.0, 1.0, <SID>Pos(<q-args>))
+command! -bar -nargs=? LMon call LitReplMonitor("eval-sections", <SID>Pos(<q-args>))
 
 command! -bar -nargs=0 LStatus call LitReplStatus()
 

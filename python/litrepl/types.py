@@ -1,14 +1,25 @@
-from typing import (Set, List, Dict, Tuple, Callable, Optional)
+from typing import (Any, Set, List, Dict, Tuple, Callable, Optional)
 from dataclasses import dataclass
 from enum import Enum
 
 FileName=str
+LitreplArgs=Any
+
+class SType(Enum):
+  """ Code section types """
+  SPython = 0
+  SAI = 1
+
+class IType(Enum):
+  """ Interpreter types """
+  Python = 0,
+  IPython = 1
+  GPT4AllCli = 2
 
 @dataclass(frozen=True)
 class RunResult:
   """ Result of launchng the readout job """
   fname:FileName     # File where the output data is piped into
-  pattern:str        # Termination patter to search for in the output stream.
 
 @dataclass
 class ReadResult:
@@ -24,8 +35,8 @@ CursorPos=Tuple[int,int]
 @dataclass
 class PrepInfo:
   """ Results of the document preprocessing """
-  nsec:NSec                         # Number of code sections
-  cursors:Dict[CursorPos,NSec]      # Resolved cursor locations
+  nsec:NSec                         # Total number of code sections
+  cursors:Dict[CursorPos,NSec]      # Sections, rbesolved from the cursor position
   pending:Dict[NSec,RunResult]      # Async job markers
 
 @dataclass
@@ -37,19 +48,17 @@ class SecRec:
 @dataclass
 class FileNames:
   """ Interpreter state """
-  wd:str             # Working directory
-  inp:str            # Input pipe
-  outp:str           # Output pipe
-  pidf:str           # File containing PID
-  ecodef:str         # File containing exit code
+  wd:str                            # Working directory
+  inp:str                           # Input pipe
+  outp:str                          # Output pipe
+  pidf:str                          # File containing PID
+  ecodef:str                        # File containing exit code
 
-
-class IType(Enum):
-  Python = 0,
-  IPython = 1
 
 @dataclass
 class Settings:
   """ Interpreter settings to share among the runners """
   itype:IType
+  pattern1:Tuple[str,str]           # Request-response pair 1
+  pattern2:Tuple[str,str]           # Request-response pair 2
 
