@@ -311,15 +311,15 @@ def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
       if pid==0:
         # Child
         sys.stdout.close(); sys.stdin.close()
+        def _handler(signum,frame):
+          pass
+        signal(SIGINT,_handler)
         pdebug(f"processAsync reader opening pipes")
         with with_locked_fd(inp, os.O_WRONLY|os.O_SYNC,
                             fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdw:
           with with_locked_fd(outp, os.O_RDONLY|os.O_SYNC,
                               fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdr:
             if fdw and fdr:
-              def _handler(signum,frame):
-                pass
-              signal(SIGINT,_handler)
               pdebug("processAsync reader interact start")
               interact(fdr,fdw,code,fo,ss)
               pdebug("processAsync reader interact finish")
