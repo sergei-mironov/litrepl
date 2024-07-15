@@ -1,9 +1,10 @@
 LitREPL
 =======
 
-**LitREPL** is a command-line tool and a Vim plugin for [literate
-programming](https://en.wikipedia.org/wiki/Literate_programming) in Python,
-aimed at providing user-friendly code editing and execution workflows.
+**LitREPL** is a command-line text processing tool for code evaluation
+aimed at enabling
+[literate programming](https://en.wikipedia.org/wiki/Literate_programming)
+experience in common editors.
 
 ![2024-02-24 02-29-19](https://github.com/grwlf/litrepl.vim/assets/4477729/73fd31f6-2b2a-4193-b63e-5c163272a9d8)
 
