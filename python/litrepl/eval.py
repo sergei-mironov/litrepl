@@ -305,29 +305,32 @@ def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
   fname=join(wd,f"litrepl_eval_{codehash}.txt")
   pdebug(f"processAsync starting via {fname}")
   with with_locked_fd(fname,CREATE_WRONLY_EMPTY,LOCK_NONBLOCKING) as fo:
-    assert fo is not None
-    sys.stdout.flush(); sys.stderr.flush() # FIXME: crude
-    pid=os.fork()
-    if pid==0:
-      # Child
-      sys.stdout.close(); sys.stdin.close()
-      pdebug(f"processAsync reader opening pipes")
-      with with_locked_fd(inp, os.O_WRONLY|os.O_SYNC,
-                          fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdw:
-        with with_locked_fd(outp, os.O_RDONLY|os.O_SYNC,
-                            fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdr:
-          if fdw and fdr:
-            def _handler(signum,frame):
-              pass
-            signal(SIGINT,_handler)
-            pdebug("processAsync reader interact start")
-            interact(fdr,fdw,code,fo,ss)
-            pdebug("processAsync reader interact finish")
-      pdebug("Exiting!")
-      exit(0)
+    if fo is not None:
+      sys.stdout.flush(); sys.stderr.flush() # FIXME: crude
+      pid=os.fork()
+      if pid==0:
+        # Child
+        sys.stdout.close(); sys.stdin.close()
+        pdebug(f"processAsync reader opening pipes")
+        with with_locked_fd(inp, os.O_WRONLY|os.O_SYNC,
+                            fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdw:
+          with with_locked_fd(outp, os.O_RDONLY|os.O_SYNC,
+                              fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdr:
+            if fdw and fdr:
+              def _handler(signum,frame):
+                pass
+              signal(SIGINT,_handler)
+              pdebug("processAsync reader interact start")
+              interact(fdr,fdw,code,fo,ss)
+              pdebug("processAsync reader interact finish")
+        pdebug("Exiting!")
+        exit(0)
+      else:
+        # Parent
+        pdebug(f"processAsync parent forked {pid}")
+        return RunResult(fname)
     else:
-      # Parent
-      pdebug(f"processAsync parent forked {pid}")
+      # The reader is already running, try to own it.
       return RunResult(fname)
 
 def processCont(fns:FileNames,

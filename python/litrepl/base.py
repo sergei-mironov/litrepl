@@ -306,6 +306,9 @@ def result_postprocess(a:LitreplArgs, ss:Settings, text:str) -> str:
     '''))
   return wraplong(s,a.result_textwidth) if a.result_textwidth else s
 
+def restart(a:LitreplArgs,st:SType):
+  stop(a,st); start(a,st)
+
 def running(a:LitreplArgs,st:SType)->bool:
   """ Checks if the background session was run or not. """
   fns=pipenames(a,st)

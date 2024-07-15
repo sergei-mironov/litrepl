@@ -26,7 +26,7 @@ if __name__=='__main__':
   ap.add_argument('--standalone-session',action='store_true',help='Do not reuse the interpreter session of the current directory')
   ap.add_argument('--map-cursor',type=str,metavar='LINE:COL',default=None,help="Calculate cursor coordinates, see documentation")
   ap.add_argument('--result-textwidth',type=str,metavar='NUM',default=None,help="Wrap long result lines")
-  ap.add_argument('--type',type=str,help='Interpreter type (python|ai)',default='python')
+  ap.add_argument('--type',type=str,help='Interpreter type (python|ai)',default=None)
   sps=ap.add_subparsers(dest='command',help='commands to execute')
   sstart=sps.add_parser('start',help='Start the interpreter in the background')
   sstop=sps.add_parser('stop',help='Stop the interpreter')
@@ -65,6 +65,8 @@ if __name__=='__main__':
     litrepl.eval.DEBUG=True
     litrepl.base.DEBUG=True
 
+  type_or_def = a.type if a.type is not None else 'python'
+
   if a.workdir:
     chdir(a.workdir)
 
@@ -77,7 +79,7 @@ if __name__=='__main__':
 
   if a.command=='start':
     assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.command}`"
-    start(a,name2st(a.type))
+    start(a,name2st(type_or_def))
   elif a.command=='stop':
     assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.command}`"
     for st in SType:
@@ -85,7 +87,12 @@ if __name__=='__main__':
         stop(a,st)
   elif a.command=='restart':
     assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.command}`"
-    stop(a,name2st(a.type)); start(a,name2st(a.type))
+    if a.type in {'all',None}:
+      for st in SType:
+        if running(a,st):
+          restart(a,st)
+    else:
+      restart(a,name2st(a.type))
   elif a.command=='parse':
     assert not a.standalone_session, f"`--standalone-session` is not compatible with `{a.command}`"
     t=parse_(GRAMMARS[a.filetype])
@@ -106,7 +113,7 @@ if __name__=='__main__':
     ecode=eval_section_(a,t,nsecs)
     exit(0 if ecode is None else ecode)
   elif a.command=='repl':
-    st=name2st(a.type)
+    st=name2st(type_or_def)
     fns=pipenames(a,st)
     if not running(a,st) or a.standalone_session:
       start(a,st)
@@ -124,7 +131,7 @@ if __name__=='__main__':
     ecode=eval_section_(a,tree,sr,interrupt=True)
     exit(ecode)
   elif a.command=='eval-code':
-    st=name2st(a.type)
+    st=name2st(type_or_def)
     fns=pipenames(a,st)
     if not running(a,st) or a.standalone_session:
       start(a,st)
@@ -136,7 +143,7 @@ if __name__=='__main__':
     exit(0 if ecode is None else ecode)
   elif a.command=='status':
     if a.standalone_session:
-      st=name2st(a.type)
+      st=name2st(type_or_def)
       start(a,st)
       ecode=status(a,st,__version__)
       stop(a,st)
