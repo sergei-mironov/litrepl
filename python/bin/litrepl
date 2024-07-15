@@ -39,11 +39,11 @@ if __name__=='__main__':
   apes.add_argument('--line',type=int,default=None)
   apes.add_argument('--col',type=int,default=None)
   eps=sps.add_parser('eval-sections',help='Evaluate one or more sections by location')
-  eps.add_argument('locs',metavar='LOCS',default='*', help=LOCSHELP)
+  eps.add_argument('locs',type=str,metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
   ecs=sps.add_parser('eval-code',help='Evaluate the given lines of code')
   srepl=sps.add_parser('repl',help='Connect interactive shell to the terminal')
   ips=sps.add_parser('interrupt',help='Raise KeyboardInterrupt exception to the interpreter')
-  ips.add_argument('locs',metavar='LOCS',default='*',help=LOCSHELP)
+  ips.add_argument('locs',metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
   a=ap.parse_args(sys.argv[1:])
 
   a.timeout_initial=float(a.timeout_initial)
