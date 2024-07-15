@@ -207,19 +207,19 @@ def interact(fdr, fdw, text:str, fo:int, ss:Settings)->None:
   pdebug(f"interact main text ({len(text)} chars) sent")
   readout_asis(fdr,fdw,fo,ss.pattern2[0],prompt=mkre(ss.pattern2[1]),timeout=TIMEOUT_SEC)
 
-# def process(fns:FileNames, ss:Settings, lines:str)->Tuple[str,RunResult]:
-#   """ Evaluate `lines` synchronously. """
-#   pdebug("process started")
-#   runr=processAsync(fns,ss,lines)
-#   res=''
-#   with with_sigint(fns):
-#     with with_locked_fd(runr.fname,OPEN_RDONLY,LOCK_EX) as fdr:
-#       assert fdr is not None
-#       pdebug("process readout")
-#       res=readout(fdr,prompt=mkre(ss.pattern2[1]),merge=merge_rn2)
-#       # os.unlink(runr.fname)
-#       pdebug("process readout complete")
-#   return res,runr
+def process(fns:FileNames, ss:Settings, lines:str)->Tuple[str,RunResult]:
+  """ Evaluate `lines` synchronously. """
+  pdebug("process started")
+  runr=processAsync(fns,ss,lines)
+  res=''
+  with with_sigint(fns):
+    with with_locked_fd(runr.fname,OPEN_RDONLY,LOCK_EX) as fdr:
+      assert fdr is not None
+      pdebug("process readout")
+      res=readout(fdr,prompt=mkre(ss.pattern2[1]),merge=merge_rn2)
+      os.unlink(runr.fname)
+      pdebug("process readout complete")
+  return res,runr
 
 def interpIsRunning(fns:FileNames)->bool:
   try:

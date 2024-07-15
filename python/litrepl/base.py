@@ -25,7 +25,7 @@ from subprocess import check_output, DEVNULL, CalledProcessError
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
                     FileNames, IType, Settings, CursorPos, ReadResult, SType)
-from .eval import (pstderr, rresultLoad, rresultSave, processAdapt,
+from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
                    cursor_within, nlines, wraplong)
@@ -101,8 +101,10 @@ def settings(fns:FileNames)->Optional[Settings]:
     pdebug(f"interpreter pid {pid} cmd '{cmd}' leads to type '{itype}'")
     return Settings(itype,pattern1,pattern2)
   except FileNotFoundError:
+    pdebug(f"could not determine pid of an interpreter")
     return None
-  except NoSuchProcess:
+  except NoSuchProcess as p:
+    pdebug(f"could not determine process of an interpreter ({p})")
     return None
 
 def open_child_pipes(inp,outp):
