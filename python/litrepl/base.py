@@ -24,14 +24,14 @@ from textwrap import dedent
 from subprocess import check_output, DEVNULL, CalledProcessError
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
-                    FileNames, IType, Settings, CursorPos, ReadResult, SType)
+                    FileNames, IType, Settings, CursorPos, ReadResult, SType,
+                    LitreplArgs)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
                    cursor_within, nlines, wraplong)
 
 DEBUG:bool=False
-LitreplArgs=Any
 
 def pdebug(*args,**kwargs):
   if DEBUG:
@@ -460,9 +460,9 @@ def eval_code_(a:LitreplArgs,
   """
   rr:ReadResult
   if runr is None:
-    rr,runr=processAdapt(fns,ss,code_preprocess(a,ss,code),a.timeout_initial)
+    rr,runr=processAdapt(a,fns,ss,code_preprocess(a,ss,code),a.timeout_initial)
   else:
-    rr=processCont(fns,ss,runr,a.timeout_continue)
+    rr=processCont(a,fns,ss,runr,a.timeout_continue)
   pptext=result_postprocess(a,ss,rr.text)
   res=rresultSave(pptext,runr) if rr.timeout else pptext
   return res,rr
@@ -555,7 +555,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
       if self.nsec in nsecs:
         fns,ss=_getinterp("python")
         if ss:
-          result=process(fns,ss,'print('+code+');\n')[0].rstrip('\n')
+          result=process(a,fns,ss,'print('+code+');\n')[0].rstrip('\n')
           _checkecode(fns,False)
         else:
           result=_failmsg(fns)

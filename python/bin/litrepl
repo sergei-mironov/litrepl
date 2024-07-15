@@ -17,6 +17,7 @@ if __name__=='__main__':
   ap.add_argument('--interpreter',metavar='EXE',default='auto',help='python|ipython|auto')
   ap.add_argument('--timeout-initial',type=str,metavar='SEC',default='inf')
   ap.add_argument('--timeout-continue',type=str,metavar='SEC',default='inf')
+  ap.add_argument('--propagate-sigint',action='store_true',help='Propagate sigint to the background interpeter')
   ap.add_argument('-d','--debug',type=int,metavar='LEVEL',default=0)
   ap.add_argument('--verbose',action='store_true',help='Be verbose')
   ap.add_argument('--auxdir',type=str,metavar='DIR',default=None,help="Directory to store auxilary files")

@@ -1,8 +1,9 @@
-from typing import (Set, List, Dict, Tuple, Callable, Optional)
+from typing import (Any, Set, List, Dict, Tuple, Callable, Optional)
 from dataclasses import dataclass
 from enum import Enum
 
 FileName=str
+LitreplArgs=Any
 
 class SType(Enum):
   """ Code section types """

@@ -21,7 +21,7 @@ from contextlib import contextmanager
 from errno import ESRCH
 from signal import pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK, SIG_SETMASK
 
-from .types import Settings, RunResult, ReadResult, FileNames
+from .types import LitreplArgs, Settings, RunResult, ReadResult, FileNames
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs, flush=True)
@@ -54,15 +54,16 @@ def with_sigmask(signals=None):
       pthread_sigmask(SIG_SETMASK,old)
 
 @contextmanager
-def with_sigint(fns:FileNames, brk=False,ipid:Optional[int]=None):
-  ipid_=int(open(fns.pidf).read()) if ipid is None else ipid
+def with_sigint(a:LitreplArgs, fns:FileNames):
+  ipid=int(open(fns.pidf).read())
   def _handler(signum,frame):
-    pdebug(f"Sending SIGINT to {ipid_}")
-    os.kill(ipid_,SIGINT)
+    pdebug(f"Sending SIGINT to {ipid}")
+    os.kill(ipid,SIGINT)
   prev=None
   try:
     with with_sigmask():
-      prev=signal(SIGINT,_handler)
+      if a.propagate_sigint:
+        prev=signal(SIGINT,_handler)
     yield
   finally:
     with with_sigmask():
@@ -207,12 +208,12 @@ def interact(fdr, fdw, text:str, fo:int, ss:Settings)->None:
   pdebug(f"interact main text ({len(text)} chars) sent")
   readout_asis(fdr,fdw,fo,ss.pattern2[0],prompt=mkre(ss.pattern2[1]),timeout=TIMEOUT_SEC)
 
-def process(fns:FileNames, ss:Settings, lines:str)->Tuple[str,RunResult]:
+def process(a:LitreplArgs,fns:FileNames, ss:Settings, lines:str)->Tuple[str,RunResult]:
   """ Evaluate `lines` synchronously. """
   pdebug("process started")
   runr=processAsync(fns,ss,lines)
   res=''
-  with with_sigint(fns):
+  with with_sigint(a,fns):
     with with_locked_fd(runr.fname,OPEN_RDONLY,LOCK_EX) as fdr:
       assert fdr is not None
       pdebug("process readout")
@@ -333,14 +334,15 @@ def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
       # The reader is already running, try to own it.
       return RunResult(fname)
 
-def processCont(fns:FileNames,
+def processCont(a:LitreplArgs,
+                fns:FileNames,
                 ss:Settings,
                 runr:RunResult,
                 timeout:float)->ReadResult:
   """ Read from the running readout process. """
   fdr=0
   rr:Optional[ReadResult]=None
-  with with_sigint(fns):
+  with with_sigint(a,fns):
     pdebug(f"processCont starting via {runr.fname}")
     with with_locked_fd(runr.fname,
                         os.O_RDONLY|os.O_SYNC,
@@ -364,7 +366,8 @@ def processCont(fns:FileNames,
   assert rr is not None
   return rr
 
-def processAdapt(fns:FileNames,
+def processAdapt(a:LitreplArgs,
+                 fns:FileNames,
                  ss:Settings,
                  code:str,
                  timeout:float=1.0)->Tuple[ReadResult,RunResult]:
@@ -376,7 +379,7 @@ def processAdapt(fns:FileNames,
   #   return ReadResult(lines2,False),runr
   # else:
   runr=processAsync(fns,ss,code)
-  rr=processCont(fns,ss,runr,timeout=timeout)
+  rr=processCont(a,fns,ss,runr,timeout=timeout)
   return rr,runr
 
 PRESULT_RE=re.compile(r"(.*)\[BG:([a-zA-Z0-9_\/\.-]+)\]\n.*",

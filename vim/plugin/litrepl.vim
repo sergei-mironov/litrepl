@@ -107,7 +107,8 @@ endfun
 
 fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
   let cur = getcharpos('.')
-  let errcode = LitReplRun_(a:command, a:timeout_initial, a:timeout_continue, a:pos)
+  let command = '--propagate-sigint ' . a:command
+  let errcode = LitReplRun_(command, a:timeout_initial, a:timeout_continue, a:pos)
   if errcode == 0 || errcode == g:litrepl_pending
     let g:litrepl_laspos = a:pos
     if errcode == 0
