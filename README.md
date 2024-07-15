@@ -10,11 +10,14 @@ aimed at providing user-friendly code editing and execution workflows.
 Features
 --------
 
-* **Document formats:** Markdown [[Example]](./doc/example.md) | Latex [[Example]](./doc/example.tex)[[Example (PDF)]](./doc/example.pdf)
-* **Interpreters:** Python | [IPython](https://ipython.org/) | [GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli)
-* **Editor integration:** Vim (plugin)
+* **Document formats** <br/>
+  Markdown _(Example [[MD]](./doc/example.md))_ **|** [LaTeX](https://www.latex-project.org/) _(Examples [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf))_
+* **Interpreters** <br/>
+  [Python](https://www.python.org/) **|** [IPython](https://ipython.org/) **|** [GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli)
+* **Editor integration** <br/>
+  Vim _(plugin included)_
 
-<details><summary>Requirements</summary><p>
+<details><summary><h2>Requirements</h2></summary><p>
 
 * POSIX-compatible OS, typically a Linux. The plugin relies on POSIX pipes and
   depends on certain shell commands.
