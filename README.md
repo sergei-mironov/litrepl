@@ -116,9 +116,9 @@ See the [Development](#development) section for more details.
 Usage
 -----
 
-1. Create the code and result sections in your Markdown or Latex document. Put
-   Python code into the code section. Leave the result section emtpy.
-2. Place the cursor on any of the secions and run the `:LEval` command.
+Create code and result sections in your Markdown or Latex document. Put some
+Python code into the code section and run `:LEval` command to execute the
+section under the cursor.
 
    ~~~~
    Markdown                                   Latex
