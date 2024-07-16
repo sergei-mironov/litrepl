@@ -139,7 +139,7 @@ class PythonInterpreter(Interpreter):
       f"exec {interpreter} -uic 'import sys; sys.ps1=\"\"; sys.ps2=\"\";' "
       f"<'{inp}' >'{outp}' 2>&1"
     )
-    return WEXITSTATUS(ret)
+    return ret
   def setup_child(self, finp, foutp)->None:
     a=self.a
     finp.write(
@@ -186,7 +186,7 @@ class IPythonInterpreter(Interpreter):
       f"exec {interpreter} -um IPython --config={cfg} --colors=NoColor {log} -i "
       f"<'{inp}' >'{outp}' 2>&1"
     )
-    return WEXITSTATUS(ret)
+    return ret
   def setup_child(self, finp, foutp)->None:
     a=self.a
     finp.write(
@@ -212,7 +212,7 @@ class GPT4AllInterpreter(Interpreter):
       f"--readline-prompt='' "
       f"<'{fns.inp}' >'{fns.outp}' 2>&1"
     )
-    return WEXITSTATUS(ret)
+    return ret
   def setup_child(self, finp, foutp)->None:
     finp.write("/echo ready\n")
 
@@ -229,8 +229,10 @@ def start_(a:LitreplArgs,i:Interpreter)->None:
   npid=os.fork()
   if npid==0:
     # sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
+    system(f"rm '{ecode}' >/dev/null 2>/dev/null")
     open_child_pipes(inp,outp)
     ret=i.run_child()
+    ret=ret if ret<256 else WEXITSTATUS(ret)
     pdebug(f"fork records ecode: {ret}")
     with open(ecode,'w') as f:
       f.write(str(ret))
@@ -688,6 +690,30 @@ def solve_sloc(s:str, tree)->SecRec:
     set.union(*[_safeset(lambda:range(_get(q[0]),_get(q[1])+1)) if len(q)==2
                 else _safeset(lambda:[_get(q[0])]) for q in qs]),
     ppi.pending)
+
+
+def status(a:LitreplArgs,sts:List[SType],version):
+  if a.verbose:
+    return status_verbose(a,sts,version)
+  else:
+    return status_oneline(a,sts)
+
+def status_oneline(a:LitreplArgs,sts:List[SType])->int:
+  for st in sts:
+    fns=pipenames(a,st)
+    auxd,inp,outp,pidf,ecodef=astuple(fns)
+    try:
+      pid=open(pidf).read().strip()
+      cmd=' '.join(Process(int(pid)).cmdline())
+    except Exception:
+      pid='-'
+      cmd='-'
+    try:
+      ecode=open(ecodef).read().strip()
+    except Exception:
+      ecode='-'
+    print(f"{st2name(st):6s} {pid:10s} {ecode:3s} {cmd}")
+
 
 def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
   print(f"version: {version}")

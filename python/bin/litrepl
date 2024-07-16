@@ -159,14 +159,14 @@ if __name__=='__main__':
       st=name2st(a.type)
       with with_parent_finally(partial(_foreground_stop,st)):
         start(a,st)
-        ecode=status_verbose(a,[st],__version__)
+        ecode=status(a,[st],__version__)
       exit(0 if ecode is None else ecode)
     else:
       sts=[]
       for st in SType:
         if a.type in {st2name(st),"all",None}:
           sts.append(st)
-      ecode=status_verbose(a,sts,__version__)
+      ecode=status(a,sts,__version__)
       exit(0 if ecode is None else ecode)
   else:
     pstderr(f'Unknown command: {a.command}')
