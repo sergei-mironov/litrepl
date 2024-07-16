@@ -173,7 +173,7 @@ W='Hello from repl'
 ^D
 ```
 
-The variable `W` now resides in our session and could be queried upon
+The variable `W` now resides in the session and could be queried during
 subsequent evaluations.
 
 #### AI
