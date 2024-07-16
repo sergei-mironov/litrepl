@@ -128,17 +128,17 @@ document. Insert Python code into the 'python' section, then use the ':LEval'
 command to execute that section at the cursor location.
 
    ~~~~
-   Markdown                             Latex
+   Markdown                             LaTeX
    --------                             -----
 
-   ``` python                           \begin{lcode}
+   ``` python                           \begin{python}
    print('Hello Markdown!')             print('Hello LaTeX!')
-   ```                                  \end{lcode}
+   ```                                  \end{python}
 
 
-   ``` result                           \begin{lresult}
+   ``` result                           \begin{result}
    Hello Markdown!                      Hello LaTeX!
-   ```                                  \end{lresult}
+   ```                                  \end{result}
    ~~~~
 
 
@@ -183,13 +183,16 @@ Where
 |---------------------------------|--------------------------------|-----------------------------------|
 | `set filetype`                  | `--filetype=T`                 | Input file type: `latex`\|`markdown` |
 | `let g:litrepl_interpreter=EXE` | `--interpreter=I`              | The interpreter to use: `python`\|`ipython`\|`auto` (the default) |
-| `let g:litrepl_debug=0/1`       | `--debug=1`                    | Print debug messages to the stderr |
-| `let g:litrepl_errfile=FILE`    | N/A                            | Intermediary file for debug and error messages |
-| `let g:litrepl_always_show_stderr=0/1` |  N/A                    | Set to auto-open stderr window after each execution |
+| `let g:litrepl_debug=0/1`       | `--debug=0/1`                  | Print debug messages to the stderr |
 | `let g:litrepl_timeout=FLOAT`   | `--timeout=FLOAT`              | Timeout to wait for the new executions, in seconds, defaults to inf |
 
+* `T` - file type: `tex` or `markdown` (the default).
 * `I` is taken into account by the `start` command or by the first call to
   `eval-sections`.
+* `FLOAT` should be formatted as `1` or `1.1` or `inf`. Note: command line
+  argument also accepts a pair of timeouts.
+
+More arguments are available, see `help`.
 
 ### Hints
 
