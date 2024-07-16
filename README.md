@@ -35,16 +35,17 @@ Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
+    * [Quick start](#quick-start)
     * [Reference](#reference)
         * [Vim and command-line commands](#vim-and-command-line-commands)
         * [Variables and arguments](#variables-and-arguments)
-    * [Usecases](#usecases)
+    * [Hints](#hints)
+        * [Command line, basic usage](#command-line-basic-usage)
+        * [Command line, foreground evaluation](#command-line-foreground-evaluation)
         * [Vim, adding keybindings](#vim-adding-keybindings)
         * [Vim, inserting new sections](#vim-inserting-new-sections)
         * [Vim, executing first section after restart](#vim-executing-first-section-after-restart)
         * [Vim, running shell commands](#vim-running-shell-commands)
-        * [Command line, basic usage](#command-line-basic-usage)
-        * [Command line, stop on unhandled exception](#command-line-stop-on-unhandled-exception)
 * [Development](#development)
     * [Development shells](#development-shells)
     * [Common workflows](#common-workflows)
@@ -120,9 +121,11 @@ See the [Development](#development) section for more details.
 Usage
 -----
 
-Create code and result sections in your Markdown or Latex document. Put some
-Python code into the code section and run `:LEval` command to execute the
-section under the cursor.
+### Quick start
+
+Create separate 'python' and 'result' sections within your Markdown or LaTeX
+document. Insert Python code into the 'python' section, then use the ':LEval'
+command to execute that section at the cursor location.
 
    ~~~~
    Markdown                             Latex
@@ -148,22 +151,23 @@ See also:
 
 #### Vim and command-line commands
 
-| Vim <img width=200/> | Command line <img width=200/> | Description                          |
+| Vim <img width=200/> | Command line <img width=200/> | Description                 |
 |----------------------|----------------------|--------------------------------------|
-| `:LStart`            | `litrepl start`      | Start the interpreter     |
-| `:LStop`             | `litrepl stop`       | Stop the interpreter      |
-| `:LStatus`           | `litrepl status <F`  | Print the daemon status   |
-| `:LRestart`          | `litrepl restart`    | Restart the interpreter   |
+| `:LStart`            | `litrepl start`      | Start the interpreter                |
+| `:LStop`             | `litrepl stop`       | Stop the interpreter                 |
+| `:LStatus`           | `litrepl status <F`  | Print the daemon status              |
+| `:LRestart`          | `litrepl restart`    | Restart the interpreter              |
 | `:LEval N`           | `lirtepl eval-sections N <F`     | Run or update section under the cursor and wait until the completion |
 | `:LEvalAbove N`      | `lirtepl eval-sections '0..N' <F`| Run sections above and under the cursor and wait until the completion |
 | `:LEvalBelow N`      | `lirtepl eval-sections 'N..$' <F`| Run sections below and under the cursor and wait until the completion |
 | `:LEvalAll`          | `lirtepl eval-sections <F`       | Evaluate all code sections |
 | `:LEvalAsync N`      | `lirtepl --timeout=0.5,0 eval-sections N <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
 | `:LInterrupt N`      | `lirtepl interrupt N <F`         | Send Ctrl+C signal to the interpreter and get a feedback |
-|                      | `lirtepl eval-code <P`                  | Evaluate the given Python code |
+| `:LMon`              | `while .. do .. done`            | Monitor asynchronous code evaluation |
+| N/A                  | `lirtepl eval-code <P`           | Evaluate the given Python code |
 | `:LTerm`             | `lirtepl repl`       | Open the terminal to the interpreter |
-| `:LOpenErr`          | `litrepl ...  2>F`   | Open the stderr window    |
-| `:LVersion`          | `litrepl --version`  | Show version              |
+| `:LOpenErr`          | `litrepl ...  2>F`   | Open the stderr window               |
+| `:LVersion`          | `litrepl --version`  | Show version                         |
 
 Where
 
