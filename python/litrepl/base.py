@@ -198,7 +198,6 @@ class GPT4AllInterpreter(Interpreter):
     fns=pipenames(a,SType.SAI)
     ret=system(
       f"exec {interpreter} "
-      f"--model=/home/grwlf/proj/litrepl.vim/_model/Meta-Llama-3-8B-Instruct.Q4_0.gguf "
       f"--readline-prompt='' "
       f"<'{fns.inp}' >'{fns.outp}' 2>&1"
     )

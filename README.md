@@ -36,6 +36,8 @@ Contents
 * [Installation](#installation)
 * [Usage](#usage)
     * [Quick start](#quick-start)
+        * [Python](#python)
+        * [AI](#ai)
     * [Reference](#reference)
         * [Vim and command-line commands](#vim-and-command-line-commands)
         * [Variables and arguments](#variables-and-arguments)
@@ -123,29 +125,51 @@ Usage
 
 ### Quick start
 
-Create separate 'python' and 'result' sections within your Markdown or LaTeX
-document. Insert Python code into the 'python' section, then use the ':LEval'
+#### Python
+
+Create separate `python` and `result` sections within your Markdown or LaTeX
+document. Insert Python code into the 'python' section, then use the `:LEval`
 command to execute that section at the cursor location.
 
-   ~~~~
-   Markdown                             LaTeX
-   --------                             -----
+    ~~~~
+    Markdown                             LaTeX
+    --------                             -----
 
-   ``` python                           \begin{python}
-   print('Hello Markdown!')             print('Hello LaTeX!')
-   ```                                  \end{python}
+    ``` python                           \begin{python}
+    print('Hello Markdown!')             print('Hello LaTeX!')
+    ```                                  \end{python}
 
 
-   ``` result                           \begin{result}
-   Hello Markdown!                      Hello LaTeX!
-   ```                                  \end{result}
-   ~~~~
+    ``` result                           \begin{result}
+    Hello Markdown!                      Hello LaTeX!
+    ```                                  \end{result}
+    ~~~~
 
 
 See also:
 - [Formatting Markdown documents](./doc/formatting.md#markdown)
 - [Formatting LaTeX documents](./doc/formatting.md#latex)
 
+#### AI
+
+As an experiment, Litrepl supports
+[GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli) allowing users to
+query local LLMs. In order to try it, install the GPT4All-cli and use `ai` as
+the name for code sections. For low-speed models it would be convenient to use
+`:LMon` command rather then `:LEval`.
+
+    ~~~
+    ``` ai
+    /model Meta-Llama-3-8B-Instruct.Q4_0.gguf
+    Hi chat! What is your name?
+    ```
+
+    ``` result
+    I'm LLaMA, a large language model trained by Meta AI. I'm here to help answer
+    any questions you might have and provide information on a wide range of topics.
+    How can I assist you today?
+    ```
+    ~~~
 
 ### Reference
 
