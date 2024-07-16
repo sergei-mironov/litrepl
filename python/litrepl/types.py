@@ -12,6 +12,7 @@ class SType(Enum):
 
 class IType(Enum):
   """ Interpreter types """
+  # FIXME: use `Interpreter` classes insted
   Python = 0,
   IPython = 1
   GPT4AllCli = 2

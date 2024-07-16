@@ -8,7 +8,7 @@ from copy import deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable
 from re import search, match as re_match
 from select import select
-from os import environ, system, getpid
+from os import environ, system, getpid, unlink
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
 from os.path import isfile, join
@@ -22,6 +22,7 @@ from errno import ESRCH
 from signal import pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK, SIG_SETMASK
 
 from .types import LitreplArgs, Settings, RunResult, ReadResult, FileNames
+from .utils import blind_unlink
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs, flush=True)
@@ -218,7 +219,7 @@ def process(a:LitreplArgs,fns:FileNames, ss:Settings, lines:str)->Tuple[str,RunR
       assert fdr is not None
       pdebug("process readout")
       res=readout(fdr,prompt=mkre(ss.pattern2[1]),merge=merge_rn2)
-      os.unlink(runr.fname)
+      blind_unlink(runr.fname)
       pdebug("process readout complete")
   return res,runr
 
@@ -354,7 +355,7 @@ def processCont(a:LitreplArgs,
         res=readout(fdr,prompt=mkre(ss.pattern2[1]),merge=merge_rn2)
         pdebug(f"processCont final readout finish")
         rr=ReadResult(res,False) # Return final result
-        os.unlink(runr.fname)
+        blind_unlink(runr.fname)
         pdebug(f"processCont unlinked {runr.fname}")
       else:
         with with_fd(runr.fname,os.O_RDONLY|os.O_SYNC) as fdr:

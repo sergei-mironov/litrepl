@@ -100,7 +100,8 @@ if __name__=='__main__':
         f"Explicitly-specified auxdir ({a.auxdir}) already contains a running session"
 
   if a.command=='start':
-    start(a,name2st(a.type))
+    ecode=start(a,name2st(a.type))
+    exit(ecode)
   elif a.command=='stop':
     for st in SType:
       if a.type in {st2name(st),"all",None}:

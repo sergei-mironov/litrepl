@@ -6,7 +6,7 @@ import re
 from copy import deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable, Any
 from select import select
-from os import environ, system, isatty, getpid
+from os import environ, system, isatty, getpid, unlink
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter as LarkInterpreter
 from os.path import isfile, join
@@ -30,7 +30,7 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
-                   cursor_within, nlines, wraplong)
+                   cursor_within, nlines, wraplong, blind_unlink)
 
 DEBUG:bool=False
 
@@ -216,7 +216,17 @@ class GPT4AllInterpreter(Interpreter):
   def setup_child(self, finp, foutp)->None:
     finp.write("/echo ready\n")
 
-def start_(a:LitreplArgs,i:Interpreter)->None:
+def write_child_pid(pidf,pid):
+  with open(pidf,'w') as f:
+    for attempt in range(20):
+      try:
+        f.write(str(Process(pid).children()[0].pid))
+        return True
+      except IndexError:
+        sleep(0.1)
+  return False
+
+def start_(a:LitreplArgs,i:Interpreter)->int:
   """ Starts the background Python interpreter. Kill an existing interpreter if
   any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`."""
   fns=i.fns
@@ -229,7 +239,7 @@ def start_(a:LitreplArgs,i:Interpreter)->None:
   npid=os.fork()
   if npid==0:
     # sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
-    system(f"rm '{ecode}' >/dev/null 2>/dev/null")
+    blind_unlink(ecode)
     open_child_pipes(inp,outp)
     ret=i.run_child()
     ret=ret if ret<256 else WEXITSTATUS(ret)
@@ -240,27 +250,29 @@ def start_(a:LitreplArgs,i:Interpreter)->None:
   else:
     finp,foutp=open_parent_pipes(inp,outp)
     i.setup_child(finp,foutp)
-    with open(pid,'w') as f:
-      f.write(str(Process(npid).children()[0].pid))
+    if write_child_pid(pid,npid):
+      return 0
+    else:
+      return 1
 
-def start(a:LitreplArgs, st:SType):
+def start(a:LitreplArgs, st:SType)->int:
   fns=pipenames(a,st)
   if st is SType.SPython:
     if 'ipython' in a.python_interpreter.lower():
-      start_(a,IPythonInterpreter(a,fns,a.python_interpreter))
+      return start_(a,IPythonInterpreter(a,fns,a.python_interpreter))
     elif 'python' in a.python_interpreter:
-      start_(a,PythonInterpreter(a,fns,a.python_interpreter))
+      return start_(a,PythonInterpreter(a,fns,a.python_interpreter))
     elif a.python_interpreter=='auto':
       if system('python3 -m IPython -c \'print("OK")\' >/dev/null 2>&1')==0:
-        start_(a,IPythonInterpreter(a,fns,'python3 -m IPython'))
+        return start_(a,IPythonInterpreter(a,fns,'python3 -m IPython'))
       else:
-        start_(a,PythonInterpreter(a,fns,'python3'))
+        return start_(a,PythonInterpreter(a,fns,'python3'))
     else:
       raise ValueError(f"Unsupported python interpreter: {a.python_interpreter}")
   elif st is SType.SAI:
     assert not a.exception_exit, "Not supported"
     interpreter='gpt4all-cli' if a.ai_interpreter=='auto' else a.ai_interpreter
-    start_(a,GPT4AllInterpreter(a,fns,interpreter))
+    return start_(a,GPT4AllInterpreter(a,fns,interpreter))
   else:
     raise ValueError(f"Unsupported section type: {st}")
 

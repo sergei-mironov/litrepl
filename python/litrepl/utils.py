@@ -1,6 +1,7 @@
 from textwrap import dedent, wrap
 from re import match as re_match, compile as re_compile
 from typing import Iterable,List
+from os import unlink
 from .types import CursorPos
 
 def unindent(col:int, lines:str)->str:
@@ -107,4 +108,10 @@ def wraplong(lines, tw):
   s=s+'\n' if lines and lines[-1]=='\n' else s
   return s
 
+
+def blind_unlink(file):
+  try:
+    unlink(file)
+  except FileNotFoundError:
+    pass
 
