@@ -149,11 +149,11 @@ See also:
 
 #### AI
 
-As an experiment, Litrepl supports
+Litrepl experimentally supports
 [GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli) allowing users to
-query local LLMs. In order to try it, install the GPT4All-cli and use `ai` as
+query local LLMs. In order to try it, install the interpreter and use `ai` as
 the name for code sections. For low-speed models it would be convenient to use
-`:LMon` command rather then `:LEval`.
+`:LMon` command rather then `:LEval` for evaluation.
 
     ``` ai
     /model "Meta-Llama-3-8B-Instruct.Q4_0.gguf"
