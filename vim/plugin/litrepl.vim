@@ -39,8 +39,8 @@ endfun
 
 fun! LitReplStart(what)
   execute '!'.LitReplCmd().
-        \' --python-interpreter='.g:litrepl_python_interpreter.
-        \' --ai-interpreter='.g:litrepl_ai_interpreter.
+        \' --python-interpreter="'.g:litrepl_python_interpreter.'"'.
+        \' --ai-interpreter="'.g:litrepl_ai_interpreter.'"'.
         \' start '.a:what
 endfun
 command! -bar -nargs=? LStart call LitReplStart(<q-args>)
@@ -52,8 +52,8 @@ command! -bar -nargs=? LStop call LitReplStop(<q-args>)
 
 fun! LitReplRestart(what)
   execute '!'.LitReplCmd().
-        \' --python-interpreter='.g:litrepl_python_interpreter.
-        \' --ai-interpreter='.g:litrepl_ai_interpreter.
+        \' --python-interpreter="'.g:litrepl_python_interpreter.'"'.
+        \' --ai-interpreter="'.g:litrepl_ai_interpreter.'"'.
         \' restart '.a:what
 endfun
 command! -bar -nargs=? LRestart call LitReplRestart(<q-args>)
@@ -63,10 +63,10 @@ fun! LitReplParsePrint()
 endfun
 command! -bar -nargs=0 LPP call LitReplParsePrint()
 
-fun! LitReplTerm()
-  execute "terminal ".LitReplCmd()." repl"
+fun! LitReplTerm(what)
+  execute "terminal ".LitReplCmd()." repl ".a:what
 endfun
-command! -bar -nargs=0 LTerm call LitReplTerm()
+command! -bar -nargs=? LTerm call LitReplTerm(<q-args>)
 
 fun! LitReplOpenErr(file)
   if bufwinnr(a:file) <= 0
@@ -100,8 +100,8 @@ fun LitReplRun_(command, timeout, pos)
   let &ul=&ul
   " Execute the selected code blocks
   let cmdline = '%!'.LitReplCmd().
-        \ ' --python-interpreter='.g:litrepl_python_interpreter.
-        \ ' --ai-interpreter='.g:litrepl_ai_interpreter.
+        \ ' --python-interpreter="'.g:litrepl_python_interpreter.'"'.
+        \ ' --ai-interpreter="'.g:litrepl_ai_interpreter.'"'.
         \ ' --timeout='.a:timeout.
         \ ' --pending-exit='.g:litrepl_pending.
         \ ' --debug='.g:litrepl_debug.

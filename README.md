@@ -63,9 +63,13 @@ Contents
 Installation
 ------------
 
-The repository includes a Python tool and an interface Vim plugin. The Python
-part should be installed with `pip install` as usual. The Vim part requires
-plugin manager like `Plug` or hand-copying files to a .vim config folder.
+This repository includes the Litrepl tool in Python and an interface Vim plugin.
+The Python part might be installed with `pip install .` run in the project
+folder. The Vim part requires hand-copying `./vim/plugin/litrepl.vim` to a .vim
+config folder or using any Vim plugin manager, like Vim-Plug.
+
+The repository also includes a set of Nix expressions compatible which automate
+the above installation algorithm.
 
 The generic installation procedure:
 
@@ -89,23 +93,23 @@ Instructions for the [Pip](https://pypi.org) and [Vim-plug](https://github.com/j
 
 <details><summary><b>Nix and vim_configurable</b></summary><p>
 
-Nix/NixOS users can follow the formalized path:
+Nix/NixOS users might follow the formalized path:
 
 Nix supports
 [configurable Vim expressions](https://nixos.wiki/wiki/Vim#System_wide_vim.2Fnvim_configuration).
-To enable the Litrepl plugin, just add the `vim-litrepl.vim-litrepl-release` to the
-list of Vim packages.
+To enable the Litrepl plugin, add the `vim-litrepl.vim-litrepl-release` to the
+list of Vim plugins and put this version of vim into your Nix profile. Litrepl
+and its dependencies will be installed automatically.
 
 ``` nix
-let
-  vim-litrepl = import <path/to/litrepl.vim> {};
-in
+{ litrepl }:
+...
 vim_configurable.customize {
   name = "vim";
   vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
     start = [
       ...
-      vim-litrepl.vim-litrepl-release
+      litrepl.vim-litrepl-release
       ...
     ];
   };
@@ -143,7 +147,8 @@ command to execute that section at the cursor location.
     Hello Markdown!                      Hello LaTeX!
     ```                                  \end{result}
 
-See also:
+Note: that LaTeX documents also need a preamble introducing python/result tags
+to the system. See also:
 - [Formatting Markdown documents](./doc/formatting.md#markdown)
 - [Formatting LaTeX documents](./doc/formatting.md#latex)
 
