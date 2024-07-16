@@ -151,10 +151,9 @@ text processor. For details, see:
 - [Formatting LaTeX documents](./doc/formatting.md#latex)
 
 
-After the evaluation, Litrepl leaves the Python interpreter running in the
-background, its input and output pipes are associated with the folder where the
-document resides. We can use `:LStatus` vim command or `litrepl status` command
-to know the status
+Litrepl leaves the Python interpreter running in the background, its input and
+output pipes are associated with the folder where the document resides. We can
+use `:LStatus` in vim or `litrepl status` command line to know its status:
 
 ``` sh
 $ litrepl status
