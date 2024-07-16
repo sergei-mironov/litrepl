@@ -161,11 +161,12 @@ python 3718077    -   python3 -m IPython --config=/tmp/nix-shell.KcUxp9/litrepl_
 ```
 
 The format is: `ITYPE PID EXITCODE CMD..`, where `ITYPE` is either `python` or
-`ai` (see below), `EXITCODE` is the exit code of the stopped interpreter.
+`ai` (see below), `EXITCODE` is the exit code of the interpreter that was
+stopped.
 
 In order to attach to the running interpreter and examine its state, one might
 use `repl` command.  Note: Litrepl disables command line propmts so `>>>`
-symbols are not going to appear. Here we assign a Python variable and detach.
+symbols are not going to appear. Here we assign a Python variable and then detach.
 
 ``` sh
 $ litrepl repl
