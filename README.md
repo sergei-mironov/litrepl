@@ -179,14 +179,14 @@ Where
 
 #### Variables and arguments
 
-| Vim setting                     | CLI argument           | Description                       |
-|---------------------------------|------------------------|-----------------------------------|
-| `set filetype`                  | `--filetype=T`         | Input file type: `latex`\|`markdown` |
-| `let g:litrepl_interpreter=EXE` | `--interpreter=I`      | The interpreter to use: `python`\|`ipython`\|`auto` (the default) |
-| `let g:litrepl_debug=0/1`       | `--debug=1`            | Print debug messages to the stderr |
-| `let g:litrepl_errfile=FILE`    | N/A                    | Intermediary file for debug and error messages |
-| `let g:litrepl_always_show_stderr=0/1` |  N/A            | Set to auto-open stderr window after each execution |
-| `let g:litrepl_timeout=FLOAT`   | `--timeout=FLOAT`      | Timeout to wait for the new executions, in seconds, defaults to inf |
+| Vim setting  <img width=200/>   | CLI argument  <img width=200/> | Description                       |
+|---------------------------------|--------------------------------|-----------------------------------|
+| `set filetype`                  | `--filetype=T`                 | Input file type: `latex`\|`markdown` |
+| `let g:litrepl_interpreter=EXE` | `--interpreter=I`              | The interpreter to use: `python`\|`ipython`\|`auto` (the default) |
+| `let g:litrepl_debug=0/1`       | `--debug=1`                    | Print debug messages to the stderr |
+| `let g:litrepl_errfile=FILE`    | N/A                            | Intermediary file for debug and error messages |
+| `let g:litrepl_always_show_stderr=0/1` |  N/A                    | Set to auto-open stderr window after each execution |
+| `let g:litrepl_timeout=FLOAT`   | `--timeout=FLOAT`              | Timeout to wait for the new executions, in seconds, defaults to inf |
 
 * `I` is taken into account by the `start` command or by the first call to
   `eval-sections`.
