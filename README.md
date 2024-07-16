@@ -155,7 +155,7 @@ Litrepl leaves the Python interpreter running in the background, its input and
 output pipes are associated with the folder where the document resides. We can
 use `:LStatus` in vim or `litrepl status` command line to know its status:
 
-``` sh
+``` shell
 $ litrepl status
 # Format:
 # TYP  PID      ECODE  CMD
@@ -166,7 +166,7 @@ In order to attach to the running interpreter and examine its state, one might
 use `repl` command.  Note: Litrepl disables command line propmts so `>>>`
 symbols are not going to appear. Here we assign a Python variable and then detach.
 
-``` sh
+``` shell
 $ litrepl repl
 Opening the interpreter terminal (NO PROMPT, USE `Ctrl+D` TO DETACH)
 W='Hello from repl'
@@ -345,7 +345,7 @@ The default development shell is defined in the `./default.nix` as a Nix
 expression named `shell` which is the default name for development shells.
 Running
 
-``` sh
+``` shell
 $ nix develop
 ```
 
@@ -357,7 +357,7 @@ Another shell which might be useful is `shell-screencast`. This would build the
 full set of Litrepl tools and makes sure that the screencasting software is
 available. To enter it, specify its Nix-flake path as follows:
 
-``` sh
+``` shell
 $ nix develop '.#shell-screencast'
 ```
 
@@ -365,7 +365,7 @@ To build individual Nix expressions, run `nix build '.#NAME'` passing the
 name of Nix-expression to build. If succeeded, Nix publishes the last build'
 results under the `./result` symlink.
 
-``` sh
+``` shell
 $ nix build '.#vim-demo'
 $ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
 ```
@@ -388,7 +388,7 @@ See Nix flakes manual for other Nix-related details.
 
 The top-level [Makefile](./Makefile) encodes common development workflows:
 
-``` sh
+``` shell
 [LitREPL-develop] $ make help
 LitREPL is a macroprocessing Python library for Litrate programming and code execution
 Build targets:
