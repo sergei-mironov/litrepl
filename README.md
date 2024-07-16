@@ -156,7 +156,7 @@ the name for code sections. For low-speed models it would be convenient to use
 `:LMon` command rather then `:LEval`.
 
     ``` ai
-    /model Meta-Llama-3-8B-Instruct.Q4_0.gguf
+    /model "Meta-Llama-3-8B-Instruct.Q4_0.gguf"
     Hi chat! What is your name?
     ```
 

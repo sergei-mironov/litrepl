@@ -246,20 +246,20 @@ def start_(a:LitreplArgs,i:Interpreter)->None:
 def start(a:LitreplArgs, st:SType):
   fns=pipenames(a,st)
   if st is SType.SPython:
-    if 'ipython' in a.interpreter.lower():
-      start_(a,IPythonInterpreter(a,fns,a.interpreter))
-    elif 'python' in a.interpreter:
-      start_(a,PythonInterpreter(a,fns,a.interpreter))
-    elif a.interpreter=='auto':
+    if 'ipython' in a.python_interpreter.lower():
+      start_(a,IPythonInterpreter(a,fns,a.python_interpreter))
+    elif 'python' in a.python_interpreter:
+      start_(a,PythonInterpreter(a,fns,a.python_interpreter))
+    elif a.python_interpreter=='auto':
       if system('python3 -m IPython -c \'print("OK")\' >/dev/null 2>&1')==0:
         start_(a,IPythonInterpreter(a,fns,'python3 -m IPython'))
       else:
         start_(a,PythonInterpreter(a,fns,'python3'))
     else:
-      raise ValueError(f"Unsupported python interpreter: {a.interpreter}")
+      raise ValueError(f"Unsupported python interpreter: {a.python_interpreter}")
   elif st is SType.SAI:
     assert not a.exception_exit, "Not supported"
-    interpreter='gpt4all-cli' if a.interpreter=='auto' else a.interpreter
+    interpreter='gpt4all-cli' if a.ai_interpreter=='auto' else a.ai_interpreter
     start_(a,GPT4AllInterpreter(a,fns,interpreter))
   else:
     raise ValueError(f"Unsupported section type: {st}")

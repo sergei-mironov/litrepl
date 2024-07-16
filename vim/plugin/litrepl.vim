@@ -20,8 +20,11 @@ if ! exists("g:litrepl_map_cursor_output")
   " No `:` are allowed in the file name
   let g:litrepl_map_cursor_output = '/tmp/litrepl_cursor.txt'
 endif
-if ! exists("g:litrepl_interpreter")
-  let g:litrepl_interpreter = 'auto'
+if ! exists("g:litrepl_python_interpreter")
+  let g:litrepl_python_interpreter = 'auto'
+endif
+if ! exists("g:litrepl_ai_interpreter")
+  let g:litrepl_ai_interpreter = 'auto'
 endif
 if ! exists("g:litrepl_timeout")
   let g:litrepl_timeout = 0.5
@@ -35,7 +38,10 @@ fun! LitReplCmd()
 endfun
 
 fun! LitReplStart()
-  execute '!'.LitReplCmd().' --interpreter='.g:litrepl_interpreter.' start'
+  execute '!'.LitReplCmd().
+        \' --python-interpreter='.g:litrepl_python_interpreter.
+        \' --ai-interpreter='.g:litrepl_ai_interpreter.
+        \' start'
 endfun
 command! -bar -nargs=0 LStart call LitReplStart()
 
@@ -45,7 +51,10 @@ endfun
 command! -bar -nargs=0 LStop call LitReplStop()
 
 fun! LitReplRestart()
-  execute '!'.LitReplCmd().' --interpreter='.g:litrepl_interpreter.' restart'
+  execute '!'.LitReplCmd().
+        \' --python-interpreter='.g:litrepl_python_interpreter.
+        \' --ai-interpreter='.g:litrepl_ai_interpreter.
+        \' restart'
 endfun
 command! -bar -nargs=0 LRestart call LitReplRestart()
 
@@ -91,7 +100,8 @@ fun LitReplRun_(command, timeout, pos)
   let &ul=&ul
   " Execute the selected code blocks
   let cmdline = '%!'.LitReplCmd().
-        \ ' --interpreter='.g:litrepl_interpreter.
+        \ ' --python-interpreter='.g:litrepl_python_interpreter.
+        \ ' --ai-interpreter='.g:litrepl_ai_interpreter.
         \ ' --timeout='.a:timeout.
         \ ' --pending-exit='.g:litrepl_pending.
         \ ' --debug='.g:litrepl_debug.
@@ -180,7 +190,6 @@ command! -bar -nargs=? LEvalBelow call LitReplRun("eval-sections", "inf,inf", <S
 command! -bar -nargs=0 LEvalAll call LitReplRun("eval-sections", "inf,inf", "0..$")
 command! -bar -nargs=? LInterrupt call LitReplRun("interrupt", "1.0,1.0", <SID>Pos(<q-args>))
 command! -bar -nargs=? LMon call LitReplMonitor("eval-sections", <SID>Pos(<q-args>))
-
 command! -bar -nargs=0 LStatus call LitReplStatus()
 
 let g:litrepl_loaded = 1

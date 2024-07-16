@@ -764,7 +764,7 @@ tests() {
 runlitrepl() {
   test -n "$LITREPL_INTERPRETER"
   test -n "$LITREPL_BIN"
-  $LITREPL_BIN/litrepl --debug="$LITREPL_DEBUG" --interpreter="$LITREPL_INTERPRETER" "$@"
+  $LITREPL_BIN/litrepl --debug="$LITREPL_DEBUG" --python-interpreter="$LITREPL_INTERPRETER" "$@"
 }
 
 runvim() {
