@@ -37,26 +37,26 @@ fun! LitReplCmd()
   return 'PATH='.g:litrepl_bin.':$PATH '.g:litrepl_exe.' --workdir='.expand('%:p:h')
 endfun
 
-fun! LitReplStart()
+fun! LitReplStart(what)
   execute '!'.LitReplCmd().
         \' --python-interpreter='.g:litrepl_python_interpreter.
         \' --ai-interpreter='.g:litrepl_ai_interpreter.
-        \' start'
+        \' start '.a:what
 endfun
-command! -bar -nargs=0 LStart call LitReplStart()
+command! -bar -nargs=? LStart call LitReplStart(<q-args>)
 
-fun! LitReplStop()
-  execute '!'.LitReplCmd().' stop'
+fun! LitReplStop(what)
+  execute '!'.LitReplCmd().' stop '.a:what
 endfun
-command! -bar -nargs=0 LStop call LitReplStop()
+command! -bar -nargs=? LStop call LitReplStop(<q-args>)
 
-fun! LitReplRestart()
+fun! LitReplRestart(what)
   execute '!'.LitReplCmd().
         \' --python-interpreter='.g:litrepl_python_interpreter.
         \' --ai-interpreter='.g:litrepl_ai_interpreter.
-        \' restart'
+        \' restart '.a:what
 endfun
-command! -bar -nargs=0 LRestart call LitReplRestart()
+command! -bar -nargs=? LRestart call LitReplRestart(<q-args>)
 
 fun! LitReplParsePrint()
   execute '%!'.LitReplCmd().' parse-print'
