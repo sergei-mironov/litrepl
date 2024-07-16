@@ -150,6 +150,34 @@ text processor. For details, see:
 - [Formatting Markdown documents](./doc/formatting.md#markdown)
 - [Formatting LaTeX documents](./doc/formatting.md#latex)
 
+
+After the evaluation, Litrepl leaves the Python interpreter running in the
+background, its input and output pipes are associated with the folder where the
+document resides. We can use `:LStatus` vim command or `litrepl status` command
+to know the status
+
+``` sh
+$ litrepl status
+python 3718077    -   python3 -m IPython --config=/tmp/nix-shell.KcUxp9/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
+```
+
+The format is: `ITYPE PID EXITCODE CMD..`, where `ITYPE` is either `python` or
+`ai` (see below), `EXITCODE` is the exit code of the stopped interpreter.
+
+In order to attach to the running interpreter and examine its state, one might
+use `repl` command.  Note: Litrepl disables command line propmts so `>>>`
+symbols are not going to appear. Here we assign a Python variable and detach.
+
+``` sh
+$ litrepl repl
+Opening the interpreter terminal (NO PROMPT, USE `Ctrl+D` TO DETACH)
+W='Hello from repl'
+^D
+```
+
+The variable `W` now resides in our session and could be queried upon
+subsequent evaluations.
+
 #### AI
 
 Litrepl experimentally supports

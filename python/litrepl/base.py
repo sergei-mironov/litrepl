@@ -183,7 +183,7 @@ class IPythonInterpreter(Interpreter):
         'c.TerminalInteractiveShell.separate_out = ""\n'
       )
     ret=system(
-      f"exec {interpreter} -um IPython --config={cfg} --colors=NoColor {log} -i "
+      f"exec {interpreter} --config={cfg} --colors=NoColor {log} -i "
       f"<'{inp}' >'{outp}' 2>&1"
     )
     return ret
