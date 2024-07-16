@@ -131,7 +131,7 @@ fun! LitReplMonitor(command, pos)
   let cur = getcharpos('.')
   try
     while 1
-      let code = LitReplRun_(a:command, g:litrepl_timeout.'0.0', a:pos)
+      let code = LitReplRun_(a:command, g:litrepl_timeout.',0.0', a:pos)
       if code == 0
         call LitReplUpdateCursor(cur)
         break
