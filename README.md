@@ -23,7 +23,7 @@ Features
 * POSIX-compatible OS, typically a Linux. The tool relies on POSIX pipes and
   depends on certain shell commands.
 * More or less recent `Vim`
-* Python3 with the following libraries: `lark-parser` (Required).
+* Python3 packages: `lark-parser`, `psutil` (Required).
 * Command line tools: `GNU socat` (Optional)
 
 </p></details>
