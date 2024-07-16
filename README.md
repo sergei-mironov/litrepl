@@ -20,7 +20,7 @@ Features
 
 <details><summary><h2>Requirements</h2></summary><p>
 
-* POSIX-compatible OS, typically a Linux. The plugin relies on POSIX pipes and
+* POSIX-compatible OS, typically a Linux. The tool relies on POSIX pipes and
   depends on certain shell commands.
 * More or less recent `Vim`
 * Python3 with the following libraries: `lark-parser` (Required).
@@ -125,17 +125,17 @@ Python code into the code section and run `:LEval` command to execute the
 section under the cursor.
 
    ~~~~
-   Markdown                                   Latex
-   --------                                   -----
+   Markdown                             Latex
+   --------                             -----
 
-   ``` python                                 \begin{lcode}
-   print('Hello Markdown!')                   print('Hello LaTeX!')
-   ```                                        \end{lcode}
+   ``` python                           \begin{lcode}
+   print('Hello Markdown!')             print('Hello LaTeX!')
+   ```                                  \end{lcode}
 
 
-   ``` result                                 \begin{lresult}
-   Hello Markdown!                            Hello LaTeX!
-   ```                                        \end{lresult}
+   ``` result                           \begin{lresult}
+   Hello Markdown!                      Hello LaTeX!
+   ```                                  \end{lresult}
    ~~~~
 
 
@@ -149,21 +149,21 @@ See also:
 #### Vim and command-line commands
 
 | Vim <img width=200/> | Command line <img width=200/> | Description                          |
-|---------------------|----------------------|--------------------------------------|
-| `:LStart`           | `litrepl start`      | Start the interpreter     |
-| `:LStop`            | `litrepl stop`       | Stop the interpreter      |
-| `:LStatus`          | `litrepl status <F`  | Print the daemon status   |
-| `:LRestart`         | `litrepl restart`    | Restart the interpreter   |
-| `:LEval N`          | `lirtepl eval-sections N <F`   | Run or update section under the cursor and wait until the completion |
-| `:LEvalAbove N`     | `lirtepl eval-sections '0..N' <F`| Run sections above and under the cursor and wait until the completion |
-| `:LEvalBelow N`     | `lirtepl eval-sections 'N..$' <F`| Run sections below and under the cursor and wait until the completion |
-| `:LEvalAll`         | `lirtepl eval-sections <F`       | Evaluate all code sections |
-| `:LEvalAsync N`     | `lirtepl --timeout-initial=0.5 --timeout-continue=0 eval-sections N <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
-| `:LInterrupt N`     | `lirtepl interrupt N <F`       | Send Ctrl+C signal to the interpreter and get a feedback |
-|                     | `lirtepl eval-code <P`                  | Evaluate the given Python code |
-| `:LTerm`            | `lirtepl repl`       | Open the terminal to the interpreter |
-| `:LOpenErr`         | `litrepl ...  2>F`   | Open the stderr window    |
-| `:LVersion`         | `litrepl --version`  | Show version              |
+|----------------------|----------------------|--------------------------------------|
+| `:LStart`            | `litrepl start`      | Start the interpreter     |
+| `:LStop`             | `litrepl stop`       | Stop the interpreter      |
+| `:LStatus`           | `litrepl status <F`  | Print the daemon status   |
+| `:LRestart`          | `litrepl restart`    | Restart the interpreter   |
+| `:LEval N`           | `lirtepl eval-sections N <F`     | Run or update section under the cursor and wait until the completion |
+| `:LEvalAbove N`      | `lirtepl eval-sections '0..N' <F`| Run sections above and under the cursor and wait until the completion |
+| `:LEvalBelow N`      | `lirtepl eval-sections 'N..$' <F`| Run sections below and under the cursor and wait until the completion |
+| `:LEvalAll`          | `lirtepl eval-sections <F`       | Evaluate all code sections |
+| `:LEvalAsync N`      | `lirtepl --timeout=0.5,0 eval-sections N <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
+| `:LInterrupt N`      | `lirtepl interrupt N <F`         | Send Ctrl+C signal to the interpreter and get a feedback |
+|                      | `lirtepl eval-code <P`                  | Evaluate the given Python code |
+| `:LTerm`             | `lirtepl repl`       | Open the terminal to the interpreter |
+| `:LOpenErr`          | `litrepl ...  2>F`   | Open the stderr window    |
+| `:LVersion`          | `litrepl --version`  | Show version              |
 
 Where
 
@@ -175,21 +175,57 @@ Where
 
 #### Variables and arguments
 
-
-| Vim setting               | CLI argument         | Description                       |
-|---------------------------|----------------------|-----------------------------------|
-| `set filetype`            | `--filetype=T`       | Input file type: `latex`\|`markdown` |
-| N/A                       | `--interpreter=I`    | The interpreter to use: `python`\|`ipython`\|`auto` (the default) |
-| `let g:litrepl_debug=0/1` |  `--debug=1`         | Print debug messages to the stderr |
-| `let g:litrepl_errfile="/tmp/litrepl.vim"` |  N/A  | Intermediary file for debug and error messages |
-| `let g:litrepl_always_show_stderr=0/1`     |  N/A  | Set to auto-open stderr window after each execution |
-| `let g:litrepl_timeout=FLOAT` |  `--timeout-initial=FLOAT` | Timeout to wait for the new executions, in seconds, defaults to inf |
-| N/A                           |  `--timeout-continue=FLOAT`| Timeout to wait for executions which are already running, in seconds, defaults to inf |
+| Vim setting                     | CLI argument           | Description                       |
+|---------------------------------|------------------------|-----------------------------------|
+| `set filetype`                  | `--filetype=T`         | Input file type: `latex`\|`markdown` |
+| `let g:litrepl_interpreter=EXE` | `--interpreter=I`      | The interpreter to use: `python`\|`ipython`\|`auto` (the default) |
+| `let g:litrepl_debug=0/1`       | `--debug=1`            | Print debug messages to the stderr |
+| `let g:litrepl_errfile=FILE`    | N/A                    | Intermediary file for debug and error messages |
+| `let g:litrepl_always_show_stderr=0/1` |  N/A            | Set to auto-open stderr window after each execution |
+| `let g:litrepl_timeout=FLOAT`   | `--timeout=FLOAT`      | Timeout to wait for the new executions, in seconds, defaults to inf |
 
 * `I` is taken into account by the `start` command or by the first call to
   `eval-sections`.
 
-### Usecases
+### Hints
+
+#### Command line, basic usage
+
+To evaluate code section in a document:
+
+```sh
+$ cat doc/example.md | litrepl --interpreter=ipython eval-sections >output.md
+```
+
+To evaluate a Python script:
+
+```sh
+$ cat script.py | litrepl --interpreter=ipython eval-code
+```
+
+Note that both commands above share the same background interpreter session.
+
+
+#### Command line, foreground evaluation
+
+For batch processing of documents, it may be necessary to have an on-demand
+interpreter session available, which would exist solely for the duration of the
+evaluation process.
+
+~~~~ sh
+$ cat >document.md.in <<EOF
+``` python
+raise Exception("D'oh!")
+```
+EOF
+$ cat document.md.in | litrepl --foreground --exception-exit=200 eval-sections >document.md
+$ echo $?
+200
+~~~~
+
+Here, the `--foreground` argument tells Litrepl to run a new interpreter session
+and then stop it before exiting, `--exception-exit=200` sets the exit code
+returned in the case of unhandled exceptions.
 
 #### Vim, adding keybindings
 
@@ -238,47 +274,6 @@ directly from Python code sections.
                 ||     ||
 ```
 ~~~~
-
-#### Command line, basic usage
-
-To evaluate code section in a document:
-
-```sh
-$ cat doc/example.md | litrepl --interpreter=ipython eval-sections >output.md
-```
-
-To evaluate a Python script:
-
-```sh
-$ cat script.py | litrepl --interpreter=ipython eval-code
-```
-
-Note that both commands above share the same background interpreter session.
-
-#### Command line, stop on unhandled exception
-
-For processing software documents one might find useful to use a separated
-interpreter session, stopping it when first unhandled exception happens.
-
-~~~~ sh
-$ cat >document.md.in <<EOF
-``` python
-raise Exception("D'oh!")
-```
-EOF
-$ cat document.md.in \
-  | litrepl \
-    --standalone-session \
-    --exception-exit=200 \
-    eval-sections \
-  >document.md
-$ echo $?
-200
-~~~~
-
-Here, the `--standalone-session` tells Litrepl to run this document in a new
-session and stop it before exiting, `--exception-exit=200` sets the exit code
-returned in the case of unhandled exceptions.
 
 Development
 -----------
