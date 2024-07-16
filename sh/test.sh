@@ -157,6 +157,11 @@ print("-->")
 <!-- result
 ??
 -->
+<!-- python
+print('GAP')
+-->
+<!-- result
+-->
 EOF
 cat source.md | runlitrepl --filetype=markdown parse-print >out.md
 diff -u source.md out.md
@@ -217,6 +222,12 @@ print("-->")
 ```
 <!-- result
 \-\-\>
+-->
+<!-- python
+print('GAP')
+-->
+<!-- result
+GAP
 -->
 EOF
 )} #}}}

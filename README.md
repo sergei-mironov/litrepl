@@ -64,14 +64,12 @@ Installation
 ------------
 
 This repository includes the Litrepl tool in Python and an interface Vim plugin.
-The Python part might be installed with `pip install .` run in the project
-folder. The Vim part requires hand-copying `./vim/plugin/litrepl.vim` to a .vim
-config folder or using any Vim plugin manager, like Vim-Plug.
+The Python part might be installed with `pip install .` run from the project
+folder. The Vim part requires hand-copying `./vim/plugin/litrepl.vim` to a
+`~/.vim` config folder or using any Vim plugin manager, e.g. Vim-Plug.
 
-The repository also includes a set of Nix expressions compatible which automate
-the above installation algorithm.
-
-The generic installation procedure:
+The repository also includes a set of Nix expressions that automate installation
+on Nix-enabled systems.
 
 <details><summary><b>pip-install and Vim-Plug</b></summary><p>
 
@@ -147,8 +145,8 @@ command to execute that section at the cursor location.
     Hello Markdown!                      Hello LaTeX!
     ```                                  \end{result}
 
-Note: that LaTeX documents also need a preamble introducing python/result tags
-to the system. See also:
+Note: LaTeX documents need a preamble introducing python/result tags to the
+text processor. For details, see:
 - [Formatting Markdown documents](./doc/formatting.md#markdown)
 - [Formatting LaTeX documents](./doc/formatting.md#latex)
 
