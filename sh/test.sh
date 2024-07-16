@@ -696,13 +696,13 @@ while True:
 EOF
 
 runlitrepl stop
-runlitrepl --type=python --verbose status >status1.txt || true
+runlitrepl --verbose status python >status1.txt || true
 grep -q '?' status1.txt
 cat source.md | runlitrepl \
   --filetype=markdown \
   --timeout=1,1 \
   eval-sections '0..$' >out.md
-runlitrepl --type=python status >status2.txt
+runlitrepl status python >status2.txt
 grep -q -v '?' status2.txt
 
 )} #}}}

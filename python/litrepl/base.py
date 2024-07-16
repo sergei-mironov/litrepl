@@ -22,6 +22,7 @@ from hashlib import sha256
 from psutil import Process, NoSuchProcess
 from textwrap import dedent
 from subprocess import check_output, DEVNULL, CalledProcessError
+from contextlib import contextmanager
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
                     FileNames, IType, Settings, CursorPos, ReadResult, SType,
@@ -36,6 +37,16 @@ DEBUG:bool=False
 def pdebug(*args,**kwargs):
   if DEBUG:
     print(f"[{time():14.3f},{getpid()}]", *args, file=sys.stderr, **kwargs, flush=True)
+
+PID:int=getpid()
+
+@contextmanager
+def with_parent_finally(_handler):
+  try:
+    yield
+  finally:
+    if PID==getpid():
+      _handler()
 
 def defauxdir(suffix:Optional[str]=None)->str:
   """ Generate the default name of working directory. """
@@ -468,7 +479,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
   ssrc:Dict[int,str]={}    # Section sources
   sres:Dict[int,str]={}    # Section results
   ledder:Dict[int,int]={}  # Facility to restore the cursor
-  stypes:Set[SType]=set()  # Section types which were run
+  stypes:Set[SType]=set()  # Section types we have run
   ecode:int=0              # Combined exit code
 
   def _getinterp(bmarker:str)->Tuple[FileNames,Optional[Settings]]:
@@ -560,17 +571,23 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
       bmarker=tree.children[0].children[0].value
       emarker=tree.children[2].children[0].value
       self._print(f"{bmarker}{tree.children[1].children[0].value}{emarker}")
-  C().visit(tree)
-  if a.map_cursor:
-    cl=a.map_cursor[0] # cursor line
-    for threshold,diff in sorted(ledder.items()):
-      if cl>threshold:
-        cl=max(threshold,cl+diff)
-    with open(a.map_cursor_output,"w") as f:
-      f.write(str(cl))
-  if a.foreground:
-    for st in stypes:
-      stop(a,st)
+
+  def _finally():
+    if PID==getpid():
+      if a.map_cursor:
+        cl=a.map_cursor[0] # cursor line
+        for threshold,diff in sorted(ledder.items()):
+          if cl>threshold:
+            cl=max(threshold,cl+diff)
+        with open(a.map_cursor_output,"w") as f:
+          f.write(str(cl))
+      if a.foreground:
+        for st in stypes:
+          stop(a,st)
+
+  with with_parent_finally(_finally):
+    C().visit(tree)
+
   pdebug(f"Returning {ecode}")
   return ecode
 
