@@ -97,7 +97,7 @@ fun LitReplRun_(command, timeout, pos)
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.
         \ ' --map-cursor='.cur[1].':'.cur[2].':'.g:litrepl_map_cursor_output.
-        \ ' --result-textwidth=80'.
+        \ ' --result-textwidth='.string(&textwidth).
         \ ' '.cmd.' 2>'.g:litrepl_errfile
   silent execute cmdline
   call LitReplUpdateCursor(cur)

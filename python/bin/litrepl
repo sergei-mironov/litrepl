@@ -56,8 +56,11 @@ if __name__=='__main__':
     a.exception_exit=int(a.exception_exit)
   if a.pending_exit:
     a.pending_exit=int(a.pending_exit)
+
   if a.result_textwidth:
     a.result_textwidth=int(a.result_textwidth)
+    if a.result_textwidth==0:
+      a.result_textwidth=None # for vim-compatibility
 
   if a.map_cursor:
     line,col,output=a.map_cursor.split(":")

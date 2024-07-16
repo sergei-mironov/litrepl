@@ -368,12 +368,12 @@ comtext : /(.(?!{symbols_md.comendmarker}))*./s
 
 @dataclass
 class SymbolsLatex:
-  icodebeginmarker=r"\\begin\{l[a-zA-Z0-9]*code\}"
-  icodendmarker=r"\\end\{l[a-zA-Z0-9]*code\}"
+  icodebeginmarker=r"\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l?python\}|\\begin\{ai\}"
+  icodendmarker=r"\\end\{l[a-zA-Z0-9]*code\}|\\end\{l?python\}|\\end\{ai\}"
   icodebeginmarker2=r"\%lcode"
   icodendmarker2=r"\%lnocode"
-  ocodebeginmarker=r"\\begin\{l[a-zA-Z0-9]*result\}"
-  ocodendmarker=r"\\end\{l[a-zA-Z0-9]*result\}"
+  ocodebeginmarker=r"\\begin\{l?[a-zA-Z0-9]*result\}"
+  ocodendmarker=r"\\end\{l?[a-zA-Z0-9]*result\}"
   verbeginmarker=r"\%lresult"
   verendmarker=r"\%lnoresult"
   inlinemarker=r"\\l[a-zA-Z0-9]*inline"
