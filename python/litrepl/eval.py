@@ -341,7 +341,6 @@ def processCont(a:LitreplArgs,
                 runr:RunResult,
                 timeout:float)->ReadResult:
   """ Read from the running readout process. """
-  fdr=0
   rr:Optional[ReadResult]=None
   with with_sigint(a,fns):
     pdebug(f"processCont starting via {runr.fname}")
