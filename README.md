@@ -170,44 +170,44 @@ the name for code sections. For low-speed models it would be convenient to use
 
 #### Vim and command-line commands
 
-| Vim <img width=200/> | Command line <img width=200/> | Description                 |
-|----------------------|----------------------|--------------------------------------|
-| `:LStart`            | `litrepl start`      | Start the interpreter                |
-| `:LStop`             | `litrepl stop`       | Stop the interpreter                 |
-| `:LStatus`           | `litrepl status <F`  | Print the daemon status              |
-| `:LRestart`          | `litrepl restart`    | Restart the interpreter              |
+| Vim <img width=200/> | Command line <img width=200/>    | Description                 |
+|----------------------|----------------------------------|-----------------------------|
+| `:LStart [T]`        | `litrepl start [T]`              | Start the interpreter       |
+| `:LStop [T]`         | `litrepl stop [T]`               | Stop the interpreter        |
+| `:LStatus [T]`       | `litrepl status [T] <F`          | Print the daemon status     |
+| `:LRestart [T]`      | `litrepl restart [T]`            | Restart the interpreter     |
 | `:LEval N`           | `lirtepl eval-sections N <F`     | Run or update section under the cursor and wait until the completion |
 | `:LEvalAbove N`      | `lirtepl eval-sections '0..N' <F`| Run sections above and under the cursor and wait until the completion |
 | `:LEvalBelow N`      | `lirtepl eval-sections 'N..$' <F`| Run sections below and under the cursor and wait until the completion |
-| `:LEvalAll`          | `lirtepl eval-sections <F`       | Evaluate all code sections |
+| `:LEvalAll`          | `lirtepl eval-sections <F`       | Evaluate all code sections  |
 | `:LEvalAsync N`      | `lirtepl --timeout=0.5,0 eval-sections N <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
 | `:LInterrupt N`      | `lirtepl interrupt N <F`         | Send Ctrl+C signal to the interpreter and get a feedback |
 | `:LMon`              | `while .. do .. done`            | Monitor asynchronous code evaluation |
 | N/A                  | `lirtepl eval-code <P`           | Evaluate the given Python code |
-| `:LTerm`             | `lirtepl repl`       | Open the terminal to the interpreter |
-| `:LOpenErr`          | `litrepl ...  2>F`   | Open the stderr window               |
-| `:LVersion`          | `litrepl --version`  | Show version                         |
+| `:LTerm`             | `lirtepl repl [T]`               | Open the terminal to the interpreter |
+| `:LOpenErr`          | `litrepl ...  2>F`               | Open the stderr window               |
+| `:LVersion`          | `litrepl --version`              | Show version                         |
 
 Where
 
-* `F` denotes the document
-* `P` denotes the Python code
-* `N` denotes the number of code section starting from 0.
+* `T` type of the interpreter: `python` or `ai` (some commands also accept `all`)
+* `F` Path to a Markdown or LaTeX file
+* `P` Path to a Python script
+* `N` number of code section to evaluate, starting from 0.
 * `L:C` denotes line:column of the cursor.
-
 
 #### Variables and arguments
 
 | Vim setting  <img width=200/>   | CLI argument  <img width=200/> | Description                       |
 |---------------------------------|--------------------------------|-----------------------------------|
-| `set filetype`                  | `--filetype=T`                 | Input file type: `latex`\|`markdown` |
-| `let g:litrepl_interpreter=EXE` | `--interpreter=I`              | The interpreter to use: `python`\|`ipython`\|`auto` (the default) |
+| `set filetype`                  | `--filetype=D`                 | Input file type: `latex`\|`markdown` |
+| `let g:litrepl_python_interpreter=B` | `--python-interpreter=B`  | The Python interpreter to use: `python`\|`ipython`\|`auto` (the default) |
+| `let g:litrepl_ai_interpreter=B`     | `--ai-interpreter=B`      | The AI interpreter to use: `gpt4all-cli`\|`auto` (the default) |
 | `let g:litrepl_debug=0/1`       | `--debug=0/1`                  | Print debug messages to the stderr |
 | `let g:litrepl_timeout=FLOAT`   | `--timeout=FLOAT`              | Timeout to wait for the new executions, in seconds, defaults to inf |
 
-* `T` - file type: `tex` or `markdown` (the default).
-* `I` is taken into account by the `start` command or by the first call to
-  `eval-sections`.
+* `D` type of the document: `tex` or `markdown` (the default).
+* `B` interpreter binary to use, defaults to `auto` which guesses the best one.
 * `FLOAT` should be formatted as `1` or `1.1` or `inf`. Note: command line
   argument also accepts a pair of timeouts.
 
@@ -220,13 +220,13 @@ More arguments are available, see `help`.
 To evaluate code section in a document:
 
 ```sh
-$ cat doc/example.md | litrepl --interpreter=ipython eval-sections >output.md
+$ cat doc/example.md | litrepl eval-sections >output.md
 ```
 
 To evaluate a Python script:
 
 ```sh
-$ cat script.py | litrepl --interpreter=ipython eval-code
+$ cat script.py | litrepl eval-code
 ```
 
 Note that both commands above share the same background interpreter session.
