@@ -54,9 +54,9 @@ setup(
   scripts=['./python/bin/litrepl'],
   python_requires='>=3.6',
   author="Sergei Mironov",
-  author_email="grrwlf@gmail.com",
-  description="LitREPL is a macroprocessing Python library for Litrate "\
-              "programming and code execution.",
+  author_email="sergei.v.mironov@proton.me",
+  url='https://github.com/sergei-mironov/litrepl',
+  description="LitREPL is a command-line tool and a Vim plugin for code snippet execution.",
   classifiers=[
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
