@@ -364,12 +364,8 @@ for i in tqdm(range(4)):
 ```lresult
 ```
 EOF
-cat source.md | runlitrepl --filetype=markdown --timeout-initial=1 eval-sections '0..$' >out1.md
-cat out1.md | runlitrepl \
-  --filetype=markdown \
-  --timeout-continue=1 \
-  --pending-exit=33 \
-  eval-sections '0..$' >out2.md ||
+cat source.md | runlitrepl --filetype=markdown --timeout=1,inf eval-sections >out1.md
+cat out1.md | runlitrepl --filetype=markdown --timeout=inf,1 --pending-exit=33 eval-sections >out2.md ||
 test "$?" = "33"
 grep -q 'BG' out2.md
 runlitrepl stop
@@ -680,8 +676,7 @@ runlitrepl --type=python --verbose status >status1.txt || true
 grep -q '?' status1.txt
 cat source.md | runlitrepl \
   --filetype=markdown \
-  --timeout-initial=1 \
-  --timeout-continue=1 \
+  --timeout=1,1 \
   eval-sections '0..$' >out.md
 runlitrepl --type=python status >status2.txt
 grep -q -v '?' status2.txt
@@ -702,7 +697,7 @@ while True:
 EOF
 cat source.md | runlitrepl \
   --filetype=markdown \
-  --timeout-initial=0 \
+  --timeout=0,inf \
   eval-sections '0..$' >out1.md
 grep -q 'BG' out1.md
 sleep 1 # IPython seems to die without this delay

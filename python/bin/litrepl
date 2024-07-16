@@ -15,8 +15,8 @@ if __name__=='__main__':
   ap.add_argument('-v','--version',action='version',version=__version__ or '?',help='Print the version')
   ap.add_argument('--filetype',metavar='STR',default='markdown',help='markdown|tex')
   ap.add_argument('--interpreter',metavar='EXE',default='auto',help='python|ipython|auto')
-  ap.add_argument('--timeout-initial',type=str,metavar='SEC',default='inf')
-  ap.add_argument('--timeout-continue',type=str,metavar='SEC',default='inf')
+  ap.add_argument('--timeout',type=str,metavar='SEC[,SEC]',default='inf',
+                  help='Timeouts in seconds: for initial evaluation, for pending check')
   ap.add_argument('--propagate-sigint',action='store_true',help='Propagate sigint to the background interpeter')
   ap.add_argument('-d','--debug',type=int,metavar='LEVEL',default=0)
   ap.add_argument('--verbose',action='store_true',help='Be verbose')
@@ -47,8 +47,10 @@ if __name__=='__main__':
   ips.add_argument('locs',metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
   a=ap.parse_args(sys.argv[1:])
 
-  a.timeout_initial=float(a.timeout_initial)
-  a.timeout_continue=float(a.timeout_continue)
+  timeouts=a.timeout.split(',')
+  assert len(timeouts) in {1,2}, f"invalid timeout value {timeouts}"
+  a.timeout_initial=float(timeouts[0])
+  a.timeout_continue=float(timeouts[1] if len(timeouts)==2 else timeouts[0])
 
   if a.exception_exit:
     a.exception_exit=int(a.exception_exit)

@@ -92,8 +92,7 @@ fun LitReplRun_(command,timeout_initial,timeout_continue,pos)
   " Execute the selected code blocks
   let cmdline = '%!'.LitReplCmd().
         \ ' --interpreter='.g:litrepl_interpreter.
-        \ ' --timeout-initial='.a:timeout_initial.
-        \ ' --timeout-continue='.a:timeout_continue.
+        \ ' --timeout='.a:timeout_initial.','.a:timeout_continue.
         \ ' --pending-exit='.g:litrepl_pending.
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.

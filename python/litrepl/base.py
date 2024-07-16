@@ -264,11 +264,6 @@ def result_postprocess_ipython(a:LitreplArgs, text:str) -> str:
                'History logging moved to new session [0-9]+\\n')
   return re.sub(r,'',text)
 
-# def code_preprocess_ipython(code:str) -> str:
-#   return fillspaces(code, '# spaces')
-# def result_postprocess_ipython(text:str) -> str:
-#   return text
-
 def code_preprocess_python(a:LitreplArgs, code:str) -> str:
   return fillspaces(code, '# spaces')
 def code_preprocess_gpt4allcli(a:LitreplArgs, code:str) -> str:
