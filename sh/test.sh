@@ -271,6 +271,12 @@ ZZZZZ
 \begin{lresult}
 PLACEHOLDER
 \end{lresult}
+\begin{python}
+print('FOOO')
+\end{python}
+%result
+PLACEHOLDER
+%noresult
 EOF
 cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
 diff -u source.tex out.tex
@@ -310,6 +316,12 @@ ZZZZZ
 %lnoignore
 \begin{lresult}
 \end{lresult}
+\begin{python}
+print('FOOO')
+\end{python}
+%result
+FOOO
+%noresult
 EOF
 )} #}}}
 

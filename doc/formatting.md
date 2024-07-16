@@ -32,25 +32,14 @@ Hello, World!
 ```
 ~~~~
 
-Markdown comments taged with `python` and `result`/`noresult` (see an example
-below) also mark executable and result sections. This syntax allows evaluation
-of hidden blocks.
+Markdown comments tagged with `result`/`noresult` (see an example below) also
+mark result sections. This syntax allows emitting parts of Markdown document.
 
 ~~~~
-<!-- python
-print("Hello, LitREPL")
--->
-
-<!-- result
-Hello, LitREPL
--->
-
 <!-- result -->
-Hello, LitREPL
+Hello, World!
 <!-- noresult -->
 ~~~~
-
-The latter variant allows emitting parts of Markdown document.
 
 
 ### Converting to Jupyter Notebook
@@ -111,59 +100,61 @@ Latex
 
 ### Syntax
 
+LitREPL treats `\begin{python}\end{python}` environment as code sections and
+`\begin{result}\end{result}` environment as result sections. The names are
+currently hardcoded into the simplified LitREPL parser. Wrapping it in other
+tags is not allowed.
+
+LaTeX does not know anything about these environments by default, so we need to
+introduce these environments in the preamble:
+
 ~~~~ latex
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \begin{document}
 
-LitREPL treats \texttt{lcode} environment as code sections and \texttt{lresult}
-environment as result sections. The names are currently hardcoded into the
-simplified LitREPL parser. Wrapping it in other tags is not allowed.
-
-LaTeX does not know anything about these environments by default, we need to
-introduce them to be able to compile the document using e.g. \texttt{pdflatex}.
-
-\newenvironment{lcode}{\begin{texttt}}{\end{texttt}}
-\newenvironment{lresult}{\begin{texttt}}{\end{texttt}}
+\newenvironment{python}{\begin{texttt}}{\end{texttt}}
+\newenvironment{result}{\begin{texttt}}{\end{texttt}}
 \newcommand{\linline}[2]{#2}
 
-Executable section is the text between the \texttt{lcode} begin/end tags.
+\begin{document}
+...
+\end{document}
+~~~~
 
-\begin{lcode}
+Executable sections is the document are enclosed with the `python` tags, results
+- wtih `result` tags:
+
+~~~~
+
+\begin{python}
 W='Hello, World!'
 print(W)
-\end{lcode}
+\end{python}
 
-Putting the cursor on it and typing the \texttt{:LitEval1} runs the code in the
-background Python interpreter.
-
-\texttt{lresult} begin/end tags mark the result section.  LitREPL replaces its
-content with the above code section's execution result.
-
-\begin{lresult}
+\begin{result}
 Hello, World!
-\end{lresult}
+\end{result}
 
-LitREPL recognizes \texttt{l[no]code}/\texttt{l[no]result} comments as
-code/result section markers. This way we can use Python to produce LaTeX markup
-as output.
+~~~~
 
-%lcode
-print("Hi!")
-%lnocode
+LitREPL recognizes `result`/`noresult` LaTeX comments as result section markers.
+This way we can use Python to emit LaTeX markup as output.
 
-%lresult
-Hi!
-%lnoresult
+~~~~
 
-Additionally, VimREPL recognises \texttt{linline} 2-argument tags. The first
-arguement is treaten as a Python printable expression. The second arguemnt is to
-be replaced with the printing output. In our simplified definition, we simply
-ignore the first argument and paste the second to the LaTeX processor as-is.
+%result
+Hello, World!
+%noresult
 
+~~~~
+
+Additionally, LitREPL recognises `linline` 2-argument tags. The first arguement
+is treated as a Python printable expression. The second arguemnt is an immediate
+result section where the value of expression will be placed.
+
+~~~~
 \linline{W}{Hello, World!}
-
-\end{document}
 ~~~~
 
 ### Python code highlighting
