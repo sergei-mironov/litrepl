@@ -634,6 +634,30 @@ grep -q '^result-2' file.md
 )}
 #}}}
 
+test_vim_lmon() {( #{{{
+mktest "_test_vim_lmon"
+runlitrepl start
+
+cat >file.md <<"EOF"
+``` python
+for i in range(4):
+  sleep(0.5)
+  print(i, end='')
+print()
+```
+
+``` result
+```
+EOF
+
+runvim file.md >_vim.log 2>&1 <<"EOF"
+:LMon
+:wq!
+EOF
+grep -q -v '1234' file.md
+)}
+#}}}
+
 test_foreground() {( #{{{
 mktest "_test_foreground"
 runlitrepl start
@@ -731,6 +755,7 @@ tests() {
   echo test_exception_errcode
   echo test_vim_leval_cursor
   echo test_vim_leval_explicit
+  echo test_vim_lmon
   echo test_foreground
   echo test_status
   echo test_interrupt

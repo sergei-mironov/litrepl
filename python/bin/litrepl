@@ -11,7 +11,7 @@ from tempfile import mkdtemp
 LOCSHELP='(N|$|N..N)[,(...)] where N is either: number,$,ROW:COL'
 
 if __name__=='__main__':
-  ap=ArgumentParser(prog='litrepl.py')
+  ap=ArgumentParser(prog='litrepl')
   ap.add_argument('-v','--version',action='version',version=__version__ or '?',help='Print the version')
   ap.add_argument('--filetype',metavar='STR',default='markdown',help='markdown|tex')
   ap.add_argument('--interpreter',metavar='EXE',default='auto',help='python|ipython|auto')

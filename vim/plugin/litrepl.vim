@@ -126,7 +126,7 @@ fun! LitReplRun(command, timeout, pos)
   endif
 endfun
 
-" Continuosly run litrepl until an error or complet
+" Continuosly run litrepl until error or completion
 fun! LitReplMonitor(command, pos)
   let cur = getcharpos('.')
   try
