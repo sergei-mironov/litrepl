@@ -689,49 +689,52 @@ def solve_sloc(s:str, tree)->SecRec:
                 else _safeset(lambda:[_get(q[0])]) for q in qs]),
     ppi.pending)
 
-def status(a:LitreplArgs,st:SType,version:str)->int:
-  fns=pipenames(a,st)
-  auxd,inp,outp,pidf,_=astuple(fns)
+def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
   print(f"version: {version}")
   print(f"workdir: {getcwd()}")
-  print(f"auxdir: {auxd}")
-  try:
-    pid=open(pidf).read().strip()
-    print(f"interpreter pid: {pid}")
-  except Exception:
-    print(f"interpreter pid: ?")
-  t=parse_(GRAMMARS[a.filetype], a.tty)
-  sr=solve_sloc('0..$',t)
-  for nsec,pend in sr.pending.items():
-    fname=pend.fname
-    print(f"pending section {nsec} buffer: {fname}")
+  print(f"litrepl PATH: {environ.get('PATH','')}")
+  ecodes=set()
+  for st in sts:
+    fns=pipenames(a,st)
+    auxd,inp,outp,pidf,_=astuple(fns)
+    print(f"{st2name(st)} interpreter auxdir: {auxd}")
     try:
-      for bline in check_output(['lsof','-t',fname], stderr=DEVNULL).split(b'\n'):
-        line=bline.decode('utf-8')
-        if len(line)==0:
-          continue
-        print(f"pending section {nsec} reader: {line}")
-    except CalledProcessError:
-      print(f"pending section {nsec} reader: ?")
-  if a.verbose:
+      pid=open(pidf).read().strip()
+      print(f"{st2name(st)} interpreter pid: {pid}")
+    except Exception:
+      print(f"{st2name(st)} interpreter pid: ?")
+
+    t=parse_(GRAMMARS[a.filetype], a.tty)
+    sr=solve_sloc('0..$',t)
+    for nsec,pend in sr.pending.items():
+      fname=pend.fname
+      print(f"{st2name(st)} pending section {nsec} buffer: {fname}")
+      try:
+        for bline in check_output(['lsof','-t',fname], stderr=DEVNULL).split(b'\n'):
+          line=bline.decode('utf-8')
+          if len(line)==0:
+            continue
+          print(f"{st2name(st)} pending section {nsec} reader: {line}")
+      except CalledProcessError:
+        print(f"{st2name(st)} pending section {nsec} reader: ?")
     if st==SType.SPython:
       ss=settings(fns)
-      print(f"litrepl PATH: {environ.get('PATH','')}")
       try:
         assert ss is not None
         interpreter_path=eval_code(a,fns,ss,'\n'.join(["import os","print(os.environ.get('PATH',''))"]))
-        print(f"interpreter PATH: {interpreter_path.strip()}")
+        print(f"{st2name(st)} interpreter PATH: {interpreter_path.strip()}")
       except Exception:
-        print(f"interpreter PATH: ?")
+        print(f"{st2name(st)} interpreter PATH: ?")
       try:
         assert ss is not None
         interpreter_pythonpath=eval_code(a,fns,ss,'\n'.join(["import sys","print(':'.join(sys.path))"]))
-        print(f"interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
+        print(f"{st2name(st)} interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
       except Exception:
-        print(f"interpreter PYTHONPATH: ?")
+        print(f"{st2name(st)} interpreter PYTHONPATH: ?")
     elif st==SType.SAI:
       pass
     else:
       raise NotImplementedError(f'Unsupported type {st}')
-  ecode=interpExitCode(fns,undefined=200)
-  return ecode
+    ecode=interpExitCode(fns,undefined=200)
+    ecodes.add(0 if ecode is None else ecode)
+  return max(ecodes)

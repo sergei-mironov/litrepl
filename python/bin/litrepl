@@ -159,15 +159,15 @@ if __name__=='__main__':
       st=name2st(a.type)
       with with_parent_finally(partial(_foreground_stop,st)):
         start(a,st)
-        ecode=status(a,st,__version__)
+        ecode=status_verbose(a,[st],__version__)
       exit(0 if ecode is None else ecode)
     else:
-      ecodes=set()
+      sts=[]
       for st in SType:
         if a.type in {st2name(st),"all",None}:
-          ecodes.add(status(a,st,__version__))
-      pdebug(f"ecodes: {ecodes}")
-      exit(0 if len(ecodes - {0,None})==0 else 1)
+          sts.append(st)
+      ecode=status_verbose(a,sts,__version__)
+      exit(0 if ecode is None else ecode)
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)
