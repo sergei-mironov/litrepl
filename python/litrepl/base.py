@@ -569,7 +569,7 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
         cl=max(threshold,cl+diff)
     with open(a.map_cursor_output,"w") as f:
       f.write(str(cl))
-  if a.standalone_session:
+  if a.foreground:
     for st in stypes:
       stop(a,st)
   pdebug(f"Returning {ecode}")

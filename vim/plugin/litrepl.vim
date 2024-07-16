@@ -83,7 +83,7 @@ fun! LitReplUpdateCursor(cur)
   call setcharpos('.',cur)
 endfun
 
-fun LitReplRun_(command,timeout_initial,timeout_continue,pos)
+fun LitReplRun_(command, timeout, pos)
   let ft = &filetype
   let cur = getcharpos('.')
   let cmd = a:command . " " . a:pos
@@ -92,7 +92,7 @@ fun LitReplRun_(command,timeout_initial,timeout_continue,pos)
   " Execute the selected code blocks
   let cmdline = '%!'.LitReplCmd().
         \ ' --interpreter='.g:litrepl_interpreter.
-        \ ' --timeout='.a:timeout_initial.','.a:timeout_continue.
+        \ ' --timeout='.a:timeout.
         \ ' --pending-exit='.g:litrepl_pending.
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.
@@ -104,10 +104,10 @@ fun LitReplRun_(command,timeout_initial,timeout_continue,pos)
   return v:shell_error
 endfun
 
-fun! LitReplRun(command,timeout_initial,timeout_continue,pos)
+fun! LitReplRun(command, timeout, pos)
   let cur = getcharpos('.')
   let command = '--propagate-sigint ' . a:command
-  let errcode = LitReplRun_(command, a:timeout_initial, a:timeout_continue, a:pos)
+  let errcode = LitReplRun_(command, a:timeout, a:pos)
   if errcode == 0 || errcode == g:litrepl_pending
     let g:litrepl_laspos = a:pos
     if errcode == 0
@@ -131,7 +131,7 @@ fun! LitReplMonitor(command, pos)
   let cur = getcharpos('.')
   try
     while 1
-      let code = LitReplRun_(a:command, g:litrepl_timeout, 0.0, a:pos)
+      let code = LitReplRun_(a:command, g:litrepl_timeout.'0.0', a:pos)
       if code == 0
         call LitReplUpdateCursor(cur)
         break
@@ -172,13 +172,13 @@ fun! s:Pos(arg)
   endif
 endfun
 
-command! -bar -nargs=? LEval call LitReplRun("eval-sections", "inf", "inf", <SID>Pos(<q-args>))
-command! -bar -nargs=? LEvalAsync call LitReplRun("eval-sections", g:litrepl_timeout, 0.0, <SID>Pos(<q-args>))
-command! -bar -nargs=0 LEvalLast call LitReplRun("eval-sections", "inf", "inf", g:litrepl_lastcur)
-command! -bar -nargs=? LEvalAbove call LitReplRun("eval-sections", "inf", "inf", "0..".<SID>Pos(<q-args>))
-command! -bar -nargs=? LEvalBelow call LitReplRun("eval-sections", "inf", "inf", <SID>Pos(<q-args>)."..$")
-command! -bar -nargs=0 LEvalAll call LitReplRun("eval-sections", "inf", "inf", "0..$")
-command! -bar -nargs=? LInterrupt call LitReplRun("interrupt", 1.0, 1.0, <SID>Pos(<q-args>))
+command! -bar -nargs=? LEval call LitReplRun("eval-sections", "inf,inf", <SID>Pos(<q-args>))
+command! -bar -nargs=? LEvalAsync call LitReplRun("eval-sections", g:litrepl_timeout.'0.0', <SID>Pos(<q-args>))
+command! -bar -nargs=0 LEvalLast call LitReplRun("eval-sections", "inf,inf", g:litrepl_lastcur)
+command! -bar -nargs=? LEvalAbove call LitReplRun("eval-sections", "inf,inf", "0..".<SID>Pos(<q-args>))
+command! -bar -nargs=? LEvalBelow call LitReplRun("eval-sections", "inf,inf", <SID>Pos(<q-args>)."..$")
+command! -bar -nargs=0 LEvalAll call LitReplRun("eval-sections", "inf,inf", "0..$")
+command! -bar -nargs=? LInterrupt call LitReplRun("interrupt", "1.0,1.0", <SID>Pos(<q-args>))
 command! -bar -nargs=? LMon call LitReplMonitor("eval-sections", <SID>Pos(<q-args>))
 
 command! -bar -nargs=0 LStatus call LitReplStatus()

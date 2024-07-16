@@ -634,8 +634,8 @@ grep -q '^result-2' file.md
 )}
 #}}}
 
-test_standalone_session() {( #{{{
-mktest "_test_standalone_session"
+test_foreground() {( #{{{
+mktest "_test_foreground"
 runlitrepl start
 
 cat >source.md <<"EOF"
@@ -643,7 +643,7 @@ cat >source.md <<"EOF"
 session='common-session'
 ```
 ``` python
-session='standalone-session'
+session='foreground'
 ```
 ``` python
 print(session)
@@ -653,8 +653,8 @@ print(session)
 EOF
 cat source.md | runlitrepl --filetype=markdown eval-sections '0,2' >out1.md
 grep -q "^common-session" out1.md
-cat source.md | runlitrepl --standalone-session --filetype=markdown eval-sections '1,2' >out2.md
-grep -q "^standalone-session" out2.md
+cat source.md | runlitrepl --foreground --filetype=markdown eval-sections '1,2' >out2.md
+grep -q "^foreground" out2.md
 cat source.md | runlitrepl --filetype=markdown eval-sections '2' >out3.md
 grep -q "^common-session" out3.md
 )} #}}}
@@ -731,7 +731,7 @@ tests() {
   echo test_exception_errcode
   echo test_vim_leval_cursor
   echo test_vim_leval_explicit
-  echo test_standalone_session
+  echo test_foreground
   echo test_status
   echo test_interrupt
 }
