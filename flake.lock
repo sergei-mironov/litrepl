@@ -6,11 +6,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1720703396,
-        "narHash": "sha256-/B21F+0xB1g9/NyYSVuK/MGE//XwJZ0hWw8PCnlaus4=",
+        "lastModified": 1721164546,
+        "narHash": "sha256-WuycJwDbT2mwnJr6Z03yaUL7JDG03T/YkK7dr4fm0l8=",
         "owner": "sergei-mironov",
         "repo": "gpt4all-cli",
-        "rev": "ece4e4581f8d08ae077194854e077d663da5ab61",
+        "rev": "2574d1c40dab28cc80991d94e2e066d3c4de5a68",
         "type": "github"
       },
       "original": {
