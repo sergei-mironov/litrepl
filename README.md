@@ -157,12 +157,10 @@ use `:LStatus` in vim or `litrepl status` command line to know its status:
 
 ``` sh
 $ litrepl status
-python 3718077    -   python3 -m IPython --config=/tmp/nix-shell.KcUxp9/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
+# Format:
+# TYP  PID      ECODE  CMD
+python 3718077  -      python3 -m IPython --config=/tmp/nix-shell.KcUxp9/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
 ```
-
-The format is: `ITYPE PID EXITCODE CMD..`, where `ITYPE` is either `python` or
-`ai` (see below), `EXITCODE` is the exit code of the interpreter that was
-stopped.
 
 In order to attach to the running interpreter and examine its state, one might
 use `repl` command.  Note: Litrepl disables command line propmts so `>>>`
