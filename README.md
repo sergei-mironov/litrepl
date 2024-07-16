@@ -131,7 +131,6 @@ Create separate `python` and `result` sections within your Markdown or LaTeX
 document. Insert Python code into the 'python' section, then use the `:LEval`
 command to execute that section at the cursor location.
 
-    ~~~~
     Markdown                             LaTeX
     --------                             -----
 
@@ -143,8 +142,6 @@ command to execute that section at the cursor location.
     ``` result                           \begin{result}
     Hello Markdown!                      Hello LaTeX!
     ```                                  \end{result}
-    ~~~~
-
 
 See also:
 - [Formatting Markdown documents](./doc/formatting.md#markdown)
@@ -158,7 +155,6 @@ query local LLMs. In order to try it, install the GPT4All-cli and use `ai` as
 the name for code sections. For low-speed models it would be convenient to use
 `:LMon` command rather then `:LEval`.
 
-    ~~~
     ``` ai
     /model Meta-Llama-3-8B-Instruct.Q4_0.gguf
     Hi chat! What is your name?
@@ -169,7 +165,6 @@ the name for code sections. For low-speed models it would be convenient to use
     any questions you might have and provide information on a wide range of topics.
     How can I assist you today?
     ```
-    ~~~
 
 ### Reference
 
