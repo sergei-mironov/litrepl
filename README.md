@@ -185,7 +185,7 @@ the name for code sections. For low-speed models it would be convenient to use
 `:LEvalMon` command rather then `:LEval` for evaluation.
 
     ``` ai
-    /model "Meta-Llama-3-8B-Instruct.Q4_0.gguf"
+    /model "~/.local/share/nomic.ai/GPT4All/Meta-Llama-3-8B-Instruct.Q4_0.gguf"
     Hi chat! What is your name?
     ```
 

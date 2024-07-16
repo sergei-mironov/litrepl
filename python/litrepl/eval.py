@@ -130,7 +130,7 @@ def merge_rn2(buf_,r,i_n=-1)->Tuple[bytes,int]:
 
 def mkre(prompt:str):
   """ Create the regexp that matches everything ending with a `prompt` """
-  return re.compile(f"(.*)(?={prompt})|{prompt}".encode('utf-8'),
+  return re.compile(f"(.*)(?={prompt})".encode('utf-8'),
                     re.A|re.MULTILINE|re.DOTALL)
 
 
@@ -396,6 +396,6 @@ def rresultLoad(text:str)->Tuple[str,Optional[RunResult]]:
 def rresultSave(text:str, presult:RunResult)->str:
   """ Saves uncompleted RunRestult into the response text in order to load and
   check it later. """
-  return (text+f"\n[BG:{presult.fname}]\n"
-          "<Re-evaluate to update>\n")
+  sep='\n' if text and text[-1]!='\n' else ''
+  return (text+f"{sep}[BG:{presult.fname}]\n")
 
