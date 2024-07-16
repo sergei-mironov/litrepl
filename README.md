@@ -158,7 +158,7 @@ Litrepl experimentally supports
 [GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli) allowing users to
 query local LLMs. In order to try it, install the interpreter and use `ai` as
 the name for code sections. For low-speed models it would be convenient to use
-`:LMon` command rather then `:LEval` for evaluation.
+`:LEvalMon` command rather then `:LEval` for evaluation.
 
     ``` ai
     /model "Meta-Llama-3-8B-Instruct.Q4_0.gguf"
@@ -187,7 +187,7 @@ the name for code sections. For low-speed models it would be convenient to use
 | `:LEvalAll`          | `lirtepl eval-sections <F`       | Evaluate all code sections  |
 | `:LEvalAsync N`      | `lirtepl --timeout=0.5,0 eval-sections N <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
 | `:LInterrupt N`      | `lirtepl interrupt N <F`         | Send Ctrl+C signal to the interpreter and get a feedback |
-| `:LMon`              | `while .. do .. done`            | Monitor asynchronous code evaluation |
+| `:LEvalMon`          | `while .. do .. done`            | Monitor asynchronous code evaluation |
 | N/A                  | `lirtepl eval-code <P`           | Evaluate the given Python code |
 | `:LTerm`             | `lirtepl repl [T]`               | Open the terminal to the interpreter |
 | `:LOpenErr`          | `litrepl ...  2>F`               | Open the stderr window               |

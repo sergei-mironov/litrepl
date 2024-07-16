@@ -651,7 +651,7 @@ print()
 EOF
 
 runvim file.md >_vim.log 2>&1 <<"EOF"
-:LMon
+:LEvalMon
 :wq!
 EOF
 grep -q -v '1234' file.md

@@ -189,7 +189,7 @@ command! -bar -nargs=? LEvalAbove call LitReplRun("eval-sections", "inf,inf", "0
 command! -bar -nargs=? LEvalBelow call LitReplRun("eval-sections", "inf,inf", <SID>Pos(<q-args>)."..$")
 command! -bar -nargs=0 LEvalAll call LitReplRun("eval-sections", "inf,inf", "0..$")
 command! -bar -nargs=? LInterrupt call LitReplRun("interrupt", "1.0,1.0", <SID>Pos(<q-args>))
-command! -bar -nargs=? LMon call LitReplMonitor("eval-sections", <SID>Pos(<q-args>))
+command! -bar -nargs=? LEvalMon call LitReplMonitor("eval-sections", <SID>Pos(<q-args>))
 command! -bar -nargs=0 LStatus call LitReplStatus()
 
 let g:litrepl_loaded = 1
