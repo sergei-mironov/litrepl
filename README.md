@@ -223,7 +223,7 @@ W = 'Hello from repl'
 * The corresponding Vim command is `:LTerm`
 
 
-`litrepl eval-code` might be used to send the code right to the interpreter. The
+`litrepl eval-code` might be used to pipe the code through the interpreter. The
 `W` variable now resides in memory so we can query it as we would do in a
 regular IPython session.
 
