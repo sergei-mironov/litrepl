@@ -1,12 +1,9 @@
 LitREPL
 =======
 
-**LitREPL** is a command-line text processing tool for code evaluation aimed at
-combining
-[literate programming](https://en.wikipedia.org/wiki/Literate_programming)
-with the
-[read-eval-print-loop](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)
-development.
+**LitREPL** is a command-line tool that brings together the benefits of
+[literate programming](https://en.wikipedia.org/wiki/Literate_programming) and
+[interactive coding](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop).
 
 ![2024-02-24 02-29-19](https://github.com/grwlf/litrepl.vim/assets/4477729/73fd31f6-2b2a-4193-b63e-5c163272a9d8)
 
@@ -37,7 +34,7 @@ Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
-    * [Quick start](#quick-start)
+    * [Overview](#overview)
         * [Python](#python)
         * [AI](#ai)
     * [Reference](#reference)
@@ -67,7 +64,7 @@ Installation
 
 This repository includes the Litrepl tool in Python and an interface Vim plugin.
 The Python part might be installed with `pip install .` run from the project
-folder. The Vim part requires hand-copying `./vim/plugin/litrepl.vim` to a
+folder. The Vim part requires hand-copying `./vim/plugin/litrepl.vim` to the
 `~/.vim` config folder or using any Vim plugin manager, e.g. Vim-Plug.
 
 The repository also includes a set of Nix expressions that automate installation
