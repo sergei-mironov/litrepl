@@ -36,7 +36,7 @@ Contents
 * [Installation](#installation)
 * [Usage](#usage)
     * [Overview](#overview)
-        * [Evaluating sections](#evaluating-sections)
+        * [Basic evaluation](#basic-evaluation)
         * [Managing sessions](#managing-sessions)
         * [Examining internal state](#examining-internal-state)
         * [Communicating with AI (Experimental)](#communicating-with-ai-experimental)
