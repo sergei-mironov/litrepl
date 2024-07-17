@@ -157,7 +157,8 @@ EOF
 $ cat file.md | litrepl eval-sections
 ~~~~
 
-would produce a Markdown document containing properly filled result section.
+.. would produce a Markdown document containing the properly filled result
+section.
 
 ~~~~ markdown
 ``` python
