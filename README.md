@@ -194,7 +194,7 @@ Hello LaTeX!
   - [Formatting LaTeX documents](./doc/formatting.md#latex)
 
 
-`litrepl status` allows to query information about the interpreters running in
+`litrepl status` allows querying the information about the interpreters running in
 the background. The command reveals the process PID and the command-line arguments.
 
 
