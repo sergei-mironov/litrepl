@@ -261,7 +261,7 @@ the control earlier (with an exception).
 #### Examining internal state
 
 `litrepl repl` "manually" attaches to the interpreter session allowing us to
-examine the session:
+examine its internal state:
 
 ``` shell
 $ litrepl repl
