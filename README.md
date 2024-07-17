@@ -38,6 +38,7 @@ Contents
     * [Overview](#overview)
         * [Basic evaluation](#basic-evaluation)
         * [Managing sessions](#managing-sessions)
+        * [Asynchronous execution](#asynchronous-execution)
         * [Examining internal state](#examining-internal-state)
         * [Communicating with AI (Experimental)](#communicating-with-ai-experimental)
     * [Reference](#reference)
@@ -218,6 +219,44 @@ ai     3904696  -         gpt4all-cli --readline-prompt=
 * The corresponding Vim commands are `:LStart`, `:LStop`, `:LRestart` and
   `:LStatus`
 
+
+#### Asynchronous execution
+
+Litrepl can produce output document earlier than the interpreter reports the
+completion. In cases where the evaluation takes longer to finish, LitREPL will
+leave a marker that allows it to pick up where it left off on subsequent
+executions.
+
+`litrepl --timeout=3.5 eval-sections` changes the reading timeout from the
+default infinity the specified number of seconds. The output would be:
+
+~~~~ markdown
+``` python
+from tqdm import tqdm
+from time import sleep
+for i in tqdm(range(10)):
+  sleep(1)
+```
+
+``` result
+ 30%|███       | 3/10 [00:03<00:07,  1.00s/it]
+[BG:/tmp/nix-shell.vijcH0/litrepl_1000_a2732d/python/litrepl_eval_5503542553591491252.txt]
+```
+~~~~
+
+When re-executing this document, LitREPL will resume the reading. Once the
+evaluation is complete, it will remove any continuation markers from the output
+section.
+
+`litrepl interrupt` will send interrupt signal to the interpreter so it return
+the control earlier (with an exception).
+
+* The corresponding Vim commands are `:LEvalAsyn` (with the timeout set to 0.5
+  seconds by default) and `:LInterrupt`.
+* Vim plugin defines `:LEvalMon` command that enables repeated code evaluation
+  without any delay. Interrupting this process using Ctrl+C will cause Litrepl
+  to return control to the editor while leaving the evaluation in the
+  background.
 
 #### Examining internal state
 
