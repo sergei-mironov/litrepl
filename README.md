@@ -218,12 +218,14 @@ W = 'Hello from repl'
 ^D
 ```
 
-* Usual Python interpreter propmts are disabled internally, so `>>>` symbols are
-  not going to appear. `W` variable now resides in memory and could be queried
-  during subsequent evaluations.
+* Python interpreter propmts are disabled internally, no `>>>` symbols are
+  going to appear.
 * The corresponding Vim command is `:LTerm`
 
-`litrepl eval-code` might be used to send the code right away
+
+`litrepl eval-code` might be used to send the code right to the interpreter. The
+`W` variable now resides in memory so we can query it as we would do in a
+regular IPython session.
 
 ``` shell
 $ echo 'W' | litrepl eval-code
