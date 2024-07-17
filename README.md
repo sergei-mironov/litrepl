@@ -1,10 +1,12 @@
 LitREPL
 =======
 
-**LitREPL** is a command-line text processing tool for code evaluation
-aimed at enabling
+**LitREPL** is a command-line text processing tool for code evaluation aimed at
+combining
 [literate programming](https://en.wikipedia.org/wiki/Literate_programming)
-experience in common editors.
+with the
+[read-eval-print-loop](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)
+development.
 
 ![2024-02-24 02-29-19](https://github.com/grwlf/litrepl.vim/assets/4477729/73fd31f6-2b2a-4193-b63e-5c163272a9d8)
 
@@ -125,13 +127,42 @@ See the [Development](#development) section for more details.
 Usage
 -----
 
-### Quick start
+### Overview
+
+Litrepl sends verbatim document sections to third-party interpreters and
+receives results of the evaluation.
 
 #### Python
 
-Create separate `python` and `result` sections within your Markdown or LaTeX
-document. Insert Python code into the 'python' section, then use the `:LEval`
-command to execute that section at the cursor location.
+Litrepl recognises sequences of verbatim code sections followed by zero
+or more result sections. In Markdown documents, the code is any triple-quoted section
+labeled as `python`. The result is any triple-quoted `result` section. For LaTeX
+documents, Litrepl recognizes `\begin{python}\end{python}` and
+`\begin{result}\end{result}` environments.
+
+To evaluate the formatted document, you can send it to the `litrepl
+eval-sections` shell command, which will trigger the evaluation. Alternatively,
+Litrepl provides a Vim plugin that allows you to use the `:LEval` command to
+evaluate the section under your cursor in a similar manner.
+
+For example:
+
+~~~~ shell
+$ (
+cat <<"EOF"
+``` python
+print('Hello Markdown!')
+```
+
+``` result
+```
+EOF
+) | litrepl eval-sections
+~~~~
+
+would produce a Markdown document containing properly filled result section.
+Below we show how both Markdown and LaTeX "Hello world" results look like:
+
 
     Markdown                             LaTeX
     --------                             -----
@@ -145,35 +176,40 @@ command to execute that section at the cursor location.
     Hello Markdown!                      Hello LaTeX!
     ```                                  \end{result}
 
-Note: LaTeX documents need a preamble introducing python/result tags to the
-text processor. For details, see:
-- [Formatting Markdown documents](./doc/formatting.md#markdown)
-- [Formatting LaTeX documents](./doc/formatting.md#latex)
+Notes:
+
+* Litrepl expects Markdown formatting by default. Add `--filetype=tex` for Tex
+  documents. Vim plugin does this automatically based on the `filetype`
+  variable.
+* LaTeX documents need a preamble introducing python/result tags to the Tex processor.
+  For details, see:
+  - [Formatting Markdown documents](./doc/formatting.md#markdown)
+  - [Formatting LaTeX documents](./doc/formatting.md#latex)
 
 
-Litrepl leaves the Python interpreter running in the background, its input and
-output pipes are associated with the folder where the document resides. We can
-use `:LStatus` in vim or `litrepl status` command line to know its status:
+By default, Litrepl leaves the interpreter running in the background, associated
+with the current directory. `litrepl status` reveals its PID and command-line
+arguments:
 
 ``` shell
 $ litrepl status
 # Format:
-# TYP  PID      ECODE  CMD
-python 3718077  -      python3 -m IPython --config=/tmp/nix-shell.KcUxp9/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
+# TYP  PID      EXITCODE  CMD
+python 3718077  -         python3 -m IPython --config=/tmp/nix-shell.KcUxp9/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
 ```
 
-In order to attach to the running interpreter and examine its state, one might
-use `repl` command.  Note: Litrepl disables command line propmts so `>>>`
-symbols are not going to appear. Here we assign a Python variable and then detach.
+In order to attach to the interpreter session, one might use `litrepl repl`
+command.
 
 ``` shell
 $ litrepl repl
-Opening the interpreter terminal (NO PROMPT, USE `Ctrl+D` TO DETACH)
-W='Hello from repl'
+Opening the interpreter terminal (NO PROMPTS, USE `Ctrl+D` TO DETACH)
+W = 'Hello from repl'
 ^D
 ```
 
-The variable `W` now resides in the session and could be queried during
+Note that propmts are disabled internally, so `>>>` symbols are not going to
+appear. `W` variable now resides in memory and could be queried during
 subsequent evaluations.
 
 #### AI
