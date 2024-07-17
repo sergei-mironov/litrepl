@@ -193,9 +193,8 @@ Notes:
   - [Formatting LaTeX documents](./doc/formatting.md#latex)
 
 
-By default, Litrepl leaves the interpreter running in the background, associated
-with the current directory. `litrepl status` reveals its PID and command-line
-arguments:
+By default, Litrepl leaves the interpreter running in the background. `litrepl
+status` reveals its PID and command-line arguments:
 
 ``` shell
 $ litrepl status
