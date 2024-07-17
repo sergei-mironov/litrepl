@@ -127,21 +127,20 @@ Usage
 
 ### Overview
 
-Litrepl sends verbatim document sections to third-party interpreters and
+The tool sends verbatim document sections to third-party interpreters and
 receives results of the evaluation.
 
 #### Python
 
-Litrepl recognises sequences of verbatim code sections followed by zero
-or more result sections. In Markdown documents, the code is any triple-quoted section
-labeled as `python`. The result is any triple-quoted `result` section. For LaTeX
-documents, Litrepl recognizes `\begin{python}\end{python}` and
+Litrepl recognises verbatim code sections followed by zero or more result
+sections. In Markdown documents, the code is any triple-quoted section labeled
+as `python`. The result is any triple-quoted `result` section. In LaTeX
+documents, sections are marked with `\begin{python}\end{python}` and
 `\begin{result}\end{result}` environments.
 
-To evaluate the formatted document, you can send it to the `litrepl
-eval-sections` shell command, which will trigger the evaluation. Alternatively,
-Litrepl provides a Vim plugin that allows you to use the `:LEval` command to
-evaluate the section under your cursor in a similar manner.
+To evaluate the properly formatted document, one can send it to the `litrepl
+eval-sections` shell command. In the Vim-based workflow, one would use a command
+of `:LEval*` family to evaluate the required sections in-place.
 
 For example:
 
