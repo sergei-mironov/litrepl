@@ -37,7 +37,7 @@ Contents
 * [Usage](#usage)
     * [Overview](#overview)
         * [Evaluating sections](#evaluating-sections)
-        * [Printing status](#printing-status)
+        * [Managing sessions](#managing-sessions)
         * [Examining internal state](#examining-internal-state)
         * [Communicating with AI (Experimental)](#communicating-with-ai-experimental)
     * [Reference](#reference)
@@ -195,7 +195,7 @@ Hello LaTeX!
   - [Formatting Markdown documents](./doc/formatting.md#markdown)
   - [Formatting LaTeX documents](./doc/formatting.md#latex)
 
-#### Printing status
+#### Managing sessions
 
 `litrepl start`, `litrepl stop`, `litrepl restart` manages the interpreter
 sessions. The commands also accepts the type of the interpreter to operation on.
