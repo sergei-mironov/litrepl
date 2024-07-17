@@ -137,11 +137,11 @@ Litrepl recognises verbatim code sections followed by zero or more result
 sections. In Markdown documents, the code is any triple-quoted section labeled
 as `python`. The result is any triple-quoted `result` section. In LaTeX
 documents, sections are marked with `\begin{python}\end{python}` and
-`\begin{result}\end{result}` environments.
+`\begin{result}\end{result}` environments correspondingly.
 
 `litrepl eval-sections` is the main command evaluating the formatted document.
 To run the evaluation, send the file to the input of the shell command. The
-equvalent Vim command is `:LEval`.
+equivalent Vim command is `:LEval`.
 
 For example:
 
