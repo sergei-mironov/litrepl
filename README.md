@@ -194,7 +194,7 @@ Notes:
 
 
 By default, Litrepl leaves the interpreter running in the background. `litrepl
-status` reveals its PID and command-line arguments:
+status` reveals its PID and the command-line arguments:
 
 ``` shell
 $ litrepl status
