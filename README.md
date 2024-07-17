@@ -127,8 +127,9 @@ Usage
 
 ### Overview
 
-The tool sends verbatim document sections to third-party interpreters and
-receives results of the evaluation.
+The tool sends verbatim sections from a document to external interpreters,
+receiving the evaluated results in return. Litrepl currently supports a few
+Python and GPT4All interpreters.
 
 #### Python
 
