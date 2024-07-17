@@ -159,7 +159,7 @@ $ cat file.md | litrepl eval-sections
 
 would produce a Markdown document containing properly filled result section.
 
-~~~~ text
+~~~~ markdown
 ``` python
 print('Hello Markdown!')
 ```
@@ -213,9 +213,9 @@ W = 'Hello from repl'
 ^D
 ```
 
-Note that propmts are disabled internally, so `>>>` symbols are not going to
-appear. `W` variable now resides in memory and could be queried during
-subsequent evaluations.
+Usual Python interpreter propmts are disabled internally, so `>>>` symbols are
+not going to appear. `W` variable now resides in memory and could be queried
+during subsequent evaluations.
 
 #### AI
 
@@ -223,18 +223,20 @@ Litrepl experimentally supports
 [GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli) allowing users to
 query local LLMs. In order to try it, install the interpreter and use `ai` as
 the name for code sections. For low-speed models it would be convenient to use
-`:LEvalMon` command rather then `:LEval` for evaluation.
+`:LEvalMon` command for evaluation.
 
-    ``` ai
-    /model "~/.local/share/nomic.ai/GPT4All/Meta-Llama-3-8B-Instruct.Q4_0.gguf"
-    Hi chat! What is your name?
-    ```
+~~~~ markdown
+``` ai
+/model "~/.local/share/nomic.ai/GPT4All/Meta-Llama-3-8B-Instruct.Q4_0.gguf"
+Hi chat! What is your name?
+```
 
-    ``` result
-    I'm LLaMA, a large language model trained by Meta AI. I'm here to help answer
-    any questions you might have and provide information on a wide range of topics.
-    How can I assist you today?
-    ```
+``` result
+I'm LLaMA, a large language model trained by Meta AI. I'm here to help answer
+any questions you might have and provide information on a wide range of topics.
+How can I assist you today?
+```
+~~~~
 
 ### Reference
 
