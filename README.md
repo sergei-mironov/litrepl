@@ -230,7 +230,7 @@ W = 'Hello from repl'
 ^D
 ```
 
-* Python interpreter propmts are disabled internally, no `>>>` symbols are
+* Python interpreter prompts are disabled internally, no `>>>` symbols are
   going to appear.
 * The corresponding Vim command is `:LTerm`
 
