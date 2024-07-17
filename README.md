@@ -139,9 +139,9 @@ as `python`. The result is any triple-quoted `result` section. In LaTeX
 documents, sections are marked with `\begin{python}\end{python}` and
 `\begin{result}\end{result}` environments.
 
-To evaluate the properly formatted document, one can send it to the `litrepl
-eval-sections` shell command. In the Vim-based workflow, one would use a command
-of `:LEval*` family to evaluate the required sections in-place.
+`litrepl eval-sections` is the main command evaluating the formatted document.
+To run the evaluation, send the file to the input of the shell command. The
+equvalent Vim command is `:LEval`.
 
 For example:
 
@@ -183,18 +183,20 @@ Hello LaTeX!
 \end{result}
 ~~~~
 
-Notes:
-
 * Litrepl expects Markdown formatting by default. Add `--filetype=tex` for Tex
   documents. Vim plugin does this automatically based on the `filetype`
   variable.
+* Both command-line and Vim commands accept indices of the sections to be
+  evaluated. By default Litrepl evaluates all sections it sees.
 * LaTeX documents need a preamble introducing python/result tags to the Tex processor.
   For details, see:
   - [Formatting Markdown documents](./doc/formatting.md#markdown)
   - [Formatting LaTeX documents](./doc/formatting.md#latex)
-* By default, Litrepl leaves the interpreter running in the background.
 
-`litrepl status` reveals its PID and the command-line arguments:
+
+`litrepl status` allows to query information about the interpreters running in
+the background. The command reveals the process PID and the command-line arguments.
+
 
 ``` shell
 $ litrepl status
@@ -202,6 +204,9 @@ $ litrepl status
 # TYP  PID      EXITCODE  CMD
 python 3718077  -         python3 -m IPython --config=/tmp/nix-shell.KcUxp9/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
 ```
+
+* The interpreters are associates with the directory they were started in.
+* The corresponding Vim command is `:LStatus`
 
 `litrepl repl` "manually" attaches to the interpreter session allowing us to
 examine the session:
@@ -216,6 +221,7 @@ W = 'Hello from repl'
 * Usual Python interpreter propmts are disabled internally, so `>>>` symbols are
   not going to appear. `W` variable now resides in memory and could be queried
   during subsequent evaluations.
+* The corresponding Vim command is `:LTerm`
 
 `litrepl eval-code` might be used to send the code right away
 
