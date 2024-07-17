@@ -130,8 +130,8 @@ Usage
 ### Overview
 
 The tool sends verbatim sections from a document to external interpreters,
-receiving the evaluated results in return. Litrepl currently supports a few
-Python and GPT4All interpreters.
+receiving the evaluated results in return. Litrepl currently supports two
+flavors of Python and the GPT4All-cli interpreter.
 
 #### Evaluating sections
 
