@@ -146,8 +146,7 @@ of `:LEval*` family to evaluate the required sections in-place.
 For example:
 
 ~~~~ shell
-$ (
-cat <<"EOF"
+$ cat >file.md <<"EOF"
 ``` python
 print('Hello Markdown!')
 ```
@@ -155,24 +154,33 @@ print('Hello Markdown!')
 ``` result
 ```
 EOF
-) | litrepl eval-sections
+$ cat file.md | litrepl eval-sections
 ~~~~
 
 would produce a Markdown document containing properly filled result section.
-Below we show how both Markdown and LaTeX "Hello world" results look like:
+
+~~~~ text
+``` python
+print('Hello Markdown!')
+```
+
+``` result
+Hello Markdown!
+```
+~~~~
+
+Below we also show what the relevant LaTeX part would look like:
+
+``` tex
+\begin{python}
+print('Hello LaTeX!')
+\end{python}
 
 
-    Markdown                             LaTeX
-    --------                             -----
-
-    ``` python                           \begin{python}
-    print('Hello Markdown!')             print('Hello LaTeX!')
-    ```                                  \end{python}
-
-
-    ``` result                           \begin{result}
-    Hello Markdown!                      Hello LaTeX!
-    ```                                  \end{result}
+\begin{result}
+Hello LaTeX!
+\end{result}
+```
 
 Notes:
 
