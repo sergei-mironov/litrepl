@@ -197,7 +197,11 @@ Hello LaTeX!
 
 #### Printing status
 
-`litrepl status` allows querying the information about the interpreters running in
+`litrepl start`, `litrepl stop`, `litrepl restart` manages the interpreter
+sessions. The commands also accepts the type of the interpreter to operation on.
+IPython interpreter is assumed by default.
+
+`litrepl status` queries the information about the interpreters running in
 the background. The command reveals the process PID and the command-line arguments.
 
 
@@ -205,11 +209,13 @@ the background. The command reveals the process PID and the command-line argumen
 $ litrepl status
 # Format:
 # TYP  PID      EXITCODE  CMD
-python 3718077  -         python3 -m IPython --config=/tmp/nix-shell.KcUxp9/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
+python 3900919  -         python3 -m IPython --config=/tmp/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
+ai     3904696  -         gpt4all-cli --readline-prompt=
 ```
 
 * The interpreters are associates with the directory they were started in.
-* The corresponding Vim command is `:LStatus`
+* The corresponding Vim commands are `:LStart`, `:LStop`, `:LRestart` and
+  `:LStatus`
 
 
 #### Examining internal state
