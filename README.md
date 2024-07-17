@@ -133,7 +133,7 @@ The tool sends verbatim sections from a document to external interpreters,
 receiving the evaluated results in return. Litrepl currently supports two
 flavors of Python and the GPT4All-cli interpreter.
 
-#### Evaluating sections
+#### Basic evaluation
 
 Litrepl recognises verbatim code sections followed by zero or more result
 sections. In Markdown documents, the code is any triple-quoted section labeled
@@ -188,6 +188,7 @@ Hello LaTeX!
 * Litrepl expects Markdown formatting by default. Add `--filetype=tex` for Tex
   documents. Vim plugin does this automatically based on the `filetype`
   variable.
+* Vim plugin also supports `:LEvalAbove`, `:LEvalBelow`, etc.
 * Both command-line and Vim versions of the command accept code section indices.
   Everything is evaluated by default.
 * LaTeX documents need a preamble introducing python/result tags to the Tex processor.
@@ -197,7 +198,7 @@ Hello LaTeX!
 
 #### Managing sessions
 
-`litrepl start`, `litrepl stop`, `litrepl restart` manages the interpreter
+`litrepl start`, `litrepl stop` and `litrepl restart` manage the interpreter
 sessions. The commands also accepts the type of the interpreter to operation on.
 IPython interpreter is assumed by default.
 
