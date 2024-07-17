@@ -171,7 +171,7 @@ Hello Markdown!
 
 Below we also show what the relevant LaTeX part would look like:
 
-``` tex
+~~~~ tex
 \begin{python}
 print('Hello LaTeX!')
 \end{python}
@@ -180,7 +180,7 @@ print('Hello LaTeX!')
 \begin{result}
 Hello LaTeX!
 \end{result}
-```
+~~~~
 
 Notes:
 
