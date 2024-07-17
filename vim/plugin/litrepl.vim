@@ -184,7 +184,7 @@ fun! s:Pos(arg)
 endfun
 
 command! -bar -nargs=? LEval call LitReplRun("eval-sections", "inf,inf", <SID>Pos(<q-args>))
-command! -bar -nargs=? LEvalAsync call LitReplRun("eval-sections", g:litrepl_timeout.'0.0', <SID>Pos(<q-args>))
+command! -bar -nargs=? LEvalAsync call LitReplRun("eval-sections", g:litrepl_timeout.',0.0', <SID>Pos(<q-args>))
 command! -bar -nargs=0 LEvalLast call LitReplRun("eval-sections", "inf,inf", g:litrepl_lastcur)
 command! -bar -nargs=? LEvalAbove call LitReplRun("eval-sections", "inf,inf", "0..".<SID>Pos(<q-args>))
 command! -bar -nargs=? LEvalBelow call LitReplRun("eval-sections", "inf,inf", <SID>Pos(<q-args>)."..$")
