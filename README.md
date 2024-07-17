@@ -186,8 +186,8 @@ Hello LaTeX!
 * Litrepl expects Markdown formatting by default. Add `--filetype=tex` for Tex
   documents. Vim plugin does this automatically based on the `filetype`
   variable.
-* Both command-line and Vim commands accept indices of the sections to be
-  evaluated. By default Litrepl evaluates all sections it sees.
+* Both command-line and Vim versions of the command accept indices of the
+  sections to be evaluated. By default Litrepl evaluates all sections it sees.
 * LaTeX documents need a preamble introducing python/result tags to the Tex processor.
   For details, see:
   - [Formatting Markdown documents](./doc/formatting.md#markdown)
