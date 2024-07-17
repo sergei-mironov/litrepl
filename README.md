@@ -192,10 +192,9 @@ Notes:
   For details, see:
   - [Formatting Markdown documents](./doc/formatting.md#markdown)
   - [Formatting LaTeX documents](./doc/formatting.md#latex)
+* By default, Litrepl leaves the interpreter running in the background.
 
-
-By default, Litrepl leaves the interpreter running in the background. `litrepl
-status` reveals its PID and the command-line arguments:
+`litrepl status` reveals its PID and the command-line arguments:
 
 ``` shell
 $ litrepl status
@@ -204,8 +203,8 @@ $ litrepl status
 python 3718077  -         python3 -m IPython --config=/tmp/nix-shell.KcUxp9/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
 ```
 
-In order to attach to the interpreter session, one might use `litrepl repl`
-command.
+`litrepl repl` "manually" attaches to the interpreter session allowing us to
+examine the session:
 
 ``` shell
 $ litrepl repl
@@ -214,9 +213,16 @@ W = 'Hello from repl'
 ^D
 ```
 
-Usual Python interpreter propmts are disabled internally, so `>>>` symbols are
-not going to appear. `W` variable now resides in memory and could be queried
-during subsequent evaluations.
+* Usual Python interpreter propmts are disabled internally, so `>>>` symbols are
+  not going to appear. `W` variable now resides in memory and could be queried
+  during subsequent evaluations.
+
+`litrepl eval-code` might be used to send the code right away
+
+``` shell
+$ echo 'W' | litrepl eval-code
+'Hello from repl'
+```
 
 #### AI
 
