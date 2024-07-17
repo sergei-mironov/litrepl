@@ -36,8 +36,10 @@ Contents
 * [Installation](#installation)
 * [Usage](#usage)
     * [Overview](#overview)
-        * [Python](#python)
-        * [AI](#ai)
+        * [Evaluating sections](#evaluating-sections)
+        * [Printing status](#printing-status)
+        * [Examining internal state](#examining-internal-state)
+        * [Communicating with AI (Experimental)](#communicating-with-ai-experimental)
     * [Reference](#reference)
         * [Vim and command-line commands](#vim-and-command-line-commands)
         * [Variables and arguments](#variables-and-arguments)
@@ -131,7 +133,7 @@ The tool sends verbatim sections from a document to external interpreters,
 receiving the evaluated results in return. Litrepl currently supports a few
 Python and GPT4All interpreters.
 
-#### Python
+#### Evaluating sections
 
 Litrepl recognises verbatim code sections followed by zero or more result
 sections. In Markdown documents, the code is any triple-quoted section labeled
@@ -193,6 +195,7 @@ Hello LaTeX!
   - [Formatting Markdown documents](./doc/formatting.md#markdown)
   - [Formatting LaTeX documents](./doc/formatting.md#latex)
 
+#### Printing status
 
 `litrepl status` allows querying the information about the interpreters running in
 the background. The command reveals the process PID and the command-line arguments.
@@ -208,6 +211,9 @@ python 3718077  -         python3 -m IPython --config=/tmp/nix-shell.KcUxp9/litr
 * The interpreters are associates with the directory they were started in.
 * The corresponding Vim command is `:LStatus`
 
+
+#### Examining internal state
+
 `litrepl repl` "manually" attaches to the interpreter session allowing us to
 examine the session:
 
@@ -222,7 +228,6 @@ W = 'Hello from repl'
   going to appear.
 * The corresponding Vim command is `:LTerm`
 
-
 `litrepl eval-code` might be used to pipe the code through the interpreter. The
 `W` variable now resides in memory so we can query it as we would do in a
 regular IPython session.
@@ -232,7 +237,7 @@ $ echo 'W' | litrepl eval-code
 'Hello from repl'
 ```
 
-#### AI
+#### Communicating with AI (Experimental)
 
 Litrepl experimentally supports
 [GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli) allowing users to
