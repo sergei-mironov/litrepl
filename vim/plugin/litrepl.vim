@@ -167,7 +167,8 @@ fun! LitReplStatus()
   silent execute '%!'.LitReplCmd().
         \ ' --debug='.g:litrepl_debug.
         \ ' --filetype='.ft.
-        \ ' status --verbose 2>'.g:litrepl_errfile.' >&2'
+        \ ' --verbose'.
+        \ ' status 2>'.g:litrepl_errfile.' >&2'
   call setcharpos('.',cur)
   execute "u"
   call LitReplOpenErr(g:litrepl_errfile)

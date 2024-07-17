@@ -58,13 +58,15 @@ def with_sigmask(signals=None):
 def with_sigint(a:LitreplArgs, fns:FileNames):
   ipid=int(open(fns.pidf).read())
   def _handler(signum,frame):
-    pdebug(f"Sending SIGINT to {ipid}")
-    os.kill(ipid,SIGINT)
+    if a.propagate_sigint:
+      pdebug(f"Sending SIGINT to {ipid}")
+      os.kill(ipid,SIGINT)
+    else:
+      pdebug(f"Ignoring SIGINT")
   prev=None
   try:
     with with_sigmask():
-      if a.propagate_sigint:
-        prev=signal(SIGINT,_handler)
+      prev=signal(SIGINT,_handler)
     yield
   finally:
     with with_sigmask():
@@ -128,11 +130,6 @@ def merge_rn2(buf_,r,i_n=-1)->Tuple[bytes,int]:
     assert buf[i_n]==(b'\n'[0]), f"{buf}, {i_n}, {buf[i_n]}"
   return buf,sz+i_n if i_n<0 else sz+i_n
 
-def mkre(prompt:str):
-  """ Create the regexp that matches everything ending with a `prompt` """
-  return re.compile(f"(.*)(?={prompt})".encode('utf-8'),
-                    re.A|re.MULTILINE|re.DOTALL)
-
 
 def readout(fdr,
             prompt,
@@ -188,6 +185,12 @@ def readout_asis(fdr:int, fdw:int, fo:int, pattern:str, prompt,
         return
 
 TIMEOUT_SEC=3
+
+def mkre(prompt:str):
+  """ Matches the shortest string followed by a sequence of prompts """
+  return re.compile(f"((.(?!{prompt}))*(.(?={prompt}))?)({prompt})+".encode('utf-8'),
+                    re.MULTILINE|re.DOTALL)
+
 
 def interact(fdr, fdw, text:str, fo:int, ss:Settings)->None:
   """ Interpreter interaction procedure, running in a forked process. Its goal
@@ -353,6 +356,7 @@ def processCont(a:LitreplArgs,
         pdebug(f"processCont final readout start")
         res=readout(fdr,prompt=mkre(ss.pattern2[1]),merge=merge_rn2)
         pdebug(f"processCont final readout finish")
+        # res=res+f"\nDBG Obtained from:{runr.fname}\n"
         rr=ReadResult(res,False) # Return final result
         blind_unlink(runr.fname)
         pdebug(f"processCont unlinked {runr.fname}")

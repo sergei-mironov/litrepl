@@ -6,7 +6,7 @@ import re
 from copy import deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable, Any
 from select import select
-from os import environ, system, isatty, getpid, unlink
+from os import environ, system, isatty, getpid, unlink, getpgid, setpgid
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter as LarkInterpreter
 from os.path import isfile, join
@@ -239,6 +239,7 @@ def start_(a:LitreplArgs,i:Interpreter)->int:
   npid=os.fork()
   if npid==0:
     # sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
+    setpgid(getpid(),0)
     blind_unlink(ecode)
     open_child_pipes(inp,outp)
     ret=i.run_child()
@@ -714,10 +715,12 @@ def status_oneline(a:LitreplArgs,sts:List[SType])->int:
   for st in sts:
     fns=pipenames(a,st)
     auxd,inp,outp,pidf,ecodef=astuple(fns)
+    pdebug(f"status auxdir: {auxd}")
     try:
       pid=open(pidf).read().strip()
       cmd=' '.join(Process(int(pid)).cmdline())
-    except Exception:
+    except Exception as ex:
+      pdebug(f"exception: {ex}")
       pid='-'
       cmd='-'
     try:

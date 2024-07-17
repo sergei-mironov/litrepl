@@ -137,7 +137,7 @@ if __name__=='__main__':
       fns=pipenames(a,st)
       if not running(a,st) or a.foreground:
         start(a,st)
-      print("Opening the interpreter terminal (NO PROMPT, USE `Ctrl+D` TO DETACH)")
+      print("Opening the interpreter terminal (NO PROMPTS, USE `Ctrl+D` TO DETACH)")
       system(f"socat - 'PIPE:{fns.outp},flock-ex-nb=1!!PIPE:{fns.inp},flock-ex-nb=1'")
       ecode=interpExitCode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
