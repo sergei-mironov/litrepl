@@ -56,17 +56,15 @@ def with_sigmask(signals=None):
 
 @contextmanager
 def with_sigint(a:LitreplArgs, fns:FileNames):
-  ipid=int(open(fns.pidf).read())
   def _handler(signum,frame):
-    if a.propagate_sigint:
-      pdebug(f"Sending SIGINT to {ipid}")
-      os.kill(ipid,SIGINT)
-    else:
-      pdebug(f"Ignoring SIGINT")
+    pdebug(f"Sending SIGINT to {ipid}")
+    os.kill(ipid,SIGINT)
+  ipid=int(open(fns.pidf).read())
   prev=None
   try:
     with with_sigmask():
-      prev=signal(SIGINT,_handler)
+      if a.propagate_sigint:
+        prev=signal(SIGINT,_handler)
     yield
   finally:
     with with_sigmask():
