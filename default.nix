@@ -280,15 +280,18 @@ let
       };
 
       vimrcConfig.customRC = ''
-        colorscheme C64
-        syntax on
         filetype plugin indent on
+        syntax on
+        " colorscheme C64
+        colorscheme Tomorrow-Night-Blue
         set backspace=indent,eol,start
         set wrap
         set conceallevel=0
         set textwidth=80
         set foldmethod=marker
         set foldcolumn=0
+        set autoread
+        set noswapfile
 
         hi Pmenu ctermbg=258
 
@@ -412,6 +415,8 @@ let
         # obs-studio
         peek
         tmux
+        xdotool
+        xorg.xwininfo
       ]);
       shellHook = with pkgs; ''
         export PS1="\n[DEMO] \[\033[1;32m\][nix-shell:\w]\$\[\033[0m\] "

@@ -303,6 +303,10 @@ How can I assist you today?
 ```
 ~~~~
 
+As another example, this repository contains a [joke script](./sh/airepl.sh)
+which begs AI to generate `ffmpeg`-based .gif to .webm shell oneliner in a loop
+(do use virtualization if you ever want to run it!).
+
 ### Reference
 
 #### Vim and command-line commands

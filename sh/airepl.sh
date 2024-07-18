@@ -1,6 +1,11 @@
 #!/bin/sh
 
-echo "WARNING: THIS SCRIPT EXECUTES AI-GENERATED PROGRAMS!" >&2
+(
+echo 'WARNING: THIS SCRIPT EXECUTES AI-GENERATED PROGRAMS!'
+echo 'ARE YOU USING SYSTEM-LEVEL CONTAINER?'
+echo '(Press Enter to continue; Press CTRL+C to cancel)'
+) >&2
+read
 
 litrepl restart ai
 (
