@@ -95,7 +95,7 @@ endfun
 fun LitReplRun_(command, timeout, pos)
   let ft = &filetype
   let cur = getcharpos('.')
-  let cmd = a:command . " " . a:pos
+  let cmd_pos = a:command . " " . a:pos
   " Open a new undo block
   let &ul=&ul
   " Execute the selected code blocks
@@ -108,7 +108,7 @@ fun LitReplRun_(command, timeout, pos)
         \ ' --filetype='.ft.
         \ ' --map-cursor='.cur[1].':'.cur[2].':'.g:litrepl_map_cursor_output.
         \ ' --result-textwidth='.string(&textwidth).
-        \ ' '.cmd.' 2>'.g:litrepl_errfile
+        \ ' '.cmd_pos.' 2>'.g:litrepl_errfile
   silent execute cmdline
   call LitReplUpdateCursor(cur)
   return v:shell_error
@@ -175,9 +175,16 @@ fun! LitReplStatus()
 endfun
 
 fun! s:Pos(arg)
+  let p = getcharpos('.')
+  let loc = p[1].":".p[2]
   if a:arg == ""
-    let p = getcharpos('.')
-    return p[1].":".p[2]
+    return loc
+  elseif tolower(a:arg) == "all"
+    return "0..$"
+  elseif tolower(a:arg) == "above"
+    return "0..".loc
+  elseif tolower(a:arg) == "below"
+    return loc."..$"
   else
     return a:arg
   endif
@@ -185,12 +192,9 @@ endfun
 
 command! -bar -nargs=? LEval call LitReplRun("eval-sections", "inf,inf", <SID>Pos(<q-args>))
 command! -bar -nargs=? LEvalAsync call LitReplRun("eval-sections", g:litrepl_timeout.',0.0', <SID>Pos(<q-args>))
-command! -bar -nargs=0 LEvalLast call LitReplRun("eval-sections", "inf,inf", g:litrepl_lastcur)
-command! -bar -nargs=? LEvalAbove call LitReplRun("eval-sections", "inf,inf", "0..".<SID>Pos(<q-args>))
-command! -bar -nargs=? LEvalBelow call LitReplRun("eval-sections", "inf,inf", <SID>Pos(<q-args>)."..$")
-command! -bar -nargs=0 LEvalAll call LitReplRun("eval-sections", "inf,inf", "0..$")
-command! -bar -nargs=? LInterrupt call LitReplRun("interrupt", "1.0,1.0", <SID>Pos(<q-args>))
 command! -bar -nargs=? LEvalMon call LitReplMonitor("eval-sections", <SID>Pos(<q-args>))
+command! -bar -nargs=0 LEvalLast call LitReplRun("eval-sections", "inf,inf", g:litrepl_lastcur)
+command! -bar -nargs=? LInterrupt call LitReplRun("interrupt", "1.0,1.0", <SID>Pos(<q-args>))
 command! -bar -nargs=0 LStatus call LitReplStatus()
 
 let g:litrepl_loaded = 1

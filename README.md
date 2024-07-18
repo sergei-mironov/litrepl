@@ -189,7 +189,8 @@ Hello LaTeX!
 * Litrepl expects Markdown formatting by default. Add `--filetype=tex` for Tex
   documents. Vim plugin does this automatically based on the `filetype`
   variable.
-* Vim plugin also supports `:LEvalAbove`, `:LEvalBelow`, etc.
+* `:LEval` accepts optional argument denoting the range: `all`, `above` (the
+  cursor), `below` (the cursor), section number, etc.
 * Both command-line and Vim versions of the command accept code section indices.
   Everything is evaluated by default.
 * LaTeX documents need a preamble introducing python/result tags to the Tex processor.
@@ -318,12 +319,12 @@ which begs AI to generate `ffmpeg`-based .gif to .webm shell oneliner in a loop
 | `:LStatus [T]`       | `litrepl status [T] <F`          | Print the daemon status     |
 | `:LRestart [T]`      | `litrepl restart [T]`            | Restart the interpreter     |
 | `:LEval N`           | `lirtepl eval-sections N <F`     | Run or update section under the cursor and wait until the completion |
-| `:LEvalAbove N`      | `lirtepl eval-sections '0..N' <F`| Run sections above and under the cursor and wait until the completion |
-| `:LEvalBelow N`      | `lirtepl eval-sections 'N..$' <F`| Run sections below and under the cursor and wait until the completion |
-| `:LEvalAll`          | `lirtepl eval-sections <F`       | Evaluate all code sections  |
+| `:LEval above`       | `lirtepl eval-sections '0..N' <F`| Run sections above and under the cursor and wait until the completion |
+| `:LEval below`       | `lirtepl eval-sections 'N..$' <F`| Run sections below and under the cursor and wait until the completion |
+| `:LEval all`         | `lirtepl eval-sections <F`       | Evaluate all code sections  |
 | `:LEvalAsync N`      | `lirtepl --timeout=0.5,0 eval-sections N <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
 | `:LInterrupt N`      | `lirtepl interrupt N <F`         | Send Ctrl+C signal to the interpreter and get a feedback |
-| `:LEvalMon`          | `while .. do .. done`            | Monitor asynchronous code evaluation |
+| `:LEvalMon N`        | `while .. do .. done`            | Monitor asynchronous code evaluation |
 | N/A                  | `lirtepl eval-code <P`           | Evaluate the given Python code |
 | `:LTerm`             | `lirtepl repl [T]`               | Open the terminal to the interpreter |
 | `:LOpenErr`          | `litrepl ...  2>F`               | Open the stderr window               |

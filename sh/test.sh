@@ -528,7 +528,7 @@ echo $?>ret.txt
 test `cat ret.txt` = "123"
 grep -q "^before-exit" out.md
 grep -q "123" out.md
-grep -q -v "^after-exit" out.md
+not grep -q "^after-exit" out.md
 )} #}}}
 
 test_exception_errcode() {( #{{{
@@ -560,7 +560,7 @@ echo $?>ret.txt
 test `cat ret.txt` = "123"
 grep -q "^before-exception" out.md
 grep -q "123" out.md
-grep -q -v "^after-exception" out.md
+not grep -q "^after-exception" out.md
 runlitrepl stop
 )} #}}}
 
@@ -622,7 +622,7 @@ runvim file.md >_vim.log 2>&1 <<EOF
 :LEval
 :wqa!
 EOF
-grep -q -v '^result-1' file.md
+not grep -q '^result-1' file.md
 grep -q '^result-2' file.md
 )}
 #}}}
@@ -631,7 +631,7 @@ test_vim_leval_explicit() {( #{{{
 mktest "_test_vim_leval_explicit"
 runlitrepl start
 
-cat >file.md <<"EOF"
+cat >source.md <<"EOF"
 ``` python
 print("result-1")
 ```
@@ -645,14 +645,51 @@ print("result-2")
 
 ``` result
 ```
+
+``` python
+print("result-3")
+```
+
+``` result
+```
 EOF
 
-runvim file.md >_vim.log 2>&1 <<"EOF"
+runvim >_vim.log 2>&1 <<"EOF"
+:e! source.md
 :LEval 1
-:wq!
+:w! file1.md
+
+:e! source.md
+:LEval all
+:w! file-all.md
+
+:e! source.md
+9G
+:LEval above
+:w! file-above.md
+
+:e! source.md
+9G
+:LEval below
+:w! file-below.md
+:qa!
 EOF
-grep -q -v '^result-1' file.md
-grep -q '^result-2' file.md
+
+not grep -q '^result-1' file1.md
+grep -q '^result-2' file1.md
+not grep -q '^result-3' file1.md
+
+grep -q '^result-1' file-all.md
+grep -q '^result-2' file-all.md
+grep -q '^result-3' file-all.md
+
+grep -q '^result-1' file-above.md
+grep -q '^result-2' file-above.md
+not grep -q '^result-3' file-above.md
+
+not grep -q '^result-1' file-below.md
+grep -q '^result-2' file-below.md
+grep -q '^result-3' file-below.md
 
 )}
 #}}}
@@ -663,9 +700,11 @@ runlitrepl start
 
 cat >file.md <<"EOF"
 ``` python
+from time import sleep
 for i in range(4):
   sleep(0.5)
   print(i, end='')
+
 print()
 ```
 
@@ -677,7 +716,7 @@ runvim file.md >_vim.log 2>&1 <<"EOF"
 :LEvalMon
 :wq!
 EOF
-grep -q -v '1234' file.md
+grep -q '0123' file.md
 )}
 #}}}
 
@@ -690,7 +729,7 @@ runvim >_vim.log 2>&1 <<"EOF"
 :LStatus
 :wqa!
 EOF
-grep -q -v -i error _litrepl.err
+not grep -q -i error _litrepl.err
 )}
 #}}}
 
@@ -738,8 +777,8 @@ cat source.md | runlitrepl \
   --filetype=markdown \
   --timeout=1,1 \
   eval-sections '0..$' >out.md
-runlitrepl status python >status2.txt
-grep -q -v '?' status2.txt
+runlitrepl --verbose status python >status2.txt
+not grep -q '?' status2.txt
 
 )} #}}}
 
@@ -778,6 +817,10 @@ interpreters() {
   echo "$(which ipython)"
 }
 
+not() {
+  if $@ ; then return 1 ; else return 0 ; fi
+}
+
 tests() {
   echo test_parse_print
   echo test_eval_md
@@ -812,7 +855,7 @@ runvim() {
     echo ":let g:litrepl_errfile='_litrepl.err'"
     cat
   } | \
-  $LITREPL_ROOT/sh/vim_litrepl_dev "$@"
+  $LITREPL_ROOT/sh/vim_litrepl_dev --clean "$@"
 }
 
 set -e
