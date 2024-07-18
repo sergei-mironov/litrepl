@@ -78,7 +78,15 @@ let
       pp: with pp; [
         (lark-current pp)
         psutil
+      ]
+    );
+
+    python-demo = pkgs.python3.withPackages (
+      pp: with pp; [
+        (lark-current pp)
+        psutil
         ipython
+        tqdm
       ]
     );
 
@@ -112,7 +120,7 @@ let
       propagatedBuildInputs = [(lark-current python.pkgs) pkgs.socat python.pkgs.psutil];
       src = python.pkgs.fetchPypi {
         inherit pname version;
-        sha256 = "sha256-FT9i+xwJYn+4k0x1zdc8O1AcNEyg8fD6FbI9mZOQJGM=";
+        sha256 = "sha256-mtJHmuodHYb5PmaM8vyzL57VWiEmYTv+0GdIoVM06F0=";
         # sha256 = "sha256-kf/gx5f7VIKfDBxpTG/E1ghdBGRulbFoVHoNqT/FoSM=";
         # sha256 = "sha256-oWcX+5GFL3sDGKYYYlJoeglBdcufro6Sk9KZSJMt0t0=";
         # sha256 = "sha256-eOr+64tSPXPUrqI9w4UUNLtvf0ziE/vHmuU5050VS1s=";
@@ -398,8 +406,8 @@ let
         latexrun
         mytexlive
         grechanik-st
-        # (litrepl-release-pypi)
-        python-release
+        litrepl-release-pypi
+        python-demo
       ] ++ (with pkgs ; [
         # obs-studio
         peek
