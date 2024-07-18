@@ -247,7 +247,7 @@ for i in tqdm(range(10)):
 ~~~~
 
 When re-executing this document, LitREPL will resume the reading. Once the
-evaluation is complete, it will remove any continuation markers from the output
+evaluation is complete, it will remove the continuation marker from the output
 section.
 
 `litrepl interrupt` will send interrupt signal to the interpreter so it return
