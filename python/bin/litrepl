@@ -21,7 +21,7 @@ def _with_type(p, default=None, allow_all=False):
 if __name__=='__main__':
   ap=ArgumentParser(prog='litrepl')
   ap.add_argument('-v','--version',action='version',version=__version__ or '?',help='Print the version')
-  ap.add_argument('--filetype',metavar='STR',default='markdown',help='markdown|tex')
+  ap.add_argument('--filetype',metavar='STR',default=None,help='markdown|[la]tex')
   ap.add_argument('--python-interpreter',metavar='EXE',default='auto',
                   help='Python interpreter to use (python|ipython|auto)')
   ap.add_argument('--ai-interpreter',metavar='EXE',default='auto',
@@ -80,6 +80,11 @@ if __name__=='__main__':
   if a.debug>0:
     litrepl.eval.DEBUG=True
     litrepl.base.DEBUG=True
+
+  if a.filetype in {None,''}:
+    a.filetype="markdown"
+  if a.filetype in {'latex'}:
+    a.filetype='tex'
 
   ecode=1
 

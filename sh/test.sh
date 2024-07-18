@@ -681,6 +681,19 @@ grep -q -v '1234' file.md
 )}
 #}}}
 
+test_vim_lstatus() {( #{{{
+mktest "_test_vim_lstatus"
+runlitrepl start
+
+runvim >_vim.log 2>&1 <<"EOF"
+:let g:litrepl_errfile = '_litrepl.err'
+:LStatus
+:wqa!
+EOF
+grep -q -v -i error _litrepl.err
+)}
+#}}}
+
 test_foreground() {( #{{{
 mktest "_test_foreground"
 runlitrepl start
@@ -779,6 +792,7 @@ tests() {
   echo test_vim_leval_cursor
   echo test_vim_leval_explicit
   echo test_vim_lmon
+  echo test_vim_lstatus
   echo test_foreground
   echo test_status
   echo test_interrupt

@@ -112,7 +112,8 @@ let
       propagatedBuildInputs = [(lark-current python.pkgs) pkgs.socat python.pkgs.psutil];
       src = python.pkgs.fetchPypi {
         inherit pname version;
-        sha256 = "sha256-kf/gx5f7VIKfDBxpTG/E1ghdBGRulbFoVHoNqT/FoSM=";
+        sha256 = "sha256-FT9i+xwJYn+4k0x1zdc8O1AcNEyg8fD6FbI9mZOQJGM=";
+        # sha256 = "sha256-kf/gx5f7VIKfDBxpTG/E1ghdBGRulbFoVHoNqT/FoSM=";
         # sha256 = "sha256-oWcX+5GFL3sDGKYYYlJoeglBdcufro6Sk9KZSJMt0t0=";
         # sha256 = "sha256-eOr+64tSPXPUrqI9w4UUNLtvf0ziE/vHmuU5050VS1s=";
         # sha256 = "sha256-Ex06917+Grhhv8hGEr59CUK0+5tsQ6+wNv+7to2WDrg=";
@@ -260,7 +261,7 @@ let
       vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
         start = [
           vim-colorschemes
-          vim-litrepl-release
+          vim-litrepl-release-pypi
           # vimtex-local
           vimtex
           vim-terminal-images
@@ -397,10 +398,11 @@ let
         latexrun
         mytexlive
         grechanik-st
-        (litrepl-release-pypi)
+        # (litrepl-release-pypi)
         python-release
       ] ++ (with pkgs ; [
-        obs-studio
+        # obs-studio
+        peek
         tmux
       ]);
       shellHook = with pkgs; ''
