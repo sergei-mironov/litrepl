@@ -270,8 +270,7 @@ W = 'Hello from repl'
 ^D
 ```
 
-* Python interpreter prompts are disabled internally, no `>>>` symbols are
-  going to appear.
+* Python prompts are disabled internally, no `>>>` symbols are going to appear.
 * The corresponding Vim command is `:LTerm`
 
 `litrepl eval-code` might be used to pipe the code through the interpreter. The
