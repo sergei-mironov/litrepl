@@ -81,13 +81,13 @@ Instructions for the [Pip](https://pypi.org) and [Vim-plug](https://github.com/j
 
 1. Install the `litrepl` Python package with pip:
    ```sh
-   $ pip install --user git+https://github.com/grwlf/litrepl.vim
+   $ pip install --user git+https://github.com/sergei-mironov/litrepl
    $ litrepl --version
    ```
 2. Install the Vim plugin by adding the following line between the
    `plug#begin` and `plug#end` lines of your `.vimrc` file:
    ```vim
-   Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
+   Plug 'https://github.com/sergei-mironov/litrepl' , { 'rtp': 'vim' }
    ```
    Note: `rtp` sets the custom vim-plugin source directory of the plugin.
 
