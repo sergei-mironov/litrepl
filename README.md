@@ -606,5 +606,6 @@ Third-party issues
 * Pandoc https://github.com/jgm/pandoc/issues/8598
 * Jupytext https://github.com/mwouts/jupytext/issues/220#issuecomment-1418209581
 * Vim-LSC https://github.com/natebosch/vim-lsc/issues/469
+* [Bad PDF fonts in Firefox](https://github.com/mozilla/pdf.js/issues/17401)
 
 
