@@ -28,7 +28,7 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
                     FileNames, IType, Settings, CursorPos, ReadResult, SType,
                     LitreplArgs)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
-                   processCont, interpExitCode)
+                   processCont, interpExitCode, readipid)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
                    cursor_within, nlines, wraplong, blind_unlink)
 
@@ -94,7 +94,10 @@ def settings(fns:FileNames)->Optional[Settings]:
   """ Determines the session settings. Currently just finds out the type of the
   interpreter. """
   try:
-    pid=int(open(fns.pidf).read())
+    pid=readipid(fns)
+    if pid is None:
+      pdebug(f"could not determine pid of an interpreter")
+      return None
     p=Process(pid)
     cmd=p.cmdline()
     itype=None
@@ -111,9 +114,6 @@ def settings(fns:FileNames)->Optional[Settings]:
       assert False, f"Unknown interpreter {cmd}"
     pdebug(f"interpreter pid {pid} cmd '{cmd}' leads to type '{itype}'")
     return Settings(itype,pattern1,pattern2)
-  except FileNotFoundError:
-    pdebug(f"could not determine pid of an interpreter")
-    return None
   except NoSuchProcess as p:
     pdebug(f"could not determine process of an interpreter ({p})")
     return None
@@ -507,8 +507,12 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
     if not ss:
       return (fns,None)
     if interrupt:
-      pdebug("Sending SIGINT to the interpreter")
-      os.kill(int(open(fns.pidf).read()),SIGINT)
+      ipid=readipid(fns)
+      if ipid is not None:
+        pdebug("Sending SIGINT to the interpreter")
+        os.kill(ipid,SIGINT)
+      else:
+        pdebug("Failed to determine interpreter pid, not sending SIGINT")
     return fns,ss
 
   def _checkecode(fns,pending:bool):

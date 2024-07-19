@@ -807,6 +807,19 @@ cat out1.md | runlitrepl \
 grep -q 'KeyboardInterrupt' out2.md
 )} #}}}
 
+test_invalid_interpreter() {( #{{{
+mktest "_test_invalid_interpreter"
+cat >source.md <<"EOF"
+```python
+3+2
+```
+```result
+```
+EOF
+cat source.md | runlitrepl --python-interpreter=non-existent-ipython eval-sections >out1.md
+grep -q 'Interpreter exited with code: 127' out1.md
+)} #}}}
+
 die() {
   echo "$@" >&2
   exit 1
@@ -839,6 +852,7 @@ tests() {
   echo test_foreground
   echo test_status
   echo test_interrupt
+  echo test_invalid_interpreter
 }
 
 runlitrepl() {

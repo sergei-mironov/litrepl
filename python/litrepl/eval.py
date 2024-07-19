@@ -54,17 +54,26 @@ def with_sigmask(signals=None):
     if old is not None:
       pthread_sigmask(SIG_SETMASK,old)
 
+def readipid(fns:FileNames)->Optional[int]:
+  try:
+    return int(open(fns.pidf).read())
+  except (ValueError,FileNotFoundError):
+    return None
+
 @contextmanager
 def with_sigint(a:LitreplArgs, fns:FileNames):
   def _handler(signum,frame):
     pdebug(f"Sending SIGINT to {ipid}")
     os.kill(ipid,SIGINT)
-  ipid=int(open(fns.pidf).read())
+  ipid=readipid(fns)
   prev=None
   try:
     with with_sigmask():
-      if a.propagate_sigint:
-        prev=signal(SIGINT,_handler)
+      if ipid is not None:
+        if a.propagate_sigint:
+          prev=signal(SIGINT,_handler)
+      else:
+        pdebug(f"Failed to read pid: not installing SIGINT handler")
     yield
   finally:
     with with_sigmask():
@@ -226,10 +235,10 @@ def process(a:LitreplArgs,fns:FileNames, ss:Settings, lines:str)->Tuple[str,RunR
 
 def interpIsRunning(fns:FileNames)->bool:
   try:
-    ipid=int(open(fns.pidf).read())
+    ipid=readipid(fns)
+    if ipid is None:
+      return False
     os.kill(ipid, 0)
-  except FileNotFoundError:
-    return False
   except OSError as err:
     if err.errno == ESRCH:
       return False
@@ -248,7 +257,7 @@ def interpExitCode(fns:FileNames,poll_sec=0.5,poll_attempts=4,undefined=-1)->Opt
     else:
       try:
         return int(open(fns.ecodef).read())
-      except FileNotFoundError:
+      except (ValueError,FileNotFoundError):
         pass
     poll_attempts-=1
     if poll_attempts<=0:
@@ -303,7 +312,7 @@ def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
   """ Send `code` to the interpreter and fork the response reader. The output
   file is locked and its name is saved into the resulting `RunResult` object.
   """
-  wd,inp,outp,pidf,_=astuple(fns)
+  wd,inp,outp,_,_=astuple(fns)
   codehash=abs(hash(code))
   fname=join(wd,f"litrepl_eval_{codehash}.txt")
   pdebug(f"processAsync starting via {fname}")
