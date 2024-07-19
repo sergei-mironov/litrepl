@@ -27,11 +27,11 @@
 
 \section{Preamble}
 
-Litrepl uses its own internal parser to determine LaTeX-looking tags defining
-code and result sections. As one option, it expects \texttt{python} environment
-to mark code and \texttt{result} wrapping results. Both tags need to be
-introduced to LaTeX so it doesn't get confused. The following preamble sets both
-environments to be rendered as framed boxes of fixed-width text with proper
+Literpl employs its own internal parser to identify LaTeX-like tags that define
+code and result sections. One option is to use the \texttt{python} environment
+to mark code and wrap results with \texttt{result}. Both environments need to be
+defined in LaTeX so it doesn't get confused. The following preamble sets up both
+environments to render as framed boxes of fixed-width text with proper
 highlighting:
 
 \begin{verbatim}
@@ -52,6 +52,7 @@ highlighting:
 
 \section{Basic evaluation}
 
+Here is how we can use the environments we just introduced.
 
 \begin{verbatim}
 \begin{python}
@@ -64,12 +65,6 @@ print(W)
 W='Hello, World!'
 print(W)
 \end{python}
-
-Putting the cursor on it and typing the \texttt{:LEval} runs the code in the
-background Python interpreter.
-
-\texttt{result} begin/end tags mark the result section.  LitREPL replaces its
-content with the above code section's execution result.
 
 \begin{verbatim}
 \begin{result}
@@ -83,8 +78,9 @@ Hello, World!
 
 \section{Producing LaTeX}
 
-LitREPL also recognizes \texttt{result}/\texttt{noresult} comments as result
-section markers. With their help we can directly produce LaTeX markup as output:
+Literpl also recognizes \texttt{result} and \texttt{noresult} comments, which
+serve as markers for result sections. By using these comments, we can generate
+LaTeX markup directly as output.
 
 \begin{verbatim}
 \begin{python}
@@ -107,9 +103,9 @@ print("\\textbf{Hi!}")
 
 \section{Inline output}
 
-Additionally, VimREPL recognises \texttt{linline} 2-argument tags. The first
-arguement is treaten as a Python printable expression. The second arguemnt is to
-be replaced with its value.
+Furthermore, Literpl recognizes \texttt{linline} tags with two arguments. The
+first argument is treated as a Python printable expression, while the second
+argument will be replaced with its evaluated value.
 
 The value of \texttt{W} is happen to be: \linline{W}{Hello, World!}
 
