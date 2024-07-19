@@ -92,7 +92,7 @@ fun! LitReplUpdateCursor(cur)
   call setcharpos('.',cur)
 endfun
 
-fun LitReplRun_(command, timeout, pos)
+fun! LitReplRun_(command, timeout, pos)
   let ft = &filetype
   let cur = getcharpos('.')
   let cmd_pos = a:command . " " . a:pos
