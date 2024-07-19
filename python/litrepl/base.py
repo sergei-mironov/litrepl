@@ -28,7 +28,7 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
                     FileNames, IType, Settings, CursorPos, ReadResult, SType,
                     LitreplArgs)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
-                   processCont, interpExitCode, readipid)
+                   processCont, interpExitCode, readipid, with_parent_finally)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
                    cursor_within, nlines, wraplong, blind_unlink)
 
@@ -38,15 +38,6 @@ def pdebug(*args,**kwargs):
   if DEBUG:
     print(f"[{time():14.3f},{getpid()}]", *args, file=sys.stderr, **kwargs, flush=True)
 
-PID:int=getpid()
-
-@contextmanager
-def with_parent_finally(_handler):
-  try:
-    yield
-  finally:
-    if PID==getpid():
-      _handler()
 
 def defauxdir(suffix:Optional[str]=None)->str:
   """ Generate the default name of working directory. """
@@ -592,17 +583,16 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
       self._print(f"{bmarker}{tree.children[1].children[0].value}{emarker}")
 
   def _finally():
-    if PID==getpid():
-      if a.map_cursor:
-        cl=a.map_cursor[0] # cursor line
-        for threshold,diff in sorted(ledder.items()):
-          if cl>threshold:
-            cl=max(threshold,cl+diff)
-        with open(a.map_cursor_output,"w") as f:
-          f.write(str(cl))
-      if a.foreground:
-        for st in stypes:
-          stop(a,st)
+    if a.map_cursor:
+      cl=a.map_cursor[0] # cursor line
+      for threshold,diff in sorted(ledder.items()):
+        if cl>threshold:
+          cl=max(threshold,cl+diff)
+      with open(a.map_cursor_output,"w") as f:
+        f.write(str(cl))
+    if a.foreground:
+      for st in stypes:
+        stop(a,st)
 
   with with_parent_finally(_finally):
     C().visit(tree)

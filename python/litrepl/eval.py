@@ -40,6 +40,15 @@ def pusererror(fname,err)->None:
 SIGMASK_NESTED=False
 
 @contextmanager
+def with_parent_finally(_handler):
+  pid:int=getpid()
+  try:
+    yield # Might for a child process
+  finally:
+    if pid==getpid():
+      _handler()
+
+@contextmanager
 def with_sigmask(signals=None):
   global SIGMASK_NESTED
   assert not SIGMASK_NESTED
@@ -67,7 +76,11 @@ def with_sigint(a:LitreplArgs, fns:FileNames):
     os.kill(ipid,SIGINT)
   ipid=readipid(fns)
   prev=None
-  try:
+  def _finally():
+    with with_sigmask():
+      if prev is not None:
+        signal(SIGINT,prev)
+  with with_parent_finally(_finally):
     with with_sigmask():
       if ipid is not None:
         if a.propagate_sigint:
@@ -75,10 +88,6 @@ def with_sigint(a:LitreplArgs, fns:FileNames):
       else:
         pdebug(f"Failed to read pid: not installing SIGINT handler")
     yield
-  finally:
-    with with_sigmask():
-      if prev is not None:
-        signal(SIGINT,prev)
 
 @contextmanager
 def with_alarm(timeout_sec:float):
@@ -89,20 +98,21 @@ def with_alarm(timeout_sec:float):
     raise TimeoutError()
 
   prev=None
-  try:
-    if timeout_sec>0 and timeout_sec<float('inf'):
-      with with_sigmask():
-        prev=signal(SIGALRM,_handler)
-        setitimer(ITIMER_REAL,timeout_sec)
-      # pdebug(f"Alarm {timeout_sec} set")
-    yield
-  finally:
+  def _finally():
     if timeout_sec>0 and timeout_sec<float('inf'):
       # pdebug(f"Alarm {timeout_sec} cleaning")
       with with_sigmask():
         if prev is not None:
           setitimer(ITIMER_REAL,0)
           signal(SIGALRM,prev)
+
+  with with_parent_finally(_finally):
+    if timeout_sec>0 and timeout_sec<float('inf'):
+      with with_sigmask():
+        prev=signal(SIGALRM,_handler)
+        setitimer(ITIMER_REAL,timeout_sec)
+      # pdebug(f"Alarm {timeout_sec} set")
+    yield
 
 
 def merge_basic2(acc,r,x)->Tuple[bytes,int]:
@@ -268,7 +278,12 @@ def interpExitCode(fns:FileNames,poll_sec=0.5,poll_attempts=4,undefined=-1)->Opt
 @contextmanager
 def with_fd(name:str, flags:int, open_timeout_sec=float('inf')):
   fd=None
-  try:
+  def _finally():
+    pdebug(f"Closing {name}")
+    with with_sigmask():
+      if fd is not None:
+        os.close(fd)
+  with with_parent_finally(_finally):
     try:
       with with_alarm(open_timeout_sec):
         with with_sigmask(valid_signals()-{SIGALRM}):
@@ -279,11 +294,6 @@ def with_fd(name:str, flags:int, open_timeout_sec=float('inf')):
     except TimeoutError:
       pdebug(f"unable to open {name}\n")
       yield None
-  finally:
-    pdebug(f"Closing {name}")
-    with with_sigmask():
-      if fd is not None:
-        os.close(fd)
 
 @contextmanager
 def with_locked_fd(name:str, flags:int, lock_flags:int,
@@ -333,8 +343,12 @@ def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
                               fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdr:
             if fdw and fdr:
               pdebug("processAsync reader interact start")
-              interact(fdr,fdw,code,fo,ss)
-              pdebug("processAsync reader interact finish")
+              try:
+                interact(fdr,fdw,code,fo,ss)
+                pdebug("processAsync reader interact finish")
+              except BrokenPipeError:
+                pdebug("processAsync catches Broken Pipe error")
+                raise
         pdebug("Exiting!")
         exit(0)
       else:
