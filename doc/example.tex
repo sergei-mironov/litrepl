@@ -1,59 +1,116 @@
 \documentclass{article}
 \usepackage{verbatim}
+\usepackage{mdframed}
+\usepackage{minted}
+\renewcommand{\MintedPygmentize}{pygmentize}
 \usepackage[utf8]{inputenc}
-\begin{document}
 
-\section{Basics}
+% LitREPL-compatible environment for code snippets
+\newenvironment{python}
+  {\VerbatimEnvironment
+   \begin{minted}[breaklines,fontsize=\footnotesize]{python}}
+  {\end{minted}}
+\BeforeBeginEnvironment{python}{
+  \begin{mdframed}[nobreak=true,frametitle=\tiny{Python}]}
+\AfterEndEnvironment{python}{\end{mdframed}}
 
-LitREPL treats \texttt{lcode} environment as code sections and \texttt{lresult}
-environment as result sections. The names are currently hardcoded into the
-simplified LitREPL parser. Wrapping it in other tags is not allowed.
+% LitREPL-compatible environment for code results
+\newenvironment{result}{\verbatim}{\endverbatim}
+\BeforeBeginEnvironment{result}{
+  \begin{mdframed}[frametitle=\tiny{Result}]\footnotesize}
+\AfterEndEnvironment{result}{\end{mdframed}}
 
-LaTeX does not know anything about these environments by default, we need to
-introduce them to be able to compile the document using e.g. \texttt{pdflatex}.
-
-\newenvironment{lcode}{\verbatim}{\endverbatim}
-\newenvironment{lresult}{\verbatim}{\endverbatim}
+% LitREPL-compatible command for inline code results
 \newcommand{\linline}[2]{#2}
 
-Executable section is the text between the \texttt{lcode} begin/end tags.
+\begin{document}
 
-\begin{lcode}
+\section{Preamble}
+
+Litrepl uses its own internal parser to determine LaTeX-looking tags defining
+code and result sections. As one option, it expects \texttt{python} environment
+to mark code and \texttt{result} wrapping results. Both tags need to be
+introduced to LaTeX so it doesn't get confused. The following preamble sets both
+environments to be rendered as framed boxes of fixed-width text with proper
+highlighting:
+
+\begin{verbatim}
+\newenvironment{python}
+  {\VerbatimEnvironment
+   \begin{minted}[breaklines,fontsize=\footnotesize]{python}}
+  {\end{minted}}
+\BeforeBeginEnvironment{python}{
+  \begin{mdframed}[nobreak=true,frametitle=\tiny{Python}]}
+\AfterEndEnvironment{python}{\end{mdframed}}
+
+\newenvironment{result}{\verbatim}{\endverbatim}
+\BeforeBeginEnvironment{result}{
+  \begin{mdframed}[frametitle=\tiny{Result}]\footnotesize}
+\AfterEndEnvironment{result}{\end{mdframed}}
+\end{verbatim}
+
+
+\section{Basic evaluation}
+
+
+\begin{verbatim}
+\begin{python}
 W='Hello, World!'
 print(W)
-\end{lcode}
+\end{python}
+\end{verbatim}
 
-Putting the cursor on it and typing the \texttt{:LEval1} runs the code in the
+\begin{python}
+W='Hello, World!'
+print(W)
+\end{python}
+
+Putting the cursor on it and typing the \texttt{:LEval} runs the code in the
 background Python interpreter.
 
-\texttt{lresult} begin/end tags mark the result section.  LitREPL replaces its
+\texttt{result} begin/end tags mark the result section.  LitREPL replaces its
 content with the above code section's execution result.
 
-\begin{lresult}
+\begin{verbatim}
+\begin{result}
 Hello, World!
-\end{lresult}
+\end{result}
+\end{verbatim}
+
+\begin{result}
+Hello, World!
+\end{result}
 
 \section{Producing LaTeX}
 
-LitREPL recognizes \texttt{l[no]code}/\texttt{l[no]result} comments as
-code/result section markers. This way we can use Python to produce LaTeX markup
-as output.
+LitREPL also recognizes \texttt{result}/\texttt{noresult} comments as result
+section markers. With their help we can directly produce LaTeX markup as output:
 
-\begin{lcode}
-print("\\textbf{Hi}")
-\end{lcode}
+\begin{verbatim}
+\begin{python}
+print("\\textbf{Hi!}")
+\end{python}
 
-%lresult
-\textbf{Hi}
-%lnoresult
+%result
+\textbf{Hi!}
+%noresult
+\end{verbatim}
+
+
+\begin{python}
+print("\\textbf{Hi!}")
+\end{python}
+
+%result
+\textbf{Hi!}
+%noresult
 
 \section{Inline output}
 
 Additionally, VimREPL recognises \texttt{linline} 2-argument tags. The first
 arguement is treaten as a Python printable expression. The second arguemnt is to
-be replaced with the printing output. In our simplified definition, we simply
-ignore the first argument and paste the second to the LaTeX processor as-is.
+be replaced with its value.
 
-\linline{W}{Hello, World!}
+The value of \texttt{W} is happen to be: \linline{W}{Hello, World!}
 
 \end{document}
