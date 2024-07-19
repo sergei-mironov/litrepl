@@ -417,6 +417,7 @@ let
         tmux
         xdotool
         xorg.xwininfo
+        (gpt4all-cli.gpt4all-cli python-release.pkgs)
       ]);
       shellHook = with pkgs; ''
         export PS1="\n[DEMO] \[\033[1;32m\][nix-shell:\w]\$\[\033[0m\] "
