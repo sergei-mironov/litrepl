@@ -96,8 +96,6 @@ fun! LitReplRun_(command, timeout, pos)
   let ft = &filetype
   let cur = getcharpos('.')
   let cmd_pos = a:command . " " . a:pos
-  " Open a new undo block
-  let &ul=&ul
   " Execute the selected code blocks
   let cmdline = '%!'.LitReplCmd().
         \ ' --python-interpreter="'.g:litrepl_python_interpreter.'"'.
@@ -115,6 +113,9 @@ fun! LitReplRun_(command, timeout, pos)
 endfun
 
 fun! LitReplRun(command, timeout, pos)
+  " So we use hack to force remembering the undo position
+  execute "normal! I "
+  execute "normal! x"
   let cur = getcharpos('.')
   let command = '--propagate-sigint ' . a:command
   let errcode = LitReplRun_(command, a:timeout, a:pos)
@@ -141,6 +142,8 @@ fun! LitReplMonitor(command, pos)
   let cur = getcharpos('.')
   try
     while 1
+      " Opening a new undo block
+      let &ul=&ul
       let code = LitReplRun_(a:command, g:litrepl_timeout.',0.0', a:pos)
       if code == 0
         call LitReplUpdateCursor(cur)
