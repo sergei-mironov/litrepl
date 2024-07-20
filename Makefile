@@ -20,7 +20,15 @@ help:
 .PHONY: test # Run the test script (./sh/test.sh)
 test: .stamp_test
 
-$(WHEEL): $(PY) Makefile .stamp_test
+.stamp_readme: $(PY)
+	cp README.md _README.md.in
+	cat _README.md.in | litrepl --foreground --exception-exit=100 eval-sections >README.md
+	touch $@
+
+.PHONY: readme # Update code sections in the README.md
+readme: .stamp_readme
+
+$(WHEEL): $(PY) Makefile .stamp_test .stamp_readme
 	test -n "$(VERSION)"
 	rm -rf build dist || true
 	python3 setup.py sdist bdist_wheel

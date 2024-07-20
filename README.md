@@ -374,12 +374,11 @@ usage: litrepl [-h] [-v] [--filetype STR] [--python-interpreter EXE]
                [-d INT] [--verbose] [--auxdir DIR] [-C DIR]
                [--pending-exit INT] [--exception-exit INT] [--foreground]
                [--map-cursor LINE:COL:FILE] [--result-textwidth NUM]
-              
-{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
+               {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
                ...
+
 positional arguments:
- 
-{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
+  {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
                               Commands to execute
     start                     Start the background interpreter.
     stop                      Stop the background interpreters.
@@ -393,8 +392,9 @@ positional arguments:
                               resulting file to stdout.
     eval-code                 Evaluate the code snippet.
     repl                      Connect to the background terminal using GNU
-                              sockat.
+                              socat.
     interrupt                 Send SIGINT to the background interpreter.
+
 options:
   -h, --help                  show this help message and exit
   -v, --version               Print version.
@@ -452,6 +452,7 @@ For batch processing of documents, it may be necessary to have an on-demand
 interpreter session available, which would exist solely for the duration of the
 evaluation process.
 
+<!--lignore-->
 ~~~~ sh
 $ cat document.md.in
 ``` python
@@ -461,6 +462,7 @@ $ cat document.md.in | litrepl --foreground --exception-exit=200 eval-sections >
 $ echo $?
 200
 ~~~~
+<!--lnoignore-->
 
 Here, the `--foreground` argument tells Litrepl to run a new interpreter session
 and then stop it before exiting, `--exception-exit=200` sets the exit code
@@ -480,9 +482,11 @@ nnoremap <F6> :LEvalAsync<CR>
 
 Below we define `:C` command inserting new sections.
 
+<!--lignore-->
 ``` vim
 command! -buffer -nargs=0 C normal 0i``` python<CR>```<CR><CR>``` result<CR>```<Esc>4k
 ```
+<!--lnoignore-->
 
 #### Vim, executing first section after restart
 
@@ -503,9 +507,9 @@ directly from Python code sections.
 ```
 
 ``` result
- _________________
+ _________________ 
 < Hello, Litrepl! >
- -----------------
+ ----------------- 
         \   ^__^
          \  (oo)\_______
             (__)\       )\/\

@@ -752,7 +752,11 @@ print(session)
 EOF
 cat source.md | runlitrepl --filetype=markdown eval-sections '0,2' >out1.md
 grep -q "^common-session" out1.md
-cat source.md | runlitrepl --foreground --filetype=markdown eval-sections '1,2' >out2.md
+cat source.md | runlitrepl \
+  --foreground \
+  --exception-exit=123 \
+  --filetype=markdown \
+  eval-sections '1,2' >out2.md
 grep -q "^foreground" out2.md
 cat source.md | runlitrepl --filetype=markdown eval-sections '2' >out3.md
 grep -q "^common-session" out3.md

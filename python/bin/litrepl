@@ -5,11 +5,23 @@ from litrepl import *
 from litrepl import __version__, eval_section_
 from os import chdir, getcwd
 from subprocess import check_output, DEVNULL, CalledProcessError
-from argparse import ArgumentParser
+from argparse import ArgumentParser, HelpFormatter
 from tempfile import mkdtemp
 from functools import partial
 
 LOCSHELP='(N|$|N..N)[,(...)] where N is either: number,$,ROW:COL'
+
+def make_wide(formatter, w=180, h=28):
+    """Return a wider HelpFormatter, if possible."""
+    try:
+        # https://stackoverflow.com/a/5464440
+        # beware: "Only the name of this class is considered a public API."
+        kwargs = {'max_help_position': 30, 'width':78}
+        # formatter(None, **kwargs)
+        return lambda prog: formatter(prog, **kwargs)
+    except TypeError:
+        warnings.warn("argparse help formatter failed, falling back.")
+        return formatter
 
 def _with_type(p, default=None, allow_all=False):
   p.add_argument(
@@ -19,41 +31,72 @@ def _with_type(p, default=None, allow_all=False):
   return p
 
 if __name__=='__main__':
-  ap=ArgumentParser(prog='litrepl')
-  ap.add_argument('-v','--version',action='version',version=__version__ or '?',help='Print the version')
-  ap.add_argument('--filetype',metavar='STR',default=None,help='markdown|[la]tex')
+  ap=ArgumentParser(prog='litrepl',
+                    formatter_class=make_wide(HelpFormatter))
+  ap.add_argument('-v','--version',action='version',version=__version__ or '?',
+    help='Print version.')
+  ap.add_argument('--filetype',metavar='STR',default=None,
+    help='Specify the type of input formatting (markdown|[la]tex).')
   ap.add_argument('--python-interpreter',metavar='EXE',default='auto',
-                  help='Python interpreter to use (python|ipython|auto)')
+    help='Python interpreter to use (python|ipython|auto)')
   ap.add_argument('--ai-interpreter',metavar='EXE',default='auto',
-                  help='AI interpreter to use (gpt4all-cli|auto)')
-  ap.add_argument('--timeout',type=str,metavar='SEC[,SEC]',default='inf',
-                  help='Timeouts for initial evaluation and for pending checks, in seconds')
-  ap.add_argument('--propagate-sigint',action='store_true',help='Propagate sigint to the background interpeter')
-  ap.add_argument('-d','--debug',type=int,metavar='LEVEL',default=0)
-  ap.add_argument('--verbose',action='store_true',help='Be verbose')
-  ap.add_argument('--auxdir',type=str,metavar='DIR',default=None,help="Directory to store auxilary files")
-  ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,help="Directory to run from")
-  ap.add_argument('-e','--exception-exit',type=str,metavar='ERRCODE',default=None, help='Return this error code at first exception')
-  ap.add_argument('--pending-exit',type=str,metavar='ERRCODE',default=None, help='Return this error code at pending execution')
-  ap.add_argument('--foreground',action='store_true',help='Do not reuse the interpreter session of the current directory')
-  ap.add_argument('--map-cursor',type=str,metavar='LINE:COL',default=None,help="Calculate cursor coordinates, see documentation")
-  ap.add_argument('--result-textwidth',type=str,metavar='NUM',default=None,help="Wrap long result lines")
-  sps=ap.add_subparsers(dest='command',help='commands to execute')
-  _with_type(sps.add_parser('start',help='Start the interpreter in the background'),default='python')
-  _with_type(sps.add_parser('stop',help='Stop the interpreter'),allow_all=True,default='all')
-  _with_type(sps.add_parser('restart',help='Restart the interpreter'),allow_all=True)
-  sstatus=_with_type(sps.add_parser('status',help='Print the status of the worker'),allow_all=True,default='all')
-  sstatus.add_argument('--tty',action='store_true',help='Read from interactive terminal')
-  sps.add_parser('parse',help='Parse the input file (diagnostics)')
-  sps.add_parser('parse-print',help='Parse and print the input file (diagnostics, no changes are expected)')
-  apes=sps.add_parser('eval-section',help='Evaluate section under the cursor')
-  apes.add_argument('--line',type=int,default=None)
-  apes.add_argument('--col',type=int,default=None)
-  eps=sps.add_parser('eval-sections',help='Evaluate one or more sections by location')
+    help='AI interpreter to use (gpt4all-cli|auto).')
+  ap.add_argument('--timeout',type=str,metavar='F[,F]',default='inf',
+    help=dedent('''Timeouts for initial evaluation and for pending checks, in
+    seconds. If the latter is omitted, it is considered to be equal to the
+    former one.'''))
+  ap.add_argument('--propagate-sigint',action='store_true',
+    help=dedent('''If set, litrepl will relay SIGINT signals to the running
+    interpreter. Otherwise it just handles them by itself.'''))
+  ap.add_argument('-d','--debug',type=int,metavar='INT',default=0,
+    help="Enable (a lot of) debug messages.")
+  ap.add_argument('--verbose',action='store_true',
+    help='Be more verbose (used in status).')
+  ap.add_argument('--auxdir',type=str,metavar='DIR',default=None,
+    help=dedent('''Directory to store auxilary session files. By default, the
+    name of the aux. dir is derived from the name of the current dir.'''))
+  ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,
+    help=dedent('''Directory to run from, the current directory is
+    used by default.'''))
+  ap.add_argument('--pending-exit',type=str,metavar='INT',default=None,
+    help=dedent('''Return this error code if whenever section hits timeout.'''))
+  ap.add_argument('--exception-exit',type=str,metavar='INT',default=None,
+    help=dedent('''Return this error code at exception, if any. Note: it takes
+    affect only for newly-started interpreters.'''))
+  ap.add_argument('--foreground',action='store_true',
+    help=dedent('''Start a separate session and stop it when the evaluation is
+    done.'''))
+  ap.add_argument('--map-cursor',type=str,metavar='LINE:COL:FILE',default=None,
+    help=dedent('''Calculate the new position of a cursor at LINE:COL and write
+    it to FILE.'''))
+  ap.add_argument('--result-textwidth',type=str,metavar='NUM',default=None,
+    help=dedent('''Wrap result lines longer than NUM symbols.'''))
+  sps=ap.add_subparsers(dest='command',help='Commands to execute')
+  sstart=_with_type(sps.add_parser('start',
+    help='Start the background interpreter.'),default='python')
+  _with_type(sps.add_parser('stop',
+    help='Stop the background interpreters.'),allow_all=True,default='all')
+  _with_type(sps.add_parser('restart',
+    help='Restart the background interpreters.'),allow_all=True)
+  sstatus=_with_type(sps.add_parser('status',
+    help='Print background interpreter\'s status.'),allow_all=True,default='all')
+  sstatus.add_argument('--tty',action='store_true',
+    help='Read intput document from stdin (required to get per-section status).')
+  sps.add_parser('parse',
+    help='Parse the input file (diagnostics).')
+  sps.add_parser('parse-print',
+    help=dedent('''Parse and print the input file back (diagnostics, no changes
+    are made).'''))
+  eps=sps.add_parser('eval-sections',
+    help=dedent('''Parse stdin, evaluate the sepcified sections (by default - all
+    available sections), print the resulting file to stdout.'''))
   eps.add_argument('locs',type=str,metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
-  _with_type(sps.add_parser('eval-code',help='Evaluate the given lines of code'),default='python')
-  _with_type(sps.add_parser('repl',help='Connect interactive shell to the terminal'),default='python')
-  ips=sps.add_parser('interrupt',help='Raise KeyboardInterrupt exception to the interpreter')
+  _with_type(sps.add_parser('eval-code',
+    help='Evaluate the code snippet.'),default='python')
+  _with_type(sps.add_parser('repl',
+    help='Connect to the background terminal using GNU socat.'),default='python')
+  ips=sps.add_parser('interrupt',
+    help='Send SIGINT to the background interpreter.')
   ips.add_argument('locs',metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
   a=ap.parse_args(sys.argv[1:])
 
@@ -64,6 +107,7 @@ if __name__=='__main__':
 
   if a.exception_exit:
     a.exception_exit=int(a.exception_exit)
+
   if a.pending_exit:
     a.pending_exit=int(a.pending_exit)
 
@@ -125,11 +169,6 @@ if __name__=='__main__':
   elif a.command=='parse-print':
     sr0=SecRec(set(),{})
     ecode=eval_section_(a,parse_(GRAMMARS[a.filetype]),sr0)
-    exit(0 if ecode is None else ecode)
-  elif a.command=='eval-section':
-    t=parse_(GRAMMARS[a.filetype])
-    nsecs=SecRec(set(solve_cpos(t,[(a.line,a.col)]).cursors.values()),{})
-    ecode=eval_section_(a,t,nsecs)
     exit(0 if ecode is None else ecode)
   elif a.command=='eval-sections':
     t=parse_(GRAMMARS[a.filetype])
