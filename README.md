@@ -43,8 +43,9 @@ Contents
         * [Examining internal state](#examining-internal-state)
         * [Communicating with AI (Experimental)](#communicating-with-ai-experimental)
     * [Reference](#reference)
-        * [Vim and command-line commands](#vim-and-command-line-commands)
-        * [Variables and arguments](#variables-and-arguments)
+        * [Vim and command-line commands overview](#vim-and-command-line-commands-overview)
+        * [Variables and arguments overview](#variables-and-arguments-overview)
+        * [Command-line arguments](#command-line-arguments)
     * [Hints](#hints)
         * [Command line, basic usage](#command-line-basic-usage)
         * [Command line, foreground evaluation](#command-line-foreground-evaluation)
@@ -149,17 +150,18 @@ equivalent Vim command is `:LEval`.
 
 For example:
 
+<!--lignore-->
 ~~~~ shell
-$ cat >file.md <<"EOF"
+$ cat file.md
 ``` python
 print('Hello Markdown!')
 ```
 
 ``` result
 ```
-EOF
 $ cat file.md | litrepl eval-sections
 ~~~~
+<!--lnoignore-->
 
 .. would produce a Markdown document containing the properly filled result
 section.
@@ -232,6 +234,7 @@ executions.
 `litrepl --timeout=3.5 eval-sections` changes the reading timeout from the
 default infinity the specified number of seconds. The output would be:
 
+<!--lignore-->
 ~~~~ markdown
 ``` python
 from tqdm import tqdm
@@ -245,6 +248,7 @@ for i in tqdm(range(10)):
 [BG:/tmp/nix-shell.vijcH0/litrepl_1000_a2732d/python/litrepl_eval_5503542553591491252.txt]
 ```
 ~~~~
+<!--lnoignore-->
 
 When re-executing this document, LitREPL will resume the reading. Once the
 evaluation is complete, it will remove the continuation marker from the output
@@ -292,6 +296,7 @@ query local LLMs. In order to try it, install the interpreter and use `ai` as
 the name for code sections. For low-speed models it would be convenient to use
 `:LEvalMon` command for evaluation.
 
+<!--lignore-->
 ~~~~ markdown
 ``` ai
 /model "~/.local/share/nomic.ai/GPT4All/Meta-Llama-3-8B-Instruct.Q4_0.gguf"
@@ -304,32 +309,33 @@ any questions you might have and provide information on a wide range of topics.
 How can I assist you today?
 ```
 ~~~~
+<!--lnoignore-->
 
 As another example, this repository contains a [joke script](./sh/airepl.sh)
-which begs AI to generate `ffmpeg`-based .gif to .webm shell oneliner in a loop
-(do use virtualization if you ever want to run it!).
+which begs AI to generate `ffmpeg`-based .gif to .webm shell one-liner in a loop
+(do use virtualisation if you ever want to run it!).
 
 ### Reference
 
-#### Vim and command-line commands
+#### Vim and command-line commands overview
 
 | Vim <img width=200/> | Command line <img width=200/>    | Description                 |
 |----------------------|----------------------------------|-----------------------------|
-| `:LStart [T]`        | `litrepl start [T]`              | Start the interpreter       |
-| `:LStop [T]`         | `litrepl stop [T]`               | Stop the interpreter        |
-| `:LStatus [T]`       | `litrepl status [T] <F`          | Print the daemon status     |
-| `:LRestart [T]`      | `litrepl restart [T]`            | Restart the interpreter     |
-| `:LEval N`           | `lirtepl eval-sections N <F`     | Run or update section under the cursor and wait until the completion |
-| `:LEval above`       | `lirtepl eval-sections '0..N' <F`| Run sections above and under the cursor and wait until the completion |
-| `:LEval below`       | `lirtepl eval-sections 'N..$' <F`| Run sections below and under the cursor and wait until the completion |
-| `:LEval all`         | `lirtepl eval-sections <F`       | Evaluate all code sections  |
-| `:LEvalAsync N`      | `lirtepl --timeout=0.5,0 eval-sections N <F` | Run section under the cursor and wait a bit before going asynchronous. Also, update the output from the already running section. |
-| `:LInterrupt N`      | `lirtepl interrupt N <F`         | Send Ctrl+C signal to the interpreter and get a feedback |
-| `:LEvalMon N`        | `while .. do .. done`            | Monitor asynchronous code evaluation |
-| N/A                  | `lirtepl eval-code <P`           | Evaluate the given Python code |
-| `:LTerm`             | `lirtepl repl [T]`               | Open the terminal to the interpreter |
-| `:LOpenErr`          | `litrepl ...  2>F`               | Open the stderr window               |
-| `:LVersion`          | `litrepl --version`              | Show version                         |
+| `:LStart [T]`        | `litrepl start [T]`              | Start the background interpreter |
+| `:LStop [T]`         | `litrepl stop [T]`               | Stop the background interpreter |
+| `:LRestart [T]`      | `litrepl restart [T]`            | Restart the background interpreter |
+| `:LStatus [T]`       | `litrepl status [T] <F`          | Print the background interpreter status |
+| `:LEval [N]`         | `lirtepl eval-sections L:C <F`   | Evaluate the section under the cursor synchronously |
+| `:LEval above`       | `lirtepl eval-sections '0..N' <F`| Evaluate sections above and under the cursor synchronously |
+| `:LEval below`       | `lirtepl eval-sections 'N..$' <F`| Evaluate sections below and under the cursor synchronously |
+| `:LEval all`         | `lirtepl eval-sections <F`       | Evaluate all code sections in a document |
+| `:LEvalAsync N`      | `lirtepl --timeout=0.5,0 eval-sections N <F` | Start or continue asynchronous evaluation of the section under the cursor |
+| `:LInterrupt N`      | `lirtepl interrupt N <F`         | Send SIGINT to the interpreter evaluating the section under the cursor and update |
+| `:LEvalMon N`        | `while .. do .. done`            | Start or continue monitoring asynchronous code evaluation |
+| N/A                  | `lirtepl eval-code <P`           | Evaluate the given code verbatim |
+| `:LTerm`             | `lirtepl repl [T]`               | Connect to the interpreter using GNU socat |
+| `:LOpenErr`          | `litrepl ...  2>F`               | Get the errors |
+| `:LVersion`          | `litrepl --version`              | Show version |
 
 Where
 
@@ -339,7 +345,7 @@ Where
 * `N` number of code section to evaluate, starting from 0.
 * `L:C` denotes line:column of the cursor.
 
-#### Variables and arguments
+#### Variables and arguments overview
 
 | Vim setting  <img width=200/>   | CLI argument  <img width=200/> | Description                       |
 |---------------------------------|--------------------------------|-----------------------------------|
@@ -354,7 +360,72 @@ Where
 * `FLOAT` should be formatted as `1` or `1.1` or `inf`. Note: command line
   argument also accepts a pair of timeouts.
 
-More arguments are available, see `help`.
+#### Command-line arguments
+
+<!--
+``` python
+!./python/bin/litrepl --help
+```
+-->
+
+``` result
+usage: litrepl [-h] [-v] [--filetype STR] [--python-interpreter EXE]
+               [--ai-interpreter EXE] [--timeout F[,F]] [--propagate-sigint]
+               [-d INT] [--verbose] [--auxdir DIR] [-C DIR]
+               [--pending-exit INT] [--exception-exit INT] [--foreground]
+               [--map-cursor LINE:COL:FILE] [--result-textwidth NUM]
+              
+{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
+               ...
+positional arguments:
+ 
+{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
+                              Commands to execute
+    start                     Start the background interpreter.
+    stop                      Stop the background interpreters.
+    restart                   Restart the background interpreters.
+    status                    Print background interpreter's status.
+    parse                     Parse the input file (diagnostics).
+    parse-print               Parse and print the input file back
+                              (diagnostics, no changes are made).
+    eval-sections             Parse stdin, evaluate the sepcified sections (by
+                              default - all available sections), print the
+                              resulting file to stdout.
+    eval-code                 Evaluate the code snippet.
+    repl                      Connect to the background terminal using GNU
+                              sockat.
+    interrupt                 Send SIGINT to the background interpreter.
+options:
+  -h, --help                  show this help message and exit
+  -v, --version               Print version.
+  --filetype STR              Specify the type of input formatting
+                              (markdown|[la]tex).
+  --python-interpreter EXE    Python interpreter to use (python|ipython|auto)
+  --ai-interpreter EXE        AI interpreter to use (gpt4all-cli|auto).
+  --timeout F[,F]             Timeouts for initial evaluation and for pending
+                              checks, in seconds. If the latter is omitted, it
+                              is considered to be equal to the former one.
+  --propagate-sigint          If set, litrepl will relay SIGINT signals to the
+                              running interpreter. Otherwise it just handles
+                              them by itself.
+  -d INT, --debug INT         Enable (a lot of) debug messages.
+  --verbose                   Be more verbose (used in status).
+  --auxdir DIR                Directory to store auxilary session files. By
+                              default, the name of the aux. dir is derived
+                              from the name of the current dir.
+  -C DIR, --workdir DIR       Directory to run from, the current directory is
+                              used by default.
+  --pending-exit INT          Return this error code if whenever section hits
+                              timeout.
+  --exception-exit INT        Return this error code at exception, if any.
+                              Note: it takes affect only for newly-started
+                              interpreters.
+  --foreground                Start a separate session and stop it when the
+                              evaluation is done.
+  --map-cursor LINE:COL:FILE  Calculate the new position of a cursor at
+                              LINE:COL and write it to FILE.
+  --result-textwidth NUM      Wrap result lines longer than NUM symbols.
+```
 
 ### Hints
 
@@ -382,11 +453,10 @@ interpreter session available, which would exist solely for the duration of the
 evaluation process.
 
 ~~~~ sh
-$ cat >document.md.in <<EOF
+$ cat document.md.in
 ``` python
 raise Exception("D'oh!")
 ```
-EOF
 $ cat document.md.in | litrepl --foreground --exception-exit=200 eval-sections >document.md
 $ echo $?
 200
@@ -518,11 +588,12 @@ Gallery
 
 Basic usage
 
-<img src="https://github.com/grwlf/litrepl-media/blob/main/demo.gif?raw=true" width="400"/>
+![Peek 2024-07-18 20-50-2](https://github.com/user-attachments/assets/8e2b2c8c-3412-4bf6-b75d-d5bd1adaf7ea)
+
+*Note: the below screencasts are outdated.*
 
 Using LitREPL in combination with the [Vimtex](https://github.com/lervag/vimtex)
 plugin to edit Latex documents on the fly.
-
 
 <video controls src="https://user-images.githubusercontent.com/4477729/187065835-3302e93e-6fec-48a0-841d-97986636a347.mp4" muted="true"></video>
 
@@ -556,11 +627,11 @@ Limitations
 -----------
 
 * Formatting: Nested code sections are not supported.
-* Formatting: Special symbols in the Python output could invalidate the
-  document.
+* ~~Formatting: Special symbols in the Python output could invalidate the
+  document~~.
 * Interpreter: Extra newline is required after Python function definitions.
 * Interpreter: Stdout and stderr are joined together.
-* Interpreter: Evaluation of a code section locks the editor.
+* ~~Interpreter: Evaluation of a code section locks the editor~~.
 * Interpreter: Tweaking `os.ps1`/`os.ps2` prompts of the Python interpreter
   could break the session.
 * ~~Interpreter: No asynchronous code execution.~~
