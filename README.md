@@ -376,7 +376,6 @@ usage: litrepl [-h] [-v] [--filetype STR] [--python-interpreter EXE]
                [--map-cursor LINE:COL:FILE] [--result-textwidth NUM]
                {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
                ...
-
 positional arguments:
   {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
                               Commands to execute
@@ -394,7 +393,6 @@ positional arguments:
     repl                      Connect to the background terminal using GNU
                               socat.
     interrupt                 Send SIGINT to the background interpreter.
-
 options:
   -h, --help                  show this help message and exit
   -v, --version               Print version.
