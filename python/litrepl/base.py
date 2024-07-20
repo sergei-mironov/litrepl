@@ -26,7 +26,7 @@ from contextlib import contextmanager
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
                     FileNames, IType, Settings, CursorPos, ReadResult, SType,
-                    LitreplArgs)
+                    LitreplArgs, ECode, ECODE_OK, ECODE_RUNNING)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
@@ -478,15 +478,15 @@ def eval_code_(a:LitreplArgs,
   res=rresultSave(pptext,runr) if rr.timeout else pptext
   return res,rr
 
-def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int:
+def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->ECode:
   """ Evaluate code sections of the parsed `tree`, as specified in the `secrec`
   request.  """
   nsecs=secrec.nsecs
-  ssrc:Dict[int,str]={}    # Section sources
-  sres:Dict[int,str]={}    # Section results
-  ledder:Dict[int,int]={}  # Facility to restore the cursor
-  stypes:Set[SType]=set()  # Section types we have run
-  ecode:int=0              # Combined exit code
+  ssrc:Dict[int,str]={}     # Section sources: sec.num -> code
+  sres:Dict[int,str]={}     # Section results: sec.num -> result
+  ledder:Dict[int,int]={}   # Facility to restore the cursor: line -> offset
+  ecodes:Dict[int,ECode]={} # Exit codes: sec.num -> exitcode
+  stypes:Set[SType]=set()   # Section types we have run
 
   def _getinterp(bmarker:str)->Tuple[FileNames,Optional[Settings]]:
     st=bmarker2st(bmarker)
@@ -506,19 +506,19 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
         pdebug("Failed to determine interpreter pid, not sending SIGINT")
     return fns,ss
 
-  def _checkecode(fns,pending:bool):
-    nonlocal ecode
-    if ecode==0:
-      ec=interpExitCode(fns,undefined=200)
-      pdebug(f"interpreter exit code: {ec}")
-      if ec is None:
-        if pending and a.pending_exit:
-          ecode=a.pending_exit
+  def _checkecode(fns,nsec,pending:bool)->ECode:
+    ec=interpExitCode(fns)
+    pdebug(f"interpreter exit code: {ec}")
+    if ec is ECODE_RUNNING:
+      if pending and a.pending_exit:
+        ecodes[nsec]=a.pending_exit
       else:
-        ecode=ec
+        ecodes[nsec]=ECODE_RUNNING
+    else:
+      ecodes[nsec]=ec
+    return ec
 
-  def _failmsg(fns):
-    ec=interpExitCode(fns,undefined=200)
+  def _failmsg(fns,ec):
     return f"<Interpreter exited with code: {ec}>\n"
 
   class C(LarkInterpreter):
@@ -543,11 +543,12 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
       ssrc[self.nsec]=code
       if self.nsec in nsecs:
         fns,ss=_getinterp(bmarker)
+        rr=None
         if ss:
           sres[self.nsec],rr=eval_code_(a,fns,ss,code,secrec.pending.get(self.nsec))
-          _checkecode(fns,rr.timeout)
-        else:
-          sres[self.nsec]=_failmsg(fns)
+        ec=_checkecode(fns,self.nsec,rr.timeout if rr else False)
+        if ec is not None:
+          sres[self.nsec]=sres.get(self.nsec,'')+_failmsg(fns,ec)
     def ocodesection(self,tree):
       bmarker=tree.children[0].children[0].value
       t=tree.children[1].children[0].value
@@ -571,9 +572,9 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
         fns,ss=_getinterp("python")
         if ss:
           result=process(a,fns,ss,'print('+code+');\n')[0].rstrip('\n')
-          _checkecode(fns,False)
-        else:
-          result=_failmsg(fns)
+        ec=_checkecode(fns,self.nsec,False)
+        if ec is not None:
+          result+=_failmsg(fns,ec)
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
       self._print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}")
@@ -597,8 +598,9 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->int
   with with_parent_finally(_finally):
     C().visit(tree)
 
-  pdebug(f"Returning {ecode}")
-  return ecode
+  pdebug(f"eval_code_ ecodes {ecodes}")
+  return max(map(lambda x:ECODE_OK if x is None else x,
+                 ecodes.values()),default=ECODE_OK)
 
 def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
   """ Preprocess the document tree. Resolve the list of cursor locations `cs`
@@ -770,6 +772,6 @@ def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
       pass
     else:
       raise NotImplementedError(f'Unsupported type {st}')
-    ecode=interpExitCode(fns,undefined=200)
+    ecode=interpExitCode(fns)
     ecodes.add(0 if ecode is None else ecode)
   return max(ecodes)

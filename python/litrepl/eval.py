@@ -19,9 +19,11 @@ from functools import partial
 from argparse import ArgumentParser
 from contextlib import contextmanager
 from errno import ESRCH
-from signal import pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK, SIG_SETMASK
+from signal import (pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK,
+                    SIG_SETMASK)
 
-from .types import LitreplArgs, Settings, RunResult, ReadResult, FileNames
+from .types import (LitreplArgs, Settings, RunResult, ReadResult, FileNames,
+                    ECode, ECODE_OK, ECODE_RUNNING, ECODE_UNDEFINED)
 from .utils import blind_unlink
 
 def pstderr(*args,**kwargs):
@@ -254,16 +256,16 @@ def interpIsRunning(fns:FileNames)->bool:
       return False
   return True
 
-def interpExitCode(fns:FileNames,poll_sec=0.5,poll_attempts=4,undefined=-1)->Optional[int]:
-  """ Returns:
-    * <int>: interpreter exited with this exit code
-    * None: interpreter is still running
-    * undefined: unable to determine the code
-  """
+def interpExitCode(fns:FileNames,
+                   poll_sec=0.5,
+                   poll_attempts=4,
+                   undefined=255)->ECode:
+  """ Determines retcode of the interpreter. Polls it a little if it looks
+  crashed."""
   ecode:int|None=None
   while ecode is None:
     if interpIsRunning(fns):
-      return None
+      return ECODE_RUNNING
     else:
       try:
         return int(open(fns.ecodef).read())
@@ -273,7 +275,7 @@ def interpExitCode(fns:FileNames,poll_sec=0.5,poll_attempts=4,undefined=-1)->Opt
     if poll_attempts<=0:
       break
     sleep(poll_sec)
-  return undefined
+  return ECODE_UNDEFINED
 
 @contextmanager
 def with_fd(name:str, flags:int, open_timeout_sec=float('inf')):
@@ -348,6 +350,7 @@ def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
                 pdebug("processAsync reader interact finish")
               except BrokenPipeError:
                 pdebug("processAsync catches Broken Pipe error")
+                os.write(fo,"<BrokenPipe>\n".encode())
                 raise
         pdebug("Exiting!")
         exit(0)

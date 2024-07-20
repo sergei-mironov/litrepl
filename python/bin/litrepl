@@ -27,7 +27,7 @@ if __name__=='__main__':
   ap.add_argument('--ai-interpreter',metavar='EXE',default='auto',
                   help='AI interpreter to use (gpt4all-cli|auto)')
   ap.add_argument('--timeout',type=str,metavar='SEC[,SEC]',default='inf',
-                  help='Timeouts for initial evaluation and for pending check, in seconds')
+                  help='Timeouts for initial evaluation and for pending checks, in seconds')
   ap.add_argument('--propagate-sigint',action='store_true',help='Propagate sigint to the background interpeter')
   ap.add_argument('-d','--debug',type=int,metavar='LEVEL',default=0)
   ap.add_argument('--verbose',action='store_true',help='Be verbose')

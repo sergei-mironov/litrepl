@@ -808,6 +808,8 @@ grep -q 'KeyboardInterrupt' out2.md
 )} #}}}
 
 test_invalid_interpreter() {( #{{{
+# Exact result messages might start a race (exit code X VS broken pipe) That is
+# why we put tow sections.
 mktest "_test_invalid_interpreter"
 cat >source.md <<"EOF"
 ```python
@@ -815,8 +817,13 @@ cat >source.md <<"EOF"
 ```
 ```result
 ```
+```python
+5+6
+```
+```result
+```
 EOF
-cat source.md | runlitrepl --python-interpreter=non-existent-ipython eval-sections >out1.md
+cat source.md | runlitrepl --python-interpreter=non-existent-ipython eval-sections >out1.md || true
 grep -q 'Interpreter exited with code: 127' out1.md
 )} #}}}
 

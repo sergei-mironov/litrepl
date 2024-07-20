@@ -5,6 +5,12 @@ from enum import Enum
 FileName=str
 LitreplArgs=Any
 
+# Process exit code or None (running)
+ECode=Optional[int]
+ECODE_RUNNING=None
+ECODE_OK=0
+ECODE_UNDEFINED=255
+
 class SType(Enum):
   """ Code section types """
   SPython = 0
