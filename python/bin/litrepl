@@ -193,12 +193,13 @@ if __name__=='__main__':
     exit(ecode)
   elif a.command=='eval-code':
     st=name2st(a.type)
+    es=EvalState()
     with with_parent_finally(partial(_foreground_stop,st)):
       fns=pipenames(a,st)
       if not running(a,st) or a.foreground:
         start(a,st)
       ss=settings(fns)
-      print(eval_code(a,fns,ss,sys.stdin.read()))
+      print(eval_code(a,fns,ss,es,sys.stdin.read()))
       ecode=interpExitCode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='status':

@@ -270,34 +270,33 @@ def start(a:LitreplArgs, st:SType)->int:
     raise ValueError(f"Unsupported section type: {st}")
 
 
-def code_preprocess_ipython(a:LitreplArgs, code:str) -> str:
+def code_preprocess_ipython(a:LitreplArgs, es:EvalState, code:str) -> str:
   # IPython seems to not echo the terminating cpaste pattern into the output
   # which is good.
   paste_pattern='12341234213423'
   return (f'\n%cpaste -q -s {paste_pattern}\n{code}\n{paste_pattern}\n')
+def code_preprocess_python(a:LitreplArgs, es:EvalState, code:str) -> str:
+  return fillspaces(code, '# spaces')
+def code_preprocess_gpt4allcli(a:LitreplArgs, es:EvalState, code:str) -> str:
+  return code + "/ask\n"
 def result_postprocess_ipython(a:LitreplArgs, text:str) -> str:
   # A workaround for https://github.com/ipython/ipython/issues/13622
   r=re.compile('ERROR! Session/line number was not unique in database. '
                'History logging moved to new session [0-9]+\\n')
   return re.sub(r,'',text)
-
-def code_preprocess_python(a:LitreplArgs, code:str) -> str:
-  return fillspaces(code, '# spaces')
-def code_preprocess_gpt4allcli(a:LitreplArgs, code:str) -> str:
-  return code + "/ask\n"
 def result_postprocess_python(a:LitreplArgs, text:str) -> str:
   return text
 def result_postprocess_gpt4allcli(a:LitreplArgs, text:str) -> str:
   return text.strip()+"\n"
 
 
-def code_preprocess(a:LitreplArgs, ss:Settings, code:str) -> str:
+def code_preprocess(a:LitreplArgs, ss:Settings, es:EvalState, code:str) -> str:
   if (ss.itype is None) or ss.itype == IType.IPython:
-    return code_preprocess_ipython(a,code)
+    return code_preprocess_ipython(a,es,code)
   elif ss.itype == IType.Python:
-    return code_preprocess_python(a,code)
+    return code_preprocess_python(a,es,code)
   elif ss.itype == IType.GPT4AllCli:
-    return code_preprocess_gpt4allcli(a,code)
+    return code_preprocess_gpt4allcli(a,es,code)
   else:
     raise ValueError(fmterror(f'''
       Interpreter type {ss.itype} is not supported for pre-processing. Did you
@@ -462,6 +461,7 @@ def eval_code(*args, **kwargs) -> str:
 def eval_code_(a:LitreplArgs,
                fns:FileNames,
                ss:Settings,
+               es:EvalState,
                code:str,
                runr:Optional[RunResult]=None) -> Tuple[str,ReadResult]:
   """ Start or complete the snippet evaluation process. `runr`
@@ -472,7 +472,7 @@ def eval_code_(a:LitreplArgs,
   """
   rr:ReadResult
   if runr is None:
-    rr,runr=processAdapt(a,fns,ss,code_preprocess(a,ss,code),a.timeout_initial)
+    rr,runr=processAdapt(a,fns,ss,code_preprocess(a,ss,es,code),a.timeout_initial)
   else:
     rr=processCont(a,fns,ss,runr,a.timeout_continue)
   pptext=result_postprocess(a,ss,rr.text)
@@ -552,7 +552,7 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
         fns,ss=_getinterp(bmarker)
         rr=None
         if ss:
-          es.sres[self.nsec],rr=eval_code_(a,fns,ss,code,sr.preproc.pending.get(self.nsec))
+          es.sres[self.nsec],rr=eval_code_(a,fns,ss,es,code,sr.preproc.pending.get(self.nsec))
         ec=_checkecode(fns,self.nsec,rr.timeout if rr else False)
         if ec is not None:
           es.sres[self.nsec]=es.sres.get(self.nsec,'')+_failmsg(fns,ec)
@@ -767,15 +767,18 @@ def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
         print(f"{st2name(st)} pending section {nsec} reader: ?")
     if st==SType.SPython:
       ss=settings(fns)
+      es=EvalState()
       try:
         assert ss is not None
-        interpreter_path=eval_code(a,fns,ss,'\n'.join(["import os","print(os.environ.get('PATH',''))"]))
+        interpreter_path=eval_code(a,fns,ss,es,
+                                   '\n'.join(["import os","print(os.environ.get('PATH',''))"]))
         print(f"{st2name(st)} interpreter PATH: {interpreter_path.strip()}")
       except Exception:
         print(f"{st2name(st)} interpreter PATH: ?")
       try:
         assert ss is not None
-        interpreter_pythonpath=eval_code(a,fns,ss,'\n'.join(["import sys","print(':'.join(sys.path))"]))
+        interpreter_pythonpath=eval_code(a,fns,ss,es,
+                                         '\n'.join(["import sys","print(':'.join(sys.path))"]))
         print(f"{st2name(st)} interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
       except Exception:
         print(f"{st2name(st)} interpreter PYTHONPATH: ?")
