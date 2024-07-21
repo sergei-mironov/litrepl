@@ -320,7 +320,7 @@ markers. The markers have the following format:
 
 <!--lignore-->
 ``` ai
-AI, what do you think does the following text mean?
+AI, what do you think the following text means?
 
 ^^R1^^
 ```
