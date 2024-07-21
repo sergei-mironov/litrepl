@@ -74,3 +74,17 @@ class Settings:
 
 SECVAR_RE = re_compile("> *R[0-9]+ *<",flags=re.MULTILINE|re.A)
 
+
+@dataclass
+class EvalState:
+  """ Interpreter state, tracking evaluation of document sections """
+  sres:Dict[int,str]                # Section results: sec.num -> result
+  ledder:Dict[int,int]              # Facility to restore the cursor: line -> offset
+  ecodes:Dict[int,ECode]            # Exit codes: sec.num -> exitcode
+  stypes:Set[SType]                 # Section types we have already run
+
+  def __init__(self):
+    self.sres,self.ledder,self.ecodes,self.stypes={},{},{},set()
+
+
+

@@ -25,9 +25,9 @@ from textwrap import dedent
 from subprocess import check_output, DEVNULL, CalledProcessError
 from contextlib import contextmanager
 
-from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
-                    FileNames, IType, Settings, CursorPos, ReadResult, SType,
-                    LitreplArgs, ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE)
+from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
+                    IType, Settings, CursorPos, ReadResult, SType, LitreplArgs,
+                    EvalState, ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
@@ -464,8 +464,8 @@ def eval_code_(a:LitreplArgs,
                ss:Settings,
                code:str,
                runr:Optional[RunResult]=None) -> Tuple[str,ReadResult]:
-  """ Start or complete the code snippet evaluation process.  `RunResult` may
-  contain the existing runner's context.
+  """ Start or complete the snippet evaluation process. `runr`
+  contains the already existing runner's context, if any.
 
   The function returns either the evaluation result or the running context
   encoded in the result for later reference.
@@ -489,15 +489,11 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
   """ Evaluate code sections of the parsed `tree`, as specified in the `sr`
   request.  """
   nsecs=sr.nsecs
-  ssrc:Dict[int,str]={}     # Section sources: sec.num -> code
-  sres:Dict[int,str]={}     # Section results: sec.num -> result
-  ledder:Dict[int,int]={}   # Facility to restore the cursor: line -> offset
-  ecodes:Dict[int,ECode]={} # Exit codes: sec.num -> exitcode
-  stypes:Set[SType]=set()   # Section types we have run
+  es=EvalState()
 
   def _getinterp(bmarker:str)->Tuple[FileNames,Optional[Settings]]:
     st=bmarker2st(bmarker)
-    stypes.add(st)
+    es.stypes.add(st)
     fns=pipenames(a,st)
     if not running(a,st):
       start(a,st)
@@ -518,11 +514,11 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
     pdebug(f"interpreter exit code: {ec}")
     if ec is ECODE_RUNNING:
       if pending and a.pending_exit:
-        ecodes[nsec]=a.pending_exit
+        es.ecodes[nsec]=a.pending_exit
       else:
-        ecodes[nsec]=ECODE_RUNNING
+        es.ecodes[nsec]=ECODE_RUNNING
     else:
-      ecodes[nsec]=ec
+      es.ecodes[nsec]=ec
     return ec
 
   def _failmsg(fns,ec):
@@ -550,27 +546,26 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
       for secvar,ref in secvar_matches(copy(code)):
         code=code.replace(
           secvar,
-          sres.get(ref,sr.preproc.results.get(ref,'<invalid section variable>'))
+          es.sres.get(ref,sr.preproc.results.get(ref,'<invalid section variable>'))
         )
-      ssrc[self.nsec]=code
       if self.nsec in nsecs:
         fns,ss=_getinterp(bmarker)
         rr=None
         if ss:
-          sres[self.nsec],rr=eval_code_(a,fns,ss,code,sr.preproc.pending.get(self.nsec))
+          es.sres[self.nsec],rr=eval_code_(a,fns,ss,code,sr.preproc.pending.get(self.nsec))
         ec=_checkecode(fns,self.nsec,rr.timeout if rr else False)
         if ec is not None:
-          sres[self.nsec]=sres.get(self.nsec,'')+_failmsg(fns,ec)
+          es.sres[self.nsec]=es.sres.get(self.nsec,'')+_failmsg(fns,ec)
     def ocodesection(self,tree):
       bmarker=tree.children[0].children[0].value
       t=tree.children[1].children[0].value
       emarker=tree.children[2].children[0].value
       bm,em=tree.children[0].meta,tree.children[2].meta
       if self.nsec in nsecs:
-        assert self.nsec in sres
+        assert self.nsec in es.sres
         t2=bmarker+"\n"+indent(bm.column-1,
-                               escape(sres[self.nsec],emarker)+emarker)
-        ledder[bm.line]=nlines(t2)-nlines(t)
+                               escape(es.sres[self.nsec],emarker)+emarker)
+        es.ledder[bm.line]=nlines(t2)-nlines(t)
         self._print(t2)
       else:
         self._print(f"{bmarker}{tree.children[1].children[0].value}{emarker}")
@@ -598,21 +593,21 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
   def _finally():
     if a.map_cursor:
       cl=a.map_cursor[0] # cursor line
-      for threshold,diff in sorted(ledder.items()):
+      for threshold,diff in sorted(es.ledder.items()):
         if cl>threshold:
           cl=max(threshold,cl+diff)
       with open(a.map_cursor_output,"w") as f:
         f.write(str(cl))
     if a.foreground:
-      for st in stypes:
+      for st in es.stypes:
         stop(a,st)
 
   with with_parent_finally(_finally):
     C().visit(tree)
 
-  pdebug(f"eval_code_ ecodes {ecodes}")
+  pdebug(f"eval_code_ ecodes {es.ecodes}")
   return max(map(lambda x:ECODE_OK if x is None else x,
-                 ecodes.values()),default=ECODE_OK)
+                 es.ecodes.values()),default=ECODE_OK)
 
 def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
   """ Preprocess the document tree. Resolve the list of cursor locations `cs`
