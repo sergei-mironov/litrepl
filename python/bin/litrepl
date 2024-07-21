@@ -193,7 +193,7 @@ if __name__=='__main__':
     exit(ecode)
   elif a.command=='eval-code':
     st=name2st(a.type)
-    es=EvalState()
+    es=EvalState(SecRec.empty())
     with with_parent_finally(partial(_foreground_stop,st)):
       fns=pipenames(a,st)
       if not running(a,st) or a.foreground:

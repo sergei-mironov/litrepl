@@ -49,11 +49,19 @@ class PrepInfo:
   pending:Dict[NSec,RunResult]      # Async job markers
   results:Dict[NSec,str]            # Results
 
+  @staticmethod
+  def empty():
+    return PrepInfo(0,{},{},{})
+
 @dataclass
 class SecRec:
   """ Request for section evaluation """
   nsecs:Set[NSec]                   # Sections to evaluate
   preproc:PrepInfo                  # Results of preprocessing
+
+  @staticmethod
+  def empty():
+    return SecRec(set(),PrepInfo.empty())
 
 @dataclass
 class FileNames:
@@ -78,12 +86,14 @@ SECVAR_RE = re_compile("> *R[0-9]+ *<",flags=re.MULTILINE|re.A)
 @dataclass
 class EvalState:
   """ Interpreter state, tracking evaluation of document sections """
+  sr:SecRec                         # The original request
   sres:Dict[int,str]                # Section results: sec.num -> result
   ledder:Dict[int,int]              # Facility to restore the cursor: line -> offset
   ecodes:Dict[int,ECode]            # Exit codes: sec.num -> exitcode
   stypes:Set[SType]                 # Section types we have already run
 
-  def __init__(self):
+  def __init__(self,sr:SecRec):
+    self.sr=sr
     self.sres,self.ledder,self.ecodes,self.stypes={},{},{},set()
 
 

@@ -278,6 +278,13 @@ def code_preprocess_ipython(a:LitreplArgs, es:EvalState, code:str) -> str:
 def code_preprocess_python(a:LitreplArgs, es:EvalState, code:str) -> str:
   return fillspaces(code, '# spaces')
 def code_preprocess_gpt4allcli(a:LitreplArgs, es:EvalState, code:str) -> str:
+  for secvar,ref in secvar_matches(copy(code)):
+    code=code.replace(
+      secvar,
+      es.sres.get(
+        ref,es.sr.preproc.results.get(ref,'<invalid section variable>')
+      )
+    )
   return code + "/ask\n"
 def result_postprocess_ipython(a:LitreplArgs, text:str) -> str:
   # A workaround for https://github.com/ipython/ipython/issues/13622
@@ -489,7 +496,7 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
   """ Evaluate code sections of the parsed `tree`, as specified in the `sr`
   request.  """
   nsecs=sr.nsecs
-  es=EvalState()
+  es=EvalState(sr)
 
   def _getinterp(bmarker:str)->Tuple[FileNames,Optional[Settings]]:
     st=bmarker2st(bmarker)
@@ -543,11 +550,6 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
       self._print(f"{bmarker}{t}{emarker}")
       bm,em=tree.children[0].meta,tree.children[2].meta
       code=unindent(bm.column-1,t)
-      for secvar,ref in secvar_matches(copy(code)):
-        code=code.replace(
-          secvar,
-          es.sres.get(ref,sr.preproc.results.get(ref,'<invalid section variable>'))
-        )
       if self.nsec in nsecs:
         fns,ss=_getinterp(bmarker)
         rr=None
@@ -767,7 +769,7 @@ def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
         print(f"{st2name(st)} pending section {nsec} reader: ?")
     if st==SType.SPython:
       ss=settings(fns)
-      es=EvalState()
+      es=EvalState(SecRec.empty())
       try:
         assert ss is not None
         interpreter_path=eval_code(a,fns,ss,es,
