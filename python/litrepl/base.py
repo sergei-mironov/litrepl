@@ -279,10 +279,21 @@ def code_preprocess_python(a:LitreplArgs, es:EvalState, code:str) -> str:
   return fillspaces(code, '# spaces')
 def code_preprocess_gpt4allcli(a:LitreplArgs, es:EvalState, code:str) -> str:
   for secvar,ref in secvar_matches(copy(code)):
+    if secvar[0]=='^':
+      assert ref>=1, "Above reference must be greater or equal one"
+      absref=es.nsec-ref
+    elif secvar[0]=='v':
+      assert ref>=1, "Below reference must be greater or equal one"
+      absref=es.nsec+ref
+    elif secvar[0]=='>':
+      absref=ref
+    else:
+      raise ValueError("Invalid section variable {secvar}")
     code=code.replace(
       secvar,
       es.sres.get(
-        ref,es.sr.preproc.results.get(ref,'<invalid section variable>')
+        absref,
+        es.sr.preproc.results.get(absref,f'<invalid reference to section {absref}>').strip()
       )
     )
   return code + "/ask\n"
@@ -488,6 +499,7 @@ def eval_code_(a:LitreplArgs,
 
 def secvar_matches(code:str)->Iterable[Tuple[str,int]]:
   for secvar in re.findall(SECVAR_RE,code):
+    secvar=[m for m in secvar if len(m)>0][0]
     idx=int(''.join([c for c in secvar if c.isdigit()]))
     yield str(secvar),idx
 
@@ -532,8 +544,6 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
     return f"<Interpreter exited with code: {ec}>\n"
 
   class C(LarkInterpreter):
-    def __init__(self):
-      self.nsec=-1
     def _print(self, s:str):
       print(s, end='')
     def text(self,tree):
@@ -543,30 +553,30 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
     def innertext(self,tree):
       return self.text(tree)
     def icodesection(self,tree):
-      self.nsec+=1
+      es.nsec+=1
       bmarker=tree.children[0].children[0].value
       t=tree.children[1].children[0].value
       emarker=tree.children[2].children[0].value
       self._print(f"{bmarker}{t}{emarker}")
       bm,em=tree.children[0].meta,tree.children[2].meta
       code=unindent(bm.column-1,t)
-      if self.nsec in nsecs:
+      if es.nsec in nsecs:
         fns,ss=_getinterp(bmarker)
         rr=None
         if ss:
-          es.sres[self.nsec],rr=eval_code_(a,fns,ss,es,code,sr.preproc.pending.get(self.nsec))
-        ec=_checkecode(fns,self.nsec,rr.timeout if rr else False)
+          es.sres[es.nsec],rr=eval_code_(a,fns,ss,es,code,sr.preproc.pending.get(es.nsec))
+        ec=_checkecode(fns,es.nsec,rr.timeout if rr else False)
         if ec is not None:
-          es.sres[self.nsec]=es.sres.get(self.nsec,'')+_failmsg(fns,ec)
+          es.sres[es.nsec]=es.sres.get(es.nsec,'')+_failmsg(fns,ec)
     def ocodesection(self,tree):
       bmarker=tree.children[0].children[0].value
       t=tree.children[1].children[0].value
       emarker=tree.children[2].children[0].value
       bm,em=tree.children[0].meta,tree.children[2].meta
-      if self.nsec in nsecs:
-        assert self.nsec in es.sres
+      if es.nsec in nsecs:
+        assert es.nsec in es.sres
         t2=bmarker+"\n"+indent(bm.column-1,
-                               escape(es.sres[self.nsec],emarker)+emarker)
+                               escape(es.sres[es.nsec],emarker)+emarker)
         es.ledder[bm.line]=nlines(t2)-nlines(t)
         self._print(t2)
       else:
@@ -577,11 +587,11 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
       code=tree.children[1].children[0].value
       spaces=tree.children[2].children[0].value if tree.children[2].children else ''
       im=tree.children[0].children[0].value
-      if self.nsec in nsecs:
+      if es.nsec in nsecs:
         fns,ss=_getinterp("python")
         if ss:
           result=process(a,fns,ss,'print('+code+');\n')[0].rstrip('\n')
-        ec=_checkecode(fns,self.nsec,False)
+        ec=_checkecode(fns,es.nsec,False)
         if ec is not None:
           result+=_failmsg(fns,ec)
       else:

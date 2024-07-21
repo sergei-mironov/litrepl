@@ -80,7 +80,8 @@ class Settings:
   pattern1:Tuple[str,str]           # Request-response pair 1
   pattern2:Tuple[str,str]           # Request-response pair 2
 
-SECVAR_RE = re_compile("> *R[0-9]+ *<",flags=re.MULTILINE|re.A)
+SECVAR_RE = re_compile("(\^+ *R[0-9]+ *\^+)|(v+ *R[0-9]+ *v+)|(\>+ *R[0-9]+ *\<+)",
+                       flags=re.MULTILINE|re.A)
 
 
 @dataclass
@@ -91,10 +92,10 @@ class EvalState:
   ledder:Dict[int,int]              # Facility to restore the cursor: line -> offset
   ecodes:Dict[int,ECode]            # Exit codes: sec.num -> exitcode
   stypes:Set[SType]                 # Section types we have already run
+  nsec:int                          # Current section
 
   def __init__(self,sr:SecRec):
-    self.sr=sr
-    self.sres,self.ledder,self.ecodes,self.stypes={},{},{},set()
+    self.sr,self.sres,self.ledder,self.ecodes,self.stypes,self.nsec=sr,{},{},{},set(),-1
 
 
 
