@@ -188,7 +188,7 @@ if __name__=='__main__':
   elif a.command=='interrupt':
     tree=parse_(GRAMMARS[a.filetype])
     sr=solve_sloc(a.locs,tree)
-    sr.nsecs|=set(sr.pending.keys())
+    sr.nsecs|=set(sr.preproc.pending.keys())
     ecode=eval_section_(a,tree,sr,interrupt=True)
     exit(ecode)
   elif a.command=='eval-code':

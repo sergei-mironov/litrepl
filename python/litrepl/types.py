@@ -1,4 +1,6 @@
+import re
 from typing import (Any, Set, List, Dict, Tuple, Callable, Optional)
+from re import compile as re_compile
 from dataclasses import dataclass
 from enum import Enum
 
@@ -43,14 +45,15 @@ CursorPos=Tuple[int,int]
 class PrepInfo:
   """ Results of the document preprocessing """
   nsec:NSec                         # Total number of code sections
-  cursors:Dict[CursorPos,NSec]      # Sections, rbesolved from the cursor position
+  cursors:Dict[CursorPos,NSec]      # Sections, resolved from cursor positions
   pending:Dict[NSec,RunResult]      # Async job markers
+  results:Dict[NSec,str]            # Results
 
 @dataclass
 class SecRec:
   """ Request for section evaluation """
   nsecs:Set[NSec]                   # Sections to evaluate
-  pending:Dict[NSec,RunResult]      # Contexts of already running sections
+  preproc:PrepInfo                  # Results of preprocessing
 
 @dataclass
 class FileNames:
@@ -68,4 +71,6 @@ class Settings:
   itype:IType
   pattern1:Tuple[str,str]           # Request-response pair 1
   pattern2:Tuple[str,str]           # Request-response pair 2
+
+SECVAR_RE = re_compile("> *R[0-9]+ *<",flags=re.MULTILINE|re.A)
 

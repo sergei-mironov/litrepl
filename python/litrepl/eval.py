@@ -6,7 +6,7 @@ import fcntl
 from fcntl import LOCK_NB,LOCK_UN,LOCK_EX
 from copy import deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable
-from re import search, match as re_match
+from re import search, match as re_match, compile as re_compile
 from select import select
 from os import environ, system, getpid, unlink
 from lark import Lark, Visitor, Transformer, Token, Tree
@@ -207,7 +207,7 @@ TIMEOUT_SEC=3
 
 def mkre(prompt:str):
   """ Matches the shortest string followed by a sequence of prompts """
-  return re.compile(f"((.(?!{prompt}))*(.(?={prompt}))?)({prompt})+".encode('utf-8'),
+  return re_compile(f"((.(?!{prompt}))*(.(?={prompt}))?)({prompt})+".encode('utf-8'),
                     re.MULTILINE|re.DOTALL)
 
 
@@ -410,7 +410,7 @@ def processAdapt(a:LitreplArgs,
   rr=processCont(a,fns,ss,runr,timeout=timeout)
   return rr,runr
 
-PRESULT_RE=re.compile(r"(.*)\[BG:([a-zA-Z0-9_\/\.-]+)\]\n.*",
+PRESULT_RE=re_compile(r"(.*)\[BG:([a-zA-Z0-9_\/\.-]+)\]\n.*",
                       re.A|re.MULTILINE|re.DOTALL)
 
 def rresultLoad(text:str)->Tuple[str,Optional[RunResult]]:

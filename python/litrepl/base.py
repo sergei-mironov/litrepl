@@ -3,8 +3,9 @@ import sys
 import fcntl
 import re
 
-from copy import deepcopy
-from typing import List, Optional, Tuple, Set, Dict, Callable, Any
+from re import search, match as re_match, compile as re_compile
+from copy import copy, deepcopy
+from typing import List, Optional, Tuple, Set, Dict, Callable, Any, Iterable
 from select import select
 from os import environ, system, isatty, getpid, unlink, getpgid, setpgid
 from lark import Lark, Visitor, Transformer, Token, Tree
@@ -26,7 +27,7 @@ from contextlib import contextmanager
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec,
                     FileNames, IType, Settings, CursorPos, ReadResult, SType,
-                    LitreplArgs, ECode, ECODE_OK, ECODE_RUNNING)
+                    LitreplArgs, ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
@@ -478,10 +479,16 @@ def eval_code_(a:LitreplArgs,
   res=rresultSave(pptext,runr) if rr.timeout else pptext
   return res,rr
 
-def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->ECode:
-  """ Evaluate code sections of the parsed `tree`, as specified in the `secrec`
+def secvar_matches(code:str)->Iterable[Tuple[str,int]]:
+  for secvar in re.findall(SECVAR_RE,code):
+    idx=int(''.join([c for c in secvar if c.isdigit()]))
+    yield str(secvar),idx
+
+
+def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
+  """ Evaluate code sections of the parsed `tree`, as specified in the `sr`
   request.  """
-  nsecs=secrec.nsecs
+  nsecs=sr.nsecs
   ssrc:Dict[int,str]={}     # Section sources: sec.num -> code
   sres:Dict[int,str]={}     # Section results: sec.num -> result
   ledder:Dict[int,int]={}   # Facility to restore the cursor: line -> offset
@@ -540,12 +547,17 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->ECo
       self._print(f"{bmarker}{t}{emarker}")
       bm,em=tree.children[0].meta,tree.children[2].meta
       code=unindent(bm.column-1,t)
+      for secvar,ref in secvar_matches(copy(code)):
+        code=code.replace(
+          secvar,
+          sres.get(ref,sr.preproc.results.get(ref,'<invalid section variable>'))
+        )
       ssrc[self.nsec]=code
       if self.nsec in nsecs:
         fns,ss=_getinterp(bmarker)
         rr=None
         if ss:
-          sres[self.nsec],rr=eval_code_(a,fns,ss,code,secrec.pending.get(self.nsec))
+          sres[self.nsec],rr=eval_code_(a,fns,ss,code,sr.preproc.pending.get(self.nsec))
         ec=_checkecode(fns,self.nsec,rr.timeout if rr else False)
         if ec is not None:
           sres[self.nsec]=sres.get(self.nsec,'')+_failmsg(fns,ec)
@@ -605,8 +617,9 @@ def eval_section_(a:LitreplArgs, tree, secrec:SecRec, interrupt:bool=False)->ECo
 def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
   """ Preprocess the document tree. Resolve the list of cursor locations `cs`
   into code section numbers. """
-  acc:dict={}
+  cursors:dict={}
   rres:Dict[NSec,Set[RunResult]]=defaultdict(set)
+  results:Dict[NSec,str]={}
   class C(LarkInterpreter):
     def __init__(self):
       self.nsec=-1
@@ -614,9 +627,10 @@ def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
       for (line,col) in cs:
         if cursor_within((line,col),(bm.line,bm.column),
                                     (em.end_line,em.end_column)):
-          acc[(line,col)]=self.nsec
-    def _getrr(self,text):
+          cursors[(line,col)]=self.nsec
+    def _getrr(self,text,column):
       text1,pend=rresultLoad(text)
+      results[self.nsec]=unindent(column,text1)
       if pend is not None:
         rres[self.nsec].add(pend)
     def icodesection(self,tree):
@@ -624,7 +638,9 @@ def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
       self._count(tree.children[0].meta,tree.children[2].meta)
     def ocodesection(self,tree):
       self._count(tree.children[0].meta,tree.children[2].meta)
-      self._getrr(tree.children[1].children[0].value)
+      contents=tree.children[1].children[0].value
+      bm,em=tree.children[0].meta,tree.children[2].meta
+      self._getrr(contents,bm.column-1)
     def oversection(self,tree):
       self._count(tree.children[0].meta,tree.children[2].meta)
       self._getrr(tree.children[1].children[0].value)
@@ -636,7 +652,7 @@ def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
   for k,v in rres.items():
     assert len(v)==1, f"Results of codesec #{k} refer to different readout files: ({list(v)})"
     rres2[k]=list(v)[0]
-  return PrepInfo(c.nsec,acc,rres2)
+  return PrepInfo(c.nsec,cursors,rres2,results)
 
 grammar_sloc = fr"""
 start: addr -> l_const
@@ -698,7 +714,7 @@ def solve_sloc(s:str, tree)->SecRec:
   return SecRec(
     set.union(*[_safeset(lambda:range(_get(q[0]),_get(q[1])+1)) if len(q)==2
                 else _safeset(lambda:[_get(q[0])]) for q in qs]),
-    ppi.pending)
+    ppi)
 
 
 def status(a:LitreplArgs,sts:List[SType],version):
@@ -743,7 +759,7 @@ def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
 
     t=parse_(GRAMMARS[a.filetype], a.tty)
     sr=solve_sloc('0..$',t)
-    for nsec,pend in sr.pending.items():
+    for nsec,pend in sr.preproc.pending.items():
       fname=pend.fname
       print(f"{st2name(st)} pending section {nsec} buffer: {fname}")
       try:
