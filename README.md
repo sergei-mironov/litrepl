@@ -319,6 +319,7 @@ markers. The markers have the following format:
 * `vvRXvv`, where `X` is a number - references the section `X` times below the current one.
 
 <!--lignore-->
+~~~~ markdown
 ``` ai
 AI, what do you think the following text means?
 
@@ -331,6 +332,7 @@ This is an example of a chatbot introduction or "hello message." It appears to
 be written in a friendly, approachable tone, with the goal of establishing a
 connection with users.
 ```
+~~~~
 <!--lnoignore-->
 
 ### Reference
