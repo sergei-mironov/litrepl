@@ -311,9 +311,27 @@ How can I assist you today?
 ~~~~
 <!--lnoignore-->
 
-As another example, this repository contains a [joke script](./sh/airepl.sh)
-which begs AI to generate `ffmpeg`-based .gif to .webm shell one-liner in a loop
-(do use virtualisation if you ever want to run it!).
+For AI sections, Litrepl can paste text from other sections of the document in place of reference
+markers. The markers have the following format:
+
+* `>>RX<<`, where `X` is a number - references a section number `X` (starting from zero).
+* `^^RX^^`, where `X` is a number - references the section `X` times above the current one.
+* `vvRXvv`, where `X` is a number - references the section `X` times below the current one.
+
+<!--lignore-->
+``` ai
+AI, what do you think does the following text mean?
+
+^^R1^^
+```
+
+``` result
+Another interesting piece of text!
+This is an example of a chatbot introduction or "hello message." It appears to
+be written in a friendly, approachable tone, with the goal of establishing a
+connection with users.
+```
+<!--lnoignore-->
 
 ### Reference
 
