@@ -56,7 +56,7 @@ setup(
   author="Sergei Mironov",
   author_email="sergei.v.mironov@proton.me",
   url='https://github.com/sergei-mironov/litrepl',
-  description="LitREPL is a command-line tool and a Vim plugin for code snippet execution.",
+  description="Litrepl evaluates code from LaTeX/Markdown verbatim sections.",
   classifiers=[
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
