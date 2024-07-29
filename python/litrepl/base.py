@@ -26,8 +26,9 @@ from subprocess import check_output, DEVNULL, CalledProcessError
 from contextlib import contextmanager
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
-                    IType, Settings, CursorPos, ReadResult, SType, LitreplArgs,
-                    EvalState, ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE)
+                    CursorPos, ReadResult, SType, LitreplArgs,
+                    EvalState, ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE,
+                    Interpreter)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
@@ -82,9 +83,8 @@ PATTERN_PYTHON_2=('325674801010\n',)*2
 PATTERN_GPT4ALLCLI_1=('/echo 1121312\n', '1121312\n')
 PATTERN_GPT4ALLCLI_2=('/echo 8893223\n', '8893223\n')
 
-def settings(fns:FileNames)->Optional[Settings]:
-  """ Determines the session settings. Currently just finds out the type of the
-  interpreter. """
+def attach(fns:FileNames)->Optional[Interpreter]:
+  """ Attach to the interpreter associated with the given pipe filenames. """
   try:
     pid=readipid(fns)
     if pid is None:
@@ -92,22 +92,19 @@ def settings(fns:FileNames)->Optional[Settings]:
       return None
     p=Process(pid)
     cmd=p.cmdline()
-    itype=None
+    cls=None
     if any('gpt4all' in w for w in cmd):
-      itype=IType.GPT4AllCli
-      pattern1,pattern2=PATTERN_GPT4ALLCLI_1,PATTERN_GPT4ALLCLI_2
+      cls=GPT4AllInterpreter
     elif any('ipython' in w for w in cmd):
-      itype = IType.IPython
-      pattern1,pattern2=PATTERN_PYTHON_1,PATTERN_PYTHON_2
+      cls=IPythonInterpreter
     elif any('python' in w for w in cmd):
-      itype=IType.Python
-      pattern1,pattern2=PATTERN_PYTHON_1,PATTERN_PYTHON_2
+      cls=PythonInterpreter
     else:
       assert False, f"Unknown interpreter {cmd}"
-    pdebug(f"interpreter pid {pid} cmd '{cmd}' leads to type '{itype}'")
-    return Settings(itype,pattern1,pattern2)
+    pdebug(f"interpreter pid {pid} cmd '{cmd}' was resolved into '{cls}'")
+    return cls(fns)
   except NoSuchProcess as p:
-    pdebug(f"could not determine process of an interpreter ({p})")
+    pdebug(f"could not determine the interpreter classs for ({p})")
     return None
 
 def open_child_pipes(inp,outp):
@@ -115,25 +112,18 @@ def open_child_pipes(inp,outp):
 def open_parent_pipes(inp,outp):
   return open(inp,'w'),open(outp,'r')
 
-class Interpreter:
-  def __init__(self,a:LitreplArgs,fns:FileNames,interpreter:str)->None:
-    self.a,self.fns,self.interpreter=a,fns,interpreter
-  def run_child(self)->int:
-    pass
-  def setup_child(self, finp, foutp)->None:
-    pass
-
 class PythonInterpreter(Interpreter):
-  def run_child(self)->int:
-    a,fns,interpreter=self.a,self.fns,self.interpreter
+  def patterns(self):
+    return PATTERN_PYTHON_1,PATTERN_PYTHON_2
+  def run_child(self,interpreter)->int:
+    fns=self.fns
     wd,inp,outp,pid,ecode=astuple(fns)
     ret=system(
       f"exec {interpreter} -uic 'import sys; sys.ps1=\"\"; sys.ps2=\"\";' "
       f"<'{inp}' >'{outp}' 2>&1"
     )
     return ret
-  def setup_child(self, finp, foutp)->None:
-    a=self.a
+  def setup_child(self, a, finp, foutp)->None:
     finp.write(
       '\nimport signal\n'
       'def _handler(signum,frame):\n'
@@ -149,8 +139,10 @@ class PythonInterpreter(Interpreter):
       )
 
 class IPythonInterpreter(Interpreter):
-  def run_child(self)->int:
-    a,fns,interpreter=self.a,self.fns,self.interpreter
+  def patterns(self):
+    return PATTERN_PYTHON_1,PATTERN_PYTHON_2
+  def run_child(self,interpreter)->int:
+    fns=self.fns
     assert 'ipython' in interpreter.lower()
     wd,inp,outp,pid,ecode=astuple(fns)
     cfg=join(wd,'litrepl_ipython_config.py')
@@ -179,8 +171,7 @@ class IPythonInterpreter(Interpreter):
       f"<'{inp}' >'{outp}' 2>&1"
     )
     return ret
-  def setup_child(self, finp, foutp)->None:
-    a=self.a
+  def setup_child(self, a, finp, foutp)->None:
     finp.write(
       '\nimport signal\n'
       'def _handler(signum,frame):\n'
@@ -196,16 +187,17 @@ class IPythonInterpreter(Interpreter):
       )
 
 class GPT4AllInterpreter(Interpreter):
-  def run_child(self)->int:
-    a,fns,interpreter=self.a,self.fns,self.interpreter
-    fns=pipenames(a,SType.SAI)
+  def patterns(self):
+    return PATTERN_GPT4ALLCLI_1,PATTERN_GPT4ALLCLI_2
+  def run_child(self,interpreter)->int:
+    fns=self.fns
     ret=system(
       f"exec {interpreter} "
       f"--readline-prompt='' "
       f"<'{fns.inp}' >'{fns.outp}' 2>&1"
     )
     return ret
-  def setup_child(self, finp, foutp)->None:
+  def setup_child(self, a, finp, foutp)->None:
     finp.write("/echo ready\n")
 
 def write_child_pid(pidf,pid):
@@ -218,7 +210,7 @@ def write_child_pid(pidf,pid):
         sleep(0.1)
   return False
 
-def start_(a:LitreplArgs,i:Interpreter)->int:
+def start_(a:LitreplArgs,interpreter:str,i:Interpreter)->int:
   """ Starts the background Python interpreter. Kill an existing interpreter if
   any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`."""
   fns=i.fns
@@ -234,7 +226,7 @@ def start_(a:LitreplArgs,i:Interpreter)->int:
     setpgid(getpid(),0)
     blind_unlink(ecode)
     open_child_pipes(inp,outp)
-    ret=i.run_child()
+    ret=i.run_child(interpreter)
     ret=ret if ret<256 else WEXITSTATUS(ret)
     pdebug(f"fork records ecode: {ret}")
     with open(ecode,'w') as f:
@@ -242,7 +234,7 @@ def start_(a:LitreplArgs,i:Interpreter)->int:
     exit(ret)
   else:
     finp,foutp=open_parent_pipes(inp,outp)
-    i.setup_child(finp,foutp)
+    i.setup_child(a,finp,foutp)
     if write_child_pid(pid,npid):
       return 0
     else:
@@ -252,20 +244,20 @@ def start(a:LitreplArgs, st:SType)->int:
   fns=pipenames(a,st)
   if st is SType.SPython:
     if 'ipython' in a.python_interpreter.lower():
-      return start_(a,IPythonInterpreter(a,fns,a.python_interpreter))
+      return start_(a,a.python_interpreter,IPythonInterpreter(fns))
     elif 'python' in a.python_interpreter:
-      return start_(a,PythonInterpreter(a,fns,a.python_interpreter))
+      return start_(a,a.python_interpreter,PythonInterpreter(fns))
     elif a.python_interpreter=='auto':
       if system('python3 -m IPython -c \'print("OK")\' >/dev/null 2>&1')==0:
-        return start_(a,IPythonInterpreter(a,fns,'python3 -m IPython'))
+        return start_(a,'python3 -m IPython',IPythonInterpreter(fns))
       else:
-        return start_(a,PythonInterpreter(a,fns,'python3'))
+        return start_(a,'python3',PythonInterpreter(fns))
     else:
       raise ValueError(f"Unsupported python interpreter: {a.python_interpreter}")
   elif st is SType.SAI:
     assert not a.exception_exit, "Not supported"
     interpreter='gpt4all-cli' if a.ai_interpreter=='auto' else a.ai_interpreter
-    return start_(a,GPT4AllInterpreter(a,fns,interpreter))
+    return start_(a,interpreter,GPT4AllInterpreter(fns))
   else:
     raise ValueError(f"Unsupported section type: {st}")
 
@@ -308,25 +300,25 @@ def result_postprocess_gpt4allcli(a:LitreplArgs, text:str) -> str:
   return text.strip()+"\n"
 
 
-def code_preprocess(a:LitreplArgs, ss:Settings, es:EvalState, code:str) -> str:
-  if (ss.itype is None) or ss.itype == IType.IPython:
+def code_preprocess(a:LitreplArgs, ss:Interpreter, es:EvalState, code:str) -> str:
+  if isinstance(ss,IPythonInterpreter):
     return code_preprocess_ipython(a,es,code)
-  elif ss.itype == IType.Python:
+  elif isinstance(ss,PythonInterpreter):
     return code_preprocess_python(a,es,code)
-  elif ss.itype == IType.GPT4AllCli:
+  elif isinstance(ss,GPT4AllInterpreter):
     return code_preprocess_gpt4allcli(a,es,code)
   else:
     raise ValueError(fmterror(f'''
-      Interpreter type {ss.itype} is not supported for pre-processing. Did you
+      Interpreter class {ss} is not supported for pre-processing. Did you
       restart LitRepl after an update?
     '''))
 
-def result_postprocess(a:LitreplArgs, ss:Settings, text:str) -> str:
-  if (ss.itype is None) or ss.itype == IType.IPython:
+def result_postprocess(a:LitreplArgs, ss:Interpreter, text:str) -> str:
+  if isinstance(ss,IPythonInterpreter):
     s=result_postprocess_ipython(a,text)
-  elif ss.itype == IType.Python:
+  elif isinstance(ss,PythonInterpreter):
     s=result_postprocess_python(a,text)
-  elif ss.itype == IType.GPT4AllCli:
+  elif isinstance(ss,GPT4AllInterpreter):
     s=result_postprocess_gpt4allcli(a,text)
   else:
     raise ValueError(fmterror(f'''
@@ -478,7 +470,7 @@ def eval_code(*args, **kwargs) -> str:
 
 def eval_code_(a:LitreplArgs,
                fns:FileNames,
-               ss:Settings,
+               ss:Interpreter,
                es:EvalState,
                code:str,
                runr:Optional[RunResult]=None) -> Tuple[str,ReadResult]:
@@ -510,13 +502,13 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
   nsecs=sr.nsecs
   es=EvalState(sr)
 
-  def _getinterp(bmarker:str)->Tuple[FileNames,Optional[Settings]]:
+  def _getinterp(bmarker:str)->Tuple[FileNames,Optional[Interpreter]]:
     st=bmarker2st(bmarker)
     es.stypes.add(st)
     fns=pipenames(a,st)
     if not running(a,st):
       start(a,st)
-    ss=settings(fns)
+    ss=attach(fns)
     if not ss:
       return (fns,None)
     if interrupt:
@@ -778,7 +770,7 @@ def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
       except CalledProcessError:
         print(f"{st2name(st)} pending section {nsec} reader: ?")
     if st==SType.SPython:
-      ss=settings(fns)
+      ss=attach(fns)
       es=EvalState(SecRec.empty())
       try:
         assert ss is not None

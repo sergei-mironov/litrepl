@@ -22,7 +22,7 @@ from errno import ESRCH
 from signal import (pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK,
                     SIG_SETMASK)
 
-from .types import (LitreplArgs, Settings, RunResult, ReadResult, FileNames,
+from .types import (LitreplArgs, RunResult, ReadResult, FileNames,
                     ECode, ECODE_OK, ECODE_RUNNING, ECODE_UNDEFINED)
 from .utils import blind_unlink
 
@@ -211,7 +211,7 @@ def mkre(prompt:str):
                     re.MULTILINE|re.DOTALL)
 
 
-def interact(fdr, fdw, text:str, fo:int, ss:Settings)->None:
+def interact(fdr, fdw, text:str, fo:int, ss:Interpreter)->None:
   """ Interpreter interaction procedure, running in a forked process. Its goal
   is to sent the code to the interpreter, to read the response and, most
   importantly, to detect when to stop reading.
@@ -221,26 +221,28 @@ def interact(fdr, fdw, text:str, fo:int, ss:Settings)->None:
     fdw (int): Interpreter's stdin pipe, available for writing
     text (str): Text to send to the interpreter
     fo (int): Output desctiptor, available for writing
-    ss (Settings): Interpreter settings
+    ss (Interpreter): Interpreter abstraction object
   """
-  os.write(fdw,ss.pattern1[0].encode())
-  x=readout(fdr,prompt=mkre(ss.pattern1[1]),merge=merge_rn2)
+  p1,p2=ss.patterns()
+  os.write(fdw,p1[0].encode())
+  x=readout(fdr,prompt=mkre(p1[1]),merge=merge_rn2)
   pdebug(f"interact readout returned '{x}'")
   os.write(fdw,text.encode())
   os.write(fdw,'\n'.encode())
   pdebug(f"interact main text ({len(text)} chars) sent")
-  readout_asis(fdr,fdw,fo,ss.pattern2[0],prompt=mkre(ss.pattern2[1]),timeout=TIMEOUT_SEC)
+  readout_asis(fdr,fdw,fo,p2[0],prompt=mkre(p2[1]),timeout=TIMEOUT_SEC)
 
-def process(a:LitreplArgs,fns:FileNames, ss:Settings, lines:str)->Tuple[str,RunResult]:
+def process(a:LitreplArgs,fns:FileNames, ss:Interpreter, lines:str)->Tuple[str,RunResult]:
   """ Evaluate `lines` synchronously. """
   pdebug("process started")
+  p1,p2=ss.patterns()
   runr=processAsync(fns,ss,lines)
   res=''
   with with_sigint(a,fns):
     with with_locked_fd(runr.fname,OPEN_RDONLY,LOCK_EX) as fdr:
       assert fdr is not None
       pdebug("process readout")
-      res=readout(fdr,prompt=mkre(ss.pattern2[1]),merge=merge_rn2)
+      res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
       blind_unlink(runr.fname)
       pdebug("process readout complete")
   return res,runr
@@ -320,7 +322,7 @@ OPEN_RDONLY=os.O_RDONLY|os.O_SYNC
 LOCK_NONBLOCKING=LOCK_EX|LOCK_NB
 LOCK_BLOCKING=LOCK_EX
 
-def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
+def processAsync(fns:FileNames, ss:Interpreter, code:str)->RunResult:
   """ Send `code` to the interpreter and fork the response reader. The output
   file is locked and its name is saved into the resulting `RunResult` object.
   """
@@ -364,11 +366,12 @@ def processAsync(fns:FileNames, ss:Settings, code:str)->RunResult:
 
 def processCont(a:LitreplArgs,
                 fns:FileNames,
-                ss:Settings,
+                ss:Interpreter,
                 runr:RunResult,
                 timeout:float)->ReadResult:
   """ Read from the running readout process. """
   rr:Optional[ReadResult]=None
+  p1,p2=ss.patterns()
   with with_sigint(a,fns):
     pdebug(f"processCont starting via {runr.fname}")
     with with_locked_fd(runr.fname,
@@ -378,7 +381,7 @@ def processCont(a:LitreplArgs,
 
       if fdr:
         pdebug(f"processCont final readout start")
-        res=readout(fdr,prompt=mkre(ss.pattern2[1]),merge=merge_rn2)
+        res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
         pdebug(f"processCont final readout finish")
         # res=res+f"\nDBG Obtained from:{runr.fname}\n"
         rr=ReadResult(res,False) # Return final result
@@ -388,7 +391,7 @@ def processCont(a:LitreplArgs,
         with with_fd(runr.fname,os.O_RDONLY|os.O_SYNC) as fdr:
           assert fdr is not None
           pdebug("processCont readout(nonblocking) start")
-          res=readout(fdr,prompt=mkre(ss.pattern2[1]),merge=merge_rn2)
+          res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
           pdebug(f"processCont readout(nonblocking) finish")
           rr=ReadResult(res,True) # Timeout ==> Return continuation
   assert rr is not None
@@ -396,7 +399,7 @@ def processCont(a:LitreplArgs,
 
 def processAdapt(a:LitreplArgs,
                  fns:FileNames,
-                 ss:Settings,
+                 ss:Interpreter,
                  code:str,
                  timeout:float=1.0)->Tuple[ReadResult,RunResult]:
   """ Push `code` to the interpreter and wait for `timeout` seconds for

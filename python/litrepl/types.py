@@ -18,13 +18,6 @@ class SType(Enum):
   SPython = 0
   SAI = 1
 
-class IType(Enum):
-  """ Interpreter types """
-  # FIXME: use `Interpreter` classes insted
-  Python = 0,
-  IPython = 1
-  GPT4AllCli = 2
-
 @dataclass(frozen=True)
 class RunResult:
   """ Result of launchng the readout job """
@@ -73,12 +66,28 @@ class FileNames:
   ecodef:str                        # File containing exit code
 
 
-@dataclass
-class Settings:
-  """ Interpreter settings to share among the runners """
-  itype:IType
-  pattern1:Tuple[str,str]           # Request-response pair 1
-  pattern2:Tuple[str,str]           # Request-response pair 2
+class Interpreter:
+  """ Interpreter abstraction. """
+  def __init__(self, fns:FileNames)->None:
+    """ Create the interpreter object, associated with certain files, as
+    specified by `fns`."""
+    self.fns=fns
+  def run_child(self,interpreter:str)->int:
+    """ Run the interpreter process, wait until it finishes, return the system
+    exit code. The method should spawn exactly one child process. Its stdin and
+    stdout should be attached to pipes as specifiled in the `self.fns`. """
+    raise NotImplementedError()
+  def setup_child(self, args, finp, foutp)->None:
+    """ Sets up the child process by sending interpreter-specific commands to
+    the `finp` FILE descriptor which is already associated with its open pipe.
+    The `foutp` is another FILE descriptor associated with the output pipe.  """
+    raise NotImplementedError()
+  def patterns(self)->Tuple[Tuple[str,str],Tuple[str,str]]:
+    """ Return two pairs of request-response that could be used for
+    synchronization. The first pair is used to get to sync before sending
+    evaluation request, the second pair is used to get the evaluation response
+    """
+    raise NotImplementedError()
 
 SECVAR_RE = re_compile("(\^+ *R[0-9]+ *\^+)|(v+ *R[0-9]+ *v+)|(\>+ *R[0-9]+ *\<+)",
                        flags=re.MULTILINE|re.A)
