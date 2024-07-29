@@ -7,7 +7,7 @@ mktest() {
   mkdir -p "$T"
   cd "$T"
   runlitrepl stop || true
-  trap "runlitrepl stop" EXIT
+  trap "runlitrepl stop || true" EXIT
 }
 
 test_parse_print() {( # {{{
@@ -474,7 +474,7 @@ diff -u out.txt - <<"EOF"
 EOF
 
 # TODO: Re-enable when https://github.com/ipython/ipython/issues/14246 is fixed
-if echo $LITREPL_INTERPRETER | grep -q ipython ; then
+if echo $LITREPL_PYTHON_INTERPRETER | grep -q ipython ; then
 cat >source.py <<"EOF"
 from textwrap import dedent
 def foo():
@@ -775,15 +775,14 @@ while True:
 EOF
 
 runlitrepl stop
-runlitrepl --verbose status python >status1.txt || true
+runlitrepl --verbose status python >status1.txt </dev/null || true
 grep -q '?' status1.txt
 cat source.md | runlitrepl \
   --filetype=markdown \
   --timeout=1,1 \
   eval-sections '0..$' >out.md
-runlitrepl --verbose status python >status2.txt
+runlitrepl --verbose status python </dev/null >status2.txt
 not grep -q '?' status2.txt
-
 )} #}}}
 
 test_interrupt() {( #{{{
@@ -831,6 +830,32 @@ cat source.md | runlitrepl --python-interpreter=non-existent-ipython eval-sectio
 grep -q 'Interpreter exited with code: 127' out1.md
 )} #}}}
 
+
+test_gpt4all() {( #{{{
+# Exact result messages might start a race (exit code X VS broken pipe) That is
+# why we put tow sections.
+mktest "_test_gpt4all"
+runlitrepl start ai
+cat >source.md <<"EOF"
+```ai
+/echo test
+```
+```result
+```
+EOF
+cat source.md | runlitrepl eval-sections >out.md
+diff -u out.md - <<"EOF"
+```ai
+/echo test
+```
+```result
+test
+<No model is active, use /model first>
+```
+EOF
+)} #}}}
+
+
 die() {
   echo "$@" >&2
   exit 1
@@ -841,42 +866,70 @@ interpreters() {
   echo "$(which ipython)"
 }
 
-not() {
-  if $@ ; then return 1 ; else return 0 ; fi
-}
+not() {(
+  set +e
+  $@
+  if test "$?" = "0" ; then
+    exit 1
+  else
+    exit 0
+  fi
+)}
 
 tests() {
-  echo test_parse_print
-  echo test_eval_md
-  echo test_tqdm
-  echo test_eval_tex
-  echo test_async
-  echo test_eval_code
-  echo test_eval_with_empty_lines
-  echo test_print_system_order
-  echo test_exit_errcode
-  echo test_exception_errcode
-  echo test_vim_leval_cursor
-  echo test_vim_leval_explicit
-  echo test_vim_lmon
-  echo test_vim_lstatus
-  echo test_foreground
-  echo test_status
-  echo test_interrupt
-  echo test_invalid_interpreter
+  echo test_parse_print $(which python) -
+  echo test_parse_print $(which ipython) -
+  echo test_eval_md $(which python) -
+  echo test_eval_md $(which ipython) -
+  echo test_tqdm $(which python) -
+  echo test_tqdm $(which ipython) -
+  echo test_eval_tex $(which python) -
+  echo test_eval_tex $(which ipython) -
+  echo test_async $(which python) -
+  echo test_async $(which ipython) -
+  echo test_eval_code $(which python) -
+  echo test_eval_code $(which ipython) -
+  echo test_eval_with_empty_lines $(which python) -
+  echo test_eval_with_empty_lines $(which ipython) -
+  echo test_print_system_order $(which python) -
+  echo test_print_system_order $(which ipython) -
+  echo test_exit_errcode $(which python) -
+  echo test_exit_errcode $(which ipython) -
+  echo test_exception_errcode $(which python) -
+  echo test_exception_errcode $(which ipython) -
+  echo test_vim_leval_cursor $(which python) -
+  echo test_vim_leval_cursor $(which ipython) -
+  echo test_vim_leval_explicit $(which python) -
+  echo test_vim_leval_explicit $(which ipython) -
+  echo test_vim_lmon $(which python) -
+  echo test_vim_lmon $(which ipython) -
+  echo test_vim_lstatus $(which python) -
+  echo test_vim_lstatus $(which ipython) -
+  echo test_foreground $(which python) -
+  echo test_foreground $(which ipython) -
+  echo test_status $(which python) -
+  echo test_status $(which ipython) -
+  echo test_interrupt $(which python) -
+  echo test_interrupt $(which ipython) -
+  echo test_invalid_interpreter $(which python) -
+  echo test_gpt4all - $(which gpt4all-cli)
 }
 
 runlitrepl() {
-  test -n "$LITREPL_INTERPRETER"
+  test -n "$LITREPL_PYTHON_INTERPRETER"
+  test -n "$LITREPL_AI_INTERPRETER"
   test -n "$LITREPL_BIN"
-  $LITREPL_BIN/litrepl --debug="$LITREPL_DEBUG" --python-interpreter="$LITREPL_INTERPRETER" "$@"
+  $LITREPL_BIN/litrepl --debug="$LITREPL_DEBUG" \
+    --python-interpreter="$LITREPL_PYTHON_INTERPRETER" \
+    --ai-interpreter="$LITREPL_AI_INTERPRETER" \
+    "$@"
 }
 
 runvim() {
   {
     echo ":redir > _vim_messages.log"
     echo ":let g:litrepl_bin=\"$LITREPL_BIN\""
-    echo ":let g:litrepl_interpreter=\"$LITREPL_INTERPRETER\""
+    echo ":let g:litrepl_python_interpreter=\"$LITREPL_PYTHON_INTERPRETER\""
     echo ":let g:litrepl_errfile='_litrepl.err'"
     cat
   } | \
@@ -885,48 +938,51 @@ runvim() {
 
 set -e
 
-INTERPS=`interpreters`
-TESTS=`tests`
+INTERPS='.*'
+TESTS='.*'
 LITREPL_DEBUG=0
 while test -n "$1" ; do
   case "$1" in
-    -i) INTERPS="$2"; shift ;;
     --interpreters=*) INTERPS=$(echo "$1" | sed 's/.*=//g') ;;
-    -t) TESTS="$2"; shift ;;
-    --tests) TESTS=$(echo "$1" | sed 's/.*=//g') ;;
+    -i|--interpreters) INTERPS="$2"; shift ;;
+    --tests=) TESTS=$(echo "$1" | sed 's/.*=//g') ;;
+    -t|--tests) TESTS="$2"; shift ;;
     -h|--help) echo "Usage: test.sh [-i I(,I)*] [-t T(,T)*]" >&1 ; exit 1 ;;
     -d|-V|--verbose) set -x; LITREPL_DEBUG=1 ;;
   esac
   shift
 done
 
-if test "$INTERPS" = "?" ; then
-  interpreters
-fi
 if test "$TESTS" = "?" ; then
-  tests
+  tests | awk '{print $1}' | sort -u
+fi
+if test "$INTERPS" = "?" ; then
+  tests | awk '{print $2}' | grep -v '-' | sort -u
+  tests | awk '{print $3}' | grep -v '-' | sort -u
 fi
 if test "$INTERPS" = "?" -o "$TESTS" = "?" ; then
   exit 1
 fi
-
 if test -z "$LITREPL_BIN"; then
   LITREPL_BIN=$LITREPL_ROOT/python/bin
 fi
 
 trap "echo FAIL\(\$?\)" EXIT
+tests | (
 NRUN=0
-for t in $(tests) ; do
-  for i in $(interpreters) ; do
-    if echo "$INTERPS" | grep -q "$i" && \
-       echo "$TESTS" | grep -q "$t" ; then
-
-      echo "Running test \"$t\" interpreter \"$i\""
-      LITREPL_INTERPRETER="$i" $t
-      NRUN=$(expr $NRUN '+' 1)
-    fi
-  done
+while read t ipy iai ; do
+  if echo "$t" | grep -q "$TESTS" && \
+     ( echo "$ipy" | grep -q "$INTERPS" || \
+       echo "$iai" | grep -q "$INTERPS" ; ) ; then
+    echo "Running test \"$t\" python \"$ipy\" ai \"$iai\""
+    NRUN=$(expr $NRUN '+' 1)
+    LITREPL_PYTHON_INTERPRETER="$ipy" \
+    LITREPL_AI_INTERPRETER="$iai" \
+    $t
+  fi
 done
-test $NRUN = 0 && die "No tests were run"
+test "$NRUN" = "0" && die "No tests were run" || true
+)
 trap "" EXIT
 echo OK
+
