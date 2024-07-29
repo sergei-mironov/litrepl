@@ -66,6 +66,24 @@ class FileNames:
   ecodef:str                        # File containing exit code
 
 
+SECVAR_RE = re_compile("(\^+ *R[0-9]+ *\^+)|(v+ *R[0-9]+ *v+)|(\>+ *R[0-9]+ *\<+)",
+                       flags=re.MULTILINE|re.A)
+
+
+@dataclass
+class EvalState:
+  """ Interpreter state, tracking evaluation of document sections """
+  sr:SecRec                         # The original request
+  sres:Dict[int,str]                # Section results: sec.num -> result
+  ledder:Dict[int,int]              # Facility to restore the cursor: line -> offset
+  ecodes:Dict[int,ECode]            # Exit codes: sec.num -> exitcode
+  stypes:Set[SType]                 # Section types we have already run
+  nsec:int                          # Current section
+
+  def __init__(self,sr:SecRec):
+    self.sr,self.sres,self.ledder,self.ecodes,self.stypes,self.nsec=sr,{},{},{},set(),-1
+
+
 class Interpreter:
   """ Interpreter abstraction. """
   def __init__(self, fns:FileNames)->None:
@@ -88,23 +106,10 @@ class Interpreter:
     evaluation request, the second pair is used to get the evaluation response
     """
     raise NotImplementedError()
-
-SECVAR_RE = re_compile("(\^+ *R[0-9]+ *\^+)|(v+ *R[0-9]+ *v+)|(\>+ *R[0-9]+ *\<+)",
-                       flags=re.MULTILINE|re.A)
-
-
-@dataclass
-class EvalState:
-  """ Interpreter state, tracking evaluation of document sections """
-  sr:SecRec                         # The original request
-  sres:Dict[int,str]                # Section results: sec.num -> result
-  ledder:Dict[int,int]              # Facility to restore the cursor: line -> offset
-  ecodes:Dict[int,ECode]            # Exit codes: sec.num -> exitcode
-  stypes:Set[SType]                 # Section types we have already run
-  nsec:int                          # Current section
-
-  def __init__(self,sr:SecRec):
-    self.sr,self.sres,self.ledder,self.ecodes,self.stypes,self.nsec=sr,{},{},{},set(),-1
-
-
+  def code_preprocess(self, a:LitreplArgs, es:EvalState, code:str) -> str:
+    """ Preprocess code in an interpreter-specific way """
+    raise NotImplementedError()
+  def result_postprocess(self, a:LitreplArgs, text:str) -> str:
+    """ Postprocess results in an interpreter-specific way """
+    raise NotImplementedError()
 

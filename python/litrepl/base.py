@@ -113,8 +113,6 @@ def open_parent_pipes(inp,outp):
   return open(inp,'w'),open(outp,'r')
 
 class PythonInterpreter(Interpreter):
-  def patterns(self):
-    return PATTERN_PYTHON_1,PATTERN_PYTHON_2
   def run_child(self,interpreter)->int:
     fns=self.fns
     wd,inp,outp,pid,ecode=astuple(fns)
@@ -137,10 +135,14 @@ class PythonInterpreter(Interpreter):
         f'  os._exit({a.exception_exit})\n\n'
         'sys.excepthook=_exceptexithook\n'
       )
-
-class IPythonInterpreter(Interpreter):
   def patterns(self):
     return PATTERN_PYTHON_1,PATTERN_PYTHON_2
+  def result_postprocess(self, a:LitreplArgs, text:str) -> str:
+    return text
+  def code_preprocess(self, a:LitreplArgs, es:EvalState, code:str) -> str:
+    return fillspaces(code, '# spaces')
+
+class IPythonInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
     assert 'ipython' in interpreter.lower()
@@ -185,10 +187,20 @@ class IPythonInterpreter(Interpreter):
         f'  os._exit({int(a.exception_exit)})\n\n'
         'IPython.get_ipython().set_custom_exc((Exception,), _exithandler)\n'
       )
+  def patterns(self):
+    return PATTERN_PYTHON_1,PATTERN_PYTHON_2
+  def result_postprocess(self, a:LitreplArgs, text:str) -> str:
+    # A workaround for https://github.com/ipython/ipython/issues/13622
+    r=re.compile('ERROR! Session/line number was not unique in database. '
+                 'History logging moved to new session [0-9]+\\n')
+    return re.sub(r,'',text)
+  def code_preprocess(self, a:LitreplArgs, es:EvalState, code:str) -> str:
+    # IPython seems to not echo the terminating cpaste pattern into the output
+    # which is good.
+    paste_pattern='12341234213423'
+    return (f'\n%cpaste -q -s {paste_pattern}\n{code}\n{paste_pattern}\n')
 
 class GPT4AllInterpreter(Interpreter):
-  def patterns(self):
-    return PATTERN_GPT4ALLCLI_1,PATTERN_GPT4ALLCLI_2
   def run_child(self,interpreter)->int:
     fns=self.fns
     ret=system(
@@ -199,6 +211,30 @@ class GPT4AllInterpreter(Interpreter):
     return ret
   def setup_child(self, a, finp, foutp)->None:
     finp.write("/echo ready\n")
+  def patterns(self):
+    return PATTERN_GPT4ALLCLI_1,PATTERN_GPT4ALLCLI_2
+  def result_postprocess(self, a:LitreplArgs, text:str) -> str:
+    return text.strip()+"\n"
+  def code_preprocess(self, a:LitreplArgs, es:EvalState, code:str) -> str:
+    for secvar,ref in secvar_matches(copy(code)):
+      if secvar[0]=='^':
+        assert ref>=1, "Above reference must be greater or equal one"
+        absref=es.nsec-ref
+      elif secvar[0]=='v':
+        assert ref>=1, "Below reference must be greater or equal one"
+        absref=es.nsec+ref
+      elif secvar[0]=='>':
+        absref=ref
+      else:
+        raise ValueError("Invalid section variable {secvar}")
+      code=code.replace(
+        secvar,
+        es.sres.get(
+          absref,
+          es.sr.preproc.results.get(absref,f'<invalid reference to section {absref}>').strip()
+        )
+      )
+    return code + "/ask\n"
 
 def write_child_pid(pidf,pid):
   with open(pidf,'w') as f:
@@ -262,69 +298,12 @@ def start(a:LitreplArgs, st:SType)->int:
     raise ValueError(f"Unsupported section type: {st}")
 
 
-def code_preprocess_ipython(a:LitreplArgs, es:EvalState, code:str) -> str:
-  # IPython seems to not echo the terminating cpaste pattern into the output
-  # which is good.
-  paste_pattern='12341234213423'
-  return (f'\n%cpaste -q -s {paste_pattern}\n{code}\n{paste_pattern}\n')
-def code_preprocess_python(a:LitreplArgs, es:EvalState, code:str) -> str:
-  return fillspaces(code, '# spaces')
-def code_preprocess_gpt4allcli(a:LitreplArgs, es:EvalState, code:str) -> str:
-  for secvar,ref in secvar_matches(copy(code)):
-    if secvar[0]=='^':
-      assert ref>=1, "Above reference must be greater or equal one"
-      absref=es.nsec-ref
-    elif secvar[0]=='v':
-      assert ref>=1, "Below reference must be greater or equal one"
-      absref=es.nsec+ref
-    elif secvar[0]=='>':
-      absref=ref
-    else:
-      raise ValueError("Invalid section variable {secvar}")
-    code=code.replace(
-      secvar,
-      es.sres.get(
-        absref,
-        es.sr.preproc.results.get(absref,f'<invalid reference to section {absref}>').strip()
-      )
-    )
-  return code + "/ask\n"
-def result_postprocess_ipython(a:LitreplArgs, text:str) -> str:
-  # A workaround for https://github.com/ipython/ipython/issues/13622
-  r=re.compile('ERROR! Session/line number was not unique in database. '
-               'History logging moved to new session [0-9]+\\n')
-  return re.sub(r,'',text)
-def result_postprocess_python(a:LitreplArgs, text:str) -> str:
-  return text
-def result_postprocess_gpt4allcli(a:LitreplArgs, text:str) -> str:
-  return text.strip()+"\n"
 
+def interp_code_preprocess(a:LitreplArgs, ss:Interpreter, es:EvalState, code:str) -> str:
+  return ss.code_preprocess(a,es,code)
 
-def code_preprocess(a:LitreplArgs, ss:Interpreter, es:EvalState, code:str) -> str:
-  if isinstance(ss,IPythonInterpreter):
-    return code_preprocess_ipython(a,es,code)
-  elif isinstance(ss,PythonInterpreter):
-    return code_preprocess_python(a,es,code)
-  elif isinstance(ss,GPT4AllInterpreter):
-    return code_preprocess_gpt4allcli(a,es,code)
-  else:
-    raise ValueError(fmterror(f'''
-      Interpreter class {ss} is not supported for pre-processing. Did you
-      restart LitRepl after an update?
-    '''))
-
-def result_postprocess(a:LitreplArgs, ss:Interpreter, text:str) -> str:
-  if isinstance(ss,IPythonInterpreter):
-    s=result_postprocess_ipython(a,text)
-  elif isinstance(ss,PythonInterpreter):
-    s=result_postprocess_python(a,text)
-  elif isinstance(ss,GPT4AllInterpreter):
-    s=result_postprocess_gpt4allcli(a,text)
-  else:
-    raise ValueError(fmterror(f'''
-      Interpreter type {ss.itype} is not supported for post-processing. Did you
-      restart LitRepl after an update?
-    '''))
+def interp_result_postprocess(a:LitreplArgs, ss:Interpreter, text:str) -> str:
+  s=ss.result_postprocess(a,text)
   return wraplong(s,a.result_textwidth) if a.result_textwidth else s
 
 def restart(a:LitreplArgs,st:SType):
@@ -482,10 +461,12 @@ def eval_code_(a:LitreplArgs,
   """
   rr:ReadResult
   if runr is None:
-    rr,runr=processAdapt(a,fns,ss,code_preprocess(a,ss,es,code),a.timeout_initial)
+    rr,runr=processAdapt(a,fns,ss,
+                         interp_code_preprocess(a,ss,es,code),
+                         a.timeout_initial)
   else:
     rr=processCont(a,fns,ss,runr,a.timeout_continue)
-  pptext=result_postprocess(a,ss,rr.text)
+  pptext=interp_result_postprocess(a,ss,rr.text)
   res=rresultSave(pptext,runr) if rr.timeout else pptext
   return res,rr
 
