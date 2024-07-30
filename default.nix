@@ -436,6 +436,7 @@ let
     vim-litrepl-release-pypi = vim-litrepl-pypi python-release;
 
     collection = rec {
+      inherit gpt4all-cli;
       inherit pkgs shell shell-dev shell-screencast vim-litrepl-release vim-test
       vim-demo grechanik-st vimtex-local litrepl-release litrepl-dev
       litrepl-release-pypi vim-litrepl-release-pypi python-release;
