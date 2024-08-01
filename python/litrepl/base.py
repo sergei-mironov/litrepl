@@ -292,7 +292,7 @@ def start(a:LitreplArgs, st:SType)->int:
       raise ValueError(f"Unsupported python interpreter: {a.python_interpreter}")
   elif st is SType.SAI:
     assert not a.exception_exit, "Not supported"
-    interpreter='gpt4all-cli' if a.ai_interpreter=='auto' else a.ai_interpreter
+    interpreter='aicli' if a.ai_interpreter=='auto' else a.ai_interpreter
     return start_(a,interpreter,GPT4AllInterpreter(fns))
   else:
     raise ValueError(f"Unsupported section type: {st}")

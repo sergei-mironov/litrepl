@@ -40,7 +40,7 @@ if __name__=='__main__':
   ap.add_argument('--python-interpreter',metavar='EXE',default='auto',
     help='Python interpreter to use (python|ipython|auto)')
   ap.add_argument('--ai-interpreter',metavar='EXE',default='auto',
-    help='AI interpreter to use (gpt4all-cli|auto).')
+    help='AI interpreter to use (aicli|auto).')
   ap.add_argument('--timeout',type=str,metavar='F[,F]',default='inf',
     help=dedent('''Timeouts for initial evaluation and for pending checks, in
     seconds. If the latter is omitted, it is considered to be equal to the

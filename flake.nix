@@ -15,12 +15,12 @@
       url = "github:grwlf/nixpkgs/local17";
     };
 
-    gpt4all-cli = {
-      url = "github:sergei-mironov/gpt4all-cli";
+    aicli = {
+      url = "github:sergei-mironov/aicli";
     };
   };
 
-  outputs = { self, nixpkgs, gpt4all-cli }:
+  outputs = { self, nixpkgs, aicli }:
     let
       # Generate a user-friendly version number.
       version = builtins.substring 0 8 self.lastModifiedDate;
@@ -38,7 +38,7 @@
         pkgs = nixpkgsFor.${system};
         src = self;
         revision = if self ? rev then self.rev else null;
-        gpt4all-cli = gpt4all-cli.outputs.packages.${system};
+        aicli = aicli.outputs.packages.${system};
       };
     in {
       packages = forAllSystems defaultsFor;

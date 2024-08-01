@@ -15,7 +15,7 @@ Features
 * **Document formats** <br/>
   Markdown _(Example [[MD]](./doc/example.md))_ **|** [LaTeX](https://www.latex-project.org/) _(Examples [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf))_
 * **Interpreters** <br/>
-  [Python](https://www.python.org/) **|** [IPython](https://ipython.org/) **|** [GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli)
+  [Python](https://www.python.org/) **|** [IPython](https://ipython.org/) **|** [GPT4All-cli](https://github.com/sergei-mironov/aicli)
 * **Editor integration** <br/>
   Vim _(plugin included)_
 
@@ -216,7 +216,7 @@ $ litrepl status
 # Format:
 # TYP  PID      EXITCODE  CMD
 python 3900919  -         python3 -m IPython --config=/tmp/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
-ai     3904696  -         gpt4all-cli --readline-prompt=
+ai     3904696  -         aicli --readline-prompt=
 ```
 
 * The interpreters are associates with the directory they were started in.
@@ -291,7 +291,7 @@ $ echo 'W' | litrepl eval-code
 #### Communicating with AI (Experimental)
 
 Litrepl experimentally supports
-[GPT4All-cli](https://github.com/sergei-mironov/gpt4all-cli) allowing users to
+[GPT4All-cli](https://github.com/sergei-mironov/aicli) allowing users to
 query local LLMs. In order to try it, install the interpreter and use `ai` as
 the name for code sections. For low-speed models it would be convenient to use
 `:LEvalMon` command for evaluation.
@@ -371,7 +371,7 @@ Where
 |---------------------------------|--------------------------------|-----------------------------------|
 | `set filetype`                  | `--filetype=D`                 | Input file type: `latex`\|`markdown` |
 | `let g:litrepl_python_interpreter=B` | `--python-interpreter=B`  | The Python interpreter to use: `python`\|`ipython`\|`auto` (the default) |
-| `let g:litrepl_ai_interpreter=B`     | `--ai-interpreter=B`      | The AI interpreter to use: `gpt4all-cli`\|`auto` (the default) |
+| `let g:litrepl_ai_interpreter=B`     | `--ai-interpreter=B`      | The AI interpreter to use: `aicli`\|`auto` (the default) |
 | `let g:litrepl_debug=0/1`       | `--debug=0/1`                  | Print debug messages to the stderr |
 | `let g:litrepl_timeout=FLOAT`   | `--timeout=FLOAT`              | Timeout to wait for the new executions, in seconds, defaults to inf |
 
@@ -419,7 +419,7 @@ options:
   --filetype STR              Specify the type of input formatting
                               (markdown|[la]tex).
   --python-interpreter EXE    Python interpreter to use (python|ipython|auto)
-  --ai-interpreter EXE        AI interpreter to use (gpt4all-cli|auto).
+  --ai-interpreter EXE        AI interpreter to use (aicli|auto).
   --timeout F[,F]             Timeouts for initial evaluation and for pending
                               checks, in seconds. If the latter is omitted, it
                               is considered to be equal to the former one.

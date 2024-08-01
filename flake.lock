@@ -1,20 +1,20 @@
 {
   "nodes": {
-    "gpt4all-cli": {
+    "aicli": {
       "inputs": {
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1722417340,
-        "narHash": "sha256-PERdRv1qfOYv3VOEX16isMXxVX4GUZkDFpz/UHNbYLU=",
+        "lastModified": 1722511345,
+        "narHash": "sha256-wiBbj95n1nczSa6U0HAapL4LDZMNnQA9QcV9OCPQmi8=",
         "owner": "sergei-mironov",
-        "repo": "gpt4all-cli",
-        "rev": "bc10ae092afe17ebde37749a5ee782f7c708a397",
+        "repo": "aicli",
+        "rev": "a3bc57aa6a31b81acca20cfb2317aaf792d7c7a9",
         "type": "github"
       },
       "original": {
         "owner": "sergei-mironov",
-        "repo": "gpt4all-cli",
+        "repo": "aicli",
         "type": "github"
       }
     },
@@ -52,7 +52,7 @@
     },
     "root": {
       "inputs": {
-        "gpt4all-cli": "gpt4all-cli",
+        "aicli": "aicli",
         "nixpkgs": "nixpkgs_2"
       }
     }

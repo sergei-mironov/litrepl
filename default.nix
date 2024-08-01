@@ -8,7 +8,7 @@
                 !( ((builtins.match "default.nix" (baseNameOf path)) != null)) &&
                 !( baseNameOf path == "result")) ./.
 , revision ? null
-, gpt4all-cli ? null
+, aicli ? null
 } :
 let
   local = rec {
@@ -99,7 +99,7 @@ let
       propagatedBuildInputs = [(lark-current py.pkgs) py.pkgs.psutil pkgs.socat];
       nativeCheckInputs = with pkgs; [
         socat py.pkgs.ipython py.pkgs.tqdm which git vim
-        gpt4all-cli.python-gpt4all-cli
+        aicli.python-aicli
       ];
       # We cut off the python PATH to allow users to use litrepl in custom
       # Python environments
@@ -157,7 +157,7 @@ let
         mytexlive
         pkgs.pandoc
         pkgs.inkscape
-        (gpt4all-cli.gpt4all-cli python-dev.pkgs)
+        (aicli.aicli python-dev.pkgs)
       ];
       shellHook = with pkgs; ''
         if test -f ./env.sh ; then
@@ -418,7 +418,7 @@ let
         tmux
         xdotool
         xorg.xwininfo
-        (gpt4all-cli.gpt4all-cli python-release.pkgs)
+        (aicli.aicli python-release.pkgs)
       ]);
       shellHook = with pkgs; ''
         export PS1="\n[DEMO] \[\033[1;32m\][nix-shell:\w]\$\[\033[0m\] "
@@ -436,7 +436,7 @@ let
     vim-litrepl-release-pypi = vim-litrepl-pypi python-release;
 
     collection = rec {
-      inherit gpt4all-cli;
+      inherit aicli;
       inherit pkgs shell shell-dev shell-screencast vim-litrepl-release vim-test
       vim-demo grechanik-st vimtex-local litrepl-release litrepl-dev
       litrepl-release-pypi vim-litrepl-release-pypi python-release;
