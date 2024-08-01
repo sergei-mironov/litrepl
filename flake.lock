@@ -2,39 +2,20 @@
   "nodes": {
     "gpt4all-cli": {
       "inputs": {
-        "litrepl": "litrepl",
-        "nixpkgs": "nixpkgs_2"
-      },
-      "locked": {
-        "lastModified": 1721588306,
-        "narHash": "sha256-m4IqFsuN5Xj1hsx+xzN5+QBhGrIJcJ41jbHg5Fy48gw=",
-        "owner": "sergei-mironov",
-        "repo": "gpt4all-cli",
-        "rev": "486a9f3c20333114649b7c3c1d4a7304467bc8b3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "sergei-mironov",
-        "repo": "gpt4all-cli",
-        "type": "github"
-      }
-    },
-    "litrepl": {
-      "inputs": {
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1720615920,
-        "narHash": "sha256-sJ+ob6Pfe2v0Z7nfWpcF/LFcisMtQAmIGMUNmPX5S24=",
-        "ref": "refs/heads/main",
-        "rev": "1f82b89f3b334e846aa1f4cccbc5e15a073b28a5",
-        "revCount": 315,
-        "type": "git",
-        "url": "file:/home/grwlf/proj/litrepl.vim/"
+        "lastModified": 1722417340,
+        "narHash": "sha256-PERdRv1qfOYv3VOEX16isMXxVX4GUZkDFpz/UHNbYLU=",
+        "owner": "sergei-mironov",
+        "repo": "gpt4all-cli",
+        "rev": "bc10ae092afe17ebde37749a5ee782f7c708a397",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:/home/grwlf/proj/litrepl.vim/"
+        "owner": "sergei-mironov",
+        "repo": "gpt4all-cli",
+        "type": "github"
       }
     },
     "nixpkgs": {
@@ -69,26 +50,10 @@
         "type": "github"
       }
     },
-    "nixpkgs_3": {
-      "locked": {
-        "lastModified": 1719420079,
-        "narHash": "sha256-lGqaOuxLGT6/MUd/w3epHDCr3stOoVge06zI0fmPhr0=",
-        "owner": "grwlf",
-        "repo": "nixpkgs",
-        "rev": "d7fdc02f1e36ecb6545bdd55bc02e5b0dd9e12cf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "grwlf",
-        "ref": "local17",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "gpt4all-cli": "gpt4all-cli",
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_2"
       }
     }
   },
