@@ -831,10 +831,10 @@ grep -q 'Interpreter exited with code: 127' out1.md
 )} #}}}
 
 
-test_gpt4all() {( #{{{
+test_aicli() {( #{{{
 # Exact result messages might start a race (exit code X VS broken pipe) That is
 # why we put tow sections.
-mktest "_test_gpt4all"
+mktest "_test_aicli"
 runlitrepl start ai
 cat >source.md <<"EOF"
 ```ai
@@ -850,7 +850,7 @@ diff -u out.md - <<"EOF"
 ```
 ```result
 test
-<No model is active, use /model first>
+ERROR: No model is active, use /model first
 ```
 EOF
 )} #}}}
@@ -912,7 +912,7 @@ tests() {
   echo test_interrupt $(which python) -
   echo test_interrupt $(which ipython) -
   echo test_invalid_interpreter $(which python) -
-  echo test_gpt4all - $(which gpt4all-cli)
+  echo test_aicli - $(which aicli)
 }
 
 runlitrepl() {

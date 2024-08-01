@@ -93,8 +93,8 @@ def attach(fns:FileNames)->Optional[Interpreter]:
     p=Process(pid)
     cmd=p.cmdline()
     cls=None
-    if any('gpt4all' in w for w in cmd):
-      cls=GPT4AllInterpreter
+    if any('aicli' in w for w in cmd):
+      cls=AicliInterpreter
     elif any('ipython' in w for w in cmd):
       cls=IPythonInterpreter
     elif any('python' in w for w in cmd):
@@ -200,7 +200,7 @@ class IPythonInterpreter(Interpreter):
     paste_pattern='12341234213423'
     return (f'\n%cpaste -q -s {paste_pattern}\n{code}\n{paste_pattern}\n')
 
-class GPT4AllInterpreter(Interpreter):
+class AicliInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
     ret=system(
@@ -293,7 +293,7 @@ def start(a:LitreplArgs, st:SType)->int:
   elif st is SType.SAI:
     assert not a.exception_exit, "Not supported"
     interpreter='aicli' if a.ai_interpreter=='auto' else a.ai_interpreter
-    return start_(a,interpreter,GPT4AllInterpreter(fns))
+    return start_(a,interpreter,AicliInterpreter(fns))
   else:
     raise ValueError(f"Unsupported section type: {st}")
 
