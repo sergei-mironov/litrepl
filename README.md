@@ -15,7 +15,7 @@ Features
 * **Document formats** <br/>
   Markdown _(Example [[MD]](./doc/example.md))_ **|** [LaTeX](https://www.latex-project.org/) _(Examples [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf))_
 * **Interpreters** <br/>
-  [Python](https://www.python.org/) **|** [IPython](https://ipython.org/) **|** [GPT4All-cli](https://github.com/sergei-mironov/aicli)
+  [Python](https://www.python.org/) **|** [IPython](https://ipython.org/) **|** [Aicli](https://github.com/sergei-mironov/aicli)
 * **Editor integration** <br/>
   Vim _(plugin included)_
 
