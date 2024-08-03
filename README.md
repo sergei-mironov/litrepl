@@ -73,12 +73,16 @@ The Python part might be installed with `pip install .` run from the project
 folder. The Vim part requires hand-copying `./vim/plugin/litrepl.vim` to the
 `~/.vim` config folder or using any Vim plugin manager, e.g. Vim-Plug.
 
-The repository also includes a set of Nix expressions that automate installation
-on Nix-enabled systems.
+<details><summary><b>Release versions from pypi and vim.org</b></summary><p>
 
-<details><summary><b>pip-install and Vim-Plug</b></summary><p>
+1. `pip install litrepl`
+2. Download the `litrepl.vim` from the vim.org
+   [script page](https://www.vim.org/scripts/script.php?script_id=6117) and put it into
+   your `~/.vim/` folder.
 
-Instructions for the [Pip](https://pypi.org) and [Vim-plug](https://github.com/junegunn/vim-plug):
+</p></details>
+
+<details><summary><b>Latest versions using pip-install and Vim-Plug</b></summary><p>
 
 1. Install the `litrepl` Python package with pip:
    ```sh
@@ -94,9 +98,10 @@ Instructions for the [Pip](https://pypi.org) and [Vim-plug](https://github.com/j
 
 </p></details>
 
-<details><summary><b>Nix and vim_configurable</b></summary><p>
+<details><summary><b>Development environment using Nix</b></summary><p>
 
-Nix/NixOS users might follow the formalized path:
+The repository also includes a set of Nix expressions that automate installation
+on Nix-enabled systems.
 
 Nix supports
 [configurable Vim expressions](https://nixos.wiki/wiki/Vim#System_wide_vim.2Fnvim_configuration).
