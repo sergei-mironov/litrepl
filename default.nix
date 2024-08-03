@@ -15,6 +15,11 @@ let
 
     litrepl_root = src;
 
+    version = lib.fileContents "${litrepl_root}/semver.txt";
+    version_full = if revision != null then
+      "${version}+g${builtins.substring revision 0 7}" else
+      version;
+
     inherit (pkgs) lib stdenv fetchFromGitHub imagemagick makeWrapper cloc
     gnumake socat latexrun;
 
@@ -92,7 +97,7 @@ let
 
     litrepl = (py : py.pkgs.buildPythonApplication {
       pname = "litrepl";
-      version = lib.fileContents "${src}/semver.txt";
+      inherit version;
       inherit src;
       LITREPL_REVISION = revision;
       LITREPL_ROOT = src;
@@ -117,7 +122,7 @@ let
 
     litrepl-pypi = (python: python.pkgs.buildPythonPackage rec {
       pname = "litrepl";
-      version = lib.fileContents "${litrepl_root}/semver.txt";
+      inherit version;
       propagatedBuildInputs = [(lark-current python.pkgs) pkgs.socat python.pkgs.psutil];
       src = python.pkgs.fetchPypi {
         inherit pname version;
@@ -170,8 +175,7 @@ let
 
     vim-litrepl_ = (litrepl: py : pkgs.vimUtils.buildVimPluginFrom2Nix rec {
       pname = "vim-litrepl";
-      version = lib.fileContents "${litrepl_root}/semver.txt";
-      version_full = if revision != null then "${version}+g${revision}" else version;
+      inherit version;
       src = builtins.filterSource (
         path: type: !( baseNameOf path == "bin" && type == "directory" )) ./vim;
       postInstall = ''
