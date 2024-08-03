@@ -4,6 +4,7 @@ endif
 if ! exists("g:litrepl_bin")
   let g:litrepl_bin = expand('<sfile>:p:h:h').'/bin/'
 endif
+call setenv('PATH', g:litrepl_bin.':'.getenv('PATH'))
 if ! exists("g:litrepl_exe")
   let g:litrepl_exe = 'litrepl'
 endif
@@ -62,7 +63,7 @@ fun! LitReplCmd()
       let g:litrepl_check_versions = 0
     endif
   endif
-  return 'PATH='.g:litrepl_bin.':$PATH '.g:litrepl_exe.' --workdir='.expand('%:p:h')
+  return g:litrepl_exe.' --workdir='.expand('%:p:h')
 endfun
 
 fun! LitReplStart(what)
@@ -94,6 +95,7 @@ command! -bar -nargs=0 LPP call LitReplParsePrint()
 fun! LitReplTerm(what)
   execute "terminal ".LitReplCmd()." repl ".a:what
 endfun
+command! -bar -nargs=? LRepl call LitReplTerm(<q-args>)
 command! -bar -nargs=? LTerm call LitReplTerm(<q-args>)
 
 fun! LitReplOpenErr(file)
