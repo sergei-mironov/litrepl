@@ -17,7 +17,7 @@ let
 
     version = lib.fileContents "${litrepl_root}/semver.txt";
     version_full = if revision != null then
-      "${version}+g${builtins.substring revision 0 7}" else
+      "${version}+g${builtins.substring 0 7 revision}" else
       version;
 
     inherit (pkgs) lib stdenv fetchFromGitHub imagemagick makeWrapper cloc
