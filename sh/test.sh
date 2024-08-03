@@ -832,7 +832,6 @@ grep -q 'Interpreter exited with code: 127' out1.md
 grep -q 'Interpreter exited with code: 127' err.txt
 )} #}}}
 
-
 test_aicli() {( #{{{
 # Exact result messages might start a race (exit code X VS broken pipe) That is
 # why we put tow sections.
