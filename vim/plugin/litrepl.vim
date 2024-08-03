@@ -159,7 +159,7 @@ fun! LitReplRun(command, timeout, pos)
     endif
   else
     execute "u"
-      call LitReplUpdateCursor(cur)
+    call LitReplUpdateCursor(cur)
     call LitReplOpenErr(g:litrepl_errfile)
     return 0
   endif

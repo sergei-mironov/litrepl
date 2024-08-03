@@ -540,7 +540,9 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
           es.sres[es.nsec],rr=eval_code_(a,fns,ss,es,code,sr.preproc.pending.get(es.nsec))
         ec=_checkecode(fns,es.nsec,rr.timeout if rr else False)
         if ec is not None:
-          es.sres[es.nsec]=es.sres.get(es.nsec,'')+_failmsg(fns,ec)
+          msg=_failmsg(fns,ec)
+          pstderr(msg)
+          es.sres[es.nsec]=es.sres.get(es.nsec,'')+msg
     def ocodesection(self,tree):
       bmarker=tree.children[0].children[0].value
       t=tree.children[1].children[0].value
@@ -566,7 +568,7 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
           result=process(a,fns,ss,'print('+code+');\n')[0].rstrip('\n')
         ec=_checkecode(fns,es.nsec,False)
         if ec is not None:
-          result+=_failmsg(fns,ec)
+          pusererror(_failmsg(fns,ec))
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
       self._print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}")

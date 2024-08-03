@@ -826,8 +826,10 @@ cat >source.md <<"EOF"
 ```result
 ```
 EOF
-cat source.md | runlitrepl --python-interpreter=non-existent-ipython eval-sections >out1.md || true
+cat source.md | runlitrepl --python-interpreter=non-existent-ipython \
+  eval-sections >out1.md 2>err.txt || true
 grep -q 'Interpreter exited with code: 127' out1.md
+grep -q 'Interpreter exited with code: 127' err.txt
 )} #}}}
 
 
