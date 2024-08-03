@@ -32,8 +32,36 @@ endif
 if ! exists("g:litrepl_pending")
   let g:litrepl_pending = 33
 endif
+if ! exists("g:litrepl_version")
+  let devroot = getenv('LITREPL_ROOT')
+  if ! empty(devroot)
+    let g:litrepl_plugin_version = substitute(system('litrepl --version'),"\n","",'g')
+  else
+    let g:litrepl_plugin_version = 'version-to-be-filled-by-the-packager'
+  endif
+endif
+if ! exists("g:litrepl_check_versions")
+  let g:litrepl_check_versions = 1
+endif
 
 fun! LitReplCmd()
+  if g:litrepl_check_versions == 1
+    let g:litrepl_tool_version = substitute(system('litrepl --version'),"\n","",'g')
+    if v:shell_error != 0
+      echohl ErrorMsg
+      echom "Error: `litrepl` system tool failed to report its version!"
+            \" Visit https://github.com/sergei-mironov/litrepl#installation"
+      echohl None
+    else
+      if g:litrepl_tool_version != g:litrepl_plugin_version
+        echohl WarningMsg
+        echom "Warning: lirepl tool version (" . g:litrepl_tool_version . ")"
+              \" does not match the vim plugin version (" . g:litrepl_plugin_version . ")"
+        echohl None
+      endif
+      let g:litrepl_check_versions = 0
+    endif
+  endif
   return 'PATH='.g:litrepl_bin.':$PATH '.g:litrepl_exe.' --workdir='.expand('%:p:h')
 endfun
 
