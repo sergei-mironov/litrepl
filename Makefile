@@ -1,10 +1,11 @@
 .DEFAULT_GOAL = all
-VERSION = $(shell python3 setup.py --version 2>/dev/null)
 REVISION = $(shell git rev-parse HEAD | cut -c 1-7)
+VERSION = $(shell python3 setup.py --version 2>/dev/null)
+WHEEL_REV = _dist/litrepl-$(VERSION)-$(REVISION)-py3-none-any.whl
 WHEEL = dist/litrepl-$(VERSION)-py3-none-any.whl
 PY = $(shell find -name '*\.py' | grep -v semver.py | grep -v revision.py)
-VIM = $(shell find -name '*\.vim')
-VIMB = dist/vim-litrepl-$(VERSION).tar.gz
+VIM = $(shell find vim -name '*\.vim')
+VIMB_REV = _dist/vim-litrepl-$(VERSION)-$(REVISION).tar.gz
 TESTS = ./sh/test.sh
 
 .stamp_test: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
@@ -32,20 +33,22 @@ test: .stamp_test
 .PHONY: readme # Update code sections in the README.md
 readme: .stamp_readme
 
-$(WHEEL): $(PY) Makefile .stamp_readme
+$(WHEEL_REV): $(PY) Makefile .stamp_readme
+	mkdir -p $$(dirname $@) || true
 	test -n "$(VERSION)"
 	rm -rf build dist || true
 	python3 setup.py sdist bdist_wheel
-	test -f $@
+	test -f $(WHEEL)
+	cp $(WHEEL) $(WHEEL_REV)
 
 .PHONY: wheel # Build Python wheel (the DEFAULT target)
-wheel: $(WHEEL)
+wheel: $(WHEEL_REV)
 
 .PHONY: vimbundle # Build Vim bundle
-vimbundle: $(VIMB)
+vimbundle: $(VIMB_REV)
 
-$(VIMB): $(VIM)
-	mkdir -p $$(dirname $(VIMB)) || true
+$(VIMB_REV): $(VIM)
+	mkdir -p $$(dirname $@) || true
 	rm -rf build/vim || true
 	mkdir -p build/vim
 	cp -r vim/plugin build/vim
@@ -58,10 +61,10 @@ version:
 	@echo $(VERSION)+g$(REVISION)
 
 .PHONY: dist # Build Python and Vim packages
-dist: $(WHEEL) $(VIMB)
+dist: $(WHEEL_REV) $(VIMB_REV)
 
 .PHONY: upload # Upload Python wheel to Pypi.org (./_token.pypi is required)
-upload: $(WHEEL) $(VIMB)
+upload: $(WHEEL_REV) $(VIMB_REV)
 	twine upload \
 		--username __token__ \
 		--password $(shell cat _token.pypi) \
