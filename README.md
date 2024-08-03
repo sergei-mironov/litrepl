@@ -139,7 +139,7 @@ Usage
 
 The tool sends verbatim sections from a document to external interpreters,
 receiving the evaluated results in return. Litrepl currently supports two
-flavors of Python and the GPT4All-cli interpreter.
+flavors of Python and the Aicli interpreter.
 
 #### Basic evaluation
 
@@ -296,7 +296,7 @@ $ echo 'W' | litrepl eval-code
 #### Communicating with AI (Experimental)
 
 Litrepl experimentally supports
-[GPT4All-cli](https://github.com/sergei-mironov/aicli) allowing users to
+[Aicli](https://github.com/sergei-mironov/aicli) allowing users to
 query local LLMs. In order to try it, install the interpreter and use `ai` as
 the name for code sections. For low-speed models it would be convenient to use
 `:LEvalMon` command for evaluation.
