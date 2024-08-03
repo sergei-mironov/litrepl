@@ -4,7 +4,7 @@ endif
 if ! exists("g:litrepl_bin")
   let g:litrepl_bin = expand('<sfile>:p:h:h').'/bin/'
 endif
-call setenv('PATH', g:litrepl_bin.':'.getenv('PATH'))
+call setenv('PATH', g:litrepl_bin.':'.$PATH)
 if ! exists("g:litrepl_exe")
   let g:litrepl_exe = 'litrepl'
 endif
