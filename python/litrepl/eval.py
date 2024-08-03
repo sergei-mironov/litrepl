@@ -354,6 +354,10 @@ def processAsync(fns:FileNames, ss:Interpreter, code:str)->RunResult:
                 pdebug("processAsync catches Broken Pipe error")
                 os.write(fo,"<BrokenPipe>\n".encode())
                 raise
+            else:
+              # FIXME: We must transfer error back to the reader to be able to
+              # exit with an errorcode.
+              os.write(fo,"<Unable to access the interpreter>\n".encode())
         pdebug("Exiting!")
         exit(0)
       else:
