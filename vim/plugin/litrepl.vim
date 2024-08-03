@@ -4,7 +4,6 @@ endif
 if ! exists("g:litrepl_bin")
   let g:litrepl_bin = expand('<sfile>:p:h:h').'/bin/'
 endif
-call setenv('PATH', g:litrepl_bin.':'.$PATH)
 if ! exists("g:litrepl_exe")
   let g:litrepl_exe = 'litrepl'
 endif
@@ -63,7 +62,15 @@ fun! LitReplCmd()
       let g:litrepl_check_versions = 0
     endif
   endif
-  return g:litrepl_exe.' --workdir='.expand('%:p:h')
+
+  let oldpath = getenv('PATH')
+  try
+    call setenv('PATH', g:litrepl_bin.':'.oldpath)
+    let litrepl_exe = exepath(g:litrepl_exe)
+    return litrepl_exe.' --workdir='.expand('%:p:h')
+  finally
+    call setenv('PATH', oldpath)
+  endtry
 endfun
 
 fun! LitReplStart(what)
