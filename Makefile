@@ -33,7 +33,7 @@ test: .stamp_test
 .PHONY: readme # Update code sections in the README.md
 readme: .stamp_readme
 
-$(WHEEL_REV): $(PY) Makefile .stamp_readme
+$(WHEEL_REV): $(PY) Makefile .stamp_test .stamp_readme
 	mkdir -p $$(dirname $@) || true
 	test -n "$(VERSION)"
 	rm -rf build dist || true
