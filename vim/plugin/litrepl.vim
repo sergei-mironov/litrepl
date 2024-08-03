@@ -32,10 +32,21 @@ endif
 if ! exists("g:litrepl_pending")
   let g:litrepl_pending = 33
 endif
+
+fun! LitReplExe()
+  let oldpath = getenv('PATH')
+  try
+    call setenv('PATH', g:litrepl_bin.':'.oldpath)
+    return exepath(g:litrepl_exe)
+  finally
+    call setenv('PATH', oldpath)
+  endtry
+endfun
+
 if ! exists("g:litrepl_version")
   let devroot = getenv('LITREPL_ROOT')
   if ! empty(devroot)
-    let g:litrepl_plugin_version = substitute(system('litrepl --version'),"\n","",'g')
+    let g:litrepl_plugin_version = substitute(system(LitReplExe().' --version'),"\n","",'g')
   else
     let g:litrepl_plugin_version = 'version-to-be-filled-by-the-packager'
   endif
@@ -46,7 +57,7 @@ endif
 
 fun! LitReplCmd()
   if g:litrepl_check_versions == 1
-    let g:litrepl_tool_version = substitute(system('litrepl --version'),"\n","",'g')
+    let g:litrepl_tool_version = substitute(system(LitReplExe().' --version'),"\n","",'g')
     if v:shell_error != 0
       echohl ErrorMsg
       echom "Error: `litrepl` system tool failed to report its version!"
@@ -62,15 +73,7 @@ fun! LitReplCmd()
       let g:litrepl_check_versions = 0
     endif
   endif
-
-  let oldpath = getenv('PATH')
-  try
-    call setenv('PATH', g:litrepl_bin.':'.oldpath)
-    let litrepl_exe = exepath(g:litrepl_exe)
-    return litrepl_exe.' --workdir='.expand('%:p:h')
-  finally
-    call setenv('PATH', oldpath)
-  endtry
+  return LitReplExe().' --workdir='.expand('%:p:h')
 endfun
 
 fun! LitReplStart(what)
