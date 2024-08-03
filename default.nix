@@ -168,13 +168,16 @@ let
       '';
     };
 
-    vim-litrepl_ = (litrepl: py : pkgs.vimUtils.buildVimPluginFrom2Nix {
+    vim-litrepl_ = (litrepl: py : pkgs.vimUtils.buildVimPluginFrom2Nix rec {
       pname = "vim-litrepl";
-      version = "9999";
+      version = lib.fileContents "${litrepl_root}/semver.txt";
+      version_full = if revision != null then "${version}+g${revision}" else version;
       src = builtins.filterSource (
         path: type: !( baseNameOf path == "bin" && type == "directory" )) ./vim;
       postInstall = ''
         mkdir -pv $target/bin
+        sed -i "s/version-to-be-filled-by-the-packager/${version_full}/g" \
+          $target/plugin/litrepl.vim
         ln -s ${pkgs.socat}/bin/socat $target/bin/socat
         ln -s ${litrepl py}/bin/litrepl $target/bin/litrepl
       '';
