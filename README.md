@@ -150,8 +150,7 @@ documents, sections are marked with `\begin{python}\end{python}` and
 `\begin{result}\end{result}` environments correspondingly.
 
 `litrepl eval-sections` is the main command evaluating the formatted document.
-To run the evaluation, send the file to the input of the shell command. The
-equivalent Vim command is `:LEval`.
+To run the evaluation, send the file to the input of the shell command.
 
 For example:
 
@@ -194,17 +193,19 @@ Hello LaTeX!
 \end{result}
 ~~~~
 
+* The equivalent Vim command is `:LEval`.`:LEval` accepts optional argument
+  denoting the range: `all`, `above` (the cursor), `below` (the cursor), section
+  number, etc.
 * Litrepl expects Markdown formatting by default. Add `--filetype=tex` for Tex
   documents. Vim plugin does this automatically based on the `filetype`
   variable.
-* `:LEval` accepts optional argument denoting the range: `all`, `above` (the
-  cursor), `below` (the cursor), section number, etc.
 * Both command-line and Vim versions of the command accept code section indices.
   Everything is evaluated by default.
-* LaTeX documents need a preamble introducing python/result tags to the Tex processor.
-  For details, see:
-  - [Formatting Markdown documents](./doc/formatting.md#markdown)
+* LaTeX documents need a preamble introducing python/result tags to the Tex
+  processor.  For details, see:
   - [Formatting LaTeX documents](./doc/formatting.md#latex)
+* For more information on Markdown formatting, see
+  - [Formatting Markdown documents](./doc/formatting.md#markdown)
 
 #### Managing sessions
 
