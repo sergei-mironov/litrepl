@@ -78,7 +78,7 @@ folder. The Vim part requires hand-copying `./vim/plugin/litrepl.vim` to the
 1. `pip install litrepl`
 2. Download the `litrepl.vim` from the vim.org
    [script page](https://www.vim.org/scripts/script.php?script_id=6117) and put it into
-   your `~/.vim/` folder.
+   your `~/.vim/plugin` folder.
 
 </p></details>
 
