@@ -348,8 +348,8 @@ comsection.2 : combeginmarker comtext comendmarker
 icodesection.1 : icodebeginmarker ctext icodendmarker
                | icodebeginmarker2 ctext2 icodendmarker2
 ocodesection.1 : ocodebeginmarker ctext ocodendmarker
-               | verbeginmarker ctext verendmarker
-               | verbeginmarker2 ctext2 verendmarker2
+               | verbeginmarker vertext verendmarker
+               | verbeginmarker2 vertext2 verendmarker2
 icodebeginmarker : /{symbols_md.icodebeginmarker}/
 icodendmarker : /{symbols_md.icodendmarker}/
 icodebeginmarker2 : /{symbols_md.icodebeginmarker2}/
@@ -368,6 +368,8 @@ text : /(.(?!{symbols_md.ocodebeginmarker}|{symbols_md.icodebeginmarker}|{symbol
 ctext : /(.(?!{symbols_md.ocodendmarker}|{symbols_md.icodendmarker}|{symbols_md.verendmarker}))*./s
 ctext2 : /(.(?!{symbols_md.icodendmarker2}|{symbols_md.verendmarker2}))*./s
 comtext : /(.(?!{symbols_md.comendmarker}))*./s
+vertext : /(.(?!{symbols_md.verendmarker}))*./s
+vertext2 : /(.(?!{symbols_md.verendmarker2}))*./s
 """
 
 

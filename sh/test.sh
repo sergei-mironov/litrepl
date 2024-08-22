@@ -162,6 +162,14 @@ print('GAP')
 -->
 <!-- result
 -->
+``` python
+print('`'+'`'+'`'+" vim \" Inner markup")
+print('`'+'`'+'`')
+```
+<!--result-->
+``` vim " Inner markup
+```
+<!--noresult-->
 EOF
 cat source.md | runlitrepl --filetype=markdown parse-print >out.md
 diff -u source.md out.md
@@ -229,6 +237,14 @@ print('GAP')
 <!-- result
 GAP
 -->
+``` python
+print('`'+'`'+'`'+" vim \" Inner markup")
+print('`'+'`'+'`')
+```
+<!--result-->
+``` vim " Inner markup
+```
+<!--noresult-->
 EOF
 )} #}}}
 
