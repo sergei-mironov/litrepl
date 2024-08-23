@@ -44,6 +44,9 @@ Hello, World!
 * <!--lresult-->
   BLABLA
   <!--lnoresult-->
+<!--ai-->
+AI MESSAGE
+<!--noai-->
 EOF
 
 run_latex <<"EOF"
