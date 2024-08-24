@@ -329,12 +329,8 @@ class SymbolsMarkdown:
   ocodendmarker="```"
   verbeginmarker="<!--[ ]*l?result[ ]*-->"
   verendmarker="<!--[ ]*l?noresult[ ]*-->"
-  icodebeginmarker2="<!--[ ]*l?code|<!--[ ]*l?python"
-  icodendmarker2="(l?(no)?code)?-->|(l?python[ ]*)?-->"
   aibeginmarker="<!--[ ]*ai[ ]*-->"
   aiendmarker="<!--[ ]*noai[ ]*-->"
-  verbeginmarker2="<!--[ ]*l?result"
-  verendmarker2="(l?(no)?result)?-->"
   combeginmarker=r"<!--[ ]*l?ignore[ ]*-->"
   comendmarker=r"<!--[ ]*l?noignore[ ]*-->"
 
@@ -343,10 +339,8 @@ symbols_md=SymbolsMarkdown()
 def toplevel_markers_markdown():
   sl=symbols_md
   return '|'.join([sl.icodebeginmarker,
-                   sl.icodebeginmarker2,
                    sl.ocodebeginmarker,
                    sl.verbeginmarker,
-                   sl.verbeginmarker2,
                    sl.combeginmarker,
                    sl.aibeginmarker
                    ])
@@ -359,33 +353,25 @@ snippet : icodesection -> e_icodesection
         | comsection -> e_comsection
 comsection.2 : combeginmarker comtext comendmarker
 icodesection.1 : icodebeginmarker ctext icodendmarker
-               | icodebeginmarker2 ctext2 icodendmarker2
                | aibeginmarker aitext aiendmarker
 ocodesection.1 : ocodebeginmarker ctext ocodendmarker
                | verbeginmarker vertext verendmarker
-               | verbeginmarker2 vertext2 verendmarker2
 icodebeginmarker : /{symbols_md.icodebeginmarker}/
 icodendmarker : /{symbols_md.icodendmarker}/
-icodebeginmarker2 : /{symbols_md.icodebeginmarker2}/
-icodendmarker2 : /{symbols_md.icodendmarker2}/
 aibeginmarker : /{symbols_md.aibeginmarker}/
 aiendmarker : /{symbols_md.aiendmarker}/
 ocodebeginmarker : /{symbols_md.ocodebeginmarker}/
 ocodendmarker : /{symbols_md.ocodendmarker}/
 verbeginmarker : /{symbols_md.verbeginmarker}/
 verendmarker : /{symbols_md.verendmarker}/
-verbeginmarker2 : /{symbols_md.verbeginmarker2}/
-verendmarker2 : /{symbols_md.verendmarker2}/
 inlinebeginmarker : "`"
 inlinendmarker : "`"
 combeginmarker : /{symbols_md.combeginmarker}/
 comendmarker : /{symbols_md.comendmarker}/
 topleveltext : /(.(?!{toplevel_markers_markdown()}))*./s
-ctext : /(.(?!{symbols_md.ocodendmarker}|{symbols_md.icodendmarker}|{symbols_md.verendmarker}))*./s
-ctext2 : /(.(?!{symbols_md.icodendmarker2}|{symbols_md.verendmarker2}))*./s
+ctext : /(.(?!{symbols_md.ocodendmarker}|{symbols_md.icodendmarker}))*./s
 comtext : /(.(?!{symbols_md.comendmarker}))*./s
 vertext : /(.(?!{symbols_md.verendmarker}))*./s
-vertext2 : /(.(?!{symbols_md.verendmarker2}))*./s
 aitext : /(.(?!{symbols_md.aiendmarker}))*./s
 """
 

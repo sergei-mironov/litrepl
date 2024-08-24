@@ -32,6 +32,9 @@ endif
 if ! exists("g:litrepl_pending")
   let g:litrepl_pending = 33
 endif
+if ! exists("g:litrepl_dump_mon")
+  let g:litrepl_dump_mon = 0
+endif
 
 fun! LitReplExe()
   let oldpath = getenv('PATH')
@@ -177,14 +180,40 @@ fun! LitReplRun(command, timeout, pos)
   endif
 endfun
 
+
+let g:log_count = 1
+function! SaveStringToFile(dump)
+  " Define the directory name
+  let l:dir = "_dump"
+  " Check if the directory exists, create it if it doesn't
+  if !isdirectory(l:dir)
+    call mkdir(l:dir, "p")
+  endif
+  " Define the file name with current log count
+  let l:filename = printf("_dump/03%d.log", g:log_count)
+  " Open the file for writing
+  call writefile(a:dump, l:filename)
+  " Increment the log count for the next call
+  let g:log_count += 1
+endfunction
+
+
 " Continuosly run litrepl until error or completion
 fun! LitReplMonitor(command, pos)
   let cur = getcharpos('.')
   try
+    let g:log_count = 0
     while 1
       " Opening a new undo block
       let &ul=&ul
       let code = LitReplRun_(a:command, g:litrepl_timeout.',0.0', a:pos)
+
+      if g:litrepl_dump_mon == 1
+        let dump = ["CODE", string(code), "CONTENTS"]
+        call extend(dump,getline(1, '$'))
+        call SaveStringToFile(dump)
+      endif
+
       if code == 0
         call LitReplUpdateCursor(cur)
         break

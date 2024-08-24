@@ -104,6 +104,9 @@ test_eval_md() {( #{{{
 mktest "_test_eval_md"
 runlitrepl start
 cat >source.md <<"EOF"
+Simple evaluation
+=================
+
 ```python
 def hello(name):
   print(f"Hello, {name}!")
@@ -113,58 +116,80 @@ hello('World')
 ```lresult
 PLACEHOLDER
 ```
+
+Bracketed code sections
+=======================
+
 Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+
 ``` { .python }
 print('Wowowou')
 ```
+
 ``` { .lresult }
 PLACEHOLDER
 ```
+
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+
+Indent+Ignore
+=============
+
+The below part demonstrates 1) result indentation 2) ignored sections
+
 * ```python
   print("ABC"+"DEF")
   ```
 * <!--lresult-->
   PLACEHOLDER
   <!--lnoresult-->
-== Ignore ==
-<!--lignore-->
-```python
-print('A'+'B')
-```
-```
-PLACEHOLDER
-```
-<!--lnoignore-->
-```
-NOEVAL
-```
-<!--result
-EVAL
--->
-<!--lcode
+  <!--lignore-->
+  ```python
+  print('A'+'B')
+  ```
+  ```
+  PLACEHOLDER
+  ```
+  <!--lnoignore-->
+  Just a verbatim section
+  ```
+  VERB
+  ```
+  Back the result section
+  <!--
+  ```result
+  EVAL
+  ```
+  -->
+
+Commented code section
+======================
+
+<!--
+``` python
 print('FOO')
-lnocode-->
+```
+-->
 ```lresult
 XX
 ```
-<!--code
-print('BAR')
--->
 <!--result-->
 ??
 <!--noresult-->
+
+Stop tag protection
+===================
+
 ``` code
-print("-->")
+print("<!-- noresult -->")
 ```
-<!-- result
+<!-- result -->
 ??
--->
-<!-- python
-print('GAP')
--->
-<!-- result
--->
+<!-- noresult -->
+
+Inner markup safety
+===================
+
 ``` python
 print('`'+'`'+'`'+" vim \" Inner markup")
 print('`'+'`'+'`')
@@ -178,6 +203,9 @@ cat source.md | runlitrepl --filetype=markdown parse-print >out.md
 diff -u source.md out.md
 cat source.md | runlitrepl --filetype=markdown eval-sections >out.md
 diff -u out.md - <<"EOF"
+Simple evaluation
+=================
+
 ```python
 def hello(name):
   print(f"Hello, {name}!")
@@ -187,59 +215,80 @@ hello('World')
 ```lresult
 Hello, World!
 ```
+
+Bracketed code sections
+=======================
+
 Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+
 ``` { .python }
 print('Wowowou')
 ```
+
 ``` { .lresult }
 Wowowou
 ```
+
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+
+Indent+Ignore
+=============
+
+The below part demonstrates 1) result indentation 2) ignored sections
+
 * ```python
   print("ABC"+"DEF")
   ```
 * <!--lresult-->
   ABCDEF
   <!--lnoresult-->
-== Ignore ==
-<!--lignore-->
-```python
-print('A'+'B')
-```
-```
-PLACEHOLDER
-```
-<!--lnoignore-->
-```
-NOEVAL
-```
-<!--result
-ABCDEF
--->
-<!--lcode
+  <!--lignore-->
+  ```python
+  print('A'+'B')
+  ```
+  ```
+  PLACEHOLDER
+  ```
+  <!--lnoignore-->
+  Just a verbatim section
+  ```
+  VERB
+  ```
+  Back the result section
+  <!--
+  ```result
+  ABCDEF
+  ```
+  -->
+
+Commented code section
+======================
+
+<!--
+``` python
 print('FOO')
-lnocode-->
+```
+-->
 ```lresult
 FOO
 ```
-<!--code
-print('BAR')
--->
 <!--result-->
-BAR
+FOO
 <!--noresult-->
+
+Stop tag protection
+===================
+
 ``` code
-print("-->")
+print("<!-- noresult -->")
 ```
-<!-- result
-\-\-\>
--->
-<!-- python
-print('GAP')
--->
-<!-- result
-GAP
--->
+<!-- result -->
+\<\!\-\-\ \n\o\r\e\s\u\l\t\ \-\-\>
+<!-- noresult -->
+
+Inner markup safety
+===================
+
 ``` python
 print('`'+'`'+'`'+" vim \" Inner markup")
 print('`'+'`'+'`')
