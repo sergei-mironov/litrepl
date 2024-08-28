@@ -85,12 +85,16 @@ fun! LitReplStart(what)
         \' --ai-interpreter="'.g:litrepl_ai_interpreter.'"'.
         \' start '.a:what
 endfun
-command! -bar -nargs=? LStart call LitReplStart(<q-args>)
+if !exists(":LStart")
+  command! -bar -nargs=? LStart call LitReplStart(<q-args>)
+endif
 
 fun! LitReplStop(what)
   execute '!'.LitReplCmd().' stop '.a:what
 endfun
-command! -bar -nargs=? LStop call LitReplStop(<q-args>)
+if !exists(":LStop")
+  command! -bar -nargs=? LStop call LitReplStop(<q-args>)
+endif
 
 fun! LitReplRestart(what)
   execute '!'.LitReplCmd().
@@ -98,18 +102,26 @@ fun! LitReplRestart(what)
         \' --ai-interpreter="'.g:litrepl_ai_interpreter.'"'.
         \' restart '.a:what
 endfun
-command! -bar -nargs=? LRestart call LitReplRestart(<q-args>)
+if !exists(":LRestart")
+  command! -bar -nargs=? LRestart call LitReplRestart(<q-args>)
+endif
 
 fun! LitReplParsePrint()
   execute '%!'.LitReplCmd().' parse-print'
 endfun
-command! -bar -nargs=0 LPP call LitReplParsePrint()
+if !exists(":LPP")
+  command! -bar -nargs=0 LPP call LitReplParsePrint()
+endif
 
 fun! LitReplTerm(what)
   execute "terminal ".LitReplCmd()." repl ".a:what
 endfun
-command! -bar -nargs=? LRepl call LitReplTerm(<q-args>)
-command! -bar -nargs=? LTerm call LitReplTerm(<q-args>)
+if !exists(":LRepl")
+  command! -bar -nargs=? LRepl call LitReplTerm(<q-args>)
+endif
+if !exists(":LTerm")
+  command! -bar -nargs=? LTerm call LitReplTerm(<q-args>)
+endif
 
 fun! LitReplOpenErr(file)
   if bufwinnr(a:file) <= 0
@@ -117,12 +129,16 @@ fun! LitReplOpenErr(file)
     execute "setlocal autoread"
   endif
 endfun
-command! -bar -nargs=0 LOpenErr call LitReplOpenErr(g:litrepl_errfile)
+if !exists(":LOpenErr")
+  command! -bar -nargs=0 LOpenErr call LitReplOpenErr(g:litrepl_errfile)
+endif
 
 fun! LitReplVersion()
   echomsg systemlist(LitReplCmd()." --version")[0]
 endfun
-command! -bar -nargs=0 LVersion call LitReplVersion()
+if !exists(":LVersion")
+  command! -bar -nargs=0 LVersion call LitReplVersion()
+endif
 
 let g:litrepl_lastpos = "0:0"
 
@@ -262,12 +278,24 @@ fun! s:Pos(arg)
   endif
 endfun
 
-command! -bar -nargs=? LEval call LitReplRun("eval-sections", "inf,inf", <SID>Pos(<q-args>))
-command! -bar -nargs=? LEvalAsync call LitReplRun("eval-sections", g:litrepl_timeout.',0.0', <SID>Pos(<q-args>))
-command! -bar -nargs=? LEvalMon call LitReplMonitor("eval-sections", <SID>Pos(<q-args>))
-command! -bar -nargs=0 LEvalLast call LitReplRun("eval-sections", "inf,inf", g:litrepl_lastcur)
-command! -bar -nargs=? LInterrupt call LitReplRun("interrupt", "1.0,1.0", <SID>Pos(<q-args>))
-command! -bar -nargs=0 LStatus call LitReplStatus()
+if !exists(":LEval")
+  command! -bar -nargs=? LEval call LitReplRun("eval-sections", "inf,inf", <SID>Pos(<q-args>))
+endif
+if !exists(":LEvalAsync")
+  command! -bar -nargs=? LEvalAsync call LitReplRun("eval-sections", g:litrepl_timeout.',0.0', <SID>Pos(<q-args>))
+endif
+if !exists(":LEvalMon")
+  command! -bar -nargs=? LEvalMon call LitReplMonitor("eval-sections", <SID>Pos(<q-args>))
+endif
+if !exists(":LEvalLast")
+  command! -bar -nargs=0 LEvalLast call LitReplRun("eval-sections", "inf,inf", g:litrepl_lastcur)
+endif
+if !exists(":LInterrupt")
+  command! -bar -nargs=? LInterrupt call LitReplRun("interrupt", "1.0,1.0", <SID>Pos(<q-args>))
+endif
+if !exists(":LStatus")
+  command! -bar -nargs=0 LStatus call LitReplStatus()
+endif
 
 let g:litrepl_loaded = 1
 
