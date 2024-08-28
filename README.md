@@ -23,8 +23,7 @@ Features
 
 * POSIX-compatible OS, typically a Linux. The tool relies on POSIX pipes and
   depends on certain shell commands.
-* More or less recent `Vim`
-* Python3 packages: `lark-parser`, `psutil` (Required).
+* Python packages: `lark-parser`, `psutil` (Required).
 * Command line tools: `GNU socat` (Optional)
 
 </p></details>
@@ -46,9 +45,10 @@ Contents
         * [Vim and command-line commands overview](#vim-and-command-line-commands-overview)
         * [Variables and arguments overview](#variables-and-arguments-overview)
         * [Command-line arguments](#command-line-arguments)
-    * [Hints](#hints)
+    * [Applications](#applications)
         * [Command line, basic usage](#command-line-basic-usage)
         * [Command line, foreground evaluation](#command-line-foreground-evaluation)
+        * [GNU Make, updating documentation](#gnu-make-updating-documentation)
         * [Vim, adding keybindings](#vim-adding-keybindings)
         * [Vim, inserting new sections](#vim-inserting-new-sections)
         * [Vim, executing first section after restart](#vim-executing-first-section-after-restart)
@@ -451,7 +451,7 @@ options:
   --result-textwidth NUM      Wrap result lines longer than NUM symbols.
 ```
 
-### Hints
+### Applications
 
 #### Command line, basic usage
 
@@ -491,6 +491,24 @@ $ echo $?
 Here, the `--foreground` argument tells Litrepl to run a new interpreter session
 and then stop it before exiting, `--exception-exit=200` sets the exit code
 returned in the case of unhandled exceptions.
+
+#### GNU Make, updating documentation
+
+A typical Makefile recipe updating README.md might look as follows:
+
+``` Makefile
+.stamp_readme: $(SRC) Makefile
+	cp README.md _README.md.in
+	cat _README.md.in | \
+		litrepl --foreground --exception-exit=100 --result-textwidth=100 \
+		eval-sections >README.md
+	touch $@
+
+.PHONY: readme
+readme: .stamp_readme
+```
+
+Where `$(SRC)` is supposed to contain valuable source filenames.
 
 #### Vim, adding keybindings
 
