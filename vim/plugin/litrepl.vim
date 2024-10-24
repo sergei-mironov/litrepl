@@ -151,6 +151,41 @@ fun! LitReplUpdateCursor(cur)
   call setcharpos('.',cur)
 endfun
 
+fun! LitReplGetVisualSelection()
+  let [line_start, column_start] = getpos("'<")[1:2]
+  let [line_end, column_end] = getpos("'>")[1:2]
+  let lines = getline(line_start, line_end)
+  if len(lines) == 0
+      return ""
+  endif
+  let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
+  let lines[0] = lines[0][column_start - 1:]
+  return join(lines, "\n")
+endfun
+
+fun! LitReplEvalSelection(type) range
+  let code = LitReplGetVisualSelection()
+  let [line_end, column_end] = getpos("'>")[1:2]
+  let cmdline = LitReplCmd().
+        \ ' --python-interpreter="'.g:litrepl_python_interpreter.'"'.
+        \ ' --ai-interpreter="'.g:litrepl_ai_interpreter.'"'.
+        \ ' --timeout=inf'.
+        \ ' --pending-exit='.g:litrepl_pending.
+        \ ' --debug='.g:litrepl_debug.
+        \ ' --result-textwidth='.string(&textwidth).
+        \ ' eval-code '.a:type.' 2>'.g:litrepl_errfile
+
+  let result = system(cmdline, code)
+  let errcode = v:shell_error
+  if errcode == 0
+    let result = split(result, '\n')
+    call append(line_end, result)
+  else
+    call LitReplOpenErr(g:litrepl_errfile)
+    return 0
+  endif
+endfun
+
 fun! LitReplRun_(command, timeout, pos)
   let ft = &filetype
   let cur = getcharpos('.')
@@ -172,7 +207,7 @@ fun! LitReplRun_(command, timeout, pos)
 endfun
 
 fun! LitReplRun(command, timeout, pos)
-  " So we use hack to force remembering the undo position
+  " We use a hack to force remembering the undo position
   execute "normal! I "
   execute "normal! x"
   let cur = getcharpos('.')

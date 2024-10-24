@@ -801,6 +801,23 @@ not grep -q -i error _litrepl.err
 )}
 #}}}
 
+test_vim_eval_selection() {( #{{{
+mktest "_test_vim_eval_selection"
+runlitrepl start
+
+cat >file.md <<"EOF"
+3 + 4
+EOF
+
+runvim file.md >_vim.log 2>&1 <<"EOF"
+:vnoremap E :call LitReplEvalSelection('python')<CR>
+VE
+:wq!
+EOF
+grep -q '7' file.md
+)}
+#}}}
+
 test_foreground() {( #{{{
 mktest "_test_foreground"
 runlitrepl start
@@ -982,6 +999,7 @@ tests() {
   echo test_interrupt $(which ipython) -
   echo test_invalid_interpreter $(which python) -
   echo test_aicli - $(which aicli)
+  echo test_vim_eval_selection $(which python) -
 }
 
 runlitrepl() {
