@@ -1025,6 +1025,7 @@ runvim() {
 
 set -e
 
+export AICLI_NORC=y
 INTERPS='.*'
 TESTS='.*'
 LITREPL_DEBUG=0

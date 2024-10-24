@@ -53,6 +53,7 @@ Contents
         * [Vim, inserting new sections](#vim-inserting-new-sections)
         * [Vim, executing first section after restart](#vim-executing-first-section-after-restart)
         * [Vim, running shell commands](#vim-running-shell-commands)
+        * [Vim, executing text selection](#vim-executing-text-selection)
 * [Development](#development)
     * [Development shells](#development-shells)
     * [Other Nix targets](#other-nix-targets)
@@ -559,6 +560,40 @@ directly from Python code sections.
                 ||     ||
 ```
 ~~~~
+
+#### Vim, executing text selection
+
+Litrepl vim plugin defines `LitReplEvalSelection` function which runs the
+selection as a virtual code section. The section type is passed as the function
+argument.  For example, calling `LitReplEvalSelection('ai')` will execute the
+selection as if it is an `ai` code section. The execution result is pasted right
+after the selection as a plain text. `LitReplEvalSelection('python')` would pipe
+the selection through the current Python interpreter.
+
+To use the feature, define a suitable key binding (`Ctrl+K` in this example),
+
+<!--lignore-->
+``` vim
+vnoremap <C-k> :call LitReplEvalSelection('ai')<CR>
+```
+<!--lnoignore-->
+
+Now write a question to the AI in any document, select it and hit Ctrl+K.
+
+~~~~
+Hi model. What is the capital of New Zealand?
+~~~~
+
+Upon the keypress, Litrepl pipes the selection through the AI interpreter - the
+`aicli` at the time of this writing - and paste the response right after the
+last line of the original selection.
+
+~~~~
+Hi model. What is the capital of New Zealand?
+The capital of New Zealand is Wellington.
+~~~~
+
+Internally, the plugin just uses `eval-code` Litrepl command.
 
 Development
 -----------
