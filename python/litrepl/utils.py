@@ -76,36 +76,40 @@ def words_with_spaces(text):
   for char in text:
     if char.isspace():
       if word:
-          yield word
-          word = ''
+        yield word
+        word = ''
       word += char
     else:
       word += char
   if word and any((not c.isspace()) for c in word):
-      yield word
-
+    yield word
 
 def wraplong(lines, tw):
   text, width = lines, tw
   wrapped_lines = []
   for line in text.split('\n'):
+    if not line.strip():  # Check for empty lines
+      wrapped_lines.append('')  # Preserve the empty line
+      continue
+
     current_line = ""
     current_length = 0
 
     for word in words_with_spaces(line):
       if current_length + len(word) > width:
-        wrapped_lines.append(current_line)
+        if current_line != "":
+          wrapped_lines.append(current_line)
         current_line = word.strip()
         current_length = len(word.strip())
       else:
         current_line += word
         current_length += len(word)
 
-    if len(current_line)>0:
+    if len(current_line) > 0:
       wrapped_lines.append(current_line)
 
-  s= '\n'.join(wrapped_lines)
-  s=s+'\n' if lines and lines[-1]=='\n' else s
+  s = '\n'.join(wrapped_lines)
+  s = s if lines and lines.endswith('\n') else s + '\n'
   return s
 
 

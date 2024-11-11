@@ -695,6 +695,80 @@ grep -q '^result-2' file.md
 )}
 #}}}
 
+test_vim_textwidth() {( #{{{
+mktest "_test_vim_textwidth"
+runlitrepl start
+
+cat >file.md <<"EOF"
+``` python
+print("0123456789 111")
+print("")
+print("0123456789 111")
+```
+
+``` result
+```
+EOF
+
+runvim file.md >_vim.log 2>&1 <<EOF
+:set textwidth=10
+:LEval
+:w file1.md
+:set textwidth=14
+:LEval
+:w file2.md
+:set textwidth=0
+:LEval
+:w file3.md
+:qa!
+EOF
+
+diff -u file1.md - <<"EOF"
+``` python
+print("0123456789 111")
+print("")
+print("0123456789 111")
+```
+
+``` result
+0123456789
+111
+
+0123456789
+111
+```
+EOF
+
+diff -u file2.md - <<"EOF"
+``` python
+print("0123456789 111")
+print("")
+print("0123456789 111")
+```
+
+``` result
+0123456789 111
+
+0123456789 111
+```
+EOF
+
+diff -u file3.md - <<"EOF"
+``` python
+print("0123456789 111")
+print("")
+print("0123456789 111")
+```
+
+``` result
+0123456789 111
+
+0123456789 111
+```
+EOF
+)}
+#}}}
+
 test_vim_leval_explicit() {( #{{{
 mktest "_test_vim_leval_explicit"
 runlitrepl start
@@ -984,6 +1058,7 @@ tests() {
   echo test_exception_errcode $(which python) -
   echo test_exception_errcode $(which ipython) -
   echo test_vim_leval_cursor $(which python) -
+  echo test_vim_textwidth $(which ipython) -
   echo test_vim_leval_cursor $(which ipython) -
   echo test_vim_leval_explicit $(which python) -
   echo test_vim_leval_explicit $(which ipython) -
