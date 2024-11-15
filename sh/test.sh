@@ -1010,7 +1010,7 @@ diff -u out.md - <<"EOF"
 ```
 ```result
 test
-ERROR: No model is active, use /model first
+INFO: No model is active, use /model first
 ```
 EOF
 )} #}}}
@@ -1100,7 +1100,7 @@ runvim() {
 
 set -e
 
-export AICLI_NORC=y
+export AICLI_RC=none
 INTERPS='.*'
 TESTS='.*'
 LITREPL_DEBUG=0
