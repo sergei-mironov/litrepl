@@ -14,7 +14,9 @@ ECODE_OK=0
 ECODE_UNDEFINED=255
 
 class SType(Enum):
-  """ Code section types """
+  """ Code section types. They have short string representation and allows user
+  to use short code section names and specify interpreter paths and parameters
+  via settings."""
   SPython = 0
   SAI = 1
 
@@ -111,5 +113,8 @@ class Interpreter:
     raise NotImplementedError()
   def result_postprocess(self, a:LitreplArgs, text:str) -> str:
     """ Postprocess results in an interpreter-specific way """
+    raise NotImplementedError()
+  def run_repl(self, a:LitreplArgs):
+    """ Run foreground repl shell """
     raise NotImplementedError()
 

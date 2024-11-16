@@ -26,6 +26,12 @@ endif
 if ! exists("g:litrepl_ai_interpreter")
   let g:litrepl_ai_interpreter = 'auto'
 endif
+if ! exists("g:litrepl_python_auxdir")
+  let g:litrepl_python_auxdir = ''
+endif
+if ! exists("g:litrepl_ai_auxdir")
+  let g:litrepl_ai_auxdir = ''
+endif
 if ! exists("g:litrepl_timeout")
   let g:litrepl_timeout = 0.5
 endif
@@ -59,6 +65,7 @@ if ! exists("g:litrepl_check_versions")
 endif
 
 fun! LitReplCmd()
+  " Return the common part of litrepl command line based on the system settings.
   if g:litrepl_check_versions == 1
     let g:litrepl_tool_version = substitute(system(LitReplExe().' --version'),"\n","",'g')
     if v:shell_error != 0
@@ -76,7 +83,14 @@ fun! LitReplCmd()
       let g:litrepl_check_versions = 0
     endif
   endif
-  return LitReplExe().' --workdir='.expand('%:p:h')
+  let cmd = LitReplExe() . ' --workdir="'.expand('%:p:h').'"'
+  if g:litrepl_python_auxdir != ''
+    let cmd = cmd . ' --python-auxdir="'.g:litrepl_python_auxdir.'"'
+  endif
+  if g:litrepl_ai_auxdir != ''
+    let cmd = cmd . ' --ai-auxdir="'.g:litrepl_ai_auxdir.'"'
+  endif
+  return cmd
 endfun
 
 fun! LitReplStart(what)

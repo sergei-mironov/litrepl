@@ -52,12 +52,18 @@ if __name__=='__main__':
     help="Enable (a lot of) debug messages.")
   ap.add_argument('--verbose',action='store_true',
     help='Be more verbose (used in status).')
-  ap.add_argument('--auxdir',type=str,metavar='DIR',default=None,
-    help=dedent('''Directory to store auxilary session files. By default, the
-    name of the aux. dir is derived from the name of the current dir.'''))
+  ap.add_argument('--python-auxdir',type=str,metavar='DIR',default=None,
+    help=dedent('''Directory to store Python interpreter pipes. By default, it
+    is created in the system temporary directory with the name derived from
+    current working directory.'''))
+  ap.add_argument('--ai-auxdir',type=str,metavar='DIR',default=None,
+    help=dedent('''Directory to store AI interpreter pipes. By default, it is
+    created in the system temporary directory with the name derived from current
+    working directory.'''))
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,
-    help=dedent('''Directory to run from, the current directory is
-    used by default.'''))
+    help=dedent('''Set the new current working directory before run. Note that
+    changing directory typically has effect when starting or restarting
+    interpreters.'''))
   ap.add_argument('--pending-exit',type=str,metavar='INT',default=None,
     help=dedent('''Return this error code if whenever section hits timeout.'''))
   ap.add_argument('--exception-exit',type=str,metavar='INT',default=None,
@@ -83,10 +89,9 @@ if __name__=='__main__':
   sstatus.add_argument('--tty',action='store_true',
     help='Read intput document from stdin (required to get per-section status).')
   sps.add_parser('parse',
-    help='Parse the input file (diagnostics).')
+    help='Parse the input file without futher processing (diagnostics).')
   sps.add_parser('parse-print',
-    help=dedent('''Parse and print the input file back (diagnostics, no changes
-    are made).'''))
+    help=dedent('''Parse and print the input file back (diagnostics).'''))
   eps=sps.add_parser('eval-sections',
     help=dedent('''Parse stdin, evaluate the sepcified sections (by default - all
     available sections), print the resulting file to stdout.'''))
@@ -141,12 +146,15 @@ if __name__=='__main__':
 
   if a.foreground:
     assert a.command not in {'start','stop','restart','repl','interrupt'}, \
-      f"--foreground is not compatible with {a.command}"
-    if a.auxdir is None:
-      a.auxdir=mkdtemp(prefix="litrepl-auxdir")
-    else:
-      assert not running(a), \
-        f"Explicitly-specified auxdir ({a.auxdir}) already contains a running session"
+      f"--foreground is not compatible with '{a.command}' command"
+    for st in [SType.SPython,SType.SAI]:
+      auxdir=getattr(a,f"{st2name(st)}_auxdir",None)
+      if auxdir is None:
+        setattr(a,f"{st2name(st)}_auxdir",
+                mkdtemp(prefix=f"litrepl-{st2name(st)}-foreground"))
+      else:
+        assert not running(a,st), \
+          f"Explicitly-specified auxdir ({auxdir}) contains a running session"
 
   if a.command=='start':
     ecode=start(a,name2st(a.type))
@@ -181,8 +189,8 @@ if __name__=='__main__':
       fns=pipenames(a,st)
       if not running(a,st) or a.foreground:
         start(a,st)
-      print("Opening the interpreter terminal (NO PROMPTS, USE `Ctrl+D` TO DETACH)")
-      system(f"socat - 'PIPE:{fns.outp},flock-ex-nb=1!!PIPE:{fns.inp},flock-ex-nb=1'")
+      ss=attach(fns)
+      ss.run_repl(a)
       ecode=interpExitCode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='interrupt':

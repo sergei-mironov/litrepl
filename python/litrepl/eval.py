@@ -72,7 +72,7 @@ def readipid(fns:FileNames)->Optional[int]:
     return None
 
 @contextmanager
-def with_sigint(a:LitreplArgs, fns:FileNames):
+def with_sigint(propagate_sigint:bool, fns:FileNames):
   def _handler(signum,frame):
     pdebug(f"Sending SIGINT to {ipid}")
     os.kill(ipid,SIGINT)
@@ -85,7 +85,7 @@ def with_sigint(a:LitreplArgs, fns:FileNames):
   with with_parent_finally(_finally):
     with with_sigmask():
       if ipid is not None:
-        if a.propagate_sigint:
+        if propagate_sigint:
           prev=signal(SIGINT,_handler)
       else:
         pdebug(f"Failed to read pid: not installing SIGINT handler")
@@ -238,7 +238,7 @@ def process(a:LitreplArgs,fns:FileNames, ss:Interpreter, lines:str)->Tuple[str,R
   p1,p2=ss.patterns()
   runr=processAsync(fns,ss,lines)
   res=''
-  with with_sigint(a,fns):
+  with with_sigint(a.propagate_sigint,fns):
     with with_locked_fd(runr.fname,OPEN_RDONLY,LOCK_EX) as fdr:
       assert fdr is not None
       pdebug("process readout")
@@ -368,15 +368,15 @@ def processAsync(fns:FileNames, ss:Interpreter, code:str)->RunResult:
       # The reader is already running, try to own it.
       return RunResult(fname)
 
-def processCont(a:LitreplArgs,
-                fns:FileNames,
+def processCont(fns:FileNames,
                 ss:Interpreter,
                 runr:RunResult,
-                timeout:float)->ReadResult:
+                timeout:float,
+                propagate_sigint:bool)->ReadResult:
   """ Read from the running readout process. """
   rr:Optional[ReadResult]=None
   p1,p2=ss.patterns()
-  with with_sigint(a,fns):
+  with with_sigint(propagate_sigint,fns):
     pdebug(f"processCont starting via {runr.fname}")
     with with_locked_fd(runr.fname,
                         os.O_RDONLY|os.O_SYNC,
@@ -401,11 +401,11 @@ def processCont(a:LitreplArgs,
   assert rr is not None
   return rr
 
-def processAdapt(a:LitreplArgs,
-                 fns:FileNames,
+def processAdapt(fns:FileNames,
                  ss:Interpreter,
                  code:str,
-                 timeout:float=1.0)->Tuple[ReadResult,RunResult]:
+                 timeout:float=1.0,
+                 propagate_sigint:bool=True)->Tuple[ReadResult,RunResult]:
   """ Push `code` to the interpreter and wait for `timeout` seconds for
   the immediate answer. In case of delay, return intermediate answer and
   the continuation context."""
@@ -414,7 +414,7 @@ def processAdapt(a:LitreplArgs,
   #   return ReadResult(lines2,False),runr
   # else:
   runr=processAsync(fns,ss,code)
-  rr=processCont(a,fns,ss,runr,timeout=timeout)
+  rr=processCont(fns,ss,runr,timeout=timeout,propagate_sigint=propagate_sigint)
   return rr,runr
 
 PRESULT_RE=re_compile(r"(.*)\[BG:([a-zA-Z0-9_\/\.-]+)\]\n.*",

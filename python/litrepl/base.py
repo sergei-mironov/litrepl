@@ -40,14 +40,27 @@ def pdebug(*args,**kwargs):
   if DEBUG:
     print(f"[{time():14.3f},{getpid()}]", *args, file=sys.stderr, **kwargs, flush=True)
 
+def st2auxdir(a:LitreplArgs, st:SType, default=None)->str:
+  """ Return the aux.dir name for this section type """
+  d=None
+  if st == SType.SPython:
+    d=a.python_auxdir
+  elif st==SType.SAI:
+    d=a.ai_auxdir
+  else:
+    raise ValueError(f"Invalid section type {st}")
+  return d or (default(st) if default else defauxdir(st))
 
-def defauxdir(suffix:Optional[str]=None)->str:
-  """ Generate the default name of working directory. """
+def defauxdir(st:SType, suffix:Optional[str]=None)->str:
+  """ Calculate the default aux. directory name. """
   suffix_=f"{suffix}_" if suffix is not None else ""
-  return join(gettempdir(),f"litrepl_{getuid()}_"+suffix_+
-              sha256(getcwd().encode('utf-8')).hexdigest()[:6])
+  return join(gettempdir(),
+              (f"litrepl_{getuid()}_"+suffix_+
+               sha256(getcwd().encode('utf-8')).hexdigest()[:6]),
+              st2name(st))
 
 def st2name(st:SType)->str:
+  """ Return string representation of the code section type """
   if st==SType.SPython:
     return "python"
   elif st==SType.SAI:
@@ -74,7 +87,7 @@ def pipenames(a:LitreplArgs, st:SType)->FileNames:
   """ Return the interpreter state: input and output pipe names, pid, etc. If
   not explicitly specified in the config, the state is shared for all files in
   the current directory. """
-  auxdir=join(a.auxdir if a.auxdir is not None else defauxdir(),st2name(st))
+  auxdir=st2auxdir(a,st)
   return FileNames(auxdir, join(auxdir,"_in.pipe"), join(auxdir,"_out.pipe"),
                    join(auxdir,"_pid.txt"),join(auxdir,"_ecode.txt"))
 
@@ -112,6 +125,13 @@ def open_child_pipes(inp,outp):
 def open_parent_pipes(inp,outp):
   return open(inp,'w'),open(outp,'r')
 
+SOCAT_HINT="Opening the interpreter terminal (NO PROMPTS, USE `Ctrl+D` TO DETACH)\n"
+def runsocat(fns, hint=None):
+  if hint is None:
+    hint=SOCAT_HINT
+  print(hint,end='')
+  system(f"socat - 'PIPE:{fns.outp},flock-ex-nb=1!!PIPE:{fns.inp},flock-ex-nb=1'")
+
 class PythonInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
@@ -141,6 +161,8 @@ class PythonInterpreter(Interpreter):
     return text
   def code_preprocess(self, a:LitreplArgs, es:EvalState, code:str) -> str:
     return fillspaces(code, '# spaces')
+  def run_repl(self, a:LitreplArgs):
+    runsocat(self.fns)
 
 class IPythonInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
@@ -199,17 +221,19 @@ class IPythonInterpreter(Interpreter):
     # which is good.
     paste_pattern='12341234213423'
     return (f'\n%cpaste -q -s {paste_pattern}\n{code}\n{paste_pattern}\n')
+  def run_repl(self, a:LitreplArgs):
+    runsocat(self.fns)
 
 class AicliInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
     ret=system(
       f"exec {interpreter} "
-      f"--readline-prompt='' "
       f"<'{fns.inp}' >'{fns.outp}' 2>&1"
     )
     return ret
   def setup_child(self, a, finp, foutp)->None:
+    finp.write("/set terminal prompt \"\"\n")
     finp.write("/echo ready\n")
   def patterns(self):
     return PATTERN_GPT4ALLCLI_1,PATTERN_GPT4ALLCLI_2
@@ -235,6 +259,14 @@ class AicliInterpreter(Interpreter):
         )
       )
     return code + "/ask\n"
+  def run_repl(self, a:LitreplArgs):
+    rr,_=eval_code_raw(self,f"/set terminal prompt \">>> \"\n\n",
+                  float('inf'),float('inf'),True)
+    assert not rr.timeout, "Setting non-empty prompt did not happen fast"
+    runsocat(self.fns, hint=SOCAT_HINT.replace('NO PROMPTS, ','')+'>>> ')
+    rr,_=eval_code_raw(self,f"/set terminal prompt \"\"\n",
+                  float('inf'),float('inf'),True)
+    assert not rr.timeout, "Setting empty prompt did not happen fast"
 
 def write_child_pid(pidf,pid):
   with open(pidf,'w') as f:
@@ -465,15 +497,24 @@ def eval_code_(a:LitreplArgs,
   encoded in the result for later reference.
   """
   rr:ReadResult
-  if runr is None:
-    rr,runr=processAdapt(a,fns,ss,
-                         interp_code_preprocess(a,ss,es,code),
-                         a.timeout_initial)
-  else:
-    rr=processCont(a,fns,ss,runr,a.timeout_continue)
+  rr,runr=eval_code_raw(ss,interp_code_preprocess(a,ss,es,code),
+                        a.timeout_initial,a.timeout_continue,a.propagate_sigint,runr)
   pptext=interp_result_postprocess(a,ss,rr.text)
   res=rresultSave(pptext,runr) if rr.timeout else pptext
   return res,rr
+
+def eval_code_raw(ss:Interpreter,
+                  code:str,
+                  timeout_initial,
+                  timeout_continue,
+                  propagate_sigint,
+                  runr:Optional[RunResult]=None) -> Tuple[ReadResult,RunResult]:
+  fns=ss.fns
+  if runr is None:
+    rr,runr=processAdapt(fns,ss,code,timeout_initial,propagate_sigint)
+  else:
+    rr=processCont(fns,ss,runr,timeout_continue,propagate_sigint)
+  return rr,runr
 
 def secvar_matches(code:str)->Iterable[Tuple[str,int]]:
   for secvar in re.findall(SECVAR_RE,code):
