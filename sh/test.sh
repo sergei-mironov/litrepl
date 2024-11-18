@@ -875,6 +875,19 @@ not grep -q -i error _litrepl.err
 )}
 #}}}
 
+test_vim_eval_code() {( #{{{
+mktest "_test_vim_eval_code"
+runlitrepl start
+
+cat >file.md
+runvim file.md >_vim.log 2>&1 <<"EOF"
+:call append('$',LitReplRun('eval-code python', '3+4')[1])<CR>
+:wq!
+EOF
+grep -q '7' file.md
+)}
+#}}}
+
 test_vim_eval_selection() {( #{{{
 mktest "_test_vim_eval_selection"
 runlitrepl start
@@ -1010,7 +1023,7 @@ diff -u out.md - <<"EOF"
 ```
 ```result
 test
-INFO: No model is active, use /model first
+WARNING: No model is active, use /model first
 ```
 EOF
 )} #}}}
@@ -1058,8 +1071,8 @@ tests() {
   echo test_exception_errcode $(which python) -
   echo test_exception_errcode $(which ipython) -
   echo test_vim_leval_cursor $(which python) -
-  echo test_vim_textwidth $(which ipython) -
   echo test_vim_leval_cursor $(which ipython) -
+  echo test_vim_textwidth $(which ipython) -
   echo test_vim_leval_explicit $(which python) -
   echo test_vim_leval_explicit $(which ipython) -
   echo test_vim_lmon $(which python) -
@@ -1074,6 +1087,7 @@ tests() {
   echo test_interrupt $(which ipython) -
   echo test_invalid_interpreter $(which python) -
   echo test_aicli - $(which aicli)
+  echo test_vim_eval_code $(which python) -
   echo test_vim_eval_selection $(which python) -
 }
 

@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1731763144,
-        "narHash": "sha256-ckW/bhJbWedlazmbmjgrB/i3p+EqEKAI36ofZnTqBPQ=",
+        "lastModified": 1731916654,
+        "narHash": "sha256-JK/xA2f87X9YYeZd7wnwBbBRoTxPXl6qxWV1S1hM0GM=",
         "owner": "sergei-mironov",
         "repo": "aicli",
-        "rev": "7aaae064f28e5be168c315252071bcd5be68f7b4",
+        "rev": "81b13a465fd6475e46a7484a243709e7e3c11147",
         "type": "github"
       },
       "original": {

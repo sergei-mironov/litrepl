@@ -46,8 +46,9 @@ if __name__=='__main__':
     seconds. If the latter is omitted, it is considered to be equal to the
     former one.'''))
   ap.add_argument('--propagate-sigint',action='store_true',
-    help=dedent('''If set, litrepl will relay SIGINT signals to the running
-    interpreter. Otherwise it just handles them by itself.'''))
+    help=dedent('''If set, litrepl will catch and resend SIGINT signals to the
+    running interpreter. Otherwise it will just terminate itself leaving the
+    interpreter as-is.'''))
   ap.add_argument('-d','--debug',type=int,metavar='INT',default=0,
     help="Enable (a lot of) debug messages.")
   ap.add_argument('--verbose',action='store_true',
@@ -62,13 +63,14 @@ if __name__=='__main__':
     working directory.'''))
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,
     help=dedent('''Set the new current working directory before run. Note that
-    changing directory typically has effect when starting or restarting
-    interpreters.'''))
+    changing directory has the following effects: (1) changes directory of the
+    newly started interpreter (2) influence the default --<interp>-auxdir. '''))
   ap.add_argument('--pending-exit',type=str,metavar='INT',default=None,
-    help=dedent('''Return this error code if whenever section hits timeout.'''))
+    help=dedent('''Return this error code if whenever a section hits timeout.'''))
   ap.add_argument('--exception-exit',type=str,metavar='INT',default=None,
-    help=dedent('''Return this error code at exception, if any. Note: it takes
-    affect only for newly-started interpreters.'''))
+    help=dedent('''Return this error code at exception, if any. Note: this
+    option might not be defined for some interpreters. It takes affect only for
+    newly-started interpreters.'''))
   ap.add_argument('--foreground',action='store_true',
     help=dedent('''Start a separate session and stop it when the evaluation is
     done.'''))
@@ -135,14 +137,14 @@ if __name__=='__main__':
   if a.filetype in {'latex'}:
     a.filetype='tex'
 
+  if a.workdir:
+    chdir(a.workdir)
+
   ecode=1
 
   def _foreground_stop(st):
     if a.foreground:
       stop(a,st)
-
-  if a.workdir:
-    chdir(a.workdir)
 
   if a.foreground:
     assert a.command not in {'start','stop','restart','repl','interrupt'}, \

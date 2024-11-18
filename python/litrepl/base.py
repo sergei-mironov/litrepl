@@ -234,6 +234,7 @@ class AicliInterpreter(Interpreter):
     return ret
   def setup_child(self, a, finp, foutp)->None:
     finp.write("/set terminal prompt \"\"\n")
+    finp.write("/set terminal verbosity 2\n")
     finp.write("/echo ready\n")
   def patterns(self):
     return PATTERN_GPT4ALLCLI_1,PATTERN_GPT4ALLCLI_2

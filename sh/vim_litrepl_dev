@@ -14,6 +14,61 @@ endif
 if exists('g:litrepl_loaded')
   unlet g:litrepl_loaded
 endif
+if exists(':LStart')
+  delcommand LStart
+endif
+
+if exists(':LStop')
+  delcommand LStop
+endif
+
+if exists(':LRestart')
+  delcommand LRestart
+endif
+
+if exists(':LPP')
+  delcommand LPP
+endif
+
+if exists(':LRepl')
+  delcommand LRepl
+endif
+
+if exists(':LTerm')
+  delcommand LTerm
+endif
+
+if exists(':LOpenErr')
+  delcommand LOpenErr
+endif
+
+if exists(':LVersion')
+  delcommand LVersion
+endif
+
+if exists(':LEval')
+  delcommand LEval
+endif
+
+if exists(':LEvalAsync')
+  delcommand LEvalAsync
+endif
+
+if exists(':LEvalMon')
+  delcommand LEvalMon
+endif
+
+if exists(':LEvalLast')
+  delcommand LEvalLast
+endif
+
+if exists(':LInterrupt')
+  delcommand LInterrupt
+endif
+
+if exists(':LStatus')
+  delcommand LStatus
+endif
 let &runtimepath = '$LITREPL_ROOT/vim,'.&runtimepath
 runtime plugin/litrepl.vim
 " "$@"
