@@ -2,7 +2,7 @@ if exists("g:litrepl_loaded")
   finish
 endif
 if ! exists("g:litrepl_bin")
-  " TODO: Delay expansion to LitReplExe.
+  " TODO: Delay the expansion until the LitReplExe or alike.
   let g:litrepl_bin = expand('<sfile>:p:h:h').'/bin/'
 endif
 if ! exists("g:litrepl_exe")
@@ -142,18 +142,6 @@ fun! LitReplUpdateCursor(cur)
   endtry
 endfun
 
-fun! LitReplGetVisualSelection()
-  let [line_start, column_start] = getpos("'<")[1:2]
-  let [line_end, column_end] = getpos("'>")[1:2]
-  let lines = getline(line_start, line_end)
-  if len(lines) == 0
-      return ""
-  endif
-  let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
-  let lines[0] = lines[0][column_start - 1:]
-  return join(lines, "\n")
-endfun
-
 fun! LitReplNotice(message)
   echohl MoreMsg
   echon a:message
@@ -176,9 +164,9 @@ fun! LitReplVisualize(errcode, result)
   endif
 endfun
 
+" Take the command part of litrepl command-line and it's input and return
+" errorcode and stdout.
 fun! LitReplRun(command, input) range
-  " Take the command part of litrepl command-line and it's input and return
-  " errorcode and stdout.
   let cur = getcharpos('.')
   let cmd = LitReplCmdTimeout('inf').' '.a:command.' 2>'.g:litrepl_errfile
   let result = system(cmd, a:input)
@@ -209,8 +197,8 @@ fun! LitReplRunBufferVC(command, timeout) range
   return errcode
 endfun
 
+" Evaluates selection and pastes the result next after it.
 fun! LitReplEvalSelection(type) range
-  " Evaluates selection and pastes the result next after it.
   let selection = LitReplGetVisualSelection()
   let [line_end, column_end] = getpos("'>")[1:2]
   let [errcode, result] = LitReplRunV('eval-code '.a:type, selection)
@@ -221,8 +209,8 @@ fun! LitReplEvalSelection(type) range
   return [errcode, result]
 endfun
 
+" We use a hack to force remembering the undo position
 fun! LitReplRunBufferOrUndo(command, timeout)
-  " We use a hack to force remembering the undo position
   execute "normal! I "
   execute "normal! x"
   let cur = getcharpos('.')
@@ -249,13 +237,13 @@ function! SaveStringToFile(dump)
 endfunction
 
 " Continuosly run litrepl until error or completion
+" Notes: [1] - Opens a new undo block
 fun! LitReplRunBufferMonitor(command)
   let cur = getcharpos('.')
   try
     let g:log_count = 0
     while 1
-      " Opening a new undo block
-      let &ul=&ul
+      let &ul=&ul " [1]
       let errcode = LitReplRunBuffer(a:command, g:litrepl_timeout.',0.0')
 
       if g:litrepl_dump_mon == 1
@@ -283,12 +271,13 @@ fun! LitReplRunBufferMonitor(command)
   endtry
 endfun
 
+" Prints the Litrepl status informaiton
+" Notes: [1] - A hack to remember the undo position
 fun! LitReplStatus()
   let cur = getcharpos('.')
-  " A hack to remember the undo position
   execute "normal! I "
   execute "normal! x"
-  " Execute the status command
+  " ^^^ [1]
   silent execute '%!'.LitReplCmd(). ' --verbose status 2>'.g:litrepl_errfile.' >&2'
   call setcharpos('.',cur)
   execute "u"
