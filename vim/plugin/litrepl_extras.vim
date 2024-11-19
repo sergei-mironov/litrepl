@@ -33,6 +33,18 @@ function! LitReplReplaceSelectionWith(replacement) range
   call setpos("'>", [0, line_end2, len(getline(line_end2)), 0])
 endfunction
 
+fun! LitReplEvalSelection(type) range
+  " Evaluates selection and pastes the result next after it.
+  let selection = LitReplGetVisualSelection()
+  let [line_end, column_end] = getpos("'>")[1:2]
+  let [errcode, result] = LitReplRunV('eval-code '.a:type, selection)
+  if errcode == 0
+    let result = split(result, '\n')
+    call append(line_end, result)
+  endif
+  return [errcode, result]
+endfun
+
 fun! LitReplAISelection(q) range
   " Construct an AI prompt out of the user input [1], the selection [2] and the
   " current file [3]. Replace the selection with the output.

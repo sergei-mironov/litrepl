@@ -181,6 +181,7 @@ fun! LitReplRunV(command, input) range
 endfun
 
 fun! LitReplRunBuffer(command, timeout) range
+  " Run the current buffer 'through' the litrepl processor.
   let cur = getcharpos('.')
   let ft = &filetype
   let cmd = '%!'.LitReplCmdTimeout(a:timeout).' '.a:command.' 2>'.g:litrepl_errfile
@@ -190,6 +191,8 @@ fun! LitReplRunBuffer(command, timeout) range
 endfun
 
 fun! LitReplRunBufferVC(command, timeout) range
+  " Run the current buffer 'through' the litrepl processor. Print the status and
+  " update the cursor if needed.
   let cur = getcharpos('.')
   let errcode = LitReplRunBuffer(a:command, a:timeout)
   call LitReplVisualize(errcode, '')
@@ -197,20 +200,8 @@ fun! LitReplRunBufferVC(command, timeout) range
   return errcode
 endfun
 
-" Evaluates selection and pastes the result next after it.
-fun! LitReplEvalSelection(type) range
-  let selection = LitReplGetVisualSelection()
-  let [line_end, column_end] = getpos("'>")[1:2]
-  let [errcode, result] = LitReplRunV('eval-code '.a:type, selection)
-  if errcode == 0
-    let result = split(result, '\n')
-    call append(line_end, result)
-  endif
-  return [errcode, result]
-endfun
-
-" We use a hack to force remembering the undo position
 fun! LitReplRunBufferOrUndo(command, timeout)
+  " We use a hack to force remembering the undo position
   execute "normal! I "
   execute "normal! x"
   let cur = getcharpos('.')
