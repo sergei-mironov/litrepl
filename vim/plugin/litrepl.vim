@@ -137,7 +137,7 @@ fun! LitReplUpdateCursor(cur)
     if newrow != 0
       let cur[1] = newrow
     endif
-    call setcharpos('.',cur)
+    call setcharpos('.', cur)
   catch /E484/
   endtry
 endfun
@@ -220,7 +220,7 @@ fun! LitReplRunBufferOrUndo(command, timeout)
     return errcode
   else
     execute "u"
-    call setcharpos(cur)
+    call setcharpos('.', cur)
     return 0
   endif
 endfun
@@ -260,14 +260,14 @@ fun! LitReplRunBufferMonitor(command)
           silent execute "redraw"
         else
           execute "u"
-          call setcharpos(cur)
+          call setcharpos('.', cur)
           call LitReplVisualize(errcode, '')
           break
         endif
       endif
     endwhile
   catch /Vim:Interrupt/
-    call setcharpos(cur)
+    call setcharpos('.', cur)
   endtry
 endfun
 
@@ -279,7 +279,7 @@ fun! LitReplStatus()
   execute "normal! x"
   " ^^^ [1]
   silent execute '%!'.LitReplCmd(). ' --verbose status 2>'.g:litrepl_errfile.' >&2'
-  call setcharpos('.',cur)
+  call setcharpos('.', cur)
   execute "u"
   call LitReplOpenErr(g:litrepl_errfile, '')
 endfun

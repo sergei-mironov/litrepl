@@ -402,9 +402,10 @@ Where
 ``` result
 usage: litrepl [-h] [-v] [--filetype STR] [--python-interpreter EXE]
                [--ai-interpreter EXE] [--timeout F[,F]] [--propagate-sigint]
-               [-d INT] [--verbose] [--auxdir DIR] [-C DIR]
-               [--pending-exit INT] [--exception-exit INT] [--foreground]
-               [--map-cursor LINE:COL:FILE] [--result-textwidth NUM]
+               [-d INT] [--verbose] [--python-auxdir DIR] [--ai-auxdir DIR]
+               [-C DIR] [--pending-exit INT] [--exception-exit INT]
+               [--foreground] [--map-cursor LINE:COL:FILE]
+               [--result-textwidth NUM]
                {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
                ...
 
@@ -415,9 +416,10 @@ positional arguments:
     stop                      Stop the background interpreters.
     restart                   Restart the background interpreters.
     status                    Print background interpreter's status.
-    parse                     Parse the input file (diagnostics).
+    parse                     Parse the input file without futher processing
+                              (diagnostics).
     parse-print               Parse and print the input file back
-                              (diagnostics, no changes are made).
+                              (diagnostics).
     eval-sections             Parse stdin, evaluate the sepcified sections (by
                               default - all available sections), print the
                               resulting file to stdout.
@@ -436,21 +438,31 @@ options:
   --timeout F[,F]             Timeouts for initial evaluation and for pending
                               checks, in seconds. If the latter is omitted, it
                               is considered to be equal to the former one.
-  --propagate-sigint          If set, litrepl will relay SIGINT signals to the
-                              running interpreter. Otherwise it just handles
-                              them by itself.
+  --propagate-sigint          If set, litrepl will catch and resend SIGINT
+                              signals to the running interpreter. Otherwise it
+                              will just terminate itself leaving the
+                              interpreter as-is.
   -d INT, --debug INT         Enable (a lot of) debug messages.
   --verbose                   Be more verbose (used in status).
-  --auxdir DIR                Directory to store auxilary session files. By
-                              default, the name of the aux. dir is derived
-                              from the name of the current dir.
-  -C DIR, --workdir DIR       Directory to run from, the current directory is
-                              used by default.
-  --pending-exit INT          Return this error code if whenever section hits
-                              timeout.
+  --python-auxdir DIR         Directory to store Python interpreter pipes. By
+                              default, it is created in the system temporary
+                              directory with the name derived from current
+                              working directory.
+  --ai-auxdir DIR             Directory to store AI interpreter pipes. By
+                              default, it is created in the system temporary
+                              directory with the name derived from current
+                              working directory.
+  -C DIR, --workdir DIR       Set the new current working directory before
+                              run. Note that changing directory has the
+                              following effects: (1) changes directory of the
+                              newly started interpreter (2) influence the
+                              default --<interp>-auxdir.
+  --pending-exit INT          Return this error code if whenever a section
+                              hits timeout.
   --exception-exit INT        Return this error code at exception, if any.
-                              Note: it takes affect only for newly-started
-                              interpreters.
+                              Note: this option might not be defined for some
+                              interpreters. It takes affect only for newly-
+                              started interpreters.
   --foreground                Start a separate session and stop it when the
                               evaluation is done.
   --map-cursor LINE:COL:FILE  Calculate the new position of a cursor at
