@@ -42,9 +42,10 @@ Contents
 * [Usage](#usage)
     * [Overview](#overview)
         * [Basic evaluation](#basic-evaluation)
-        * [Managing sessions](#managing-sessions)
+        * [Specifying sections to evaluate](#specifying-sections-to-evaluate)
+        * [Managing interpreters](#managing-interpreters)
         * [Asynchronous execution](#asynchronous-execution)
-        * [Examining internal state](#examining-internal-state)
+        * [Direct interaction with the interpreter](#direct-interaction-with-the-interpreter)
         * [Communicating with AI (Experimental)](#communicating-with-ai-experimental)
     * [Reference](#reference)
         * [Vim and command-line commands overview](#vim-and-command-line-commands-overview)
@@ -165,10 +166,11 @@ labeled as `python`. The result is any triple-quoted `result` section.  In LaTeX
 documents, sections are marked with `\begin{python}\end{python}` and
 `\begin{result}\end{result}` environments correspondingly.
 
-`litrepl eval-sections` is the main command evaluating the formatted document.
-To run the evaluation, send the file to the input of the shell command.
+The primary command for evaluating formatted documents is `litrepl
+eval-sections`. To execute the evaluation, redirect the file into the shell
+command's input.
 
-For example, consider a `source.md` document:
+Consider a document named `source.md`:
 
 <!--lignore-->
 ~~~~ markdown
@@ -179,13 +181,13 @@ print('Hello Markdown!')
 ```
 ~~~~
 
-We pass it to the litrepl.
+You pass it to Litrepl using:
 
 ~~~~ shell
 $ cat source.md | litrepl eval-sections > result.md
 ~~~~
 
-Now the `result.md` contains the result section filled appropriately.
+The resulting `result.md` will have the result section filled in correctly.
 
 ~~~~ markdown
 ``` python
@@ -195,18 +197,18 @@ print('Hello Markdown!')
 Hello Markdown!
 ```
 ~~~~
-<!--noignore-->
+<!--lnoignore-->
 
-By default, `litrepl eval-sections` evaluate all sections.  The equivalent Vim
-command is `:LEval` with the default behavior is to evaluate the section under
-the cursor.
+By default, `litrepl eval-sections` evaluates all sections. The Vim equivalent
+command is `:LEval`, which by default evaluates the section at the cursor.
 
-* For more information on Markdown formatting, see
-  [Formatting Markdown documents](./doc/formatting.md#markdown)
+* For additional details on Markdown formatting, refer to [Formatting Markdown
+  documents](./doc/formatting.md#markdown)
 
-Litrepl expects Markdown formatting by default. Add `--filetype=tex` to switch
-the format to LaTex. Vim plugin does this automatically based on the `filetype`
-variable. The above example in LaTex would be:
+By default, Litrepl assumes Markdown formatting. Use the `--filetype=tex` option
+to change the format to LaTeX. The Vim plugin automatically handles this based
+on the `filetype` variable. Here is how the earlier example would appear in
+LaTeX:
 
 ~~~~ tex
 \begin{python}
@@ -218,14 +220,15 @@ Hello LaTeX!
 \end{result}
 ~~~~
 
-* LaTeX documents need a preamble introducing python/result tags to the Tex
-  processor. For details, see:
-  [Formatting LaTeX documents](./doc/formatting.md#latex)
+- LaTeX documents usually require a preamble to introduce python/result tags to
+  the TeX processor. For more information, see [Formatting LaTeX
+  documents](./doc/formatting.md#latex).
+
 
 #### Specifying sections to evaluate
 
-Both `eval-sections` command-line command and `:LEval` vim command takes an
-optional argument that specifies which sections to evaluate. The overall
+Both `eval-sections` command-line command and `:LEval` vim command takes
+an optional argument that specifies which sections to evaluate. The overall
 command-line syntax is `litrepl eval-sections WHICH`, where `WHICH` can be:
 
 * `N`: Represents a specific code section to evaluate, with the following
@@ -287,13 +290,16 @@ The corresponding Vim command is `:LStatus`.
 
 #### Asynchronous execution
 
-Litrepl can produce output document earlier than the interpreter reports the
-completion. In cases where the evaluation takes longer to finish, LitREPL will
-leave a marker that allows it to pick up where it left off on subsequent
-executions.
+Litrepl can generate an output document before the interpreter has finished
+processing. If the evaluation takes longer than a timeout, Litrepl leaves a
+marker, enabling it to continue from where it was stopped during future runs.
+The `--timeout=SEC[,SEC]` option allows you to set timeouts. The first number
+specifies the initial execution timeout in seconds, while the optional second
+number sets the timeout for subsequent attempts. By default, both timeouts are
+set to infinity.
 
-`litrepl --timeout=3.5 eval-sections` changes the reading timeout from the
-default infinity the specified number of seconds. The output would be:
+For instance, executing `litrepl --timeout=3.5 eval-sections` on the
+corresponding program yields:
 
 <!--lignore-->
 ~~~~ markdown
@@ -311,43 +317,46 @@ for i in tqdm(range(10)):
 ~~~~
 <!--lnoignore-->
 
-When re-executing this document, LitREPL will resume the reading. Once the
-evaluation is complete, it will remove the continuation marker from the output
-section.
+Upon re-executing the document, Litrepl resumes processing from the marker. Once
+evaluation concludes, it removes the marker from the output section.
 
-`litrepl interrupt` will send interrupt signal to the interpreter so it return
-the control earlier (with an exception).
+The command `litrepl interrupt` sends an interrupt signal to the interpreter,
+prompting it to return control sooner (with an exception).
 
-* The corresponding Vim commands are `:LEvalAsyn` (with the timeout set to 0.5
-  seconds by default) and `:LInterrupt`.
-* Vim plugin defines `:LEvalMon` command that enables repeated code evaluation
-  without any delay. Interrupting this process using Ctrl+C will cause Litrepl
-  to return control to the editor while leaving the evaluation in the
-  background.
+- The equivalent Vim commands are `:LEvalAsync` (defaulting to a 0.5-second
+  timeout) and `:LInterrupt`.
+- The Vim plugin also provides the `:LEvalMon` command, which facilitates
+  continuous code evaluation with no delay. Interrupting this with Ctrl+C will
+  make Litrepl return control to the editor, leaving the evaluation ongoing in
+  the background.
 
-#### Examining internal state
 
-`litrepl repl` "manually" attaches to the interpreter session allowing us to
-examine its internal state:
+#### Direct interaction with the interpreter
+
+The command `litrepl repl TYPE` connects to interpreter sessions, enabling users
+to inspect their internal states:
 
 ``` shell
-$ litrepl repl
+$ litrepl repl python
 Opening the interpreter terminal (NO PROMPTS, USE `Ctrl+D` TO DETACH)
 W = 'Hello from repl'
 ^D
 ```
 
-* Python prompts are disabled internally, no `>>>` symbols are going to appear.
-* The corresponding Vim command is `:LTerm`
+- The equivalent Vim command is `:LRepl`
+- Python prompts are internally disabled, so no `>>>` symbols will appear.
 
-`litrepl eval-code` might be used to pipe the code through the interpreter. The
-`W` variable now resides in memory so we can query it as we would do in a
-regular IPython session.
+You can use `litrepl eval-code` to pipe code directly through the interpreter,
+bypassing all section formatting steps.
+
+For example, after manually defining the `W` variable in the example above, it
+can be queried as in a typical IPython session.
 
 ``` shell
 $ echo 'W' | litrepl eval-code
 'Hello from repl'
 ```
+
 
 #### Communicating with AI (Experimental)
 
