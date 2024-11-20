@@ -25,10 +25,11 @@ Features
 
 <details><summary><h2>Requirements</h2></summary><p>
 
-* POSIX-compatible OS, typically a Linux. The tool relies on POSIX pipes and
-  depends on certain shell commands.
+* POSIX-compatible OS, typically a Linux. The tool relies on POSIX operations, notably pipes, and
+  depends on certain Shell commands.
 * Python packages: `lark-parser`, `psutil` (Required).
-* Command line tools: `GNU socat` (Optional)
+* Command line tools: `GNU socat` (Optional, only required for `litrepl repl` and Vim's LRepl
+  commands)
 
 </p></details>
 
@@ -73,12 +74,12 @@ Contents
 Installation
 ------------
 
-This repository includes the Litrepl tool in Python and an interface Vim plugin.
-The Python part might be installed with `pip install .` run from the project
-folder. The Vim part requires hand-copying `./vim/plugin/litrepl.vim` to the
-`~/.vim` config folder or using any Vim plugin manager, e.g. Vim-Plug.
+This repository contains the Litrepl tool, packaged as both a standalone Python
+application and a Vim plugin interface. The author's preferred method is using
+Nix, but if you choose not to use it, you'll need to install both components
+separately. Below, we outline several common installation methods.
 
-<details><summary><b>Release versions from pypi and vim.org</b></summary><p>
+<details><summary><b>Release versions, from Pypi and Vim.org</b></summary><p>
 
 1. `pip install litrepl`
 2. Download the `litrepl.vim` from the vim.org
@@ -87,7 +88,7 @@ folder. The Vim part requires hand-copying `./vim/plugin/litrepl.vim` to the
 
 </p></details>
 
-<details><summary><b>Latest versions using pip-install and Vim-Plug</b></summary><p>
+<details><summary><b>Latest versions, from Git, using Pip and Vim-Plug</b></summary><p>
 
 1. Install the `litrepl` Python package with pip:
    ```sh
@@ -103,37 +104,40 @@ folder. The Vim part requires hand-copying `./vim/plugin/litrepl.vim` to the
 
 </p></details>
 
-<details><summary><b>Development environment using Nix</b></summary><p>
+<details><summary><b>Latest versions, from source, using Nix</b></summary><p>
 
-The repository also includes a set of Nix expressions that automate installation
-on Nix-enabled systems.
+The repository offers a suite of Nix expressions designed to optimize
+installation and development processes on systems that support Nix. Consistent
+with standard practices in Nix projects, the [flake.nix](./flake.nix) file
+defines the source dependencies, while the [default.nix](./default.nix) file
+identifies the build targets.
 
-Nix supports
-[configurable Vim expressions](https://nixos.wiki/wiki/Vim#System_wide_vim.2Fnvim_configuration).
-To enable the Litrepl plugin, add the `vim-litrepl.vim-litrepl-release` to the
-list of Vim plugins and put this version of vim into your Nix profile. Litrepl
-and its dependencies will be installed automatically.
+For testing, the `vim-demo` expression is a practical choice. It includes a
+pre-configured Vim setup with several related plugins, including Litrepl. To
+build this target, use the command `nix build '.#vim-demo'`. Once the build is
+complete, you can run the editor with `./result/bin/vim-demo`.
 
-``` nix
-{ litrepl }:
-...
-vim_configurable.customize {
-  name = "vim";
-  vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
-    start = [
-      ...
-      litrepl.vim-litrepl-release
-      ...
-    ];
-  };
-}
-```
+To add the Litrepl tool to your system profile, first include the Litrepl flake
+in your flake inputs. Then, add `litrepl-release` to
+`environment.systemPackages` or to your custom environment.
 
-Note: `vim-demo` expression from the [default.nix](./default.nix) provides
-an example Vim configuration. Use `nix build '.#vim-demo'` to build it and then
-`./result/bin/vim-demo` to run the editor.
+To include the Litrepl Vim plugin, add `vim-litrepl-release` to the `vimPlugins`
+list within your `vim_configurable` expression.
 
-See the [Development](#development) section for more details.
+Regardless of the approach, Nix will manage all necessary dependencies
+automatically.
+
+Nix are used to open the development shell, see the [Development](#development)
+section.
+
+</p></details>
+
+<details><summary><b>Latest versions, from source, using Pip</b></summary><p>
+
+The Litrepl application might be installed with `pip install .` run from the
+project root folder. The Vim plugin part requires hand-copying
+`./vim/plugin/litrepl.vim` and `./vim/plugin/litrepl_extras.vim` to the `~/.vim`
+config folder.
 
 </p></details>
 
@@ -142,84 +146,133 @@ Usage
 
 ### Overview
 
-The tool sends verbatim sections from a document to external interpreters,
-receiving the evaluated results in return. Litrepl currently supports two
-flavors of Python and the Aicli interpreter.
+The Litrepl tool identifies code and result sections within a text document. It
+processes the code by sending it to the appropriate interpreters and populates
+the result sections with their responses. The interpreters remain active in the
+background, ready to handle new inputs.
+
+Litrepl supports Markdown and LaTeX formatting and also can treat plain code
+as a single code section.
+
+At present, Litrepl includes support for two Python interpreter variants and a
+custom Aicli interpreter by the same author.
 
 #### Basic evaluation
 
 Litrepl recognises verbatim code sections followed by zero or more result
-sections. In Markdown documents, the code is any triple-quoted section labeled
-as `python`. The result is any triple-quoted `result` section. In LaTeX
+sections. In Markdown documents, the Python code is any triple-quoted section
+labeled as `python`. The result is any triple-quoted `result` section.  In LaTeX
 documents, sections are marked with `\begin{python}\end{python}` and
 `\begin{result}\end{result}` environments correspondingly.
 
 `litrepl eval-sections` is the main command evaluating the formatted document.
 To run the evaluation, send the file to the input of the shell command.
 
-For example:
+For example, consider a `source.md` document:
 
 <!--lignore-->
-~~~~ shell
-$ cat file.md
+~~~~ markdown
 ``` python
 print('Hello Markdown!')
 ```
-
 ``` result
 ```
-$ cat file.md | litrepl eval-sections
 ~~~~
-<!--lnoignore-->
 
-.. would produce a Markdown document containing the properly filled result
-section.
+We pass it to the litrepl.
+
+~~~~ shell
+$ cat source.md | litrepl eval-sections > result.md
+~~~~
+
+Now the `result.md` contains the result section filled appropriately.
 
 ~~~~ markdown
 ``` python
 print('Hello Markdown!')
 ```
-
 ``` result
 Hello Markdown!
 ```
 ~~~~
+<!--noignore-->
 
-Below we also show what the relevant LaTeX part would look like:
+By default, `litrepl eval-sections` evaluate all sections.  The equivalent Vim
+command is `:LEval` with the default behavior is to evaluate the section under
+the cursor.
+
+* For more information on Markdown formatting, see
+  [Formatting Markdown documents](./doc/formatting.md#markdown)
+
+Litrepl expects Markdown formatting by default. Add `--filetype=tex` to switch
+the format to LaTex. Vim plugin does this automatically based on the `filetype`
+variable. The above example in LaTex would be:
 
 ~~~~ tex
 \begin{python}
 print('Hello LaTeX!')
 \end{python}
 
-
 \begin{result}
 Hello LaTeX!
 \end{result}
 ~~~~
 
-* The equivalent Vim command is `:LEval`.`:LEval` accepts optional argument
-  denoting the range: `all`, `above` (the cursor), `below` (the cursor), section
-  number, etc.
-* Litrepl expects Markdown formatting by default. Add `--filetype=tex` for Tex
-  documents. Vim plugin does this automatically based on the `filetype`
-  variable.
-* Both command-line and Vim versions of the command accept code section indices.
-  Everything is evaluated by default.
 * LaTeX documents need a preamble introducing python/result tags to the Tex
-  processor.  For details, see:
-  - [Formatting LaTeX documents](./doc/formatting.md#latex)
-* For more information on Markdown formatting, see
-  - [Formatting Markdown documents](./doc/formatting.md#markdown)
+  processor. For details, see:
+  [Formatting LaTeX documents](./doc/formatting.md#latex)
 
-#### Managing sessions
+#### Specifying sections to evaluate
 
-`litrepl start`, `litrepl stop` and `litrepl restart` manage the interpreter
-sessions. The commands also accepts the type of the interpreter to operation on.
-IPython interpreter is assumed by default.
+Both `eval-sections` command-line command and `:LEval` vim command takes an
+optional argument that specifies which sections to evaluate. The overall
+command-line syntax is `litrepl eval-sections WHICH`, where `WHICH` can be:
 
-`litrepl status` queries the information about the interpreters running in
-the background. The command reveals the process PID and the command-line arguments.
+* `N`: Represents a specific code section to evaluate, with the following
+  possible formats:
+  - A number starting from 0.
+  - `$`, indicating the last section.
+  - `L:C`, referring to the line and column position. Litrepl calculates the
+    section number based on this position.
+* `N..N`: Represents a range of sections, determined using the rules mentioned
+  above.
+
+In addition to the above generic format, the `:LEval` of Vim accepts the
+following strings: `all`, `above` (the cursor) and `below` (the cursor).
+
+#### Managing interpreters
+
+Each interpreter session uses an auxiliary directory where Litrepl stores
+filesystem pipes and other runtime data.
+
+By default, the directory name is derived from the current directory name (for
+Vim, this is based on the directory of the current file).
+
+This behavior can be configured by:
+* Explicitly setting the working directory with `--workdir=DIR` (this may also
+  affect the current directory of the interpreters), or
+* Defining the auxiliary directory with `--<interpreter-type>-auxdir=DIR`
+
+
+The commands `litrepl start`, `litrepl stop`, and `litrepl restart` are used to
+manage interpreter sessions. They accept the interpreter type to operate on or
+the keyword `all` to apply the command to all interpreters. Add the
+`--<interpreter-type>-interpteter=CMDLINE` to set the exact command line for
+Litrepl to execute.
+
+``` shell
+$ litrepl start python
+$ litrepl restart ai
+$ litrepl stop all
+```
+
+The equivalent Vim commands are `:LStart`, `:LStop`, and `:LRestart`. For the
+corresponding Vim configuration variables, see the reference section below.
+
+
+The `litrepl status` command queries the information about the currently running
+interpreters running. The command reveals the process PID and the command-line
+arguments. For stopped interpreters, the last exit codes are also listed.
 
 
 ``` shell
@@ -230,10 +283,7 @@ python 3900919  -         python3 -m IPython --config=/tmp/litrepl_1000_a2732d/p
 ai     3904696  -         aicli --readline-prompt=
 ```
 
-* The interpreters are associates with the directory they were started in.
-* The corresponding Vim commands are `:LStart`, `:LStop`, `:LRestart` and
-  `:LStatus`
-
+The corresponding Vim command is `:LStatus`.
 
 #### Asynchronous execution
 
