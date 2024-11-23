@@ -40,35 +40,34 @@ Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
-    * [Overview](#overview)
-        * [Basic evaluation](#basic-evaluation)
-        * [Specifying sections to evaluate](#specifying-sections-to-evaluate)
-        * [Managing interpreters](#managing-interpreters)
-        * [Asynchronous execution](#asynchronous-execution)
-        * [Direct interaction with the interpreter](#direct-interaction-with-the-interpreter)
-        * [Communicating with AI (Experimental)](#communicating-with-ai-experimental)
-    * [Reference](#reference)
-        * [Vim and command-line commands overview](#vim-and-command-line-commands-overview)
-        * [Variables and arguments overview](#variables-and-arguments-overview)
-        * [Command-line arguments](#command-line-arguments)
-    * [Applications](#applications)
-        * [Command line, basic usage](#command-line-basic-usage)
-        * [Command line, foreground evaluation](#command-line-foreground-evaluation)
-        * [GNU Make, updating documentation](#gnu-make-updating-documentation)
-        * [Vim, adding keybindings](#vim-adding-keybindings)
-        * [Vim, inserting new sections](#vim-inserting-new-sections)
-        * [Vim, executing first section after restart](#vim-executing-first-section-after-restart)
-        * [Vim, running shell commands](#vim-running-shell-commands)
-        * [Vim, executing text selection](#vim-executing-text-selection)
-* [Development](#development)
-    * [Development shells](#development-shells)
-    * [Other Nix targets](#other-nix-targets)
-    * [Common workflows](#common-workflows)
-* [Gallery](#gallery)
-* [Technical details](#technical-details)
-* [Limitations](#limitations)
-* [Related projects](#related-projects)
-* [Third-party issues](#third-party-issues)
+    * [General Concepts](#general-concepts)
+        * [Basic Evaluation](#basic-evaluation)
+        * [Selecting Sections for Execution](#selecting-sections-for-execution)
+        * [Managing Interpreter Sessions](#managing-interpreter-sessions)
+        * [Asynchronous Processing](#asynchronous-processing)
+        * [Direct Interaction with Interpreters](#direct-interaction-with-interpreters)
+        * [Experimental AI Features](#experimental-ai-features)
+    * [Application Scenarios](#application-scenarios)
+        * [Command Line: Dedicated Interpreter Usage](#command-line-dedicated-interpreter-usage)
+        * [GNU Make, Automating Code Section Processing](#gnu-make-automating-code-section-processing)
+        * [Vim, Setting Up Keybindings](#vim-setting-up-keybindings)
+        * [Vim, Inserting New Sections](#vim-inserting-new-sections)
+        * [Vim, Running the Initial Section After Interpreter Restart](#vim-running-the-initial-section-after-interpreter-restart)
+        * [Vim, Executing Shell Commands](#vim-executing-shell-commands)
+        * [Vim, Evaluating Selected Text](#vim-evaluating-selected-text)
+    * [In-Depth Reference](#in-depth-reference)
+        * [Vim Commands and Command-Line Attributes](#vim-commands-and-command-line-attributes)
+        * [Command Line Arguments and Vim Variables](#command-line-arguments-and-vim-variables)
+        * [Command Line Arguments Summary](#command-line-arguments-summary)
+* [Development Guidelines](#development-guidelines)
+    * [Development Environments and Setup](#development-environments-and-setup)
+    * [Additional Nix Target Configurations](#additional-nix-target-configurations)
+    * [Common Development Techniques](#common-development-techniques)
+* [Visual Showcases](#visual-showcases)
+* [Technical Insights](#technical-insights)
+* [Known Limitations](#known-limitations)
+* [Related Tools and Projects](#related-tools-and-projects)
+* [Considerations for Third-Party Tools](#considerations-for-third-party-tools)
 
 <!-- vim-markdown-toc -->
 
@@ -145,7 +144,7 @@ config folder.
 Usage
 -----
 
-### Overview
+### General Concepts
 
 The Litrepl tool identifies code and result sections within a text document. It
 processes the code by sending it to the appropriate interpreters and populates
@@ -158,7 +157,7 @@ as a single code section.
 At present, Litrepl includes support for two Python interpreter variants and a
 custom Aicli interpreter by the same author.
 
-#### Basic evaluation
+#### Basic Evaluation
 
 Litrepl recognises verbatim code sections followed by zero or more result
 sections. In Markdown documents, the Python code is any triple-quoted section
@@ -225,7 +224,7 @@ Hello LaTeX!
   documents](./doc/formatting.md#latex).
 
 
-#### Specifying sections to evaluate
+#### Selecting Sections for Execution
 
 Both `eval-sections` command-line command and `:LEval` vim command takes
 an optional argument that specifies which sections to evaluate. The overall
@@ -243,7 +242,7 @@ command-line syntax is `litrepl eval-sections WHICH`, where `WHICH` can be:
 In addition to the above generic format, the `:LEval` of Vim accepts the
 following strings: `all`, `above` (the cursor) and `below` (the cursor).
 
-#### Managing interpreters
+#### Managing Interpreter Sessions
 
 Each interpreter session uses an auxiliary directory where Litrepl stores
 filesystem pipes and other runtime data.
@@ -288,7 +287,7 @@ ai     3904696  -         aicli --readline-prompt=
 
 The corresponding Vim command is `:LStatus`.
 
-#### Asynchronous execution
+#### Asynchronous Processing
 
 Litrepl can generate an output document before the interpreter has finished
 processing. If the evaluation takes longer than a timeout, Litrepl leaves a
@@ -331,7 +330,7 @@ prompting it to return control sooner (with an exception).
   the background.
 
 
-#### Direct interaction with the interpreter
+#### Direct Interaction with Interpreters
 
 The command `litrepl repl TYPE` connects to interpreter sessions, enabling users
 to inspect their internal states:
@@ -358,13 +357,13 @@ $ echo 'W' | litrepl eval-code
 ```
 
 
-#### Communicating with AI (Experimental)
+#### Experimental AI Features
 
-Litrepl experimentally supports
-[Aicli](https://github.com/sergei-mironov/aicli) allowing users to
-query local LLMs. In order to try it, install the interpreter and use `ai` as
-the name for code sections. For low-speed models it would be convenient to use
-`:LEvalMon` command for evaluation.
+Litrepl experimentally supports [Aicli](https://github.com/sergei-mironov/aicli)
+terminal allowing users to query external language models. In order to try it,
+install the interpreter and use `ai` as the name for code sections. For
+low-speed models it might be convenient to use `:LEvalMon` command to monitor
+the text generation in real time.
 
 <!--lignore-->
 ~~~~ markdown
@@ -381,8 +380,8 @@ How can I assist you today?
 ~~~~
 <!--lnoignore-->
 
-For AI sections, Litrepl can paste text from other sections of the document in place of reference
-markers. The markers have the following format:
+For AI sections, Litrepl can paste text from other sections of the document in
+place of reference markers. The markers have the following format:
 
 * `>>RX<<`, where `X` is a number - references a section number `X` (starting from zero).
 * `^^RX^^`, where `X` is a number - references the section `X` times above the current one.
@@ -405,9 +404,146 @@ connection with users.
 ~~~~
 <!--lnoignore-->
 
-### Reference
+### Application Scenarios
 
-#### Vim and command-line commands overview
+#### Command Line: Dedicated Interpreter Usage
+
+When performing batch processing of documents, it might be necessary to initiate
+a new interpreter session solely for the evaluation's duration. The
+`--foreground` option can be used to activate this mode.
+
+Another frequently requested feature is the ability to report unhandled
+exceptions. Litrepl can be configured to return a non-zero exit code in such
+scenarios.
+
+<!--lignore-->
+~~~~ sh
+$ cat document.md.in
+``` python
+raise Exception("D'oh!")
+```
+$ cat document.md.in | litrepl --foreground --exception-exit=200 eval-sections
+>document.md
+$ echo $?
+200
+~~~~
+<!--lnoignore-->
+
+In this example, the `--foreground` option instructs Litrepl to start a new
+interpreter session, stopping it upon completion. The `--exception-exit=200`
+option specifies the exit code to be returned in the event of unhandled
+exceptions.
+
+
+#### GNU Make, Automating Code Section Processing
+
+A typical Makefile recipe for updating README.md is structured as follows:
+
+``` Makefile
+SRC = $(shell find -name '*\.py')
+
+.stamp_readme: $(SRC) Makefile
+	cp README.md _README.md.in
+	cat _README.md.in | \
+		litrepl --foreground --exception-exit=100 \
+		eval-sections >README.md
+	touch $@
+
+.PHONY: readme
+readme: .stamp_readme
+```
+
+Here, `$(SRC)` is expected to include the filenames of dependencies. By using
+this recipe, you can execute `make readme` to start the processing.
+
+
+#### Vim, Setting Up Keybindings
+
+The plugin does not define any keybindings, but users could do it by themselves,
+for example:
+
+``` vim
+nnoremap <F5> :LEval<CR>
+nnoremap <F6> :LEvalAsync<CR>
+```
+
+#### Vim, Inserting New Sections
+
+Below we define `:C` command inserting new sections.
+
+<!--lignore-->
+``` vim
+command! -buffer -nargs=0 C normal 0i``` python<CR>```<CR><CR>``` result<CR>```<Esc>4k
+```
+<!--lnoignore-->
+
+#### Vim, Running the Initial Section After Interpreter Restart
+
+We define the `:LR` command running first section after the restart.
+
+``` vim
+command! -nargs=0 LR LRestart | LEval 0
+```
+
+#### Vim, Executing Shell Commands
+
+Thanks to IPython features, we can use exclamation to run shell commands
+directly from Python code sections.
+
+~~~~
+``` python
+!cowsay "Hello, Litrepl!"
+```
+
+``` result
+ _________________
+< Hello, Litrepl! >
+ -----------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+```
+~~~~
+
+#### Vim, Evaluating Selected Text
+
+Litrepl vim plugin defines `LitReplEvalSelection` function which runs the
+selection as a virtual code section. The section type is passed as the function
+argument.  For example, calling `LitReplEvalSelection('ai')` will execute the
+selection as if it is an `ai` code section. The execution result is pasted right
+after the selection as a plain text. `LitReplEvalSelection('python')` would pipe
+the selection through the current Python interpreter.
+
+To use the feature, define a suitable key binding (`Ctrl+K` in this example),
+
+<!--lignore-->
+``` vim
+vnoremap <C-k> :call LitReplEvalSelection('ai')<CR>
+```
+<!--lnoignore-->
+
+Now write a question to the AI in any document, select it and hit Ctrl+K.
+
+~~~~
+Hi model. What is the capital of New Zealand?
+~~~~
+
+Upon the keypress, Litrepl pipes the selection through the AI interpreter - the
+`aicli` at the time of this writing - and paste the response right after the
+last line of the original selection.
+
+~~~~
+Hi model. What is the capital of New Zealand?
+The capital of New Zealand is Wellington.
+~~~~
+
+Internally, the plugin just uses `eval-code` Litrepl command.
+
+### In-Depth Reference
+
+#### Vim Commands and Command-Line Attributes
 
 | Vim <img width=200/> | Command line <img width=200/>    | Description                 |
 |----------------------|----------------------------------|-----------------------------|
@@ -435,7 +571,7 @@ Where
 * `N` number of code section to evaluate, starting from 0.
 * `L:C` denotes line:column of the cursor.
 
-#### Variables and arguments overview
+#### Command Line Arguments and Vim Variables
 
 | Vim setting  <img width=200/>   | CLI argument  <img width=200/> | Description                       |
 |---------------------------------|--------------------------------|-----------------------------------|
@@ -450,7 +586,7 @@ Where
 * `FLOAT` should be formatted as `1` or `1.1` or `inf`. Note: command line
   argument also accepts a pair of timeouts.
 
-#### Command-line arguments
+#### Command Line Arguments Summary
 
 <!--
 ``` python
@@ -529,151 +665,9 @@ options:
   --result-textwidth NUM      Wrap result lines longer than NUM symbols.
 ```
 
-### Applications
 
-#### Command line, basic usage
-
-To evaluate code section in a document:
-
-```sh
-$ cat doc/example.md | litrepl eval-sections >output.md
-```
-
-To evaluate a Python script:
-
-```sh
-$ cat script.py | litrepl eval-code
-```
-
-Note that both commands above share the same background interpreter session.
-
-
-#### Command line, foreground evaluation
-
-For batch processing of documents, it may be necessary to have an on-demand
-interpreter session available, which would exist solely for the duration of the
-evaluation process.
-
-<!--lignore-->
-~~~~ sh
-$ cat document.md.in
-``` python
-raise Exception("D'oh!")
-```
-$ cat document.md.in | litrepl --foreground --exception-exit=200 eval-sections >document.md
-$ echo $?
-200
-~~~~
-<!--lnoignore-->
-
-Here, the `--foreground` argument tells Litrepl to run a new interpreter session
-and then stop it before exiting, `--exception-exit=200` sets the exit code
-returned in the case of unhandled exceptions.
-
-#### GNU Make, updating documentation
-
-A typical Makefile recipe updating README.md might look as follows:
-
-``` Makefile
-.stamp_readme: $(SRC) Makefile
-	cp README.md _README.md.in
-	cat _README.md.in | \
-		litrepl --foreground --exception-exit=100 --result-textwidth=100 \
-		eval-sections >README.md
-	touch $@
-
-.PHONY: readme
-readme: .stamp_readme
-```
-
-Where `$(SRC)` is supposed to contain valuable source filenames.
-
-#### Vim, adding keybindings
-
-The plugin does not define any keybindings, but users could do it by themselves,
-for example:
-
-``` vim
-nnoremap <F5> :LEval<CR>
-nnoremap <F6> :LEvalAsync<CR>
-```
-
-#### Vim, inserting new sections
-
-Below we define `:C` command inserting new sections.
-
-<!--lignore-->
-``` vim
-command! -buffer -nargs=0 C normal 0i``` python<CR>```<CR><CR>``` result<CR>```<Esc>4k
-```
-<!--lnoignore-->
-
-#### Vim, executing first section after restart
-
-We define the `:LR` command running first section after the restart.
-
-``` vim
-command! -nargs=0 LR LRestart | LEval 0
-```
-
-#### Vim, running shell commands
-
-Thanks to IPython features, we can use exclamation to run shell commands
-directly from Python code sections.
-
-~~~~
-``` python
-!cowsay "Hello, Litrepl!"
-```
-
-``` result
- _________________
-< Hello, Litrepl! >
- -----------------
-        \   ^__^
-         \  (oo)\_______
-            (__)\       )\/\
-                ||----w |
-                ||     ||
-```
-~~~~
-
-#### Vim, executing text selection
-
-Litrepl vim plugin defines `LitReplEvalSelection` function which runs the
-selection as a virtual code section. The section type is passed as the function
-argument.  For example, calling `LitReplEvalSelection('ai')` will execute the
-selection as if it is an `ai` code section. The execution result is pasted right
-after the selection as a plain text. `LitReplEvalSelection('python')` would pipe
-the selection through the current Python interpreter.
-
-To use the feature, define a suitable key binding (`Ctrl+K` in this example),
-
-<!--lignore-->
-``` vim
-vnoremap <C-k> :call LitReplEvalSelection('ai')<CR>
-```
-<!--lnoignore-->
-
-Now write a question to the AI in any document, select it and hit Ctrl+K.
-
-~~~~
-Hi model. What is the capital of New Zealand?
-~~~~
-
-Upon the keypress, Litrepl pipes the selection through the AI interpreter - the
-`aicli` at the time of this writing - and paste the response right after the
-last line of the original selection.
-
-~~~~
-Hi model. What is the capital of New Zealand?
-The capital of New Zealand is Wellington.
-~~~~
-
-Internally, the plugin just uses `eval-code` Litrepl command.
-
-Development
------------
+Development Guidelines
+----------------------
 
 This project uses [Nix](https://nixos.org/nix) as a primary development
 framework. [flake.nix](./flake.nix) handles the source-level Nix dependencies
@@ -681,7 +675,7 @@ while the [default.nix](./default.nix) defines the common build targets
 including Pypi and Vim packages, demo Vim configurations, development shells,
 etc.
 
-### Development shells
+### Development Environments and Setup
 
 The default development shell is defined in the `./default.nix` as a Nix
 expression named `shell` which is the default name for development shells.
@@ -693,7 +687,7 @@ $ nix develop
 
 will ask Nix to install the development dependencies and open the shell.
 
-### Other Nix targets
+### Additional Nix Target Configurations
 
 Another shell which might be useful is `shell-screencast`. This would build the
 full set of Litrepl tools and makes sure that the screencasting software is
@@ -726,7 +720,7 @@ The list of Nix build targets includes:
 
 See Nix flakes manual for other Nix-related details.
 
-### Common workflows
+### Common Development Techniques
 
 The top-level [Makefile](./Makefile) encodes common development workflows:
 
@@ -741,8 +735,8 @@ version:    Print the version
 upload:     Upload wheel to Pypi.org (./_token.pypi is required)
 ```
 
-Gallery
--------
+Visual Showcases
+----------------
 
 Basic usage
 
@@ -760,8 +754,8 @@ Asynchronous code execution
 <img src="https://user-images.githubusercontent.com/4477729/190009000-7652d544-a668-4440-933d-799f3410736f.gif" width="510"/>
 
 
-Technical details
------------------
+Technical Insights
+------------------
 
 The following events should normally happen after users type the `:LitEval1`
 command:
@@ -781,8 +775,8 @@ command:
 5. Re-evaluating sections with temporary results causes LitREPL to update
    these results.
 
-Limitations
------------
+Known Limitations
+-----------------
 
 * Formatting: Nested code sections are not supported.
 * ~~Formatting: Special symbols in the Python output could invalidate the
@@ -795,8 +789,8 @@ Limitations
 * ~~Interpreter: No asynchronous code execution.~~
 * ~~Interpreter: Background Python interpreter couldn't be interrupted~~
 
-Related projects
-----------------
+Related Tools and Projects
+--------------------------
 
 Edititng:
 
@@ -828,8 +822,8 @@ Useful tools:
 
 * https://pandoc.org/
 
-Third-party issues
-------------------
+Considerations for Third-Party Tools
+------------------------------------
 
 * Vim-plug https://github.com/junegunn/vim-plug/issues/1010#issuecomment-1221614232
 * Pandoc https://github.com/jgm/pandoc/issues/8598
