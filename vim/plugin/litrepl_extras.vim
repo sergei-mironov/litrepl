@@ -45,23 +45,25 @@ fun! LitReplEvalSelection(type) range
   return [errcode, result]
 endfun
 
-fun! LitReplAISelection(q) range
-  " Construct an AI prompt out of the user input [1], the selection [2] and the
-  " current file [3]. Replace the selection with the output.
+fun! LitReplAIQuery(q) range
+  " Construct an AI prompt out of the (1) user-provided argument string (2) user
+  " input (3) visual selection if the prompt is empty up to now or if `/S`
+  " is found in the text (4) the contents of the current file, if `/F` is found
+  " in the text.
   if len(trim(a:q))>0
-    let input = a:q
+    let prompt = a:q
   else
-    let input = input(
+    let prompt = input(
           \"Hint: type /S to insert the selection, ".
           \"type /F to insert current file, ".
           \"empty line uses the selection\n".
           \"Your question: ")
   endif
-  if input == ''
-    let input = "/S"
+  if prompt == ''
+    let prompt = "/S"
   endif
-  let input = substitute(input, "/F", "/append buffer:file buffer:in\n", "g")
-  let input = substitute(input, "/S", "/append buffer:sel buffer:in\n", "g")
+  let prompt = substitute(prompt, "/F", "/append buffer:file buffer:in\n", "g")
+  let prompt = substitute(prompt, "/S", "/append buffer:sel buffer:in\n", "g")
   let selection = LitReplGetVisualSelection()
   let prompt = "".
         \ "/clear buffer:in\n".
@@ -70,7 +72,7 @@ fun! LitReplAISelection(q) range
         \ "/paste off\n".
         \ "/cp buffer:in buffer:sel\n".
         \ "/cp file:\"".expand('%:p')."\" buffer:file\n".
-        \ input
+        \ prompt
 
   let [errcode, result] = LitReplRun('eval-code ai', prompt)
   if errcode == 0
@@ -80,7 +82,7 @@ fun! LitReplAISelection(q) range
 endfun
 
 if !exists(":LAI")
-  command! -range -bar -nargs=* LAI call LitReplAISelection(<q-args>)
+  command! -range -bar -nargs=* LAI call LitReplAIQuery(<q-args>)
 endif
 
 let g:litrepl_extras_loaded = 1

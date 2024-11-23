@@ -14,6 +14,10 @@ endif
 if exists('g:litrepl_loaded')
   unlet g:litrepl_loaded
 endif
+if exists('g:litrepl_extras_loaded')
+  unlet g:litrepl_extras_loaded
+endif
+
 if exists(':LStart')
   delcommand LStart
 endif
