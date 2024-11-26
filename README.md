@@ -41,14 +41,15 @@ Contents
 * [Installation](#installation)
 * [Usage](#usage)
     * [General Concepts](#general-concepts)
-        * [Basic Evaluation](#basic-evaluation)
+        * [Basic Execution](#basic-execution)
         * [Selecting Sections for Execution](#selecting-sections-for-execution)
         * [Managing Interpreter Sessions](#managing-interpreter-sessions)
         * [Asynchronous Processing](#asynchronous-processing)
         * [Direct Interaction with Interpreters](#direct-interaction-with-interpreters)
         * [Experimental AI Features](#experimental-ai-features)
+        * [Calling for AI on a Vim visual selection](#calling-for-ai-on-a-vim-visual-selection)
     * [Application Scenarios](#application-scenarios)
-        * [Command Line: Dedicated Interpreter Usage](#command-line-dedicated-interpreter-usage)
+        * [Command Line, Foreground Evaluation](#command-line-foreground-evaluation)
         * [GNU Make, Automating Code Section Processing](#gnu-make-automating-code-section-processing)
         * [Vim, Setting Up Keybindings](#vim-setting-up-keybindings)
         * [Vim, Inserting New Sections](#vim-inserting-new-sections)
@@ -157,12 +158,12 @@ as a single code section.
 At present, Litrepl includes support for two Python interpreter variants and a
 custom Aicli interpreter by the same author.
 
-#### Basic Evaluation
+#### Basic Execution
 
-Litrepl recognises verbatim code sections followed by zero or more result
-sections. In Markdown documents, the Python code is any triple-quoted section
-labeled as `python`. The result is any triple-quoted `result` section.  In LaTeX
-documents, sections are marked with `\begin{python}\end{python}` and
+Litrepl recognises and executes verbatim code sections followed by zero or more
+result sections. In Markdown documents, the Python code is any triple-quoted
+section labeled as `python`. The result is any triple-quoted `result` section.
+In LaTeX documents, sections are marked with `\begin{python}\end{python}` and
 `\begin{result}\end{result}` environments correspondingly.
 
 The primary command for evaluating formatted documents is `litrepl
@@ -342,8 +343,9 @@ W = 'Hello from repl'
 ^D
 ```
 
-- The equivalent Vim command is `:LRepl`
+- The equivalent Vim command is `:LRepl`.
 - Python prompts are internally disabled, so no `>>>` symbols will appear.
+- `TYPE` stands for either `ai` or `python`.
 
 You can use `litrepl eval-code` to pipe code directly through the interpreter,
 bypassing all section formatting steps.
@@ -368,7 +370,7 @@ the text generation in real time.
 <!--lignore-->
 ~~~~ markdown
 ``` ai
-/model "~/.local/share/nomic.ai/GPT4All/Meta-Llama-3-8B-Instruct.Q4_0.gguf"
+/model gpt4all:"./_models/Meta-Llama-3-8B-Instruct.Q4_0.gguf"
 Hi chat! What is your name?
 ```
 
@@ -380,12 +382,20 @@ How can I assist you today?
 ~~~~
 <!--lnoignore-->
 
-For AI sections, Litrepl can paste text from other sections of the document in
-place of reference markers. The markers have the following format:
+All Aicli `/`-commands like the `/model` command above are passed as-is to the
+interpreter. The `/ask` command is added automatically at the of each section,
+so make sure that `ai` secions have self-contained questions.
 
-* `>>RX<<`, where `X` is a number - references a section number `X` (starting from zero).
-* `^^RX^^`, where `X` is a number - references the section `X` times above the current one.
-* `vvRXvv`, where `X` is a number - references the section `X` times below the current one.
+As a pre-processing step, Litrepl can paste text from other sections of the
+document in place of special reference markers. The markers have the following
+format:
+
+* `>>RX<<`, where `X` is a number - references a section number `X` (starting
+  from zero).
+* `^^RX^^`, where `X` is a number - references the section `X` times above the
+  current one.
+* `vvRXvv`, where `X` is a number - references the section `X` times below the
+  current one.
 
 <!--lignore-->
 ~~~~ markdown
@@ -404,9 +414,56 @@ connection with users.
 ~~~~
 <!--lnoignore-->
 
+
+#### Calling for AI on a Vim visual selection
+
+The repository includes a file called `./vim/plugin/litrepl_extras.vim`, which
+defines extra tools for interacting with AI. These tools include the
+`LitReplAIQuery()` function and the `:LAI` Vim command, both of which enable the
+creation of an AI chat query incorporating the current file and any selected
+text. The AI model's response then replaces the last visual selection. The
+function takes a string argument or runs an `input()` prompt if the argument is
+empty. Either way, the resulting prompt can include `/S` tag for selection or
+`/F` tag for the contents of the current file.
+
+The function makes it possible to define other functions, encoding custom text
+processing tasks.
+
+For example, below we show an `LStyle` function which asks the model to improve the text
+readability. The function forms prompt and calls the base function.
+
+``` vim
+fun! LStyle(q) range
+  if len(trim(a:q))>0
+    let prompt = a:q
+  else
+    let prompt = input(
+          \"Hint: type /S to insert the selection, ".
+          \"type /F to insert current file, ".
+          \"empty line uses the selection\n".
+          \"Your comments on style: ")
+  endif
+  return LitReplAIQuery(
+        \ "Your task is to rephase the following text so it appears " .
+        \ "as an idiomatic English: " .
+        \ "\n---\n/S\n---\n" .
+        \ prompt . "\n".
+        \ "Please provide a rephrased text without formatting and separately your " .
+        \ "comments in the markdown comment section  `<!--` ... `-->`")
+endfun
+```
+
+As with the selection evaluation mode, the aicli interpreter stays
+active in the background. It maintains a log of the conversation, allowing us to
+reference results from previous queries in new ones.
+
+Direct interaction with the interpreter also functions as expected. The `LRepl`
+command opens the Vim terminal, enabling communication with a model through
+`aicli` text commands.
+
 ### Application Scenarios
 
-#### Command Line: Dedicated Interpreter Usage
+#### Command Line, Foreground Evaluation
 
 When performing batch processing of documents, it might be necessary to initiate
 a new interpreter session solely for the evaluation's duration. The
@@ -472,10 +529,11 @@ nnoremap <F6> :LEvalAsync<CR>
 Below we define `:C` command inserting new sections.
 
 <!--lignore-->
-``` vim
+```` vim
 command! -buffer -nargs=0 C normal 0i``` python<CR>```<CR><CR>``` result<CR>```<Esc>4k
-```
+````
 <!--lnoignore-->
+<!---``` <- to make TokOpen() happy -->
 
 #### Vim, Running the Initial Section After Interpreter Restart
 
