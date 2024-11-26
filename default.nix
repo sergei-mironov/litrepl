@@ -126,7 +126,8 @@ let
       propagatedBuildInputs = [(lark-current python.pkgs) pkgs.socat python.pkgs.psutil];
       src = python.pkgs.fetchPypi {
         inherit pname version;
-        sha256 = "sha256-LI4k6anvK9MMqz0n8M8l5W5v3qM0i5TN9ho2QWwIGjQ=";
+        sha256 = "sha256-+ass/WI8dfA+a5fBGcCYCr5xswC7uWVfd2oCsp1Zt48=";
+        # sha256 = "sha256-LI4k6anvK9MMqz0n8M8l5W5v3qM0i5TN9ho2QWwIGjQ=";
         # sha256 = "sha256-yrnqBSH+idosum/97Gwz4cB36hsggrMfOtoGspiPHb8=";
         # sha256 = "sha256-B1qDAksYPQm+hkG7T79sMEKgZ9mM4ncEBaEq4qye/bo=";
         # sha256 = "sha256-kf/gx5f7VIKfDBxpTG/E1ghdBGRulbFoVHoNqT/FoSM=";
@@ -314,6 +315,12 @@ let
         endfunction
         call Ident(2)
 
+        function! SynClear(name)
+          if hlexists(a:name)
+            execute "syntax clear ".a:name
+          end
+        endfun
+
         vnoremap "a "ay
         vnoremap "b "by
         vnoremap "c "cy
@@ -432,6 +439,8 @@ let
       shellHook = with pkgs; ''
         export PS1="\n[DEMO] \[\033[1;32m\][nix-shell:\w]\$\[\033[0m\] "
         # exec ${grechanik-st}/bin/st
+        CWD=$(pwd)
+        export PATH=$CWD/sh:$CWD/python/bin:$PATH
       '';
     };
 

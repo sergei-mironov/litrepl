@@ -61,8 +61,9 @@ Contents
         * [Command Line Arguments and Vim Variables](#command-line-arguments-and-vim-variables)
         * [Command Line Arguments Summary](#command-line-arguments-summary)
 * [Development Guidelines](#development-guidelines)
+    * [Building Targets](#building-targets)
     * [Development Environments and Setup](#development-environments-and-setup)
-    * [Additional Nix Target Configurations](#additional-nix-target-configurations)
+    * [Tools for Screencast Recording](#tools-for-screencast-recording)
     * [Common Development Techniques](#common-development-techniques)
 * [Visual Showcases](#visual-showcases)
 * [Technical Insights](#technical-insights)
@@ -617,8 +618,8 @@ Internally, the plugin just uses `eval-code` Litrepl command.
 | `:LInterrupt N`      | `lirtepl interrupt N <F`         | Send SIGINT to the interpreter evaluating the section under the cursor and update |
 | `:LEvalMon N`        | `while .. do .. done`            | Start or continue monitoring asynchronous code evaluation |
 | N/A                  | `lirtepl eval-code <P`           | Evaluate the given code verbatim |
-| `:LTerm`             | `lirtepl repl [T]`               | Connect to the interpreter using GNU socat |
-| `:LOpenErr`          | `litrepl ...  2>F`               | Get the errors |
+| `:LTerm [T]`         | `lirtepl repl [T]`               | Connect to the interpreter using GNU socat |
+| `:LOpenErr`          | `litrepl ...  2>F`               | View errors |
 | `:LVersion`          | `litrepl --version`              | Show version |
 
 Where
@@ -727,42 +728,18 @@ options:
 Development Guidelines
 ----------------------
 
-This project uses [Nix](https://nixos.org/nix) as a primary development
-framework. [flake.nix](./flake.nix) handles the source-level Nix dependencies
-while the [default.nix](./default.nix) defines the common build targets
-including Pypi and Vim packages, demo Vim configurations, development shells,
-etc.
+This project uses [Nix](https://nixos.org/nix) as its main development
+framework. The file [flake.nix](./flake.nix) manages the source-level
+dependencies required by Nix, whereas [default.nix](./default.nix) specifies
+common build targets, including PyPI and Vim packages, demo Vim configurations,
+development shells, and more.
 
-### Development Environments and Setup
+### Building Targets
 
-The default development shell is defined in the `./default.nix` as a Nix
-expression named `shell` which is the default name for development shells.
-Running
-
-``` shell
-$ nix develop
-```
-
-will ask Nix to install the development dependencies and open the shell.
-
-### Additional Nix Target Configurations
-
-Another shell which might be useful is `shell-screencast`. This would build the
-full set of Litrepl tools and makes sure that the screencasting software is
-available. To enter it, specify its Nix-flake path as follows:
-
-``` shell
-$ nix develop '.#shell-screencast'
-```
-
-To build individual Nix expressions, run `nix build '.#NAME'` passing the
-name of Nix-expression to build. If succeeded, Nix publishes the last build'
-results under the `./result` symlink.
-
-``` shell
-$ nix build '.#vim-demo'
-$ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
-```
+To build individual Nix expressions, execute the command `nix build '.#NAME'`,
+replacing `NAME` with the actual name of the Nix expression you want to build.
+If the build is successful, Nix places the results of the last build in a
+symbolic link located at `./result`.
 
 The list of Nix build targets includes:
 
@@ -776,7 +753,43 @@ The list of Nix build targets includes:
 * `shell-dev` - The development shell
 * `shell-screencast` - The shell for recording demonstrations, includes `vim-demo`.
 
-See Nix flakes manual for other Nix-related details.
+See `local.collection` attribute-set in the [default.nix](./default.nix) for the
+full list of defined targetr.
+
+For example, to build a version of Vim pre-configured for demo, run
+
+``` shell
+$ nix build '.#vim-demo'
+$ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
+```
+
+### Development Environments and Setup
+
+The default development shell is defined in the `./default.nix` as a Nix
+expression named `shell` which is the default name for development shells.
+Running
+
+``` shell
+$ nix develop
+```
+
+will ask Nix to install the development dependencies and open shell.
+
+### Tools for Screencast Recording
+
+Another shell which might be useful is `shell-screencast`. This would build the
+full set of Litrepl tools and makes sure that the screencasting software is
+available. To enter it, specify its Nix-flake path as follows:
+
+``` shell
+$ nix develop '.#shell-screencast'
+```
+
+In the opened shell, run the `screencast.sh` and perform the recording.
+
+``` shell
+$ screencast.sh
+```
 
 ### Common Development Techniques
 
