@@ -453,7 +453,7 @@ fun! LStyle(q) range
 endfun
 ```
 
-As with the selection evaluation mode, the aicli interpreter stays
+As with the selection evaluation mode, the `aicli` interpreter stays
 active in the background. It maintains a log of the conversation, allowing us to
 reference results from previous queries in new ones.
 
