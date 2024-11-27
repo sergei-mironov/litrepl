@@ -15,8 +15,7 @@ fun! LitReplGetVisualSelection() range
   return join(lines, "\n")
 endfun
 
-fun! LitReplRegionRead(region) range
-  " Get visual selection
+fun! LitReplRegionRead(region) range " -> string
   let [line_start, column_start, line_end, column_end] = a:region
   let lines = getline(line_start, line_end)
   if len(lines) == 0
@@ -27,10 +26,20 @@ fun! LitReplRegionRead(region) range
   return join(lines, "\n")
 endfun
 
-fun! LitReplRegionFromSelection() range
+fun! LitReplRegionFromSelection() range " -> [int, int, int, int]
   let [line_start, column_start] = getpos("'<")[1:2]
   let [line_end, column_end] = getpos("'>")[1:2]
   return [line_start, column_start, line_end, column_end]
+endfun
+
+fun! LitReplRegionFromCursor() range " -> [int, int, int, int]
+  let [line, column] = getpos(".")[1:2]
+  return [line, column, line, column]
+endfun
+
+fun! LitReplRegionFromFile() range " -> [int, int, int, int]
+  let [line, column] = getpos("$")[1:2]
+  return [1, 0, line, len(getline(line_end2))]
 endfun
 
 fun! LitReplRegionToSelection(region) range
@@ -40,19 +49,9 @@ fun! LitReplRegionToSelection(region) range
   execute "normal gv"
 endfun
 
-fun! LitReplRegionFromCursor() range
-  let [line, column] = getpos(".")[1:2]
-  return [line, column, line, column]
-endfun
-
-fun! LitReplRegionFromFile() range
-  let [line, column] = getpos("$")[1:2]
-  return [1, 0, line, len(getline(line_end2))]
-endfun
-
-fun! LitReplRegionReplace(region, replacement) range
-  " Replaces the current selection with a `replacement`, and adjusts the
-  " selection registers accordingly. Returns the `replacement without change.
+fun! LitReplRegionReplace(region, replacement) range " -> [int, int, int, int]
+  " Replace the specified region with the `replacement` string, adjust the
+  " selection registers accordingly. Return the new region.
   let [line_start, column_start, line_end, column_end] = a:region
   let l:start_line = getline(line_start)
   let l:end_line = getline(line_end)
@@ -78,8 +77,8 @@ fun! LitReplRegionReplace(region, replacement) range
   return [line_start, column_start, line_end2, column_end2]
 endfun
 
-fun! LitReplEvalSelection(type) range
-  " Evaluates selection and pastes the result next after it.
+fun! LitReplEvalSelection(type) range " -> [int, string]
+  " Evaluate the selection and pastes the result next after it.
   let selection = LitReplGetVisualSelection()
   let [line_end, column_end] = getpos("'>")[1:2]
   let [errcode, result] = LitReplRunV('eval-code '.a:type, selection)
@@ -90,16 +89,17 @@ fun! LitReplEvalSelection(type) range
   return [errcode, result]
 endfun
 
-fun! LitReplAIQuery(selection, file, prompt) range
-  " Construct an AI prompt out of the (1) user-provided prompt string (2)
-  " user-provided input (3) visual selection if the prompt is empty up to now or
-  " if `/S` is found in the text (4) the contents of the current file, if `/F`
-  " is found in the text and `file` is non-zero.
+fun! LitReplAIQuery(selection, file, prompt) range " -> [int, string]
+  " Create an AI prompt using the following method: (1) start with the
+  " user-provided prompt string, (2) incorporate user input, (3) if the prompt
+  " is still vacant or contains `/S`, include the `selection`, (4) append
+  " the file contents if `/F` is present in the text and `file` is not zero.
   "
-  " The prompt is then pased to the AI interpreter.
+  " The completed prompt is submitted to the AI interpreter.
   "
-  " The function returns the exit code of the `litrepl eval-code ai` along with
-  " the interpreter response.
+  " The function outputs the exit code from `litrepl eval-code ai` alongside the
+  " interpreter's response.
+
   let [selection, prompt, file] = [a:selection, a:prompt, a:file]
 
   if len(trim(prompt)) == 0
@@ -139,7 +139,7 @@ endfun
 
 let b:airegion = LitReplRegionFromCursor()
 
-fun! LitReplTaskNew(scope, prompt) range
+fun! LitReplTaskNew(scope, prompt) range " -> [int, string]
   " Start a new AI task, by (a) taking a taget scope (0 - cursor, 1 - selection,
   " 2 - whole file, 3 - stanalone terminal) (b) combining the pompt (c)
   " piping the prompt through the interpreter and (d) populating the result.
@@ -176,7 +176,7 @@ if !exists(":LAITell")
 endif
 
 
-fun! LitReplTaskContinue(scope, prompt) range
+fun! LitReplTaskContinue(scope, prompt) range " -> [int, string]
   " Start a new AI task, by (a) taking a taget scope (0 - cursor, 1 - selection,
   " 2 - whole file, 3 - stanalone terminal) (b) combining the pompt (c)
   " piping the prompt through the interpreter and (d) populating the result.
@@ -198,12 +198,18 @@ if !exists(":LAICont")
 endif
 
 
-fun! LitReplStyle(scope, prompt) range
+fun! LitReplStyle(scope, prompt) range " -> [int, string]
+  " This function initiates an AI task for rephrasing text, taking a scope and a
+  " prompt.  If the prompt is empty, it prompts the user to provide input with
+  " hints for using the selection or file.  Calls LitReplTaskNew, instructing
+  " the AI to rephrase text to sound more idiomatic, inserting the selection if
+  " applicable.  Additional instructions are provided for returning unformatted
+  " text and append comments. The current filetype is noted.
   let prompt = a:prompt
   if len(trim(prompt)) == 0
     let prompt = input(
       \"Hint: type /S to insert the selection, ".
-      \"type /append buffer:file buffer:in to insert current file, ".
+      \"type /F to insert current file, ".
       \"empty input implies /S\n".
       \"Your comments on style: ")
   endif
@@ -218,7 +224,13 @@ fun! LitReplStyle(scope, prompt) range
 endfun
 command! -range -bar -nargs=* LAIStyle call LitReplStyle(<range>!=0, <q-args>)
 
-fun! LitReplAIFile(prompt) range
+fun! LitReplAIFile(prompt) range " -> [int, string]
+  " Start a new AI task focused on changing the contents of a file by (a)
+  " accepting a prompt, checking if it's empty and requesting input if so, (b)
+  " setting the scope to the whole file (scope=2) and constructing a task
+  " description, (c) instructing to include the file content using specified
+  " placeholders, (d) ensuring the output is plain without markdown formatting,
+  " and (e) putting comments in the header of the resulting code.
   let prompt = a:prompt
   if len(trim(prompt)) == 0
     let prompt = input(
@@ -238,12 +250,17 @@ fun! LitReplAIFile(prompt) range
 endfun
 command! -range -bar -nargs=* LAIFile call LitReplAIFile(<q-args>)
 
-fun! LitReplAICode(scope, prompt) range
+fun! LitReplAICode(scope, prompt) range " -> [int, string]
+  " Start a new AI task, by (a) taking a target scope, verifying if prompt is
+  " empty and requesting if so, (b) if the scope is for selection, prepend an
+  " example instruction, (c) combining the prompt with instructional text to
+  " avoid markdown and include comment wrapping, (d) call LitReplTaskNew with
+  " the constructed task description.
   let prompt = a:prompt
   if len(trim(prompt)) == 0
     let prompt = input(
       \"Hint: type /S to insert the selection, ".
-      \"type /F to insert current file, ".
+      \"type /append buffer:file buffer:in to insert current file, ".
       \"empty input implies /S\n".
       \"Your comments on style: ")
   endif
