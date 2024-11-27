@@ -1,4 +1,4 @@
-LitREPL
+LitRepl
 =======
 
 **LitREPL** is a command-line tool that brings together the benefits of
@@ -9,8 +9,8 @@ LitREPL comes bundled with an interface Vim plugin, integrating it into the edit
 ![Peek 2024-07-18 20-50-2](https://github.com/user-attachments/assets/8e2b2c8c-3412-4bf6-b75d-d5bd1adaf7ea)
 
 
-Features
---------
+🔥 Features
+-----------
 
 * **Document formats** <br/>
   Markdown _(Example [[MD]](./doc/example.md))_ **|**
@@ -33,13 +33,13 @@ Features
 
 </p></details>
 
-Contents
---------
+📚 Contents
+-----------
 
 <!-- vim-markdown-toc GFM -->
 
-* [Installation](#installation)
-* [Usage](#usage)
+* [⚙️ Installation](#-installation)
+* [🚀 Usage](#-usage)
     * [General Concepts](#general-concepts)
         * [Basic Execution](#basic-execution)
         * [Selecting Sections for Execution](#selecting-sections-for-execution)
@@ -60,21 +60,21 @@ Contents
         * [Vim Commands and Command-Line Attributes](#vim-commands-and-command-line-attributes)
         * [Command Line Arguments and Vim Variables](#command-line-arguments-and-vim-variables)
         * [Command Line Arguments Summary](#command-line-arguments-summary)
-* [Development Guidelines](#development-guidelines)
+* [🏗️ Development Guidelines](#-development-guidelines)
     * [Building Targets](#building-targets)
     * [Development Environments and Setup](#development-environments-and-setup)
     * [Tools for Screencast Recording](#tools-for-screencast-recording)
     * [Common Development Techniques](#common-development-techniques)
-* [Visual Showcases](#visual-showcases)
-* [Technical Insights](#technical-insights)
-* [Known Limitations](#known-limitations)
+* [🎪 Visual Showcases](#-visual-showcases)
+* [💡 Technical Insights](#-technical-insights)
+* [🚫 Known Limitations](#-known-limitations)
 * [Related Tools and Projects](#related-tools-and-projects)
 * [Considerations for Third-Party Tools](#considerations-for-third-party-tools)
 
 <!-- vim-markdown-toc -->
 
-Installation
-------------
+⚙️ Installation
+--------------
 
 This repository contains the Litrepl tool, packaged as both a standalone Python
 application and a Vim plugin interface. The author's preferred method is using
@@ -143,8 +143,8 @@ config folder.
 
 </p></details>
 
-Usage
------
+🚀 Usage
+--------
 
 ### General Concepts
 
@@ -725,8 +725,8 @@ options:
 ```
 
 
-Development Guidelines
-----------------------
+🏗️ Development Guidelines
+-------------------------
 
 This project uses [Nix](https://nixos.org/nix) as its main development
 framework. The file [flake.nix](./flake.nix) manages the source-level
@@ -785,11 +785,15 @@ available. To enter it, specify its Nix-flake path as follows:
 $ nix develop '.#shell-screencast'
 ```
 
-In the opened shell, run the `screencast.sh` and perform the recording.
+In the opened shell, run the `screencast.sh` and wait a second, until the script
+arranges demo and recorder wondows.
 
 ``` shell
 $ screencast.sh
 ```
+
+`screencast.sh` accepts an optional parameter specifying the template file to
+open for the recording session.
 
 ### Common Development Techniques
 
@@ -806,8 +810,8 @@ version:    Print the version
 upload:     Upload wheel to Pypi.org (./_token.pypi is required)
 ```
 
-Visual Showcases
-----------------
+🎪 Visual Showcases
+-------------------
 
 Basic usage
 
@@ -825,8 +829,8 @@ Asynchronous code execution
 <img src="https://user-images.githubusercontent.com/4477729/190009000-7652d544-a668-4440-933d-799f3410736f.gif" width="510"/>
 
 
-Technical Insights
-------------------
+💡 Technical Insights
+---------------------
 
 The following events should normally happen after users type the `:LitEval1`
 command:
@@ -846,8 +850,8 @@ command:
 5. Re-evaluating sections with temporary results causes LitREPL to update
    these results.
 
-Known Limitations
------------------
+🚫 Known Limitations
+--------------------
 
 * Formatting: Nested code sections are not supported.
 * ~~Formatting: Special symbols in the Python output could invalidate the
