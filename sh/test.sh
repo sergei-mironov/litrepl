@@ -905,6 +905,23 @@ grep -q '7' file.md
 )}
 #}}}
 
+test_vim_ai_query() {( #{{{
+mktest "_test_vim_ai_query"
+runlitrepl start ai
+
+cat >file.md <<"EOF"
+Dummy contents
+EOF
+
+runvim file.md >_vim.log 2>&1 <<"EOF"
+V
+:call LitReplAIQuery('/model dummy:"dummy"', function('LitReplReplaceSelection'))
+:wq!
+EOF
+grep -q -i 'dummy:dummy' file.md
+)}
+#}}}
+
 test_foreground() {( #{{{
 mktest "_test_foreground"
 runlitrepl start
@@ -1089,6 +1106,7 @@ tests() {
   echo test_aicli - $(which aicli)
   echo test_vim_eval_code $(which python) -
   echo test_vim_eval_selection $(which python) -
+  echo test_vim_ai_query - $(which aicli)
 }
 
 runlitrepl() {

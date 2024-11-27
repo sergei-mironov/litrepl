@@ -164,9 +164,9 @@ fun! LitReplVisualize(errcode, result)
   endif
 endfun
 
-" Take the command part of litrepl command-line and it's input and return
-" errorcode and stdout.
 fun! LitReplRun(command, input) range
+  " Take the command part of litrepl command-line and it's input and return
+  " errorcode and stdout.
   let cur = getcharpos('.')
   let cmd = LitReplCmdTimeout('inf').' '.a:command.' 2>'.g:litrepl_errfile
   let result = system(cmd, a:input)

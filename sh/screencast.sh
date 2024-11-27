@@ -1,8 +1,12 @@
 #!/bin/sh
 
+T="$1"
+if test -z "$T" ; then
+  T=doc/screencast.md
+fi
 PIDS=''
 trap "kill \$PIDS" SIGINT
-st -t litrepl-demo -e vim-demo -X doc/screencast.md &
+st -t litrepl-demo -e vim-demo -X "$T" &
 PIDS="$PIDS $!"
 sleep 1
 while ! wmctrl -i -r $(wmctrl -l | grep -v grep | grep litrepl-demo | awk '{print $1}') -e 0,100,100,546,382 ; do echo -n . ; sleep 0.5 ; done
