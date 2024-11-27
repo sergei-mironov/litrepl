@@ -915,7 +915,7 @@ EOF
 
 runvim file.md >_vim.log 2>&1 <<"EOF"
 V
-:call LitReplAIQuery('/model dummy:"dummy"', function('LitReplReplaceSelection'))
+:LAI /model dummy:\"dummy\"
 :wq!
 EOF
 grep -q -i 'dummy:dummy' file.md

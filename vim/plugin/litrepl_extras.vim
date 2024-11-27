@@ -108,8 +108,7 @@ fun! LitReplAIQuery(selection, file, prompt) range " -> [int, string]
       let hint = hint . "type /S to insert the selection, "
     endif
     if file > 0
-      let hint = hint .
-        \"type /F to insert current file".
+      let hint = hint . "type /F to insert current file"
     endif
     let prompt = input(hint . "\nYour question: ")
     if len(trim(prompt)) == 0 && len(selection)>0
@@ -237,7 +236,7 @@ fun! LitReplAIFile(prompt) range " -> [int, string]
       \"Hint: type /S to insert the selection, ".
       \"type /F to insert current file, ".
       \"empty input implies /S\n".
-      \"Your comments on style: ")
+      \"Your comments on the file: ")
   endif
   return LitReplTaskNew(2,
     \ "Your task is to change the contents of a file:" .
@@ -260,9 +259,9 @@ fun! LitReplAICode(scope, prompt) range " -> [int, string]
   if len(trim(prompt)) == 0
     let prompt = input(
       \"Hint: type /S to insert the selection, ".
-      \"type /append buffer:file buffer:in to insert current file, ".
+      \"type /F to insert current file, ".
       \"empty input implies /S\n".
-      \"Your comments on style: ")
+      \"Your comments on the task: ")
   endif
   if a:scope == 1
     let example = "Your task is to change the following code snippet: \n---\n/S\n---\n"
