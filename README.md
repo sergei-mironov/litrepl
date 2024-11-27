@@ -1,7 +1,7 @@
 LitRepl
 =======
 
-**LitREPL** is a command-line tool that brings together the benefits of
+**LitRepl** is a command-line tool that brings together the benefits of
 [literate programming](https://en.wikipedia.org/wiki/Literate_programming) and
 [read-eval-print-loop coding](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop).
 LitREPL comes bundled with an interface Vim plugin, integrating it into the editor.
