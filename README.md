@@ -334,8 +334,14 @@ prompting it to return control sooner (with an exception).
 
 #### Direct Interaction with Interpreters
 
-The command `litrepl repl TYPE` connects to interpreter sessions, enabling users
-to inspect their internal states:
+The command `litrepl repl [TYPE]` where `TYPE` stands for `python` (the default)
+or `ai`, connects to interpreter sessions, enabling users to interact with them
+directly.  For this command to work, [socat](https://linux.die.net/man/1/socat)
+tool needs to be installed on your system. Litrepl blocks the pipes for the time
+of interaction so no evaluation is possible while the repl session is active.
+For Python interpreter, the command prompt is disabled which is a current technical
+limitation. All other interpreter functionality is kept unchanged. Use `Ctrl+D`
+to safely detach the session. For example:
 
 ``` shell
 $ litrepl repl python
@@ -344,12 +350,14 @@ W = 'Hello from repl'
 ^D
 ```
 
-- The equivalent Vim command is `:LRepl`.
+- The equivalent Vim commands are `:LRepl [TYPE]` or `:LTerm [TYPE]`. Both
+  commands open Vim terminal window.
 - Python prompts are internally disabled, so no `>>>` symbols will appear.
-- `TYPE` stands for either `ai` or `python`.
 
-You can use `litrepl eval-code` to pipe code directly through the interpreter,
-bypassing all section formatting steps.
+Use `litrepl eval-code [TYPE]` to direct code straight to the interpreter,
+bypassing any section formatting steps. In contrast to the `repl` command,
+`eval-code` mode features prompt detection, allowing the tool to display the
+interpreter's response and detach while keeping the session open.
 
 For example, after manually defining the `W` variable in the example above, it
 can be queried as in a typical IPython session.
@@ -359,6 +367,8 @@ $ echo 'W' | litrepl eval-code
 'Hello from repl'
 ```
 
+The `eval-code` command can be utilized for batch processing and managing
+sessions, in a manner similar to how the `expect` tool is used.
 
 #### Experimental AI Features
 
