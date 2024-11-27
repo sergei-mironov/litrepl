@@ -23,7 +23,7 @@ LitREPL comes bundled with an interface Vim plugin, integrating it into the edit
 * **Editor integration** <br/>
   Vim _(plugin included)_
 
-<details><summary><h2>Requirements</h2></summary><p>
+<details><summary><h2>✅ Requirements</h2></summary><p>
 
 * POSIX-compatible OS, typically a Linux. The tool relies on POSIX operations, notably pipes, and
   depends on certain Shell commands.
