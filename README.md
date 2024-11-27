@@ -28,8 +28,9 @@ LitREPL comes bundled with an interface Vim plugin, integrating it into the edit
 * POSIX-compatible OS, typically a Linux. The tool relies on POSIX operations, notably pipes, and
   depends on certain Shell commands.
 * Python packages: `lark-parser`, `psutil` (Required).
-* Command line tools: `GNU socat` (Optional, only required for `litrepl repl` and Vim's LRepl
-  commands)
+* [socat](https://linux.die.net/man/1/socat) (Optional, only required for
+  `litrepl repl` and Vim's LRepl commands). The tool is widely accessible on
+  Unix systems.
 
 </p></details>
 
@@ -142,6 +143,10 @@ project root folder. The Vim plugin part requires hand-copying
 config folder.
 
 </p></details>
+
+The Nix-powered installation methods install the Socat tool automatically. For
+other installation methods, use your system pacakge manager to install it. For
+example, Ubuntu users might run `sudo apt-get install socat`.
 
 🚀 Usage
 --------
