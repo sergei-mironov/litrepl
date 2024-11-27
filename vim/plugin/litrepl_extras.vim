@@ -100,7 +100,7 @@ fun! LitReplAIQuery(selection, file, prompt) range " -> [int, string]
   " The function outputs the exit code from `litrepl eval-code ai` alongside the
   " interpreter's response.
 
-  let [selection, prompt, file] = [a:selection, a:prompt, a:file]
+  let [selection, prompt, file, header] = [a:selection, a:prompt, a:file, ""]
 
   if len(trim(prompt)) == 0
     let hint = "Hint: "
@@ -117,23 +117,24 @@ fun! LitReplAIQuery(selection, file, prompt) range " -> [int, string]
   endif
 
   if len(selection)>0
-    let prompt = "".
+    let header = header.
       \ "/clear buffer:in\n".
       \ "/paste on\n".
       \ selection."\n".
       \ "/paste off\n".
-      \ "/cp buffer:in buffer:sel\n".
-      \ substitute(prompt, "/S", "/append buffer:sel buffer:in\n", "g")
+      \ "/cp buffer:in buffer:sel\n"
+    let prompt = substitute(prompt, "/S", "/append buffer:\"sel\" buffer:\"in\"\n", "g")
   endif
 
   if file > 0
-    let prompt = "".
+    let header = header.
       \ "/clear buffer:in\n".
-      \ "/cp file:\"".expand('%:p')."\" buffer:file\n" .
-      \ substitute(prompt, "/F", "/append buffer:file buffer:in\n", "g")
+      \ "/cp file:\"".expand('%:p')."\" buffer:file\n"
+    let prompt = substitute(prompt, "/F", "/append buffer:\"file\" buffer:\"in\"\n", "g")
   endif
 
-  return LitReplRun('eval-code ai', prompt)
+  " echomsg "|P " . header. prompt . " P|"
+  return LitReplRun('eval-code ai', header . prompt)
 endfun
 
 let b:airegion = LitReplRegionFromCursor()
@@ -221,7 +222,7 @@ fun! LitReplStyle(scope, prompt) range " -> [int, string]
     \ "your comments using the appropriate comment blocks. ".
     \ "The current file type is ".&filetype)
 endfun
-command! -range -bar -nargs=* LAIStyle call LitReplStyle(<range>!=0, <q-args>)
+command! -range -bar -nargs=* LAIStyle call LitReplStyle(1, <q-args>)
 
 fun! LitReplAIFile(prompt) range " -> [int, string]
   " Start a new AI task focused on changing the contents of a file by (a)

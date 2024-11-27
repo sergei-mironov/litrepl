@@ -433,49 +433,48 @@ connection with users.
 
 #### Calling for AI on a Vim visual selection
 
-The repository includes a file called `./vim/plugin/litrepl_extras.vim`, which
-defines extra tools for interacting with AI. These tools include the
-`LitReplAIQuery()` function and the `:LAI` Vim command, both of which enable the
-creation of an AI chat query incorporating the current file and any selected
-text. The AI model's response then replaces the last visual selection. The
-function takes a string argument or runs an `input()` prompt if the argument is
-empty. Either way, the resulting prompt can include `/S` tag for selection or
-`/F` tag for the contents of the current file.
+The repository includes [litrepl_extras.vim](./vim/plugin/litrepl_extras.vim), which
+defines extra tools for interacting with AI. These tools are based on the single
+low-level `LitReplAIQuery()` function.
 
-The function makes it possible to define other functions, encoding custom text
-processing tasks.
+The function enables the creation of an AI chat query possibly incorporating the
+current file and any selected text. The AI model's response then returned
+alongside with the Litrepl error code.
 
-For example, below we show an `LStyle` function which asks the model to improve the text
-readability. The function forms prompt and calls the base function.
 
-``` vim
-fun! LStyle(q) range
-  if len(trim(a:q))>0
-    let prompt = a:q
-  else
-    let prompt = input(
-          \"Hint: type /S to insert the selection, ".
-          \"type /F to insert current file, ".
-          \"empty line uses the selection\n".
-          \"Your comments on style: ")
-  endif
-  return LitReplAIQuery(
-        \ "Your task is to rephase the following text so it appears " .
-        \ "as an idiomatic English: " .
-        \ "\n---\n/S\n---\n" .
-        \ prompt . "\n".
-        \ "Please provide a rephrased text without formatting and separately your " .
-        \ "comments in the markdown comment section  `<!--` ... `-->`")
-endfun
-```
+Based on this function, the following two middle-level functions are defined:
+- `LitReplTaskNew(scope, prompt)`
+- `LitReplTaskContinue(scope, prompt)`
+
+Both functions take the prompt, produce the AI model response and decide where
+to insert it. However, the key difference is that the first function determines
+the target location based on user input (like cursor position or selection),
+while the second function re-applies the previously used position, allowing
+users to make changes easilly.
+
+Finally, a number of high-level commands have been established. Each of these
+commands receives an input string that directs the model on what action to take.
+The user input can contain `/S` or `/F` tokens, which are replaced with the
+values of the visual selection and the current file, respectively.
+
+
+| Command    | Description                    | Incorporates           | Updates            |
+|------------|--------------------------------|------------------------|--------------------|
+| `LAI`      | Passes the prompt as-is        | Input, Selection       | Cursor, Selection  |
+| `LAICont`  | Passes the prompt as-is        | Input, Selection       | Last |
+| `LAIStyle` | Asks to improve language style | Input, Selection       | Selection          |
+| `LAICode`  | Asks to modify a code snippet  | Input, Selection       | Cursor, Selection  |
+| `LAITell`  | Asks to describe a code snippet| Input, Selection       | Terminal*          |
+| `LAIFile`  | Asks to change a whole file    | Input, Selection, File | File               |
+
+* `LAITell` displays the response in the AI terminal
 
 As with the selection evaluation mode, the `aicli` interpreter stays
-active in the background. It maintains a log of the conversation, allowing us to
-reference results from previous queries in new ones.
+active in the background, maintaining the log of the conversation.
 
-Direct interaction with the interpreter also functions as expected. The `LRepl`
-command opens the Vim terminal, enabling communication with a model through
-`aicli` text commands.
+Direct interaction with the interpreter functions as expected. The `LTerm ai`
+command opens the Vim terminal as usual, enabling communication with a model
+through `aicli` text commands.
 
 ### Application Scenarios
 
