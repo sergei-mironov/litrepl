@@ -17,7 +17,6 @@ The tool comes bundled with an interface Vim plugin, integrating the functionali
 
 </div>
 
-
 _Notes:_
 * _[literate programming](https://en.wikipedia.org/wiki/Literate_programming)_
 * _[read-eval-print-loop coding](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)_
@@ -850,9 +849,13 @@ upload:     Upload wheel to Pypi.org (./_token.pypi is required)
 🎪 Visual Showcases
 -------------------
 
-Basic usage
+### Basic usage
 
 ![Peek 2024-07-18 20-50-2](https://github.com/user-attachments/assets/8e2b2c8c-3412-4bf6-b75d-d5bd1adaf7ea)
+
+### AI capabilities
+
+![Peek 2024-11-28 20-48](https://github.com/user-attachments/assets/c91e6ac5-4230-47ad-b1bd-12b3d4d5f7f6)
 
 *Note: the below screencasts are outdated.*
 
