@@ -549,7 +549,9 @@ nnoremap <F6> :LEvalAsync<CR>
 
 #### Vim, Inserting New Sections
 
-Below we define `:C` command inserting new sections.
+The plugin doesn't include tools for section formatting, however they can be
+added easily if required. Below, we demonstrate how to define the `:C` command
+to insert new sections.
 
 <!--lignore-->
 ```` vim
@@ -571,7 +573,7 @@ command! -nargs=0 LR LRestart | LEval 0
 Thanks to IPython features, we can use exclamation to run shell commands
 directly from Python code sections.
 
-~~~~
+~~~~ markdown
 ``` python
 !cowsay "Hello, Litrepl!"
 ```
