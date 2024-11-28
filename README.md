@@ -51,7 +51,8 @@ LitREPL comes bundled with an interface Vim plugin, integrating it into the edit
         * [Calling for AI on a Vim visual selection](#calling-for-ai-on-a-vim-visual-selection)
     * [Application Scenarios](#application-scenarios)
         * [Command Line, Foreground Evaluation](#command-line-foreground-evaluation)
-        * [GNU Make, Automating Code Section Processing](#gnu-make-automating-code-section-processing)
+        * [Command Line, Detecting Python Exceptions](#command-line-detecting-python-exceptions)
+        * [GNU Make, Evaluating Code Sections in Project Documentation](#gnu-make-evaluating-code-sections-in-project-documentation)
         * [Vim, Setting Up Keybindings](#vim-setting-up-keybindings)
         * [Vim, Inserting New Sections](#vim-inserting-new-sections)
         * [Vim, Running the Initial Section After Interpreter Restart](#vim-running-the-initial-section-after-interpreter-restart)
@@ -441,7 +442,6 @@ The function enables the creation of an AI chat query possibly incorporating the
 current file and any selected text. The AI model's response then returned
 alongside with the Litrepl error code.
 
-
 Based on this function, the following two middle-level functions are defined:
 - `LitReplTaskNew(scope, prompt)`
 - `LitReplTaskContinue(scope, prompt)`
@@ -481,21 +481,29 @@ through `aicli` text commands.
 #### Command Line, Foreground Evaluation
 
 When performing batch processing of documents, it might be necessary to initiate
-a new interpreter session solely for the evaluation's duration. The
-`--foreground` option can be used to activate this mode.
+a new interpreter session solely for the evaluation's duration rather than
+re-using the currently running session. The `--foreground` option can be used to
+activate this mode.
+
+<!--lignore-->
+~~~~ shell
+$ cat document.md.in | litrepl --foreground eval-sections > document.md
+~~~~
+<!--lnoignore-->
+
+#### Command Line, Detecting Python Exceptions
 
 Another frequently requested feature is the ability to report unhandled
 exceptions. Litrepl can be configured to return a non-zero exit code in such
 scenarios.
 
 <!--lignore-->
-~~~~ sh
-$ cat document.md.in
+~~~~ shell
+$ cat document.md
 ``` python
 raise Exception("D'oh!")
 ```
-$ cat document.md.in | litrepl --foreground --exception-exit=200 eval-sections
->document.md
+$ cat document.md | litrepl --foreground --exception-exit=200 eval-sections
 $ echo $?
 200
 ~~~~
@@ -507,9 +515,9 @@ option specifies the exit code to be returned in the event of unhandled
 exceptions.
 
 
-#### GNU Make, Automating Code Section Processing
+#### GNU Make, Evaluating Code Sections in Project Documentation
 
-A typical Makefile recipe for updating README.md is structured as follows:
+A typical Makefile recipe for updating documentation is structured as follows:
 
 ``` Makefile
 SRC = $(shell find -name '*\.py')

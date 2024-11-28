@@ -222,7 +222,9 @@ fun! LitReplStyle(scope, prompt) range " -> [int, string]
     \ "your comments using the appropriate comment blocks. ".
     \ "The current file type is ".&filetype)
 endfun
-command! -range -bar -nargs=* LAIStyle call LitReplStyle(1, <q-args>)
+if !exists(":LAIStyle")
+  command! -range -bar -nargs=* LAIStyle call LitReplStyle(1, <q-args>)
+endif
 
 fun! LitReplAIFile(prompt) range " -> [int, string]
   " Start a new AI task focused on changing the contents of a file by (a)
@@ -248,7 +250,9 @@ fun! LitReplAIFile(prompt) range " -> [int, string]
     \ "without any text formatting, especially without markdown \"```\" formatting! ".
     \ "Put your own comments in the header code comment of the resulting program.")
 endfun
-command! -range -bar -nargs=* LAIFile call LitReplAIFile(<q-args>)
+if !exists(":LAIFile")
+  command! -range -bar -nargs=* LAIFile call LitReplAIFile(<q-args>)
+endif
 
 fun! LitReplAICode(scope, prompt) range " -> [int, string]
   " Start a new AI task, by (a) taking a target scope, verifying if prompt is
@@ -269,16 +273,24 @@ fun! LitReplAICode(scope, prompt) range " -> [int, string]
   else
     let example = ""
   endif
+  let footer = ''.
+    \ "Please print the resulting program as-is " .
+    \ "without any text formatting, especially avoid markdown \"```\" ".
+    \ "formatting! Wrap your own comments, if any, into the code comments ".
+    \ "e.g. by using hash-comment or \\/\\/ symbols. "
+  if &textwidth > 0
+    let footer = footer . "Please avoid generating lines longer than ".
+      \ string(&textwidth)." characters. "
+  endif
   return LitReplTaskNew(a:scope,
     \ example .
     \ "You need to do the following: " .
     \ prompt . "\n".
-    \ "Please print the resulting program as-is " .
-    \ "without any text formatting, especially avoid markdown \"```\" ".
-    \ "formatting! Wrap your own comments, if any, into the code comments ".
-    \ "e.g. by using hash-comment or \\/\\/ symbols.")
+    \ footer)
 endfun
 
-command! -range -bar -nargs=* LAICode call LitReplAICode(<range>!=0, <q-args>)
+if !exists(":LAICode")
+  command! -range -bar -nargs=* LAICode call LitReplAICode(<range>!=0, <q-args>)
+endif
 
 let g:litrepl_extras_loaded = 1

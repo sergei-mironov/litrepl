@@ -125,7 +125,7 @@ def open_child_pipes(inp,outp):
 def open_parent_pipes(inp,outp):
   return open(inp,'w'),open(outp,'r')
 
-SOCAT_HINT="Opening the interpreter terminal (NO PROMPTS, USE `Ctrl+D` TO DETACH)\n"
+SOCAT_HINT="Attaching to the interpreter (NO PROMPTS, USE `Ctrl+D` TO DETACH)\n"
 def runsocat(fns, hint=None):
   if hint is None:
     hint=SOCAT_HINT

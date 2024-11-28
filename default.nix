@@ -126,7 +126,8 @@ let
       propagatedBuildInputs = [(lark-current python.pkgs) pkgs.socat python.pkgs.psutil];
       src = python.pkgs.fetchPypi {
         inherit pname version;
-        sha256 = "sha256-+ass/WI8dfA+a5fBGcCYCr5xswC7uWVfd2oCsp1Zt48=";
+        sha256 = "sha256-JA/CW8mfRqRQWc35qQx4JgZ/iLmopPTJDO8rIqtBB/U=";
+        # sha256 = "sha256-+ass/WI8dfA+a5fBGcCYCr5xswC7uWVfd2oCsp1Zt48=";
         # sha256 = "sha256-LI4k6anvK9MMqz0n8M8l5W5v3qM0i5TN9ho2QWwIGjQ=";
         # sha256 = "sha256-yrnqBSH+idosum/97Gwz4cB36hsggrMfOtoGspiPHb8=";
         # sha256 = "sha256-B1qDAksYPQm+hkG7T79sMEKgZ9mM4ncEBaEq4qye/bo=";
@@ -294,11 +295,12 @@ let
         filetype plugin indent on
         syntax on
         " colorscheme C64
-        colorscheme Tomorrow-Night-Blue
+        " colorscheme Tomorrow-Night-Blue
+        colorscheme 256-jungle
         set backspace=indent,eol,start
         set wrap
         set conceallevel=0
-        set textwidth=80
+        set textwidth=53
         set foldmethod=marker
         set foldcolumn=0
         set autoread
