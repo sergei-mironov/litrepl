@@ -35,16 +35,14 @@ _Notes:_
 * **Editor integration** <br/>
   Vim _(plugin included)_
 
-<details><summary><h2>✅ Requirements</h2></summary><p>
+✅ Requirements
+---------------
 
-* POSIX-compatible OS, typically a Linux. The tool relies on POSIX operations, notably pipes, and
-  depends on certain Shell commands.
-* Python packages: `lark-parser`, `psutil` (Required).
-* [socat](https://linux.die.net/man/1/socat) (Optional, only required for
-  `litrepl repl` and Vim's LRepl commands). The tool is widely accessible on
-  Unix systems.
-
-</p></details>
+* **POSIX-compatible OS**, typically a Linux. The tool relies on POSIX
+  operations, notably pipes, and depends on certain Shell commands.
+* **lark-parser** and **psutil** Python packages.
+* [socat](https://linux.die.net/man/1/socat) (Optional) Required for
+  `litrepl repl` and Vim's `LTerm` commands to work.
 
 📚 Contents
 -----------
