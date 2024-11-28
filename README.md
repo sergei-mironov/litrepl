@@ -1,8 +1,9 @@
-<div align="center">
+<p align="center">
 <h1>
 ⌨️ LitRepl ⌨️
 </h1>
-</div>
+[Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-visual-showcases)
+</p>
 
 **LitRepl** is a command-line tool that brings together the benefits of
 [literate programming](https://en.wikipedia.org/wiki/Literate_programming) and
