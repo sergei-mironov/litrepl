@@ -1,6 +1,7 @@
 <div align="center">
+<h1>
 ⌨️ LitRepl ⌨️
-===========
+</h1>
 </div>
 
 **LitRepl** is a command-line tool that brings together the benefits of
