@@ -41,7 +41,7 @@ _Notes:_
 * **POSIX-compatible OS**, typically a Linux. The tool relies on POSIX
   operations, notably pipes, and depends on certain Shell commands.
 * **lark-parser** and **psutil** Python packages.
-* [socat](https://linux.die.net/man/1/socat) (Optional) Required for
+* **[Socat](http://www.dest-unreach.org/socat/)** (Optional) Required for
   `litrepl repl` and Vim's `LTerm` commands to work.
 
 📚 Contents
