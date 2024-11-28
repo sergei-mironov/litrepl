@@ -1,5 +1,7 @@
-⌨️ LitRepl
-=========
+<div align="center">
+⌨️ LitRepl ⌨️
+===========
+</div>
 
 **LitRepl** is a command-line tool that brings together the benefits of
 [literate programming](https://en.wikipedia.org/wiki/Literate_programming) and
