@@ -849,13 +849,20 @@ upload:     Upload wheel to Pypi.org (./_token.pypi is required)
 🎪 Visual Showcases
 -------------------
 
-### Basic usage
+<details>
+<summary>Basic usage (Show GIF)</summary>
 
 ![Peek 2024-07-18 20-50-2](https://github.com/user-attachments/assets/8e2b2c8c-3412-4bf6-b75d-d5bd1adaf7ea)
 
-### AI capabilities
+</details>
+
+<details>
+<summary>AI capabilities (Show GIF)</summary>
 
 ![Peek 2024-11-28 20-48](https://github.com/user-attachments/assets/c91e6ac5-4230-47ad-b1bd-12b3d4d5f7f6)
+
+</details>
+
 
 *Note: the below screencasts are outdated.*
 
