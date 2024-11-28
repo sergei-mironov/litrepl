@@ -2,16 +2,25 @@
 <h1>
 ⌨️ LitRepl ⌨️
 </h1>
-<a href="#-installation">Installation</a> | [Usage](#basic-execution) | [Gallery](#-visual-showcases)
+
+[Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-visual-showcases)
 </div>
 
 **LitRepl** is a command-line tool that brings together the benefits of
-[literate programming](https://en.wikipedia.org/wiki/Literate_programming) and
-[read-eval-print-loop coding](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop).
-LitREPL comes bundled with an interface Vim plugin, integrating it into the editor.
+**literate programming** and **read-eval-print-loop coding**.
+The tool comes bundled with an interface Vim plugin, integrating the functionality into the editor.
 
+
+<div align="center">
+	
 ![Peek 2024-07-18 20-50-2](https://github.com/user-attachments/assets/8e2b2c8c-3412-4bf6-b75d-d5bd1adaf7ea)
 
+</div>
+
+
+_Notes:_
+* _[literate programming](https://en.wikipedia.org/wiki/Literate_programming)_
+* _[read-eval-print-loop coding](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)_
 
 🔥 Features
 -----------
