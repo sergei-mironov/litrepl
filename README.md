@@ -864,17 +864,15 @@ upload:     Upload wheel to Pypi.org (./_token.pypi is required)
 </details>
 
 
-*Note: the below screencasts are outdated.*
+<details>
+<summary>Vimtex integration (Show Video)</summary>
 
-Using LitREPL in combination with the [Vimtex](https://github.com/lervag/vimtex)
-plugin to edit Latex documents on the fly.
+We utilize LitRepl alongside the [Vimtex](https://github.com/lervag/vimtex) plugin to edit and
+preview LaTeX documents instantly.
 
 <video controls src="https://user-images.githubusercontent.com/4477729/187065835-3302e93e-6fec-48a0-841d-97986636a347.mp4" muted="true"></video>
 
-Asynchronous code execution
-
-<img src="https://user-images.githubusercontent.com/4477729/190009000-7652d544-a668-4440-933d-799f3410736f.gif" width="510"/>
-
+</details>
 
 💡 Technical Insights
 ---------------------
