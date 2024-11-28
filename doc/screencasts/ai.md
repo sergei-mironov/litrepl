@@ -1,29 +1,91 @@
-LitREPL AI capabilities
+LitREPL AI Capabilities
 =======================
-
 
 ## Styling
 <!--{{{-->
-Here is an example of how `:LAIStyle` can request AI
-to rephrase a selected piece of text.
+
+You can request the AI to rephrase a selected portion
+of the text using the :LAIStyle feature.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!--}}}-->
 ## Requests for code modification
 <!--{{{-->
+
 By this we demonstrate the `:LAICode` command for
 code modification. Consider a program:
+
 ```python
 def hello():
-  print('Hello, World!')
+  print(f'Hello, World!')
 ```
+
+
+
+
+
+
+
+
+
 <!--}}}-->
 ## Correcting the last request
 <!--{{{-->
-Litrepl tracks the last AI-modified text region,
-allowing users to apply corrections with `:LAICont`
+
+Litrepl remembers the last AI-modified text region,
+allowing us to apply corrections using the `:LAICont`
 command
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!--}}}-->
 ## Direct access to the terminal
 <!--{{{-->
+
 Finally, we can continue the discussion in terminal
-with `:LAITell` command.
+using the `:LAITell` command.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!--}}}-->
+
