@@ -233,8 +233,9 @@ Hello Markdown!
 ~~~~
 <!-- noresult -->
 
-By default, `litrepl eval-sections` evaluates all sections. The Vim equivalent
-command is `:LEval`, which by default evaluates the section at the cursor.
+By default, `litrepl eval-sections` evaluates all sections in a document. The
+equivalent Vim command is `:LEval all`. `:LEval` without arguments evaluates the
+section at the cursor.
 
 * For additional details on Markdown formatting, refer to [Formatting Markdown
   documents](./doc/formatting.md#markdown)
