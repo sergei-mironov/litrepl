@@ -871,6 +871,18 @@ print("~~~~")
 ~~~~ shell
 [ LitREPL-DEV ] $ runtests.sh --help
 Usage: runtest.sh [-d] [-i I(,I)*] [-t T(,T)*]
+Arguments:
+  -d                        Be very verbose
+  -i I, --interpreters=I    Run tests requiring interpreters matching the grep
+expression I
+                            Run -i '?' to list all available interpreters.
+  -t T, --tests=T           Run tests whose names match the grep expression T
+                            Run -t '?' to list all available tests.
+
+Examples:
+  runtests.sh -t '?' -i '?'
+  runtests.sh -i ipython
+  runtests.sh -t 'test_eval_code|test_status' -i python
 ~~~~
 <!-- noresult -->
 
