@@ -187,7 +187,7 @@ The primary command for evaluating formatted documents is `litrepl
 eval-sections`. To execute the evaluation, redirect the file into the shell
 command's input.
 
-Consider a document named `source.md`:
+Consider a [hello.md](./doc/hello.md) document:
 
 <!--
 ``` python
