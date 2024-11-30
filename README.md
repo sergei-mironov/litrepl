@@ -189,7 +189,15 @@ command's input.
 
 Consider a document named `source.md`:
 
-<!--lignore-->
+<!--
+``` python
+print("~~~~ markdown")
+!cat doc/hello.md
+print("~~~~")
+```
+-->
+
+<!-- result -->
 ~~~~ markdown
 ``` python
 print('Hello Markdown!')
@@ -197,6 +205,7 @@ print('Hello Markdown!')
 ``` result
 ```
 ~~~~
+<!-- noresult -->
 
 You pass it to Litrepl using:
 
@@ -205,7 +214,6 @@ $ cat source.md | litrepl eval-sections > result.md
 ~~~~
 
 The resulting `result.md` will have the result section filled in correctly.
-<!--lnoignore-->
 <!--
 ``` python
 print("~~~~ markdown")
@@ -852,8 +860,8 @@ print("~~~~")
 <!-- result -->
 ~~~~ shell
 [ LitREPL-DEV ] $ make help
-LitREPL is a macroprocessing Python library for Litrate programming and code
-execution
+make[1]: Entering directory '/home/grwlf/proj/litrepl.vim'
+LitREPL is a macroprocessing Python library for Litrate programming and code execution
 Build targets:
 help:       Print help
 test:       Run the test script (./sh/runtests.sh)
@@ -863,6 +871,7 @@ vimbundle:  Build Vim bundle
 version:    Print the version
 dist:       Build Python and Vim packages
 upload:     Upload Python wheel to Pypi.org (./_token.pypi is required)
+make[1]: Leaving directory '/home/grwlf/proj/litrepl.vim'
 ~~~~
 <!-- noresult -->
 
@@ -882,8 +891,7 @@ print("~~~~")
 Usage: runtest.sh [-d] [-i I(,I)*] [-t T(,T)*]
 Arguments:
   -d                        Be very verbose
-  -i I, --interpreters=I    Run tests requiring interpreters matching the grep
-expression I
+  -i I, --interpreters=I    Run tests requiring interpreters matching the grep expression I
                             Run -i '?' to list all available interpreters.
   -t T, --tests=T           Run tests whose names match the grep expression T
                             Run -t '?' to list all available tests.
