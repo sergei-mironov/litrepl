@@ -12,7 +12,7 @@ The tool comes bundled with an interface Vim plugin, integrating the functionali
 
 
 <div align="center">
-	
+
 ![Peek 2024-07-18 20-50-2](https://github.com/user-attachments/assets/8e2b2c8c-3412-4bf6-b75d-d5bd1adaf7ea)
 
 </div>
@@ -205,7 +205,16 @@ $ cat source.md | litrepl eval-sections > result.md
 ~~~~
 
 The resulting `result.md` will have the result section filled in correctly.
+<!--lnoignore-->
+<!--
+``` python
+print("~~~~ markdown")
+!cat doc/hello.md | litrepl --foreground eval-sections
+print("~~~~")
+```
+-->
 
+<!-- result -->
 ~~~~ markdown
 ``` python
 print('Hello Markdown!')
@@ -214,7 +223,7 @@ print('Hello Markdown!')
 Hello Markdown!
 ```
 ~~~~
-<!--lnoignore-->
+<!-- noresult -->
 
 By default, `litrepl eval-sections` evaluates all sections. The Vim equivalent
 command is `:LEval`, which by default evaluates the section at the cursor.
