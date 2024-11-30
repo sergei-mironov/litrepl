@@ -210,7 +210,7 @@ print('Hello Markdown!')
 You pass it to Litrepl using:
 
 ~~~~ shell
-$ cat source.md | litrepl eval-sections > result.md
+$ cat hello.md | litrepl eval-sections > result.md
 ~~~~
 
 The resulting `result.md` will have the result section filled in correctly.
