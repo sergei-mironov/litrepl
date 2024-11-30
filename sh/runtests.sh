@@ -474,7 +474,6 @@ EOF
 cat source.py | runlitrepl eval-code >out.txt
 diff -u out.txt - <<"EOF"
 Hello, World!
-
 EOF
 runlitrepl stop
 )} #}}}
@@ -493,7 +492,6 @@ EOF
 cat source.py | runlitrepl eval-code >out.txt
 diff -u out.txt - <<"EOF"
 Hello, 33!
-
 EOF
 
 cat >source.py <<"EOF"
@@ -511,7 +509,6 @@ cat source.py | runlitrepl eval-code >out.txt
 diff -u out.txt - <<"EOF"
 Try-finally, 33!
 Done
-
 EOF
 
 cat >source.py <<"EOF"
@@ -523,7 +520,6 @@ EOF
 cat source.py | runlitrepl eval-code >out.txt
 diff -u out.txt - <<"EOF"
 If-true, 33!
-
 EOF
 
 cat >source.py <<"EOF"
@@ -538,7 +534,6 @@ EOF
 cat source.py | runlitrepl eval-code >out.txt
 diff -u out.txt - <<"EOF"
 33
-
 EOF
 
 # TODO: Re-enable when https://github.com/ipython/ipython/issues/14246 is fixed
@@ -558,7 +553,6 @@ diff -u out.txt - <<"EOF"
 aa
 
 bb
-
 EOF
 fi
 
@@ -1130,6 +1124,23 @@ runvim() {
   $LITREPL_ROOT/sh/vim_litrepl_dev --clean "$@"
 }
 
+usage() {
+cat <<EOF
+Usage: runtest.sh [-d] [-i I(,I)*] [-t T(,T)*]
+Arguments:
+  -d                        Be very verbose
+  -i I, --interpreters=I    Run tests requiring interpreters matching the grep expression I
+                            Run -i '?' to list all available interpreters.
+  -t T, --tests=T           Run tests whose names match the grep expression T
+                            Run -t '?' to list all available tests.
+
+Examples:
+  runtests.sh -t '?' -i '?'
+  runtests.sh -i ipython
+  runtests.sh -t 'test_eval_code|test_status' -i python
+EOF
+}
+
 set -e
 
 export AICLI_RC=none
@@ -1142,8 +1153,8 @@ while test -n "$1" ; do
     -i|--interpreters) INTERPS="$2"; shift ;;
     --tests=) TESTS=$(echo "$1" | sed 's/.*=//g') ;;
     -t|--tests) TESTS="$2"; shift ;;
-    -h|--help) echo "Usage: test.sh [-i I(,I)*] [-t T(,T)*]" >&1 ; exit 1 ;;
     -d|-V|--verbose) set -x; LITREPL_DEBUG=1 ;;
+    -h|--help) usage ; exit 1 ;;
   esac
   shift
 done
@@ -1152,8 +1163,8 @@ if test "$TESTS" = "?" ; then
   tests | awk '{print $1}' | sort -u
 fi
 if test "$INTERPS" = "?" ; then
-  tests | awk '{print $2}' | grep -v '-' | sort -u
-  tests | awk '{print $3}' | grep -v '-' | sort -u
+  tests | awk '{print $2}' | grep -v -w '-' | sort -u
+  tests | awk '{print $3}' | grep -v -w '-' | sort -u
 fi
 if test "$INTERPS" = "?" -o "$TESTS" = "?" ; then
   exit 1
@@ -1166,9 +1177,9 @@ trap "echo FAIL\(\$?\)" EXIT
 tests | (
 NRUN=0
 while read t ipy iai ; do
-  if echo "$t" | grep -q "$TESTS" && \
-     ( echo "$ipy" | grep -q "$INTERPS" || \
-       echo "$iai" | grep -q "$INTERPS" ; ) ; then
+  if echo "$t" | grep -q -E "$TESTS" && \
+     ( echo "$ipy" | grep -q -E "$INTERPS" || \
+       echo "$iai" | grep -q -E "$INTERPS" ; ) ; then
     echo "Running test \"$t\" python \"$ipy\" ai \"$iai\""
     NRUN=$(expr $NRUN '+' 1)
     LITREPL_PYTHON_INTERPRETER="$ipy" \

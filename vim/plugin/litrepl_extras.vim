@@ -177,7 +177,7 @@ endif
 
 
 fun! LitReplTaskContinue(scope, prompt) range " -> [int, string]
-  " Start a new AI task, by (a) taking a taget scope (0 - cursor, 1 - selection,
+  " Continue an AI task, by (a) taking a taget scope (0 - cursor, 1 - selection,
   " 2 - whole file, 3 - stanalone terminal) (b) combining the pompt (c)
   " piping the prompt through the interpreter and (d) populating the result.
   let [scope, prompt] = [a:scope, a:prompt]

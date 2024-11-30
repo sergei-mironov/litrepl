@@ -829,20 +829,50 @@ $ screencast.sh
 `screencast.sh` accepts an optional parameter specifying the template file to
 open for the recording session.
 
-### Common Development Techniques
+### Common Development Scenarios
 
-The top-level [Makefile](./Makefile) encodes common development workflows:
+The top-level [Makefile](./Makefile) encodes common development scenarios:
 
-``` shell
-[LitREPL-develop] $ make help
-LitREPL is a macroprocessing Python library for Litrate programming and code execution
+<!--
+``` python
+print("~~~~ shell\n[ LitREPL-DEV ] $ make help")
+!make help
+print("~~~~")
+```
+-->
+<!-- result -->
+~~~~ shell
+[ LitREPL-DEV ] $ make help
+LitREPL is a macroprocessing Python library for Litrate programming and code
+execution
 Build targets:
 help:       Print help
-test:       Run the test script (./sh/test.sh)
+test:       Run the test script (./sh/runtests.sh)
+readme:     Update code sections in the README.md
 wheel:      Build Python wheel (the DEFAULT target)
+vimbundle:  Build Vim bundle
 version:    Print the version
-upload:     Upload wheel to Pypi.org (./_token.pypi is required)
+dist:       Build Python and Vim packages
+upload:     Upload Python wheel to Pypi.org (./_token.pypi is required)
+~~~~
+<!-- noresult -->
+
+The `runtests.sh` script runs all tests by default, but accepts command-line
+arguments for running specific tests.
+
+<!--
+``` python
+print("~~~~ shell\n[ LitREPL-DEV ] $ runtests.sh --help")
+!runtests.sh --help
+print("~~~~")
 ```
+-->
+<!-- result -->
+~~~~ shell
+[ LitREPL-DEV ] $ runtests.sh --help
+Usage: runtest.sh [-d] [-i I(,I)*] [-t T(,T)*]
+~~~~
+<!-- noresult -->
 
 🎪 Visual Showcases
 -------------------
@@ -948,5 +978,4 @@ Considerations for Third-Party Tools
 * Jupytext https://github.com/mwouts/jupytext/issues/220#issuecomment-1418209581
 * Vim-LSC https://github.com/natebosch/vim-lsc/issues/469
 * [Bad PDF fonts in Firefox](https://github.com/mozilla/pdf.js/issues/17401)
-
 

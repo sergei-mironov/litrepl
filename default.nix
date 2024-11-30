@@ -114,7 +114,7 @@ let
       checkPhase = ''
         LITREPL_BIN="$out/bin" \
         LITREPL_ROOT=`pwd` \
-        ${./sh/test.sh}
+        ${./sh/runtests.sh}
       '';
 
       doCheck = true;
