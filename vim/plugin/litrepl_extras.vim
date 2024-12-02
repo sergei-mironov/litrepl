@@ -198,32 +198,39 @@ if !exists(":LAICont")
 endif
 
 
-fun! LitReplStyle(scope, prompt) range " -> [int, string]
+fun! LitReplStyle(scope, command) range " -> [int, string]
   " This function initiates an AI task for rephrasing text, taking a scope and a
   " prompt.  If the prompt is empty, it prompts the user to provide input with
   " hints for using the selection or file.  Calls LitReplTaskNew, instructing
   " the AI to rephrase text to sound more idiomatic, inserting the selection if
   " applicable.  Additional instructions are provided for returning unformatted
   " text and append comments. The current filetype is noted.
-  let prompt = a:prompt
-  if len(trim(prompt)) == 0
-    let prompt = input(
-      \"Hint: type /S to insert the selection, ".
-      \"type /F to insert current file, ".
-      \"empty input implies /S\n".
-      \"Your comments on style: ")
+  let [scope, task] = [a:scope, a:task]
+
+  let prompt = "" .
+    \ "Consider the following text: " .
+    \ "\n---\n/S\n---\n"
+
+  if len(trim(task)) == 0
+    let task = input("Specify the task: ")
   endif
-  return LitReplTaskNew(a:scope,
-    \ "Your task is to rephrase the following text so it appears " .
-    \ "as more idiomatic phrase: " .
-    \ "\n---\n/S\n---\n" .
-    \ prompt . "\n" .
-    \ "Please provide the rephrased text without formatting and after that " .
-    \ "your comments using the appropriate comment blocks. ".
-    \ "The current file type is ".&filetype)
+  if len(trim(task)) == 0
+    let task = "Your task is to rephrase the text so it appears more idiomatic. "
+  endif
+  let prompt = prompt . task . "\n" .
+    \ "Please generate your main response without using any formatting. "
+
+  let vm = visualmode()
+  if scope==1 && vm == 'V'
+    let prompt = prompt .
+      \ "After that you can put your own comments wrapped into the appropriate comment blocks. ".
+      \ "For commenting, mind that the overall text is ".&filetype." "
+  endif
+  let result = LitReplTaskNew(scope, prompt)
+  return result
 endfun
 if !exists(":LAIStyle")
-  command! -range -bar -nargs=* LAIStyle call LitReplStyle(1, <q-args>)
+  command! -range -bar -nargs=* LAIStyle call LitReplStyle(<range>!=0, <q-args>)
 endif
 
 fun! LitReplAIFile(prompt) range " -> [int, string]
