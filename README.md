@@ -85,6 +85,8 @@ _Notes:_
 
 <!-- vim-markdown-toc -->
 
+<a name="-installation"></a>
+
 ⚙️ Installation
 --------------
 
