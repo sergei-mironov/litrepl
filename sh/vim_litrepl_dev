@@ -73,9 +73,7 @@ endif
 if exists(':LStatus')
   delcommand LStatus
 endif
-if exists(':LAI')
-  delcommand LAI
-endif
+
 let &runtimepath = '$LITREPL_ROOT/vim,'.&runtimepath
 runtime plugin/litrepl.vim
 runtime plugin/litrepl_extras.vim
