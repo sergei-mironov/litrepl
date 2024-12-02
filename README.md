@@ -3,7 +3,7 @@
 ⌨️ LitRepl ⌨️
 </h1>
 
-[Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-visual-showcases)
+[Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-visual-exhibitions)
 </div>
 
 **LitRepl** is a command-line tool that brings together the benefits of
