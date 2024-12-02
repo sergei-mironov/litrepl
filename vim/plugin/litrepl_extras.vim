@@ -198,7 +198,7 @@ if !exists(":LAICont")
 endif
 
 
-fun! LitReplStyle(scope, command) range " -> [int, string]
+fun! LitReplStyle(scope, task) range " -> [int, string]
   " This function initiates an AI task for rephrasing text, taking a scope and a
   " prompt.  If the prompt is empty, it prompts the user to provide input with
   " hints for using the selection or file.  Calls LitReplTaskNew, instructing
