@@ -39,7 +39,7 @@ endfun
 
 fun! LitReplRegionFromFile() range " -> [int, int, int, int]
   let [line, column] = getpos("$")[1:2]
-  return [1, 0, line, len(getline(line_end2))]
+  return [1, 0, line, len(getline(line))]
 endfun
 
 fun! LitReplRegionToSelection(region) range
@@ -248,7 +248,9 @@ fun! LitReplAIFile(prompt) range " -> [int, string]
       \"empty input implies /S\n".
       \"Your comments on the file: ")
   endif
-  return LitReplTaskNew(2,
+  let tw_old = &textwidth
+  let &textwidth = 0
+  let result = LitReplTaskNew(2,
     \ "Your task is to change the contents of a file:" .
     \ "\n---\n/F\n---\n" .
     \ "You need to do the following: " .
@@ -256,6 +258,8 @@ fun! LitReplAIFile(prompt) range " -> [int, string]
     \ "Please arrange the output so the resulting program appears as-is " .
     \ "without any text formatting, especially without markdown \"```\" formatting! ".
     \ "Put your own comments in the header code comment of the resulting program.")
+  let &textwidth = tw_old
+  return result
 endfun
 if !exists(":LAIFile")
   command! -range -bar -nargs=* LAIFile call LitReplAIFile(<q-args>)
