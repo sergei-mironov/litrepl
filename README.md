@@ -76,8 +76,8 @@ _Notes:_
     * [Building Targets](#building-targets)
     * [Development Environments and Setup](#development-environments-and-setup)
     * [Tools for Screencast Recording](#tools-for-screencast-recording)
-    * [Common Development Techniques](#common-development-techniques)
-* [🎪 Visual Showcases](#-visual-showcases)
+    * [Common Development Scenarios](#common-development-scenarios)
+* [🎥 Visual Exhibitions](#-visual-exhibitions)
 * [💡 Technical Insights](#-technical-insights)
 * [🚫 Known Limitations](#-known-limitations)
 * [Related Tools and Projects](#related-tools-and-projects)
@@ -95,7 +95,7 @@ application and a Vim plugin interface. The author's preferred method is using
 Nix, but if you choose not to use it, you'll need to install both components
 separately. Below, we outline several common installation methods.
 
-<details><summary><b>Release versions, from Pypi and Vim.org</b></summary><p>
+<details open><summary><b>Release versions, from Pypi and Vim.org</b></summary><p>
 
 1. `pip install litrepl`
 2. Download the `litrepl.vim` from the vim.org
@@ -569,8 +569,8 @@ this recipe, you can execute `make readme` to start the processing.
 
 #### Vim, Setting Up Keybindings
 
-The plugin does not define any keybindings, but users could do it by themselves,
-for example:
+The `litrepl.vim` plugin does not define any keybindings, but users could do it
+by themselves, for example:
 
 ``` vim
 nnoremap <F5> :LEval<CR>
@@ -579,9 +579,9 @@ nnoremap <F6> :LEvalAsync<CR>
 
 #### Vim, Inserting New Sections
 
-The plugin doesn't include tools for section formatting, however they can be
-added easily if required. Below, we demonstrate how to define the `:C` command
-to insert new sections.
+The `litrepl.vim` plugin doesn't include tools for creating section formatting,
+however they can be added easily if required. Below, we demonstrate how to
+define the `:C` command inserting new `python` sections.
 
 <!--lignore-->
 ```` vim
@@ -592,7 +592,8 @@ command! -buffer -nargs=0 C normal 0i``` python<CR>```<CR><CR>``` result<CR>```<
 
 #### Vim, Running the Initial Section After Interpreter Restart
 
-We define the `:LR` command running first section after the restart.
+Below we demonstrate how to define the `:LR` command for running first section
+after the restart.
 
 ``` vim
 command! -nargs=0 LR LRestart | LEval 0
@@ -600,8 +601,9 @@ command! -nargs=0 LR LRestart | LEval 0
 
 #### Vim, Executing Shell Commands
 
-Thanks to IPython features, we can use exclamation to run shell commands
-directly from Python code sections.
+LitRepl doesn't support a shell interpreter at the moment. However, with IPython
+features, we can run shell commands directly from Python code sections using an
+exclamation mark.
 
 ~~~~ markdown
 ``` python
@@ -906,10 +908,10 @@ Examples:
 ~~~~
 <!-- noresult -->
 
-🎪 Visual Showcases
--------------------
+🎥 Visual Exhibitions
+---------------------
 
-<details>
+<details open>
 <summary>Basic usage (Show GIF)</summary>
 
 ![Peek 2024-07-18 20-50-2](https://github.com/user-attachments/assets/8e2b2c8c-3412-4bf6-b75d-d5bd1adaf7ea)
