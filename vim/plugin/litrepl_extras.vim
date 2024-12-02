@@ -34,7 +34,7 @@ endfun
 
 fun! LitReplRegionFromCursor() range " -> [int, int, int, int]
   let [line, column] = getpos(".")[1:2]
-  return [line, column, line, column]
+  return [line, column, line, column-1]
 endfun
 
 fun! LitReplRegionFromFile() range " -> [int, int, int, int]
