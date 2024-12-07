@@ -7,17 +7,18 @@ from re import search, match as re_match, compile as re_compile
 from copy import copy, deepcopy
 from typing import List, Optional, Tuple, Set, Dict, Callable, Any, Iterable
 from select import select
-from os import environ, system, isatty, getpid, unlink, getpgid, setpgid
+from os import (environ, system, isatty, getpid, unlink, getpgid, setpgid,
+                mkfifo, kill)
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter as LarkInterpreter
-from os.path import isfile, join
-from signal import signal, SIGINT
+from os.path import isfile, join, exists
+from signal import signal, SIGINT, SIGKILL, SIGTERM
 from time import sleep, time
-from dataclasses import dataclass, astuple
+from dataclasses import dataclass
 from functools import partial
 from argparse import ArgumentParser
 from collections import defaultdict
-from os import makedirs, getuid, getcwd, WEXITSTATUS
+from os import makedirs, getuid, getcwd, WEXITSTATUS, remove
 from tempfile import gettempdir
 from hashlib import sha256
 from psutil import Process, NoSuchProcess
@@ -135,10 +136,9 @@ def runsocat(fns, hint=None):
 class PythonInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
-    wd,inp,outp,pid,ecode=astuple(fns)
     ret=system(
       f"exec {interpreter} -uic 'import sys; sys.ps1=\"\"; sys.ps2=\"\";' "
-      f"<'{inp}' >'{outp}' 2>&1"
+      f"<'{fns.inp}' >'{fns.outp}' 2>&1"
     )
     return ret
   def setup_child(self, a, finp, foutp)->None:
@@ -168,9 +168,8 @@ class IPythonInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
     assert 'ipython' in interpreter.lower()
-    wd,inp,outp,pid,ecode=astuple(fns)
-    cfg=join(wd,'litrepl_ipython_config.py')
-    log=f"--logfile={join(wd,'_ipython.log')}" if DEBUG else ""
+    cfg=join(fns.wd, 'litrepl_ipython_config.py')
+    log=f"--logfile={join(fns.wd, '_ipython.log')}" if DEBUG else ""
     with open(cfg,'w') as f:
       f.write(
         'import sys\n'
@@ -192,7 +191,7 @@ class IPythonInterpreter(Interpreter):
       )
     ret=system(
       f"exec {interpreter} --config={cfg} --colors=NoColor {log} -i "
-      f"<'{inp}' >'{outp}' 2>&1"
+      f"<'{fns.inp}' >'{fns.outp}' 2>&1"
     )
     return ret
   def setup_child(self, a, finp, foutp)->None:
@@ -283,28 +282,31 @@ def start_(a:LitreplArgs,interpreter:str,i:Interpreter)->int:
   """ Starts the background Python interpreter. Kill an existing interpreter if
   any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`."""
   fns=i.fns
-  wd,inp,outp,pid,ecode=astuple(fns)
-  makedirs(wd, exist_ok=True)
-  if isfile(pid):
-    system(f'kill -9 "$(cat {pid})" >/dev/null 2>&1')
-  system(f"mkfifo '{inp}' '{outp}' 2>/dev/null")
+  makedirs(fns.wd, exist_ok=True)
+  try:
+    with open(fns.pidf,'r') as pid_file:
+      kill(int(pid_file.read().strip()), SIGKILL)
+  except (ValueError,FileNotFoundError,ProcessLookupError):
+    pass
+  mkfifo(fns.inp)
+  mkfifo(fns.outp)
   sys.stdout.flush(); sys.stderr.flush() # FIXME: to avoid duplicated stdout
   npid=os.fork()
   if npid==0:
     # sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
     setpgid(getpid(),0)
-    blind_unlink(ecode)
-    open_child_pipes(inp,outp)
+    blind_unlink(fns.ecodef)
+    open_child_pipes(fns.inp,fns.outp)
     ret=i.run_child(interpreter)
     ret=ret if ret<256 else WEXITSTATUS(ret)
     pdebug(f"fork records ecode: {ret}")
-    with open(ecode,'w') as f:
+    with open(fns.ecodef,'w') as f:
       f.write(str(ret))
     exit(ret)
   else:
-    finp,foutp=open_parent_pipes(inp,outp)
+    finp,foutp=open_parent_pipes(fns.inp,fns.outp)
     i.setup_child(a,finp,foutp)
-    if write_child_pid(pid,npid):
+    if write_child_pid(fns.pidf,npid):
       return 0
     else:
       return 1
@@ -344,15 +346,22 @@ def restart(a:LitreplArgs,st:SType):
 
 def running(a:LitreplArgs,st:SType)->bool:
   """ Checks if the background session was run or not. """
-  fns=pipenames(a,st)
-  return 0==system(f"test -f '{fns.pidf}' && test -p '{fns.inp}' && test -p '{fns.outp}'")
+  fns = pipenames(a,st)
+  return (isfile(fns.pidf) and exists(fns.inp) and exists(fns.outp))
 
 def stop(a:LitreplArgs,st:SType)->None:
-  """ Stops the background Python session. """
-  fns=pipenames(a,st)
-  system(f'kill "$(cat {fns.pidf} 2>/dev/null)" >/dev/null 2>&1')
-  system(f"rm '{fns.inp}' '{fns.outp}' '{fns.pidf}' >/dev/null 2>&1")
-
+  """ Stops the background interpreter session. """
+  fns = pipenames(a,st)
+  try:
+    with open(fns.pidf, 'r') as pid_file:
+      kill(int(pid_file.read().strip()),SIGTERM)
+  except (FileNotFoundError,ValueError,ProcessLookupError):
+    pass
+  for fifo in [fns.inp, fns.outp, fns.pidf]:
+    try:
+      remove(fifo)
+    except FileNotFoundError:
+      pass
 
 @dataclass
 class SymbolsMarkdown:
@@ -754,22 +763,20 @@ def status(a:LitreplArgs,sts:List[SType],version):
 
 def status_oneline(a:LitreplArgs,sts:List[SType])->int:
   for st in sts:
-    fns=pipenames(a,st)
-    auxd,inp,outp,pidf,ecodef=astuple(fns)
-    pdebug(f"status auxdir: {auxd}")
+    fns = pipenames(a, st)
+    pdebug(f"status auxdir: {fns.wd}")
     try:
-      pid=open(pidf).read().strip()
-      cmd=' '.join(Process(int(pid)).cmdline())
+      pid = open(fns.pidf).read().strip()
+      cmd = ' '.join(Process(int(pid)).cmdline())
     except Exception as ex:
       pdebug(f"exception: {ex}")
-      pid='-'
-      cmd='-'
+      pid = '-'
+      cmd = '-'
     try:
-      ecode=open(ecodef).read().strip()
+      ecode = open(fns.ecodef).read().strip()
     except Exception:
-      ecode='-'
+      ecode = '-'
     print(f"{st2name(st):6s} {pid:10s} {ecode:3s} {cmd}")
-
 
 def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
   print(f"version: {version}")
@@ -777,22 +784,21 @@ def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
   print(f"litrepl PATH: {environ.get('PATH','')}")
   ecodes=set()
   for st in sts:
-    fns=pipenames(a,st)
-    auxd,inp,outp,pidf,_=astuple(fns)
-    print(f"{st2name(st)} interpreter auxdir: {auxd}")
+    fns=pipenames(a, st)
+    print(f"{st2name(st)} interpreter auxdir: {fns.wd}")
     try:
-      pid=open(pidf).read().strip()
+      pid=open(fns.pidf).read().strip()
       print(f"{st2name(st)} interpreter pid: {pid}")
     except Exception:
       print(f"{st2name(st)} interpreter pid: ?")
 
-    t=parse_(GRAMMARS[a.filetype], a.tty)
+    t=parse_(GRAMMARS[a.filetype],a.tty)
     sr=solve_sloc('0..$',t)
     for nsec,pend in sr.preproc.pending.items():
       fname=pend.fname
       print(f"{st2name(st)} pending section {nsec} buffer: {fname}")
       try:
-        for bline in check_output(['lsof','-t',fname], stderr=DEVNULL).split(b'\n'):
+        for bline in check_output(['lsof','-t',fname],stderr=DEVNULL).split(b'\n'):
           line=bline.decode('utf-8')
           if len(line)==0:
             continue
@@ -805,14 +811,14 @@ def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
       try:
         assert ss is not None
         interpreter_path=eval_code(a,fns,ss,es,
-                                   '\n'.join(["import os","print(os.environ.get('PATH',''))"]))
+          '\n'.join(["import os","print(os.environ.get('PATH',''))"]))
         print(f"{st2name(st)} interpreter PATH: {interpreter_path.strip()}")
       except Exception:
         print(f"{st2name(st)} interpreter PATH: ?")
       try:
         assert ss is not None
         interpreter_pythonpath=eval_code(a,fns,ss,es,
-                                         '\n'.join(["import sys","print(':'.join(sys.path))"]))
+          '\n'.join(["import sys","print(':'.join(sys.path))"]))
         print(f"{st2name(st)} interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
       except Exception:
         print(f"{st2name(st)} interpreter PYTHONPATH: ?")

@@ -93,9 +93,10 @@ class Interpreter:
     specified by `fns`."""
     self.fns=fns
   def run_child(self,interpreter:str)->int:
-    """ Run the interpreter process, wait until it finishes, return the system
-    exit code. The method should spawn exactly one child process. Its stdin and
-    stdout should be attached to pipes as specifiled in the `self.fns`. """
+    """ Launch the interpreter process and wait for it to complete, then return
+    the system's exit code. This method should create only one child process.
+    Its stdin and stdout should be connected to pipes as described in
+    `self.fns`. """
     raise NotImplementedError()
   def setup_child(self, args, finp, foutp)->None:
     """ Sets up the child process by sending interpreter-specific commands to
