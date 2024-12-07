@@ -584,7 +584,7 @@ print("after-exit")
 EOF
 (
 set +e
-cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
+cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md 2>/dev/null
 echo $?>ret.txt
 )
 test `cat ret.txt` = "123"
@@ -616,7 +616,7 @@ print("after-exception")
 EOF
 (
 set +e
-cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
+cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md 2>/dev/null
 echo $?>ret.txt
 )
 test `cat ret.txt` = "123"
