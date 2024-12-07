@@ -1015,6 +1015,29 @@ grep -q 'Interpreter exited with code: 127' out1.md
 grep -q 'Interpreter exited with code: 127' err.txt
 )} #}}}
 
+test_failing_interpreter() {( #{{{
+mktest "_test_failing_interpreter"
+cat >python-failing.sh <<"EOF"
+#!/bin/sh
+echo "FOO" >&1
+echo "BAR" >&2
+exit 127
+EOF
+chmod +x python-failing.sh
+
+cat >source.md <<"EOF"
+```python
+3+2
+```
+```result
+```
+EOF
+cat source.md | runlitrepl --python-auxdir=`pwd`/_python --python-interpreter=./python-failing.sh \
+  eval-sections >out1.md 2>err.txt || true
+grep -q 'FOO' out1.md
+grep -q 'BAR' out1.md
+)} #}}}
+
 test_aicli() {( #{{{
 # Exact result messages might start a race (exit code X VS broken pipe) That is
 # why we put tow sections.
@@ -1097,6 +1120,7 @@ tests() {
   echo test_interrupt $(which python) -
   echo test_interrupt $(which ipython) -
   echo test_invalid_interpreter $(which python) -
+  echo test_failing_interpreter $(which python) -
   echo test_aicli - $(which aicli)
   echo test_vim_eval_code $(which python) -
   echo test_vim_eval_selection $(which python) -

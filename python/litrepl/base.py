@@ -31,7 +31,8 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
                     EvalState, ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE,
                     Interpreter)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
-                   processCont, interpExitCode, readipid, with_parent_finally)
+                   processCont, interpExitCode, readipid, with_parent_finally,
+                   with_fd, read_nonblock)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
                    cursor_within, nlines, wraplong, remove_silent)
 
@@ -302,6 +303,8 @@ def start_(a:LitreplArgs,interpreter:str,i:Interpreter)->int:
     open_child_pipes(fns.inp,fns.outp)
     ret=i.run_child(interpreter)
     ret=ret if ret<256 else WEXITSTATUS(ret)
+    with open(fns.emsgf,'w') as f:
+      f.write(read_nonblock(fns.outp))
     pdebug(f"Fork records ecode: {ret} into {fns.wd}")
     with open(fns.ecodef,'w') as f:
       f.write(str(ret))
@@ -362,7 +365,6 @@ def stop(a:LitreplArgs,st:SType)->None:
     pass
   remove_silent(fns.pidf)
   remove_silent(fns.inp)
-  # remove_silent(fns.outp)
 
 @dataclass
 class SymbolsMarkdown:
@@ -571,7 +573,15 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
     return ec
 
   def _failmsg(fns,ec):
-    return f"<Interpreter exited with code: {ec}>\n"
+    msg=''
+    try:
+      with open(fns.emsgf) as f:
+        msg=f.read()
+    except FileNotFoundError:
+      pass
+    if not msg.endswith('\n'):
+      msg+='\n'
+    return msg+f"<Interpreter exited with code: {ec}>\n"
 
   class C(LarkInterpreter):
     def _print(self, s:str):

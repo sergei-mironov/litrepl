@@ -317,6 +317,17 @@ def with_locked_fd(name:str, flags:int, lock_flags:int,
     else:
       yield None
 
+def read_nonblock(file:str, size=1024)->str:
+  # FIXME: move to utils.py
+  try:
+    with with_fd(file,os.O_RDONLY|os.O_NONBLOCK) as fd:
+      if fd is not None:
+        return os.read(fd,size).decode('utf-8')
+      else:
+        return "<Failed to open last error messages>"
+  except Exception as e:
+    return f"<Failed to read last error message: {str(e)}>"
+
 CREATE_WRONLY_EMPTY=os.O_WRONLY|os.O_SYNC|os.O_TRUNC|os.O_CREAT
 OPEN_RDONLY=os.O_RDONLY|os.O_SYNC
 LOCK_NONBLOCKING=LOCK_EX|LOCK_NB
