@@ -64,8 +64,9 @@ class FileNames:
   wd:str                            # Working directory
   inp:str                           # Input pipe
   outp:str                          # Output pipe
-  pidf:str                          # File containing PID
+  pidf:str                          # File containing current PID
   ecodef:str                        # File containing exit code
+  emsgf:str                         # File containing last output
 
 
 SECVAR_RE = re_compile("(\^+ *R[0-9]+ *\^+)|(v+ *R[0-9]+ *v+)|(\>+ *R[0-9]+ *\<+)",

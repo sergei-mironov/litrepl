@@ -24,7 +24,7 @@ from signal import (pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK,
 
 from .types import (LitreplArgs, RunResult, ReadResult, FileNames,
                     ECode, ECODE_OK, ECODE_RUNNING, ECODE_UNDEFINED)
-from .utils import blind_unlink
+from .utils import remove_silent
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs, flush=True)
@@ -243,7 +243,7 @@ def process(a:LitreplArgs,fns:FileNames, ss:Interpreter, lines:str)->Tuple[str,R
       assert fdr is not None
       pdebug("process readout")
       res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
-      blind_unlink(runr.fname)
+      remove_silent(runr.fname)
       pdebug("process readout complete")
   return res,runr
 
@@ -261,7 +261,7 @@ def interpIsRunning(fns:FileNames)->bool:
 def interpExitCode(fns:FileNames,
                    poll_sec=0.5,
                    poll_attempts=4,
-                   undefined=255)->ECode:
+                   undefined=ECODE_UNDEFINED)->ECode:
   """ Determines retcode of the interpreter. Polls it a little if it looks
   crashed."""
   ecode:int|None=None
@@ -277,7 +277,7 @@ def interpExitCode(fns:FileNames,
     if poll_attempts<=0:
       break
     sleep(poll_sec)
-  return ECODE_UNDEFINED
+  return undefined
 
 @contextmanager
 def with_fd(name:str, flags:int, open_timeout_sec=float('inf')):
@@ -296,7 +296,7 @@ def with_fd(name:str, flags:int, open_timeout_sec=float('inf')):
       assert fd>0, f"Failed to open file '{name}', retcode: {fd}"
       yield fd
     except TimeoutError:
-      pdebug(f"unable to open {name}\n")
+      pdebug(f"Unable to open {name}")
       yield None
 
 @contextmanager
@@ -309,10 +309,10 @@ def with_locked_fd(name:str, flags:int, lock_flags:int,
           fcntl.flock(fd,lock_flags)
         yield fd
       except TimeoutError:
-        pdebug(f"alarm while locking {name}\n")
+        pdebug(f"Alarm while locking {name}")
         yield None
-      except BlockingIOError:
-        pdebug(f"unable to lock {name}\n")
+      except BlockingIOError as err:
+        pdebug(f"Unable to lock {name}", err)
         yield None
     else:
       yield None
@@ -326,7 +326,7 @@ def processAsync(fns:FileNames, ss:Interpreter, code:str)->RunResult:
   """ Send `code` to the interpreter and fork the response reader. The output
   file is locked and its name is saved into the resulting `RunResult` object.
   """
-  wd,inp,outp,_,_=astuple(fns)
+  wd,inp,outp,_,_,_=astuple(fns)
   codehash=abs(hash(code))
   fname=join(wd,f"litrepl_eval_{codehash}.txt")
   pdebug(f"processAsync starting via {fname}")
@@ -366,6 +366,7 @@ def processAsync(fns:FileNames, ss:Interpreter, code:str)->RunResult:
         return RunResult(fname)
     else:
       # The reader is already running, try to own it.
+      pdebug(f"processAsync re-uses already existing reader")
       return RunResult(fname)
 
 def processCont(fns:FileNames,
@@ -389,7 +390,7 @@ def processCont(fns:FileNames,
         pdebug(f"processCont final readout finish")
         # res=res+f"\nDBG Obtained from:{runr.fname}\n"
         rr=ReadResult(res,False) # Return final result
-        blind_unlink(runr.fname)
+        remove_silent(runr.fname)
         pdebug(f"processCont unlinked {runr.fname}")
       else:
         with with_fd(runr.fname,os.O_RDONLY|os.O_SYNC) as fdr:

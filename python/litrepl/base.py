@@ -33,7 +33,7 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
-                   cursor_within, nlines, wraplong, blind_unlink)
+                   cursor_within, nlines, wraplong, remove_silent)
 
 DEBUG:bool=False
 
@@ -89,8 +89,9 @@ def pipenames(a:LitreplArgs, st:SType)->FileNames:
   not explicitly specified in the config, the state is shared for all files in
   the current directory. """
   auxdir=st2auxdir(a,st)
-  return FileNames(auxdir, join(auxdir,"_in.pipe"), join(auxdir,"_out.pipe"),
-                   join(auxdir,"_pid.txt"),join(auxdir,"_ecode.txt"))
+  return FileNames(auxdir,
+                   join(auxdir,"_in.pipe"),join(auxdir,"_out.pipe"),
+                   join(auxdir,"_pid.txt"),join(auxdir,"_ecode.txt"),join(auxdir,"_emsg.txt"))
 
 PATTERN_PYTHON_1=('3256748426384\n',)*2
 PATTERN_PYTHON_2=('325674801010\n',)*2
@@ -102,7 +103,7 @@ def attach(fns:FileNames)->Optional[Interpreter]:
   try:
     pid=readipid(fns)
     if pid is None:
-      pdebug(f"could not determine pid of an interpreter")
+      pdebug(f"Could not determine pid of an interpreter")
       return None
     p=Process(pid)
     cmd=p.cmdline()
@@ -115,10 +116,10 @@ def attach(fns:FileNames)->Optional[Interpreter]:
       cls=PythonInterpreter
     else:
       assert False, f"Unknown interpreter {cmd}"
-    pdebug(f"interpreter pid {pid} cmd '{cmd}' was resolved into '{cls}'")
+    pdebug(f"Interpreter pid {pid} cmd '{cmd}' was resolved into '{cls}'")
     return cls(fns)
   except NoSuchProcess as p:
-    pdebug(f"could not determine the interpreter classs for ({p})")
+    pdebug(f"Could not determine the interpreter classs for ({p})")
     return None
 
 def open_child_pipes(inp,outp):
@@ -288,6 +289,8 @@ def start_(a:LitreplArgs,interpreter:str,i:Interpreter)->int:
       kill(int(pid_file.read().strip()), SIGKILL)
   except (ValueError,FileNotFoundError,ProcessLookupError):
     pass
+  remove_silent(fns.inp)
+  remove_silent(fns.outp)
   mkfifo(fns.inp)
   mkfifo(fns.outp)
   sys.stdout.flush(); sys.stderr.flush() # FIXME: to avoid duplicated stdout
@@ -295,11 +298,11 @@ def start_(a:LitreplArgs,interpreter:str,i:Interpreter)->int:
   if npid==0:
     # sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
     setpgid(getpid(),0)
-    blind_unlink(fns.ecodef)
+    remove_silent(fns.ecodef)
     open_child_pipes(fns.inp,fns.outp)
     ret=i.run_child(interpreter)
     ret=ret if ret<256 else WEXITSTATUS(ret)
-    pdebug(f"fork records ecode: {ret}")
+    pdebug(f"Fork records ecode: {ret} into {fns.wd}")
     with open(fns.ecodef,'w') as f:
       f.write(str(ret))
     exit(ret)
@@ -357,11 +360,9 @@ def stop(a:LitreplArgs,st:SType)->None:
       kill(int(pid_file.read().strip()),SIGTERM)
   except (FileNotFoundError,ValueError,ProcessLookupError):
     pass
-  for fifo in [fns.inp, fns.outp, fns.pidf]:
-    try:
-      remove(fifo)
-    except FileNotFoundError:
-      pass
+  remove_silent(fns.pidf)
+  remove_silent(fns.inp)
+  # remove_silent(fns.outp)
 
 @dataclass
 class SymbolsMarkdown:

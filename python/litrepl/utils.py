@@ -112,10 +112,9 @@ def wraplong(lines, tw):
   s = s if lines and lines.endswith('\n') else s + '\n'
   return s
 
-
-def blind_unlink(file):
+def remove_silent(f:str)->None:
   try:
-    unlink(file)
+    unlink(f)
   except FileNotFoundError:
     pass
 
