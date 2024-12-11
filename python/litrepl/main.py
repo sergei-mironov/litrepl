@@ -1,7 +1,7 @@
 import litrepl
 from litrepl import *
 from litrepl import __version__, eval_section_
-from os import chdir, getcwd
+from os import chdir, getcwd, environ
 from subprocess import check_output, DEVNULL, CalledProcessError
 from argparse import ArgumentParser, HelpFormatter
 from tempfile import mkdtemp
@@ -36,9 +36,11 @@ def make_parser():
     help='Print version.')
   ap.add_argument('--filetype',metavar='STR',default=None,
     help='Specify the type of input formatting (markdown|[la]tex).')
-  ap.add_argument('--python-interpreter',metavar='EXE',default='auto',
+  ap.add_argument('--python-interpreter',metavar='EXE',
+    default=environ.get('LITREPL_PYTHON_INTERPRETER','auto'),
     help='Python interpreter to use (python|ipython|auto)')
-  ap.add_argument('--ai-interpreter',metavar='EXE',default='auto',
+  ap.add_argument('--ai-interpreter',metavar='EXE',
+    default=environ.get('LITREPL_AI_INTERPRETER','auto'),
     help='AI interpreter to use (aicli|auto).')
   ap.add_argument('--timeout',type=str,metavar='F[,F]',default='inf',
     help=dedent('''Timeouts for initial evaluation and for pending checks, in
@@ -52,15 +54,18 @@ def make_parser():
     help="Enable (a lot of) debug messages.")
   ap.add_argument('--verbose',action='store_true',
     help='Be more verbose (used in status).')
-  ap.add_argument('--python-auxdir',type=str,metavar='DIR',default=None,
+  ap.add_argument('--python-auxdir',type=str,metavar='DIR',
+    default=environ.get('LITREPL_PYTHON_AUXDIR'),
     help=dedent('''Directory to store Python interpreter pipes. By default, it
     is created in the system temporary directory with the name derived from
     current working directory.'''))
-  ap.add_argument('--ai-auxdir',type=str,metavar='DIR',default=None,
+  ap.add_argument('--ai-auxdir',type=str,metavar='DIR',
+    default=environ.get('LITREPL_AI_AUXDIR'),
     help=dedent('''Directory to store AI interpreter pipes. By default, it is
     created in the system temporary directory with the name derived from current
     working directory.'''))
-  ap.add_argument('-C','--workdir',type=str,metavar='DIR',default=None,
+  ap.add_argument('-C','--workdir',type=str,metavar='DIR',
+    default=environ.get('LITREPL_WORKDIR',None),
     help=dedent('''Set the new current working directory before run. Note that
     changing directory has the following effects: (1) changes directory of the
     newly started interpreter (2) influence the default --<interp>-auxdir. '''))

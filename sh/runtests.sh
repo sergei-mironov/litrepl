@@ -537,7 +537,7 @@ diff -u out.txt - <<"EOF"
 EOF
 
 # TODO: Re-enable when https://github.com/ipython/ipython/issues/14246 is fixed
-if echo $LITREPL_PYTHON_INTERPRETER | grep -q ipython ; then
+if echo $LITREPL_TEST_PYTHON_INTERPRETER | grep -q ipython ; then
 cat >source.py <<"EOF"
 from textwrap import dedent
 def foo():
@@ -1128,12 +1128,12 @@ tests() {
 }
 
 runlitrepl() {
-  test -n "$LITREPL_PYTHON_INTERPRETER"
-  test -n "$LITREPL_AI_INTERPRETER"
+  test -n "$LITREPL_TEST_PYTHON_INTERPRETER"
+  test -n "$LITREPL_TEST_AI_INTERPRETER"
   test -n "$LITREPL_BIN"
   $LITREPL_BIN/litrepl --debug="$LITREPL_DEBUG" \
-    --python-interpreter="$LITREPL_PYTHON_INTERPRETER" \
-    --ai-interpreter="$LITREPL_AI_INTERPRETER" \
+    --python-interpreter="$LITREPL_TEST_PYTHON_INTERPRETER" \
+    --ai-interpreter="$LITREPL_TEST_AI_INTERPRETER" \
     "$@"
 }
 
@@ -1141,7 +1141,7 @@ runvim() {
   {
     echo ":redir > _vim_messages.log"
     echo ":let g:litrepl_bin=\"$LITREPL_BIN\""
-    echo ":let g:litrepl_python_interpreter=\"$LITREPL_PYTHON_INTERPRETER\""
+    echo ":let g:litrepl_python_interpreter=\"$LITREPL_TEST_PYTHON_INTERPRETER\""
     echo ":let g:litrepl_errfile='_litrepl.err'"
     cat
   } | \
@@ -1206,8 +1206,8 @@ while read t ipy iai ; do
        echo "$iai" | grep -q -E "$INTERPS" ; ) ; then
     echo "Running test \"$t\" python \"$ipy\" ai \"$iai\""
     NRUN=$(expr $NRUN '+' 1)
-    LITREPL_PYTHON_INTERPRETER="$ipy" \
-    LITREPL_AI_INTERPRETER="$iai" \
+    LITREPL_TEST_PYTHON_INTERPRETER="$ipy" \
+    LITREPL_TEST_AI_INTERPRETER="$iai" \
     $t
   fi
 done
