@@ -289,15 +289,18 @@ By default, the directory name is derived from the current directory name (for
 Vim, this is based on the directory of the current file).
 
 This behavior can be configured by:
-* Explicitly setting the working directory with `--workdir=DIR` (this may also
-  affect the current directory of the interpreters), or
-* Defining the auxiliary directory with `--<interpreter-type>-auxdir=DIR`
+* Explicitly setting the working directory with `LITREPL_WORKDIR` environment
+  variable or `--workdir=DIR` command-line argument (this may also affect the
+  current directory of the interpreters), or
+* Defining the auxiliary directory with `LITREPL_<ityp>_AUXDIR` environment
+  variable or `--<ityp>-auxdir=DIR` command-line argument, where `<ityp>` stands
+  for either `python` or `ai`.
 
 
 The commands `litrepl start`, `litrepl stop`, and `litrepl restart` are used to
 manage interpreter sessions. They accept the interpreter type to operate on or
 the keyword `all` to apply the command to all interpreters. Add the
-`--<interpreter-type>-interpteter=CMDLINE` to set the exact command line for
+`--<ityp>-interpteter=CMDLINE` to set the exact command line for
 Litrepl to execute.
 
 ``` shell
