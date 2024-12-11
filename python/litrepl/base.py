@@ -803,19 +803,21 @@ def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
     except Exception:
       print(f"{st2name(st)} interpreter pid: ?")
 
-    t=parse_(GRAMMARS[a.filetype],a.tty)
-    sr=solve_sloc('0..$',t)
-    for nsec,pend in sr.preproc.pending.items():
-      fname=pend.fname
-      print(f"{st2name(st)} pending section {nsec} buffer: {fname}")
-      try:
-        for bline in check_output(['lsof','-t',fname],stderr=DEVNULL).split(b'\n'):
-          line=bline.decode('utf-8')
-          if len(line)==0:
-            continue
-          print(f"{st2name(st)} pending section {nsec} reader: {line}")
-      except CalledProcessError:
-        print(f"{st2name(st)} pending section {nsec} reader: ?")
+    g=GRAMMARS.get(a.filetype)
+    t=parse_(g,a.tty) if g is not None else None
+    sr=solve_sloc('0..$',t) if t is not None else None
+    if sr is not None:
+      for nsec,pend in sr.preproc.pending.items():
+        fname=pend.fname
+        print(f"{st2name(st)} pending section {nsec} buffer: {fname}")
+        try:
+          for bline in check_output(['lsof','-t',fname],stderr=DEVNULL).split(b'\n'):
+            line=bline.decode('utf-8')
+            if len(line)==0:
+              continue
+            print(f"{st2name(st)} pending section {nsec} reader: {line}")
+        except CalledProcessError:
+          print(f"{st2name(st)} pending section {nsec} reader: ?")
     if st==SType.SPython:
       ss=attach(fns)
       es=EvalState(SecRec.empty())
