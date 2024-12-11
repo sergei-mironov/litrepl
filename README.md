@@ -743,13 +743,14 @@ options:
   -v, --version               Print version.
   --filetype STR              Specify the type of input formatting
                               (markdown|[la]tex).
-  --python-interpreter EXE    Python interpreter to use (python|ipython|auto).
-                              Defaults to the value of
-                              LITREPL_PYTHON_INTERPRETER env variable or
-                              "auto".
-  --ai-interpreter EXE        AI interpreter to use (aicli|auto). Defaults to
-                              the value of LITREPL_AI_INTERPRETER env variable
-                              or "auto".
+  --python-interpreter EXE    Python interpreter command, or `auto`. It
+                              defaults to the LITREPL_PYTHON_INTERPRETER
+                              environment variable if set, otherwise "auto".
+                              Litrepl determines "python" or "ipython" type
+                              according to the value.
+  --ai-interpreter EXE        `aicli` interpreter command or `auto`. It
+                              defaults to the LITREPL_AI_INTERPRETER
+                              environment variable if set, otherwise "auto".
   --timeout F[,F]             Timeouts for initial evaluation and for pending
                               checks, in seconds. If the latter is omitted, it
                               is considered to be equal to the former one.
@@ -759,24 +760,21 @@ options:
                               interpreter as-is.
   -d INT, --debug INT         Enable (a lot of) debug messages.
   --verbose                   Be more verbose (used in status).
-  --python-auxdir DIR         Directory to store Python interpreter pipes. By
-                              default, the value is taken from the
-                              LITREPL_PYTHON_AUXDIR environment variable, if
-                              it is defined. Otherwise, it is created in the
-                              system temporary directory with the name derived
-                              from current working directory.
-  --ai-auxdir DIR             Directory to store AI interpreter pipes. By
-                              default, the value is taken from the
-                              LITREPL_AI_AUXDIR environment variable, if it is
-                              defined. Otherwise, it is created in the system
-                              temporary directory with the name derived from
-                              current working directory.
-  -C DIR, --workdir DIR       Set the new current working directory before
-                              run. Note that changing directory has the
-                              following effects: (1) Changes the directory of
-                              the newly started interpreter (2) Influence the
-                              default algorithm associated with the
-                              --<interpeter>-auxdir.
+  --python-auxdir DIR         This directory stores Python interpreter pipes.
+                              It defaults to LITREPL_PYTHON_AUXDIR if set;
+                              otherwise, it's created in the system's
+                              temporary directory, named after the current
+                              working directory.
+  --ai-auxdir DIR             This directory stores AI interpreter pipes. It
+                              defaults to LITREPL_AI_AUXDIR if set; otherwise,
+                              it's created in the system's temporary
+                              directory, named after the current working
+                              directory.
+  -C DIR, --workdir DIR       Set the working directory before execution. By
+                              default, it uses LITREPL_WORKDIR if set,
+                              otherwise remains the current directory. This
+                              affects the directory of a new interpreter and
+                              the --<interpreter>-auxdir option.
   --pending-exit INT          Return this error code if whenever a section
                               hits timeout.
   --exception-exit INT        Return this error code at exception, if any.
