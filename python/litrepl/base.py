@@ -226,6 +226,7 @@ class IPythonInterpreter(Interpreter):
     runsocat(self.fns)
 
 class AicliInterpreter(Interpreter):
+  endcmd="/ask"
   def run_child(self,interpreter)->int:
     fns=self.fns
     ret=system(
@@ -240,7 +241,10 @@ class AicliInterpreter(Interpreter):
   def patterns(self):
     return PATTERN_GPT4ALLCLI_1,PATTERN_GPT4ALLCLI_2
   def result_postprocess(self, a:LitreplArgs, text:str) -> str:
-    return text.strip()+"\n"
+    text=text.strip()
+    if text.endswith(self.endcmd):
+      text=text[:-len(self.endcmd)].strip()
+    return text+"\n"
   def code_preprocess(self, a:LitreplArgs, es:EvalState, code:str) -> str:
     for secvar,ref in secvar_matches(copy(code)):
       if secvar[0]=='^':
@@ -260,7 +264,7 @@ class AicliInterpreter(Interpreter):
           es.sr.preproc.results.get(absref,f'<invalid reference to section {absref}>').strip()
         )
       )
-    return code + "/ask\n"
+    return code + f"{self.endcmd}\n"
   def run_repl(self, a:LitreplArgs):
     rr,_=eval_code_raw(self,f"/set terminal prompt \">>> \"\n\n",
                   float('inf'),float('inf'),True)
