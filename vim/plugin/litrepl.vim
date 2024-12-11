@@ -103,12 +103,16 @@ fun! LitReplCmd()
   if LitReplGet('litrepl_ai_auxdir') != ''
     let cmd = cmd . ' --ai-auxdir="'.LitReplGet('litrepl_ai_auxdir').'"'
   endif
+  if LitReplGet('litrepl_python_interpreter') != ''
+    let cmd = cmd .' --python-interpreter="'.LitReplGet('litrepl_python_interpreter').'"'
+  endif
+  if LitReplGet('litrepl_ai_interpreter') != ''
+    let cmd = cmd . ' --ai-interpreter="'.LitReplGet('litrepl_ai_interpreter').'"'
+  endif
   let ft = &filetype
   let cur = getcharpos('.')
   let tw = string(&textwidth)
   let cmd = cmd .
-        \ ' --python-interpreter="'.LitReplGet('litrepl_python_interpreter').'"'.
-        \ ' --ai-interpreter="'.LitReplGet('litrepl_ai_interpreter').'"'.
         \ ' --pending-exit='.LitReplGet('litrepl_pending').
         \ ' --debug='.LitReplGet('litrepl_debug').
         \ ' --filetype='.ft.
