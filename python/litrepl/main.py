@@ -38,10 +38,12 @@ def make_parser():
     help='Specify the type of input formatting (markdown|[la]tex).')
   ap.add_argument('--python-interpreter',metavar='EXE',
     default=environ.get('LITREPL_PYTHON_INTERPRETER','auto'),
-    help='Python interpreter to use (python|ipython|auto)')
+    help=dedent('''Python interpreter to use (python|ipython|auto). Defaults to
+    the value of LITREPL_PYTHON_INTERPRETER env variable or "auto".'''))
   ap.add_argument('--ai-interpreter',metavar='EXE',
     default=environ.get('LITREPL_AI_INTERPRETER','auto'),
-    help='AI interpreter to use (aicli|auto).')
+    help=dedent('''AI interpreter to use (aicli|auto). Defaults to
+    the value of LITREPL_AI_INTERPRETER env variable or "auto".'''))
   ap.add_argument('--timeout',type=str,metavar='F[,F]',default='inf',
     help=dedent('''Timeouts for initial evaluation and for pending checks, in
     seconds. If the latter is omitted, it is considered to be equal to the
@@ -56,19 +58,22 @@ def make_parser():
     help='Be more verbose (used in status).')
   ap.add_argument('--python-auxdir',type=str,metavar='DIR',
     default=environ.get('LITREPL_PYTHON_AUXDIR'),
-    help=dedent('''Directory to store Python interpreter pipes. By default, it
-    is created in the system temporary directory with the name derived from
-    current working directory.'''))
+    help=dedent('''Directory to store Python interpreter pipes. By default, the
+    value is taken from the LITREPL_PYTHON_AUXDIR environment variable, if it is
+    defined. Otherwise, it is created in the system temporary directory with the
+    name derived from current working directory.'''))
   ap.add_argument('--ai-auxdir',type=str,metavar='DIR',
     default=environ.get('LITREPL_AI_AUXDIR'),
-    help=dedent('''Directory to store AI interpreter pipes. By default, it is
-    created in the system temporary directory with the name derived from current
-    working directory.'''))
+    help=dedent('''Directory to store AI interpreter pipes. By default, the
+    value is taken from the LITREPL_AI_AUXDIR environment variable, if it is
+    defined. Otherwise, it is created in the system temporary directory with the
+    name derived from current working directory.'''))
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',
     default=environ.get('LITREPL_WORKDIR',None),
     help=dedent('''Set the new current working directory before run. Note that
-    changing directory has the following effects: (1) changes directory of the
-    newly started interpreter (2) influence the default --<interp>-auxdir. '''))
+    changing directory has the following effects: (1) Changes the directory of the
+    newly started interpreter (2) Influence the default algorithm associated
+    with the --<interpeter>-auxdir. '''))
   ap.add_argument('--pending-exit',type=str,metavar='INT',default=None,
     help=dedent('''Return this error code if whenever a section hits timeout.'''))
   ap.add_argument('--exception-exit',type=str,metavar='INT',default=None,
