@@ -28,7 +28,11 @@ if ! exists("g:litrepl_ai_interpreter")
   let g:litrepl_ai_interpreter = 'auto'
 endif
 if ! exists("g:litrepl_workdir")
-  let g:litrepl_workdir = '%:p:h'
+  if exists('$LITREPL_WORKDIR')
+    let g:litrepl_workdir = ''
+  else
+    let g:litrepl_workdir = '%:p:h'
+  endif
 endif
 if ! exists("g:litrepl_python_auxdir")
   let g:litrepl_python_auxdir = ''
@@ -96,12 +100,15 @@ fun! LitReplCmd()
       let g:litrepl_check_versions = 0
     endif
   endif
-  let cmd = LitReplExe() . ' --workdir="'.expand(LitReplGet('litrepl_workdir')).'"'
+  let cmd = LitReplExe()
+  if LitReplGet('litrepl_workdir') != ''
+    let cmd  = cmd . ' --workdir="'.expand(LitReplGet('litrepl_workdir')).'"'
+  endif
   if LitReplGet('litrepl_python_auxdir') != ''
-    let cmd = cmd . ' --python-auxdir="'.LitReplGet('litrepl_python_auxdir').'"'
+    let cmd = cmd . ' --python-auxdir="'.expand(LitReplGet('litrepl_python_auxdir')).'"'
   endif
   if LitReplGet('litrepl_ai_auxdir') != ''
-    let cmd = cmd . ' --ai-auxdir="'.LitReplGet('litrepl_ai_auxdir').'"'
+    let cmd = cmd . ' --ai-auxdir="'.expand(LitReplGet('litrepl_ai_auxdir')).'"'
   endif
   if LitReplGet('litrepl_python_interpreter') != ''
     let cmd = cmd .' --python-interpreter="'.LitReplGet('litrepl_python_interpreter').'"'
