@@ -123,14 +123,14 @@ fun! LitReplAIQuery(selection, file, prompt) range " -> [int, string]
       \ selection."\n".
       \ "/paste off\n".
       \ "/cp buffer:in buffer:sel\n"
-    let prompt = substitute(prompt, "/S", "/append buffer:\"sel\" buffer:\"in\"\n", "g")
+    let prompt = substitute(prompt, "/S", "\n/append buffer:\"sel\" buffer:\"in\"\n", "g")
   endif
 
   if file > 0
     let header = header.
       \ "/clear buffer:in\n".
       \ "/cp file:\"".expand('%:p')."\" buffer:file\n"
-    let prompt = substitute(prompt, "/F", "/append buffer:\"file\" buffer:\"in\"\n", "g")
+    let prompt = substitute(prompt, "/F", "\n/append buffer:\"file\" buffer:\"in\"\n", "g")
   endif
 
   " echomsg "|P " . header. prompt . " P|"
@@ -271,7 +271,7 @@ fun! LitReplAICode(scope, prompt) range " -> [int, string]
   " example instruction, (c) combining the prompt with instructional text to
   " avoid markdown and include comment wrapping, (d) call LitReplTaskNew with
   " the constructed task description.
-  let prompt = a:prompt
+  let [scope, prompt] = [a:scope, a:prompt]
   if len(trim(prompt)) == 0
     let prompt = input(
       \"Hint: type /S to insert the selection, ".
@@ -279,22 +279,31 @@ fun! LitReplAICode(scope, prompt) range " -> [int, string]
       \"empty input implies /S\n".
       \"Your comments on the task: ")
   endif
-  if a:scope == 1
-    let example = "Your task is to change the following code snippet: \n---\n/S\n---\n"
+  if scope == 1
+    let task = "Your task is to change the following code snippet: \n---\n/S\n---\n"
   else
-    let example = ""
+    let task = ""
   endif
   let footer = ''.
-    \ "Please print the resulting program as-is " .
-    \ "without any text formatting, especially avoid markdown \"```\" ".
-    \ "formatting! Wrap your own comments, if any, into the code comments ".
-    \ "e.g. by using hash-comment or \\/\\/ symbols. "
+    \ "Please print the resulting code snippet as-is " .
+    \ "without any markdown formatting, especially avoid the \"```\" ".
+    \ "formatting! Please preserve the original identation whenever possible! "
+  let vm = visualmode()
+  if (scope == 1 && vm == 'V') || (scope == 0 && getpos('.')[2] == 1)
+    let footer = footer .
+      \ "Wrap your own comments, if any, into the appropriate comment blocks or " .
+      \ "line-comments suitable for the main programming language of the sinppet " .
+      \ "e.g. by using hash-comment or \\/\\/ symbols. "
+  else
+    let footer = footer .
+      \ "Please generate no comments, just output the code snippet! "
+  endif
   if &textwidth > 0
     let footer = footer . "Please avoid generating lines longer than ".
       \ string(&textwidth)." characters. "
   endif
-  return LitReplTaskNew(a:scope,
-    \ example .
+  return LitReplTaskNew(scope,
+    \ task .
     \ "You need to do the following: " .
     \ prompt . "\n".
     \ footer)
