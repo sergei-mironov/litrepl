@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Version 3.10.1
+--------------
+
+Minor environment changes
+
 Version 3.10.0
 --------------
 
