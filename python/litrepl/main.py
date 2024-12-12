@@ -205,7 +205,7 @@ def main(args=None):
       fns=pipenames(a,st)
       if not running(a,st) or a.foreground:
         start(a,st)
-      ss=attach(fns)
+      ss=attach(fns,st)
       assert ss is not None, f"Failed to attach to {st2name(st)} interpreter"
       ss.run_repl(a)
       ecode=interpExitCode(fns,undefined=200)
@@ -223,7 +223,7 @@ def main(args=None):
       fns=pipenames(a,st)
       if not running(a,st) or a.foreground:
         start(a,st)
-      ss=attach(fns)
+      ss=attach(fns,st)
       assert ss is not None, f"Failed to attach to {st2name(st)} interpreter"
       print(eval_code(a,fns,ss,es,sys.stdin.read()),end='',flush=True)
       ecode=interpExitCode(fns,undefined=200)

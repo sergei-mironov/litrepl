@@ -99,7 +99,7 @@ PATTERN_PYTHON_2=('325674801010\n',)*2
 PATTERN_GPT4ALLCLI_1=('/echo 1121312\n', '1121312\n')
 PATTERN_GPT4ALLCLI_2=('/echo 8893223\n', '8893223\n')
 
-def attach(fns:FileNames)->Optional[Interpreter]:
+def attach(fns:FileNames, st:SType|None=None)->Optional[Interpreter]:
   """ Attach to the interpreter associated with the given pipe filenames. """
   try:
     pid=readipid(fns)
@@ -109,14 +109,14 @@ def attach(fns:FileNames)->Optional[Interpreter]:
     p=Process(pid)
     cmd=p.cmdline()
     cls=None
-    if any('aicli' in w for w in cmd):
+    if (st is None or st==SType.SAI) and any('aicli' in w for w in cmd):
       cls=AicliInterpreter
-    elif any('ipython' in w for w in cmd):
+    elif (st is None or st==SType.SPython) and any('ipython' in w for w in cmd):
       cls=IPythonInterpreter
-    elif any('python' in w for w in cmd):
+    elif (st is None or st==SType.SPython) and any('python' in w for w in cmd):
       cls=PythonInterpreter
     else:
-      assert False, f"Unknown interpreter {cmd}"
+      assert False, f"Unknown or undefined interpreter {cmd} (among {st})"
     pdebug(f"Interpreter pid {pid} cmd '{cmd}' was resolved into '{cls}'")
     return cls(fns)
   except NoSuchProcess as p:
@@ -552,7 +552,7 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
     fns=pipenames(a,st)
     if not running(a,st):
       start(a,st)
-    ss=attach(fns)
+    ss=attach(fns,st)
     if not ss:
       return (fns,None)
     if interrupt:
@@ -823,7 +823,7 @@ def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
         except CalledProcessError:
           print(f"{st2name(st)} pending section {nsec} reader: ?")
     if st==SType.SPython:
-      ss=attach(fns)
+      ss=attach(fns,st)
       es=EvalState(SecRec.empty())
       try:
         assert ss is not None
