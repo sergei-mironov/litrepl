@@ -1173,6 +1173,7 @@ EOF
 set -e
 
 export AICLI_RC=none
+unset AICLI_HISTORY
 INTERPS='.*'
 TESTS='.*'
 LITREPL_DEBUG=0
