@@ -161,6 +161,12 @@ The Nix-powered installation methods install the Socat tool automatically. For
 other installation methods, use your system pacakge manager to install it. For
 example, Ubuntu users might run `sudo apt-get install socat`.
 
+The Python interpreter is usually installed by default, along with the `pip`
+installer. To install `ipython`, you can use `pip install ipython`. For the
+[aicli](https://github.com/sergei-mironov/aicli) interpreter, you can run `pip
+install sm_aicli`, or refer to the project page for additional installation
+methods.
+
 🚀 Usage
 --------
 
