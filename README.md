@@ -3,7 +3,7 @@
 ⌨️ LitRepl ⌨️
 </h1>
 
-[Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-visual-exhibitions)
+[Changelog](./CHANGELOG.md) | [Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-visual-exhibitions)
 </div>
 
 **LitRepl** is a command-line tool that brings together the benefits of
@@ -791,7 +791,8 @@ options:
                               interpreters. It takes affect only for newly-
                               started interpreters.
   --foreground                Start a separate session and stop it when the
-                              evaluation is done.
+                              evaluation is done. All --*-auxdir settings are
+                              ignored in this mode.
   --map-cursor LINE:COL:FILE  Calculate the new position of a cursor at
                               LINE:COL and write it to FILE.
   --result-textwidth NUM      Wrap result lines longer than NUM symbols.
