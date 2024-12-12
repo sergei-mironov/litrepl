@@ -82,7 +82,7 @@ def make_parser():
     newly-started interpreters.'''))
   ap.add_argument('--foreground',action='store_true',
     help=dedent('''Start a separate session and stop it when the evaluation is
-    done.'''))
+    done. All --*-auxdir settings are ignored in this mode.'''))
   ap.add_argument('--map-cursor',type=str,metavar='LINE:COL:FILE',default=None,
     help=dedent('''Calculate the new position of a cursor at LINE:COL and write
     it to FILE.'''))
@@ -164,13 +164,8 @@ def main(args=None):
     assert a.command not in {'start','stop','restart','repl','interrupt'}, \
       f"--foreground is not compatible with '{a.command}' command"
     for st in [SType.SPython,SType.SAI]:
-      auxdir=getattr(a,f"{st2name(st)}_auxdir",None)
-      if auxdir is None:
-        setattr(a,f"{st2name(st)}_auxdir",
-                mkdtemp(prefix=f"litrepl-{st2name(st)}-foreground"))
-      else:
-        assert not running(a,st), \
-          f"Explicitly-specified auxdir ({auxdir}) contains a running session"
+      setattr(a,f"{st2name(st)}_auxdir",
+              mkdtemp(prefix=f"litrepl-{st2name(st)}-foreground"))
 
   if a.command=='start':
     ecode=start(a,name2st(a.type))
