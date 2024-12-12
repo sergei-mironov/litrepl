@@ -90,10 +90,11 @@ _Notes:_
 ⚙️ Installation
 --------------
 
-This repository contains the Litrepl tool, packaged as both a standalone Python
-application and a Vim plugin interface. The author's preferred method is using
-Nix, but if you choose not to use it, you'll need to install both components
-separately. Below, we outline several common installation methods.
+This repository hosts the Litrepl tool, a standalone command-line application
+and an interface plugin for the Vim editor. The author's preferred installation
+method is using Nix, but if you choose not to use it, you'll need to install one
+or both components separately. Below, we outline several common installation
+methods.
 
 <details open><summary><b>Release versions, from Pypi and Vim.org</b></summary><p>
 
