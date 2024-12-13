@@ -1,6 +1,20 @@
 if exists("g:litrepl_loaded")
   finish
 endif
+
+fun! LitReplGetTempDir()
+  " Get the system temporary files directory from $TMPDIR, $TEMP, or $TMP
+  if exists('$TMPDIR')
+    return $TMPDIR
+  elseif exists('$TEMP')
+    return $TEMP
+  elseif exists('$TMP')
+    return $TMP
+  else
+    return '/tmp'
+  endif
+endfun
+
 if ! exists("g:litrepl_bin")
   " TODO: Delay the expansion until the LitReplExe or alike.
   let g:litrepl_bin = expand('<sfile>:p:h:h').'/bin/'
@@ -15,11 +29,11 @@ if ! exists("g:litrepl_debug")
   let g:litrepl_debug = 0
 endif
 if ! exists("g:litrepl_errfile")
-  let g:litrepl_errfile = '/tmp/litrepl.err'
+  let g:litrepl_errfile = LitReplGetTempDir() . '/litrepl.err'
 endif
 if ! exists("g:litrepl_map_cursor_output")
   " No colons `:` are allowed in this file name
-  let g:litrepl_map_cursor_output = '/tmp/litrepl_cursor.txt'
+  let g:litrepl_map_cursor_output = LitReplGetTempDir() . '/litrepl_cursor.txt'
 endif
 if ! exists("g:litrepl_python_interpreter")
   let g:litrepl_python_interpreter = 'auto'
@@ -50,7 +64,7 @@ if ! exists("g:litrepl_dump_mon")
   let g:litrepl_dump_mon = 0
 endif
 
-function! LitReplGet(name)
+fun! LitReplGet(name)
   if exists('b:'.a:name)
     return get(b:, a:name, '')
   elseif exists('g:'.a:name)
@@ -58,7 +72,7 @@ function! LitReplGet(name)
   else
     return ''
   endif
-endfunction
+endfun
 
 fun! LitReplExe()
   let oldpath = getenv('PATH')
