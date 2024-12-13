@@ -345,6 +345,11 @@ print('FOOO')
 %result
 PLACEHOLDER
 %noresult
+% python
+3+4
+% nopython
+%result
+%noresult
 EOF
 cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
 diff -u source.tex out.tex
@@ -389,6 +394,12 @@ print('FOOO')
 \end{python}
 %result
 FOOO
+%noresult
+% python
+3+4
+% nopython
+%result
+7
 %noresult
 EOF
 )} #}}}
