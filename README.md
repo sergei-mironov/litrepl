@@ -58,7 +58,6 @@ _Notes:_
         * [Asynchronous Processing](#asynchronous-processing)
         * [Direct Interaction with Interpreters](#direct-interaction-with-interpreters)
         * [Experimental AI Features](#experimental-ai-features)
-        * [Calling for AI on a Vim visual selection](#calling-for-ai-on-a-vim-visual-selection)
     * [Application Scenarios](#application-scenarios)
         * [Command Line, Foreground Evaluation](#command-line-foreground-evaluation)
         * [Command Line, Detecting Python Exceptions](#command-line-detecting-python-exceptions)
@@ -68,6 +67,7 @@ _Notes:_
         * [Vim, Running the Initial Section After Interpreter Restart](#vim-running-the-initial-section-after-interpreter-restart)
         * [Vim, Executing Shell Commands](#vim-executing-shell-commands)
         * [Vim, Evaluating Selected Text](#vim-evaluating-selected-text)
+        * [Vim, Calling for AI on a visual selection](#vim-calling-for-ai-on-a-visual-selection)
     * [In-Depth Reference](#in-depth-reference)
         * [Vim Commands and Command-Line Attributes](#vim-commands-and-command-line-attributes)
         * [Command Line Arguments and Vim Variables](#command-line-arguments-and-vim-variables)
@@ -292,16 +292,16 @@ following strings: `all`, `above` (the cursor) and `below` (the cursor).
 Each interpreter session uses an auxiliary directory where Litrepl stores
 filesystem pipes and other runtime data.
 
-By default, the directory name is derived from the current directory name (for
-Vim, this is based on the directory of the current file).
+By default, the auxiliary directory path is derived from the working directory
+name (for Vim, this defaults to the directory of the current file).
 
 This behavior can be configured by:
-* Explicitly setting the working directory with `LITREPL_WORKDIR` environment
+* Setting the working directory with `LITREPL_WORKDIR` environment
   variable or `--workdir=DIR` command-line argument (this may also affect the
   current directory of the interpreters), or
-* Defining the auxiliary directory with `LITREPL_<ityp>_AUXDIR` environment
-  variable or `--<ityp>-auxdir=DIR` command-line argument, where `<ityp>` stands
-  for either `python` or `ai`.
+* Explicitly setting the auxiliary directory with `LITREPL_<ITYP>_AUXDIR`
+  environment variable or `--<ityp>-auxdir=DIR` command-line argument, where
+  `<ityp>` stands for either `python` or `ai`.
 
 
 The commands `litrepl start`, `litrepl stop`, and `litrepl restart` are used to
@@ -472,50 +472,6 @@ connection with users.
 <!--lnoignore-->
 
 
-#### Calling for AI on a Vim visual selection
-
-The repository includes [litrepl_extras.vim](./vim/plugin/litrepl_extras.vim), which
-defines extra tools for interacting with AI. These tools are based on the single
-low-level `LitReplAIQuery()` function.
-
-The function enables the creation of an AI chat query possibly incorporating the
-current file and any selected text. The AI model's response then returned
-alongside with the Litrepl error code.
-
-Based on this function, the following two middle-level functions are defined:
-- `LitReplTaskNew(scope, prompt)`
-- `LitReplTaskContinue(scope, prompt)`
-
-Both functions take the prompt, produce the AI model response and decide where
-to insert it. However, the key difference is that the first function determines
-the target location based on user input (like cursor position or selection),
-while the second function re-applies the previously used position, allowing
-users to make changes easilly.
-
-Finally, a number of high-level commands have been established. Each of these
-commands receives an input string that directs the model on what action to take.
-The user input can contain `/S` or `/F` tokens, which are replaced with the
-values of the visual selection and the current file, respectively.
-
-
-| Command    | Description                    | Incorporates           | Updates            |
-|------------|--------------------------------|------------------------|--------------------|
-| `LAI`      | Passes the prompt as-is        | Input, Selection       | Cursor, Selection  |
-| `LAICont`  | Passes the prompt as-is        | Input, Selection       | Last |
-| `LAIStyle` | Asks to improve language style | Input, Selection       | Selection          |
-| `LAICode`  | Asks to modify a code snippet  | Input, Selection       | Cursor, Selection  |
-| `LAITell`  | Asks to describe a code snippet| Input, Selection       | Terminal*          |
-| `LAIFile`  | Asks to change a whole file    | Input, Selection, File | File               |
-
-* `LAITell` displays the response in the AI terminal
-
-As with the selection evaluation mode, the `aicli` interpreter stays
-active in the background, maintaining the log of the conversation.
-
-Direct interaction with the interpreter functions as expected. The `LTerm ai`
-command opens the Vim terminal as usual, enabling communication with a model
-through `aicli` text commands.
-
 ### Application Scenarios
 
 #### Command Line, Foreground Evaluation
@@ -666,6 +622,53 @@ The capital of New Zealand is Wellington.
 
 Internally, the plugin just uses `eval-code` Litrepl command.
 
+
+#### Vim, Calling for AI on a visual selection
+
+The repository includes [litrepl_extras.vim](./vim/plugin/litrepl_extras.vim), which
+defines extra tools for interacting with AI. These tools are based on the single
+low-level `LitReplAIQuery()` function.
+
+The function enables the creation of an AI chat query possibly incorporating the
+current file and any selected text. The AI model's response then returned
+alongside with the Litrepl error code.
+
+Based on this function, the following two middle-level functions are defined:
+- `LitReplTaskNew(scope, prompt)`
+- `LitReplTaskContinue(scope, prompt)`
+
+Both functions take the prompt, produce the AI model response and decide where
+to insert it. However, the key difference is that the first function determines
+the target location based on user input (like cursor position or selection),
+while the second function re-applies the previously used position, allowing
+users to make changes easilly.
+
+Finally, a number of high-level commands have been established. Each of these
+commands receives an input string that directs the model on what action to take.
+The user input can contain `/S` or `/F` tokens, which are replaced with the
+values of the visual selection and the current file, respectively.
+
+
+| Command    | Description                    | Incorporates           | Updates            |
+|------------|--------------------------------|------------------------|--------------------|
+| `LAI`      | Passes the prompt as-is        | Input, Selection       | Cursor, Selection  |
+| `LAICont`  | Passes the prompt as-is        | Input, Selection       | Last               |
+| `LAIStyle` | Asks to improve language style | Input, Selection       | Selection          |
+| `LAICode`  | Asks to modify a code snippet  | Input, Selection       | Cursor, Selection  |
+| `LAITell`  | Asks to describe a code snippet| Input, Selection       | Terminal*          |
+| `LAIFile`  | Asks to change a whole file    | Input, Selection, File | File               |
+
+* `LAITell` shows the response in the AI terminal instead of inserting it into
+  the document.
+
+As with the selection evaluation mode, the `aicli` interpreter stays
+active in the background, maintaining the log of the conversation.
+
+Direct interaction with the interpreter functions as expected. The `LTerm ai`
+command opens the Vim terminal as usual, enabling communication with a model
+through `aicli` text commands.
+
+
 ### In-Depth Reference
 
 #### Vim Commands and Command-Line Attributes
@@ -690,25 +693,29 @@ Internally, the plugin just uses `eval-code` Litrepl command.
 
 Where
 
-* `T` type of the interpreter: `python` or `ai` (some commands also accept `all`)
+* `T` Type of the interpreter: `python` or `ai` (some commands also accept `all`)
 * `F` Path to a Markdown or LaTeX file
 * `P` Path to a Python script
-* `N` number of code section to evaluate, starting from 0.
+* `N` Number of code section to evaluate, starting from 0.
 * `L:C` denotes line:column of the cursor.
 
 #### Command Line Arguments and Vim Variables
 
 | Vim setting  <img width=200/>   | CLI argument  <img width=200/> | Description                       |
 |---------------------------------|--------------------------------|-----------------------------------|
-| `set filetype`                  | `--filetype=D`                 | Input file type: `latex`\|`markdown` |
+| `set filetype`                  | `--filetype=T`                 | Input file type: `latex`\|`markdown` |
 | `let g:litrepl_python_interpreter=B` | `--python-interpreter=B`  | The Python interpreter to use: `python`\|`ipython`\|`auto` (the default) |
 | `let g:litrepl_ai_interpreter=B`     | `--ai-interpreter=B`      | The AI interpreter to use: `aicli`\|`auto` (the default) |
+| `let g:litrepl_python_auxdir=D` | `--python-auxdir=D`            | The auxiliary files directory used by Python interpreter |
+| `let g:litrepl_ai_auxdir=D`     | `--ai-auxdir=D`                | The auxiliary files directory used by AI interpreter |
+| `let g:litrepl_workdir=D`       | `--workdir=D`                  | The auxiliary files directory used by AI interpreter |
 | `let g:litrepl_debug=0/1`       | `--debug=0/1`                  | Print debug messages to the stderr |
 | `let g:litrepl_timeout=FLOAT`   | `--timeout=FLOAT`              | Timeout to wait for the new executions, in seconds, defaults to inf |
 
-* `D` type of the document: `tex` or `markdown` (the default).
-* `B` interpreter binary to use, defaults to `auto` which guesses the best one.
-* `FLOAT` should be formatted as `1` or `1.1` or `inf`. Note: command line
+* `T` Type of the document: `tex` or `markdown` (the default).
+* `B` Interpreter binary to use, defaults to `auto` which guesses the best one.
+* `D` Filesystem directory
+* `FLOAT` Should be formatted as `1` or `1.1` or `inf`. Note: command line
   argument also accepts a pair of timeouts.
 
 #### Command Line Arguments Summary
