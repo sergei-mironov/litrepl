@@ -50,8 +50,8 @@ vimbundle: $(VIMB_REV)
 $(VIMB_REV): $(VIM)
 	mkdir -p $$(dirname $@) || true
 	rm -rf build/vim || true
-	mkdir -p build/vim
-	cp -r vim/plugin/*vim build/vim
+	mkdir -p build/vim/plugin
+	cp -r vim/plugin/*vim build/vim/plugin
 	sed -i "s/version-to-be-filled-by-the-packager/$(VERSION)+g$(REVISION)/g" \
 		build/vim/plugin/litrepl.vim
 	tar -czvf $@ -C build/vim plugin
