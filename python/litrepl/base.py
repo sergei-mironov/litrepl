@@ -651,9 +651,9 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
   def _finally():
     if a.map_cursor:
       cl=a.map_cursor[0] # cursor line
-      for threshold,diff in sorted(es.ledder.items()):
-        if cl>threshold:
-          cl=max(threshold,cl+diff)
+      for line,diff in sorted(es.ledder.items()):
+        if cl>line:
+          cl=max(line,cl+diff)
       with open(a.map_cursor_output,"w") as f:
         f.write(str(cl))
     if a.foreground:

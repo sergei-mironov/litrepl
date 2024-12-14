@@ -167,6 +167,7 @@ fun! LitReplUpdateCursor(cur)
     let newrow = str2nr(readfile(LitReplGet('litrepl_map_cursor_output'))[0])
     if newrow != 0
       let cur[1] = newrow
+      let b:litrepl_lastpos = cur[1].":".cur[2]
     endif
     call setcharpos('.', cur)
   catch /E484/
@@ -213,8 +214,6 @@ endfun
 
 fun! LitReplRunBuffer(command, timeout) range
   " Run the current buffer 'through' the litrepl processor.
-  let cur = getcharpos('.')
-  let ft = &filetype
   let cmd = '%!'.LitReplCmdTimeout(a:timeout).' '.a:command.' 2>'.LitReplGet('litrepl_errfile')
   silent execute cmd
   let errcode = v:shell_error
@@ -258,13 +257,15 @@ function! SaveStringToFile(dump)
   let g:log_count += 1
 endfunction
 
-fun! LitReplRunBufferMonitor(command)
+fun! LitReplRunBufferMonitor()
   let cur = getcharpos('.')
   try
     let g:log_count = 0
     while 1
       let &ul=&ul " [1]
-      let errcode = LitReplRunBuffer(a:command, LitReplGet('litrepl_timeout').',0.0')
+      let cur = getcharpos('.')
+      let command = "eval-sections ".cur[1].":".cur[2]
+      let errcode = LitReplRunBuffer(command, LitReplGet('litrepl_timeout').',0.0')
 
       if LitReplGet('litrepl_dump_mon') == 1
         let dump = ["CODE", string(errcode), "CONTENTS"]
@@ -273,10 +274,11 @@ fun! LitReplRunBufferMonitor(command)
       endif
 
       if errcode == 0
-        call LitReplVisualize(errcode, '')
+        call LitReplUpdateCursor(cur)
         break
       else
         if errcode == LitReplGet('litrepl_pending')
+          call LitReplUpdateCursor(cur)
           silent execute "redraw"
         else
           execute "u"
@@ -360,7 +362,7 @@ if !exists(":LEvalAsync")
   command! -bar -nargs=? LEvalAsync call LitReplRunBufferOrUndo("eval-sections ".LitReplPos(<q-args>), LitReplGet('litrepl_timeout').',0.0')
 endif
 if !exists(":LEvalMon")
-  command! -bar -nargs=? LEvalMon call LitReplRunBufferMonitor("eval-sections ".LitReplPos(<q-args>))
+  command! -bar -nargs=0 LEvalMon call LitReplRunBufferMonitor()
 endif
 if !exists(":LEvalLast")
   command! -bar -nargs=0 LEvalLast call LitReplRunBufferOrUndo("eval-sections ".b:litrepl_lastpos, "inf,inf")

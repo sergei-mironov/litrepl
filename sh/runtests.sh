@@ -856,14 +856,21 @@ print()
 ```
 
 ``` result
+.
+.
+.
+.
 ```
 EOF
 
 runvim file.md >_vim.log 2>&1 <<"EOF"
+:nnoremap X A@<Esc>
+13G
 :LEvalMon
+X
 :wq!
 EOF
-grep -q '0123' file.md
+grep -q '0123@' file.md
 )}
 #}}}
 
