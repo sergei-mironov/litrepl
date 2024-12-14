@@ -273,7 +273,7 @@ fun! LitReplRunBufferMonitor(command)
       endif
 
       if errcode == 0
-        LitReplVisualize(errcode, '')
+        call LitReplVisualize(errcode, '')
         break
       else
         if errcode == LitReplGet('litrepl_pending')

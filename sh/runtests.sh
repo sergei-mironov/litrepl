@@ -884,9 +884,9 @@ test_vim_eval_code() {( #{{{
 mktest "_test_vim_eval_code"
 runlitrepl start
 
-cat >file.md
+echo >file.md
 runvim file.md >_vim.log 2>&1 <<"EOF"
-:call append('$',LitReplRun('eval-code python', '3+4')[1])<CR>
+:call append('$',LitReplRun('eval-code python', '3+4')[1])
 :wq!
 EOF
 grep -q '7' file.md
@@ -1162,6 +1162,7 @@ runvim() {
     cat
   } | \
   $LITREPL_ROOT/sh/vim_litrepl_dev --clean "$@"
+  not grep -E '^E[0-9]+|Error' _vim_messages.log
 }
 
 usage() {
