@@ -850,7 +850,7 @@ cat >file.md <<"EOF"
 from time import sleep
 for i in range(4):
   sleep(0.5)
-  print(i, end='')
+  print(i, end='', flush=True)
 
 print()
 ```

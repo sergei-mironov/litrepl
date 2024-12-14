@@ -653,7 +653,7 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
       cl=a.map_cursor[0] # cursor line
       for line,diff in sorted(es.ledder.items()):
         if cl>line:
-          cl=max(line,cl+diff)
+          cl=max(line+1,cl+diff)
       with open(a.map_cursor_output,"w") as f:
         f.write(str(cl))
     if a.foreground:
