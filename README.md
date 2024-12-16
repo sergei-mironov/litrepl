@@ -67,7 +67,6 @@ _Notes:_
         * [Vim, Setting Up Keybindings](#vim-setting-up-keybindings)
         * [Vim, Inserting New Sections](#vim-inserting-new-sections)
         * [Vim, Running the Initial Section After Interpreter Restart](#vim-running-the-initial-section-after-interpreter-restart)
-        * [Vim, Executing Shell Commands](#vim-executing-shell-commands)
         * [Vim, Evaluating Selected Text](#vim-evaluating-selected-text)
         * [Vim, Calling for AI on a visual selection](#vim-calling-for-ai-on-a-visual-selection)
     * [In-Depth Reference](#in-depth-reference)
@@ -565,29 +564,6 @@ after the restart.
 ``` vim
 command! -nargs=0 LR LRestart | LEval 0
 ```
-
-#### Vim, Executing Shell Commands
-
-LitRepl doesn't support a shell interpreter at the moment. However, with IPython
-features, we can run shell commands directly from Python code sections using an
-exclamation mark.
-
-~~~~ markdown
-``` python
-!cowsay "Hello, Litrepl!"
-```
-
-``` result
- _________________
-< Hello, Litrepl! >
- -----------------
-        \   ^__^
-         \  (oo)\_______
-            (__)\       )\/\
-                ||----w |
-                ||     ||
-```
-~~~~
 
 #### Vim, Evaluating Selected Text
 
