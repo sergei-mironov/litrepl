@@ -234,7 +234,7 @@ def stop(a:LitreplArgs,st:SType)->None:
 
 @dataclass
 class SymbolsMarkdown:
-  icodebeginmarker="```[ ]*ai|```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*shell|```[ ]*bash"
+  icodebeginmarker="```[ ]*ai|```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash"
   icodendmarker="```"
   ocodebeginmarker="```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
   ocodendmarker="```"
@@ -289,8 +289,8 @@ aitext : /(.(?!{symbols_md.aiendmarker}))*./s
 
 @dataclass
 class SymbolsLatex:
-  icodebeginmarker=r"\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l?python\}|\\begin\{ai\}|\\begin\{sh\}"
-  icodendmarker=r"\\end\{l[a-zA-Z0-9]*code\}|\\end\{l?python\}|\\end\{ai\}|\\end\{sh\}"
+  icodebeginmarker=r"\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}"
+  icodendmarker=r"\\end\{l[a-zA-Z0-9]*code\}|\\end\{l?python\}|\\end\{ai\}|\\end\{sh\}|\\end\{bash\}"
   icodebeginmarker2=r"\%[ ]*lcode|\%[ ]*l?python|\%[ ]*l?ai|\%[ ]*l?sh"
   icodendmarker2=r"\%[ ]*lnocode|\%[ ]*l?nopython|\%[ ]*l?noai|\%[ ]*l?nosh"
   ocodebeginmarker=r"\\begin\{l?[a-zA-Z0-9]*result\}"

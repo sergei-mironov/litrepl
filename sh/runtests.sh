@@ -110,8 +110,11 @@ test_eval_md() {( #{{{
 mktest "_test_eval_md"
 runlitrepl start
 cat >source.md <<"EOF"
+Python
+======
+
 Simple evaluation
-=================
+-----------------
 
 ```python
 def hello(name):
@@ -124,7 +127,7 @@ PLACEHOLDER
 ```
 
 Bracketed code sections
-=======================
+-----------------------
 
 Lorem Ipsum is simply dummy text of the printing and typesetting industry.
 
@@ -139,7 +142,7 @@ PLACEHOLDER
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
 
 Indent+Ignore
-=============
+-------------
 
 The below part demonstrates 1) result indentation 2) ignored sections
 
@@ -169,7 +172,7 @@ The below part demonstrates 1) result indentation 2) ignored sections
   -->
 
 Commented code section
-======================
+----------------------
 
 <!--
 ``` python
@@ -184,7 +187,7 @@ XX
 <!--noresult-->
 
 Stop tag protection
-===================
+-------------------
 
 ``` code
 print("<!-- noresult -->")
@@ -194,7 +197,7 @@ print("<!-- noresult -->")
 <!-- noresult -->
 
 Inner markup safety
-===================
+-------------------
 
 ``` python
 print('`'+'`'+'`'+" vim \" Inner markup")
@@ -204,13 +207,34 @@ print('`'+'`'+'`')
 ``` vim " Inner markup
 ```
 <!--noresult-->
+
+Shell
+=====
+
+Basics
+------
+
+``` sh
+myfun() {
+  A=1
+
+  echo $A
+}
+myfun
+```
+
+``` result
+```
 EOF
 cat source.md | runlitrepl --filetype=markdown parse-print >out.md
 diff -u source.md out.md
 cat source.md | runlitrepl --filetype=markdown eval-sections >out.md
 diff -u out.md - <<"EOF"
+Python
+======
+
 Simple evaluation
-=================
+-----------------
 
 ```python
 def hello(name):
@@ -223,7 +247,7 @@ Hello, World!
 ```
 
 Bracketed code sections
-=======================
+-----------------------
 
 Lorem Ipsum is simply dummy text of the printing and typesetting industry.
 
@@ -238,7 +262,7 @@ Wowowou
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
 
 Indent+Ignore
-=============
+-------------
 
 The below part demonstrates 1) result indentation 2) ignored sections
 
@@ -268,7 +292,7 @@ The below part demonstrates 1) result indentation 2) ignored sections
   -->
 
 Commented code section
-======================
+----------------------
 
 <!--
 ``` python
@@ -283,7 +307,7 @@ FOO
 <!--noresult-->
 
 Stop tag protection
-===================
+-------------------
 
 ``` code
 print("<!-- noresult -->")
@@ -293,7 +317,7 @@ print("<!-- noresult -->")
 <!-- noresult -->
 
 Inner markup safety
-===================
+-------------------
 
 ``` python
 print('`'+'`'+'`'+" vim \" Inner markup")
@@ -303,6 +327,25 @@ print('`'+'`'+'`')
 ``` vim " Inner markup
 ```
 <!--noresult-->
+
+Shell
+=====
+
+Basics
+------
+
+``` sh
+myfun() {
+  A=1
+
+  echo $A
+}
+myfun
+```
+
+``` result
+1
+```
 EOF
 )} #}}}
 
@@ -356,6 +399,12 @@ PLACEHOLDER
 % nopython
 %result
 %noresult
+\begin{sh}
+A=1
+echo $A
+\end{sh}
+\begin{result}
+\end{result}
 EOF
 cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
 diff -u source.tex out.tex
@@ -407,6 +456,13 @@ FOOO
 %result
 7
 %noresult
+\begin{sh}
+A=1
+echo $A
+\end{sh}
+\begin{result}
+1
+\end{result}
 EOF
 )} #}}}
 
@@ -1086,6 +1142,57 @@ WARNING: No model is active, use /model first
 EOF
 )} #}}}
 
+test_bash() {( #{{{
+mktest "_test_bash"
+runlitrepl start sh
+cat >source.md <<"EOF"
+```bash
+my_array=(one two three)
+echo "${my_array[0]}"
+my_array+=(four)
+echo "${my_array[3]}"
+```
+```result
+```
+EOF
+cat source.md | runlitrepl --filetype=markdown eval-sections >out.md
+diff -u out.md - <<"EOF"
+```bash
+my_array=(one two three)
+echo "${my_array[0]}"
+my_array+=(four)
+echo "${my_array[3]}"
+```
+```result
+one
+four
+```
+EOF
+cat >source.tex <<"EOF"
+\begin{bash}
+my_array=(one two three)
+echo "${my_array[0]}"
+my_array+=(four)
+echo "${my_array[3]}"
+\end{bash}
+\begin{result}
+\end{result}
+EOF
+cat source.tex | runlitrepl --filetype=tex eval-sections >out.tex
+diff -u out.tex - <<"EOF"
+\begin{bash}
+my_array=(one two three)
+echo "${my_array[0]}"
+my_array+=(four)
+echo "${my_array[3]}"
+\end{bash}
+\begin{result}
+one
+four
+\end{result}
+EOF
+)} #}}}
+
 
 die() {
   echo "$@" >&2
@@ -1110,12 +1217,12 @@ not() {(
 tests() {
   echo test_parse_print $(which python) - -
   echo test_parse_print $(which ipython) - -
-  echo test_eval_md $(which python) - -
-  echo test_eval_md $(which ipython) - -
+  echo test_eval_md $(which python) - $(which sh)
+  echo test_eval_md $(which ipython) - $(which sh)
   echo test_tqdm $(which python) - -
   echo test_tqdm $(which ipython) - -
-  echo test_eval_tex $(which python) - -
-  echo test_eval_tex $(which ipython) - -
+  echo test_eval_tex $(which python) - $(which sh)
+  echo test_eval_tex $(which ipython) - $(which sh)
   echo test_async $(which python) - -
   echo test_async $(which ipython) - -
   echo test_eval_code $(which python) - -
@@ -1146,6 +1253,7 @@ tests() {
   echo test_invalid_interpreter $(which python) - -
   echo test_failing_interpreter $(which python) - -
   echo test_aicli - $(which aicli) -
+  echo test_bash - - $(which bash)
   echo test_vim_eval_code $(which python) - -
   echo test_vim_eval_selection $(which python) - -
   echo test_vim_ai_query - $(which aicli) -
@@ -1238,8 +1346,9 @@ NRUN=0
 while read t ipy iai ish ; do
   if echo "$t" | grep -q -E "$TESTS" && \
      ( echo "$ipy" | grep -q -E "$INTERPS" || \
-       echo "$iai" | grep -q -E "$INTERPS" ; ) ; then
-    echo "Running test \"$t\" python \"$ipy\" ai \"$iai\""
+       echo "$iai" | grep -q -E "$INTERPS" ||
+       echo "$ish" | grep -q -E "$INTERPS" ; ) ; then
+    echo "Running test \"$t\" python \"$ipy\" ai \"$iai\" sh \"$ish\""
     NRUN=$(expr $NRUN '+' 1)
     LITREPL_TEST_PYTHON_INTERPRETER="$ipy" \
     LITREPL_TEST_AI_INTERPRETER="$iai" \

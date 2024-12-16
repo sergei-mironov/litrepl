@@ -29,6 +29,12 @@ def _with_type(p, default=None, allow_all=False):
   )
   return p
 
+def grammar(ft):
+  g=GRAMMARS.get(ft)
+  if g is None:
+    raise ValueError(f"Invalid filetype \"{ft}\"")
+  return g
+
 def make_parser():
   ap=ArgumentParser(prog='litrepl',
                     formatter_class=make_wide(HelpFormatter))
@@ -157,7 +163,7 @@ def main(args=None):
     litrepl.base.DEBUG=True
     litrepl.utils.DEBUG=True
 
-  if a.filetype in {None,''}:
+  if a.filetype in {None,'','md'}:
     a.filetype="markdown"
   if a.filetype in {'latex'}:
     a.filetype='tex'
@@ -193,15 +199,16 @@ def main(args=None):
     else:
       restart(a,name2st(a.type))
   elif a.command=='parse':
-    t=parse_(GRAMMARS[a.filetype])
+    g=grammar(a.filetype)
+    t=parse_(g)
     print(t.pretty())
     exit(0)
   elif a.command=='parse-print':
     sr0=SecRec(set(),{})
-    ecode=eval_section_(a,parse_(GRAMMARS[a.filetype]),sr0)
+    ecode=eval_section_(a,parse_(grammar(a.filetype)),sr0)
     exit(0 if ecode is None else ecode)
   elif a.command=='eval-sections':
-    t=parse_(GRAMMARS[a.filetype])
+    t=parse_(grammar(a.filetype))
     nsecs=solve_sloc(a.locs,t)
     ecode=eval_section_(a,t,nsecs)
     exit(0 if ecode is None else ecode)
@@ -217,7 +224,7 @@ def main(args=None):
       ecode=interpExitCode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='interrupt':
-    tree=parse_(GRAMMARS[a.filetype])
+    tree=parse_(grammar(a.filetype))
     sr=solve_sloc(a.locs,tree)
     sr.nsecs|=set(sr.preproc.pending.keys())
     ecode=eval_section_(a,tree,sr,interrupt=True)
