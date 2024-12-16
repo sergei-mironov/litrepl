@@ -25,7 +25,7 @@ def make_wide(formatter, w=180, h=28):
 def _with_type(p, default=None, allow_all=False):
   p.add_argument(
     'type',metavar='SECTYPE',default=default,
-    help=f"Interpreter type: python|ai{'|all' if allow_all else ''}",nargs='?'
+    help=f"Interpreter type: python|ai|sh{'|all' if allow_all else ''}",nargs='?'
   )
   return p
 
@@ -45,6 +45,11 @@ def make_parser():
     default=environ.get('LITREPL_AI_INTERPRETER','auto'),
     help=dedent('''`aicli` interpreter command or `auto`. It defaults to
     the LITREPL_AI_INTERPRETER environment variable if set, otherwise
+    "auto".'''))
+  ap.add_argument('--sh-interpreter',metavar='EXE',
+    default=environ.get('LITREPL_SH_INTERPRETER','auto'),
+    help=dedent('''`shell` interpreter command or `auto`. It defaults to
+    the LITREPL_SH_INTERPRETER environment variable if set, otherwise
     "auto".'''))
   ap.add_argument('--timeout',type=str,metavar='F[,F]',default='inf',
     help=dedent('''Timeouts for initial evaluation and for pending checks, in
@@ -67,6 +72,11 @@ def make_parser():
     default=environ.get('LITREPL_AI_AUXDIR'),
     help=dedent('''This directory stores AI interpreter pipes. It defaults to
     LITREPL_AI_AUXDIR if set; otherwise, it's created in the system's temporary
+    directory, named after the current working directory.'''))
+  ap.add_argument('--sh-auxdir',type=str,metavar='DIR',
+    default=environ.get('LITREPL_SH_AUXDIR'),
+    help=dedent('''This directory stores AI interpreter pipes. It defaults to
+    LITREPL_SH_AUXDIR if set; otherwise, it's created in the system's temporary
     directory, named after the current working directory.'''))
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',
     default=environ.get('LITREPL_WORKDIR',None),
@@ -164,7 +174,7 @@ def main(args=None):
   if a.foreground:
     assert a.command not in {'start','stop','restart','repl','interrupt'}, \
       f"--foreground is not compatible with '{a.command}' command"
-    for st in [SType.SPython,SType.SAI]:
+    for st in [SType.SPython,SType.SAI,SType.SShell]:
       setattr(a,f"{st2name(st)}_auxdir",
               mkdtemp(prefix=f"litrepl-{st2name(st)}-foreground"))
 

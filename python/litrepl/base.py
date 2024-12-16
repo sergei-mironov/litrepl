@@ -39,6 +39,7 @@ from .utils import(unindent, indent, escape, fillspaces, fmterror,
 from .interpreters.python import PythonInterpreter
 from .interpreters.ipython import IPythonInterpreter
 from .interpreters.aicli import AicliInterpreter
+from .interpreters.shell import ShellInterpreter
 
 DEBUG:bool=False
 
@@ -53,6 +54,8 @@ def st2auxdir(a:LitreplArgs, st:SType, default=None)->str:
     d=a.python_auxdir
   elif st==SType.SAI:
     d=a.ai_auxdir
+  elif st==SType.SShell:
+    d=a.sh_auxdir
   else:
     raise ValueError(f"Invalid section type {st}")
   return d or (default(st) if default else defauxdir(st))
@@ -71,6 +74,8 @@ def st2name(st:SType)->str:
     return "python"
   elif st==SType.SAI:
     return "ai"
+  elif st==SType.SShell:
+    return "sh"
   else:
     raise ValueError(f"Invalid section type: {st}")
 
@@ -79,6 +84,8 @@ def name2st(name:str)->SType:
     return SType.SPython
   elif name=="ai":
     return SType.SAI
+  elif name=="sh":
+    return SType.SShell
   else:
     raise ValueError(f"Invalid section name: {name}")
 
@@ -86,6 +93,8 @@ def bmarker2st(bmarker:str)->SType:
   """ Maps section code marker to section type """
   if 'ai' in bmarker:
     return SType.SAI
+  elif 'sh' in bmarker:
+    return SType.SShell
   else:
     return SType.SPython
 
@@ -114,6 +123,8 @@ def attach(fns:FileNames, st:SType|None=None)->Optional[Interpreter]:
       cls=IPythonInterpreter
     elif (st is None or st==SType.SPython) and any('python' in w for w in cmd):
       cls=PythonInterpreter
+    elif (st is None or st==SType.SShell) and any('sh' in w for w in cmd):
+      cls=ShellInterpreter
     else:
       assert False, f"Unknown or undefined interpreter {cmd} (among {st})"
     pdebug(f"Interpreter pid {pid} cmd '{cmd}' was resolved into '{cls}'")
@@ -193,6 +204,10 @@ def start(a:LitreplArgs, st:SType)->int:
     assert not a.exception_exit, "Not supported"
     interpreter='aicli' if a.ai_interpreter=='auto' else a.ai_interpreter
     return start_(a,interpreter,AicliInterpreter(fns))
+  elif st is SType.SShell:
+    assert not a.exception_exit, "Not supported"
+    interpreter='/bin/sh' if a.ai_interpreter=='auto' else a.sh_interpreter
+    return start_(a,interpreter,ShellInterpreter(fns))
   else:
     raise ValueError(f"Unsupported section type: {st}")
 
@@ -645,6 +660,8 @@ def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
       except Exception:
         print(f"{st2name(st)} interpreter PYTHONPATH: ?")
     elif st==SType.SAI:
+      pass
+    elif st==SType.SShell:
       pass
     else:
       raise NotImplementedError(f'Unsupported type {st}')

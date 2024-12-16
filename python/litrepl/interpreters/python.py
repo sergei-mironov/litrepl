@@ -1,7 +1,7 @@
 from os import system
 
 from ..types import LitreplArgs, EvalState, Interpreter
-from ..utils import fillspaces
+from ..utils import fillspaces, runsocat
 
 PATTERN_PYTHON_1=('3256748426384\n',)*2
 PATTERN_PYTHON_2=('325674801010\n',)*2

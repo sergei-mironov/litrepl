@@ -25,3 +25,4 @@ socat -V >/dev/null || echo "GNU socat not found" >&2
 
 export LITREPL_PYTHON_AUXDIR=_litrepl/python
 export LITREPL_AI_AUXDIR=_litrepl/ai
+export LITREPL_SH_AUXDIR=_litrepl/sh

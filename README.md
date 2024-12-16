@@ -728,11 +728,11 @@ Where
 
 ``` result
 usage: litrepl [-h] [-v] [--filetype STR] [--python-interpreter EXE]
-               [--ai-interpreter EXE] [--timeout F[,F]] [--propagate-sigint]
-               [-d INT] [--verbose] [--python-auxdir DIR] [--ai-auxdir DIR]
-               [-C DIR] [--pending-exit INT] [--exception-exit INT]
-               [--foreground] [--map-cursor LINE:COL:FILE]
-               [--result-textwidth NUM]
+               [--ai-interpreter EXE] [--sh-interpreter EXE] [--timeout F[,F]]
+               [--propagate-sigint] [-d INT] [--verbose] [--python-auxdir DIR]
+               [--ai-auxdir DIR] [--sh-auxdir DIR] [-C DIR]
+               [--pending-exit INT] [--exception-exit INT] [--foreground]
+               [--map-cursor LINE:COL:FILE] [--result-textwidth NUM]
                {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
                ...
 
@@ -768,6 +768,9 @@ options:
   --ai-interpreter EXE        `aicli` interpreter command or `auto`. It
                               defaults to the LITREPL_AI_INTERPRETER
                               environment variable if set, otherwise "auto".
+  --sh-interpreter EXE        `shell` interpreter command or `auto`. It
+                              defaults to the LITREPL_SH_INTERPRETER
+                              environment variable if set, otherwise "auto".
   --timeout F[,F]             Timeouts for initial evaluation and for pending
                               checks, in seconds. If the latter is omitted, it
                               is considered to be equal to the former one.
@@ -784,6 +787,11 @@ options:
                               working directory.
   --ai-auxdir DIR             This directory stores AI interpreter pipes. It
                               defaults to LITREPL_AI_AUXDIR if set; otherwise,
+                              it's created in the system's temporary
+                              directory, named after the current working
+                              directory.
+  --sh-auxdir DIR             This directory stores AI interpreter pipes. It
+                              defaults to LITREPL_SH_AUXDIR if set; otherwise,
                               it's created in the system's temporary
                               directory, named after the current working
                               directory.

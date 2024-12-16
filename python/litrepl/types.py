@@ -19,6 +19,7 @@ class SType(Enum):
   via settings."""
   SPython = 0
   SAI = 1
+  SShell = 2
 
 @dataclass(frozen=True)
 class RunResult:
@@ -116,7 +117,7 @@ class Interpreter:
   def result_postprocess(self, a:LitreplArgs, text:str) -> str:
     """ Postprocess results in an interpreter-specific way """
     raise NotImplementedError()
-  def run_repl(self, a:LitreplArgs):
+  def run_repl(self, a:LitreplArgs) -> None:
     """ Run foreground repl shell """
     raise NotImplementedError()
 
