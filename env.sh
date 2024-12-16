@@ -22,3 +22,6 @@ python3 -c 'import dataclasses' || echo "Warning: 'dataclasses' python library n
 # python -c 'import pylightnix' || echo "Warning: 'lark' python library not found" >&2
 litrepl --version >/dev/null || echo "litrepl is not in PATH" >&2
 socat -V >/dev/null || echo "GNU socat not found" >&2
+
+export LITREPL_PYTHON_AUXDIR=_litrepl/python
+export LITREPL_AI_AUXDIR=_litrepl/ai
