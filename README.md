@@ -3,7 +3,7 @@
 ⌨️ LitRepl ⌨️
 </h1>
 
-[Changelog](./CHANGELOG.md) | [Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-visual-exhibitions)
+[Changelog](./CHANGELOG.md) | [Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-gallery)
 </div>
 
 **LitRepl** is a command-line application that brings together the benefits of
@@ -78,7 +78,7 @@ _Notes:_
     * [Development Environments and Setup](#development-environments-and-setup)
     * [Tools for Screencast Recording](#tools-for-screencast-recording)
     * [Common Development Scenarios](#common-development-scenarios)
-* [🎥 Visual Exhibitions](#-visual-exhibitions)
+* [🎥 Gallery](#-gallery)
 * [💡 Technical Insights](#-technical-insights)
 * [🚫 Known Limitations](#-known-limitations)
 * [Related Tools and Projects](#related-tools-and-projects)
@@ -923,8 +923,8 @@ Examples:
 ~~~~
 <!-- noresult -->
 
-🎥 Visual Exhibitions
----------------------
+🎥 Gallery
+----------
 
 <details open>
 <summary>Basic usage (Show GIF)</summary>
