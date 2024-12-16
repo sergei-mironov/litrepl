@@ -1108,54 +1108,56 @@ not() {(
 )}
 
 tests() {
-  echo test_parse_print $(which python) -
-  echo test_parse_print $(which ipython) -
-  echo test_eval_md $(which python) -
-  echo test_eval_md $(which ipython) -
-  echo test_tqdm $(which python) -
-  echo test_tqdm $(which ipython) -
-  echo test_eval_tex $(which python) -
-  echo test_eval_tex $(which ipython) -
-  echo test_async $(which python) -
-  echo test_async $(which ipython) -
-  echo test_eval_code $(which python) -
-  echo test_eval_code $(which ipython) -
-  echo test_eval_with_empty_lines $(which python) -
-  echo test_eval_with_empty_lines $(which ipython) -
-  echo test_print_system_order $(which python) -
-  echo test_print_system_order $(which ipython) -
-  echo test_exit_errcode $(which python) -
-  echo test_exit_errcode $(which ipython) -
-  echo test_exception_errcode $(which python) -
-  echo test_exception_errcode $(which ipython) -
-  echo test_vim_leval_cursor $(which python) -
-  echo test_vim_leval_cursor $(which ipython) -
-  echo test_vim_textwidth $(which ipython) -
-  echo test_vim_leval_explicit $(which python) -
-  echo test_vim_leval_explicit $(which ipython) -
-  echo test_vim_lmon $(which python) -
-  echo test_vim_lmon $(which ipython) -
-  echo test_vim_lstatus $(which python) -
-  echo test_vim_lstatus $(which ipython) -
-  echo test_foreground $(which python) -
-  echo test_foreground $(which ipython) -
-  echo test_status $(which python) -
-  echo test_status $(which ipython) -
-  echo test_interrupt $(which python) -
-  echo test_interrupt $(which ipython) -
-  echo test_invalid_interpreter $(which python) -
-  echo test_failing_interpreter $(which python) -
-  echo test_aicli - $(which aicli)
-  echo test_vim_eval_code $(which python) -
-  echo test_vim_eval_selection $(which python) -
-  echo test_vim_ai_query - $(which aicli)
+  echo test_parse_print $(which python) - -
+  echo test_parse_print $(which ipython) - -
+  echo test_eval_md $(which python) - -
+  echo test_eval_md $(which ipython) - -
+  echo test_tqdm $(which python) - -
+  echo test_tqdm $(which ipython) - -
+  echo test_eval_tex $(which python) - -
+  echo test_eval_tex $(which ipython) - -
+  echo test_async $(which python) - -
+  echo test_async $(which ipython) - -
+  echo test_eval_code $(which python) - -
+  echo test_eval_code $(which ipython) - -
+  echo test_eval_with_empty_lines $(which python) - -
+  echo test_eval_with_empty_lines $(which ipython) - -
+  echo test_print_system_order $(which python) - -
+  echo test_print_system_order $(which ipython) - -
+  echo test_exit_errcode $(which python) - -
+  echo test_exit_errcode $(which ipython) - -
+  echo test_exception_errcode $(which python) - -
+  echo test_exception_errcode $(which ipython) - -
+  echo test_vim_leval_cursor $(which python) - -
+  echo test_vim_leval_cursor $(which ipython) - -
+  echo test_vim_textwidth $(which ipython) - -
+  echo test_vim_leval_explicit $(which python) - -
+  echo test_vim_leval_explicit $(which ipython) - -
+  echo test_vim_lmon $(which python) - -
+  echo test_vim_lmon $(which ipython) - -
+  echo test_vim_lstatus $(which python) - -
+  echo test_vim_lstatus $(which ipython) - -
+  echo test_foreground $(which python) - -
+  echo test_foreground $(which ipython) - -
+  echo test_status $(which python) - -
+  echo test_status $(which ipython) - -
+  echo test_interrupt $(which python) - -
+  echo test_interrupt $(which ipython) - -
+  echo test_invalid_interpreter $(which python) - -
+  echo test_failing_interpreter $(which python) - -
+  echo test_aicli - $(which aicli) -
+  echo test_vim_eval_code $(which python) - -
+  echo test_vim_eval_selection $(which python) - -
+  echo test_vim_ai_query - $(which aicli) -
 }
 
 runlitrepl() {
   unset LITREPL_PYTHON_INTERPRETER
   unset LITREPL_AI_INTERPRETER
+  unset LITREPL_SH_INTERPRETER
   unset LITREPL_PYTHON_AUXDIR
   unset LITREPL_AI_AUXDIR
+  unset LITREPL_SH_AUXDIR
   unset LITREPL_WORKDIR
   test -n "$LITREPL_TEST_PYTHON_INTERPRETER"
   test -n "$LITREPL_TEST_AI_INTERPRETER"
@@ -1163,6 +1165,7 @@ runlitrepl() {
   $LITREPL_BIN/litrepl --debug="$LITREPL_DEBUG" \
     --python-interpreter="$LITREPL_TEST_PYTHON_INTERPRETER" \
     --ai-interpreter="$LITREPL_TEST_AI_INTERPRETER" \
+    --sh-interpreter="$LITREPL_TEST_SH_INTERPRETER" \
     "$@"
 }
 
@@ -1220,6 +1223,7 @@ fi
 if test "$INTERPS" = "?" ; then
   tests | awk '{print $2}' | grep -v -w '-' | sort -u
   tests | awk '{print $3}' | grep -v -w '-' | sort -u
+  tests | awk '{print $4}' | grep -v -w '-' | sort -u
 fi
 if test "$INTERPS" = "?" -o "$TESTS" = "?" ; then
   exit 1
@@ -1231,7 +1235,7 @@ fi
 trap "echo FAIL\(\$?\)" EXIT
 tests | (
 NRUN=0
-while read t ipy iai ; do
+while read t ipy iai ish ; do
   if echo "$t" | grep -q -E "$TESTS" && \
      ( echo "$ipy" | grep -q -E "$INTERPS" || \
        echo "$iai" | grep -q -E "$INTERPS" ; ) ; then
@@ -1239,6 +1243,7 @@ while read t ipy iai ; do
     NRUN=$(expr $NRUN '+' 1)
     LITREPL_TEST_PYTHON_INTERPRETER="$ipy" \
     LITREPL_TEST_AI_INTERPRETER="$iai" \
+    LITREPL_TEST_SH_INTERPRETER="$ish" \
     $t
   fi
 done
