@@ -6,9 +6,9 @@
 [Changelog](./CHANGELOG.md) | [Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-visual-exhibitions)
 </div>
 
-**LitRepl** is a command-line tool that brings together the benefits of
+**LitRepl** is a command-line application that brings together the benefits of
 **literate programming** and **read-eval-print-loop coding**.
-The tool comes bundled with an interface Vim plugin, integrating the functionality into the editor.
+The tool comes with an interface Vim plugin, integrating the functionality into the editor.
 
 
 <div align="center">
@@ -29,6 +29,8 @@ _Notes:_
   [LaTeX](https://www.latex-project.org/)
   _(Examples [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf))_
 * **Interpreters** <br/>
+  [Sh](https://en.wikipedia.org/wiki/Bourne_shell) **|**
+  [Bash](https://www.gnu.org/software/bash/) **|**
   [Python](https://www.python.org/) **|**
   [IPython](https://ipython.org/) **|**
   [Aicli](https://github.com/sergei-mironov/aicli)
@@ -41,7 +43,7 @@ _Notes:_
 * **POSIX-compatible OS**, typically a Linux. The tool relies on POSIX
   operations, notably pipes, and depends on certain Shell commands.
 * **lark-parser** and **psutil** Python packages.
-* **[Socat](http://www.dest-unreach.org/socat/)** (Optional) Only needed for
+* **[Socat](http://www.dest-unreach.org/socat/)** (Optional) Needed for
   `litrepl repl` and Vim's `LTerm` commands to work.
 
 📚 Contents
@@ -108,7 +110,7 @@ methods.
 <details><summary><b>Latest versions, from Git, using Pip and Vim-Plug</b></summary><p>
 
 1. Install the `litrepl` Python package with pip:
-   ```sh
+   ``` sh
    $ pip install --user git+https://github.com/sergei-mironov/litrepl
    $ litrepl --version
    ```
@@ -310,7 +312,7 @@ the keyword `all` to apply the command to all interpreters. Add the
 `--<ityp>-interpteter=CMDLINE` to set the exact command line for
 Litrepl to execute.
 
-``` shell
+``` sh
 $ litrepl start python
 $ litrepl restart ai
 $ litrepl stop all
@@ -324,8 +326,7 @@ The `litrepl status` command queries the information about the currently running
 interpreters running. The command reveals the process PID and the command-line
 arguments. For stopped interpreters, the last exit codes are also listed.
 
-
-``` shell
+``` sh
 $ litrepl status
 # Format:
 # TYP  PID      EXITCODE  CMD
@@ -389,7 +390,7 @@ For Python interpreter, the command prompt is disabled which is a current techni
 limitation. All other interpreter functionality is kept unchanged. Use `Ctrl+D`
 to safely detach the session. For example:
 
-``` shell
+``` sh
 $ litrepl repl python
 Opening the interpreter terminal (NO PROMPTS, USE `Ctrl+D` TO DETACH)
 W = 'Hello from repl'
@@ -408,7 +409,7 @@ interpreter's response and detach while keeping the session open.
 For example, after manually defining the `W` variable in the example above, it
 can be queried as in a typical IPython session.
 
-``` shell
+``` sh
 $ echo 'W' | litrepl eval-code
 'Hello from repl'
 ```
@@ -768,7 +769,7 @@ options:
   --ai-interpreter EXE        `aicli` interpreter command or `auto`. It
                               defaults to the LITREPL_AI_INTERPRETER
                               environment variable if set, otherwise "auto".
-  --sh-interpreter EXE        `shell` interpreter command or `auto`. It
+  --sh-interpreter EXE        Shell interpreter command or `auto`. It
                               defaults to the LITREPL_SH_INTERPRETER
                               environment variable if set, otherwise "auto".
   --timeout F[,F]             Timeouts for initial evaluation and for pending
@@ -848,7 +849,7 @@ full list of defined targetr.
 
 For example, to build a version of Vim pre-configured for demo, run
 
-``` shell
+``` sh
 $ nix build '.#vim-demo'
 $ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
 ```
@@ -859,7 +860,7 @@ The default development shell is defined in the `./default.nix` as a Nix
 expression named `shell` which is the default name for development shells.
 Running
 
-``` shell
+``` sh
 $ nix develop
 ```
 
@@ -871,14 +872,14 @@ Another shell which might be useful is `shell-screencast`. This would build the
 full set of Litrepl tools and makes sure that the screencasting software is
 available. To enter it, specify its Nix-flake path as follows:
 
-``` shell
+``` sh
 $ nix develop '.#shell-screencast'
 ```
 
 In the opened shell, run the `screencast.sh` and wait a second, until the script
 arranges demo and recorder wondows.
 
-``` shell
+``` sh
 $ screencast.sh
 ```
 

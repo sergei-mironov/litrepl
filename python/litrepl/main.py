@@ -44,19 +44,17 @@ def make_parser():
     help='Specify the type of input formatting (markdown|[la]tex).')
   ap.add_argument('--python-interpreter',metavar='EXE',
     default=environ.get('LITREPL_PYTHON_INTERPRETER','auto'),
-    help=dedent('''Python interpreter command, or `auto`. It defaults to the
+    help=dedent('''Python interpreter command line, or `auto`. Defaults to the
     LITREPL_PYTHON_INTERPRETER environment variable if set, otherwise "auto".
     Litrepl determines "python" or "ipython" type according to the value.'''))
   ap.add_argument('--ai-interpreter',metavar='EXE',
     default=environ.get('LITREPL_AI_INTERPRETER','auto'),
-    help=dedent('''`aicli` interpreter command or `auto`. It defaults to
-    the LITREPL_AI_INTERPRETER environment variable if set, otherwise
-    "auto".'''))
+    help=dedent('''`aicli` interpreter command line or `auto`. Defaults to the
+    LITREPL_AI_INTERPRETER environment variable if set, otherwise "auto".'''))
   ap.add_argument('--sh-interpreter',metavar='EXE',
     default=environ.get('LITREPL_SH_INTERPRETER','auto'),
-    help=dedent('''`shell` interpreter command or `auto`. It defaults to
-    the LITREPL_SH_INTERPRETER environment variable if set, otherwise
-    "auto".'''))
+    help=dedent('''Shell interpreter command line or `auto`. Defaults to the
+    LITREPL_SH_INTERPRETER environment variable if set, otherwise "auto".'''))
   ap.add_argument('--timeout',type=str,metavar='F[,F]',default='inf',
     help=dedent('''Timeouts for initial evaluation and for pending checks, in
     seconds. If the latter is omitted, it is considered to be equal to the

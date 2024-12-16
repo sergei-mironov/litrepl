@@ -1193,6 +1193,36 @@ four
 EOF
 )} #}}}
 
+test_interp_disabled() {( #{{{
+mktest "_test_interp_disabled"
+runlitrepl start python
+runlitrepl start sh
+cat >source.md <<"EOF"
+``` python
+3+4
+```
+``` result
+```
+```sh
+```
+```result
+```
+EOF
+cat source.md | runlitrepl --sh-interpreter=- eval-sections >out.md
+diff -u out.md - <<"EOF"
+``` python
+3+4
+```
+``` result
+7
+```
+```sh
+```
+```result
+```
+EOF
+)}
+#}}}
 
 die() {
   echo "$@" >&2
@@ -1257,6 +1287,7 @@ tests() {
   echo test_vim_eval_code $(which python) - -
   echo test_vim_eval_selection $(which python) - -
   echo test_vim_ai_query - $(which aicli) -
+  echo test_interp_disabled $(which python) - $(which sh)
 }
 
 runlitrepl() {

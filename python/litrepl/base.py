@@ -149,9 +149,9 @@ def write_child_pid(pidf,pid):
         sleep(0.1)
   return False
 
-def start_(a:LitreplArgs,interpreter:str,i:Interpreter)->int:
+def start_(a:LitreplArgs, interpreter:str, i:Interpreter)->int:
   """ Starts the background Python interpreter. Kill an existing interpreter if
-  any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`."""
+  any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`, etc."""
   fns=i.fns
   makedirs(fns.wd, exist_ok=True)
   try:
@@ -206,12 +206,14 @@ def start(a:LitreplArgs, st:SType)->int:
     return start_(a,interpreter,AicliInterpreter(fns))
   elif st is SType.SShell:
     assert not a.exception_exit, "Not supported"
-    interpreter='/bin/sh' if a.ai_interpreter=='auto' else a.sh_interpreter
+    interpreter='/bin/sh' if a.sh_interpreter=='auto' else a.sh_interpreter
     return start_(a,interpreter,ShellInterpreter(fns))
   else:
     raise ValueError(f"Unsupported section type: {st}")
 
-
+def isdisabled(a:LitreplArgs, st:SType)->bool:
+  i=getattr(a,f"{st2name(st)}_interpreter")
+  return i in ['-','no']
 
 def restart(a:LitreplArgs,st:SType):
   stop(a,st); start(a,st)
@@ -366,9 +368,11 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
   nsecs=sr.nsecs
   es=EvalState(sr)
 
-  def _getinterp(bmarker:str)->Tuple[FileNames,Optional[Interpreter]]:
+  def _getinterp(bmarker:str)->Tuple[Optional[FileNames],Optional[Interpreter]]:
     st=bmarker2st(bmarker)
     es.stypes.add(st)
+    if isdisabled(a,st):
+      return (None,None)
     fns=pipenames(a,st)
     if not running(a,st):
       start(a,st)
@@ -426,21 +430,21 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
       code=unindent(bm.column-1,t)
       if es.nsec in nsecs:
         fns,ss=_getinterp(bmarker)
-        rr=None
-        if ss:
-          es.sres[es.nsec],rr=eval_code_(a,fns,ss,es,code,sr.preproc.pending.get(es.nsec))
-        ec=_checkecode(fns,es.nsec,rr.timeout if rr else False)
-        if ec is not None:
-          msg=_failmsg(fns,ec)
-          pstderr(msg)
-          es.sres[es.nsec]=es.sres.get(es.nsec,'')+msg
+        if fns:
+          rr=None
+          if ss:
+            es.sres[es.nsec],rr=eval_code_(a,fns,ss,es,code,sr.preproc.pending.get(es.nsec))
+          ec=_checkecode(fns,es.nsec,rr.timeout if rr else False)
+          if ec is not None:
+            msg=_failmsg(fns,ec)
+            pstderr(msg)
+            es.sres[es.nsec]=es.sres.get(es.nsec,'')+msg
     def ocodesection(self,tree):
       bmarker=tree.children[0].children[0].value
       t=tree.children[1].children[0].value
       emarker=tree.children[2].children[0].value
       bm,em=tree.children[0].meta,tree.children[2].meta
-      if es.nsec in nsecs:
-        assert es.nsec in es.sres
+      if (es.nsec in nsecs) and (es.nsec in es.sres):
         t2=bmarker+"\n"+indent(bm.column-1,
                                escape(es.sres[es.nsec],emarker)+emarker)
         es.ledder[bm.line]=nlines(t2)-nlines(t)
@@ -455,11 +459,12 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
       im=tree.children[0].children[0].value
       if es.nsec in nsecs:
         fns,ss=_getinterp("python")
-        if ss:
-          result=process(a,fns,ss,'print('+code+');\n')[0].rstrip('\n')
-        ec=_checkecode(fns,es.nsec,False)
-        if ec is not None:
-          pusererror(_failmsg(fns,ec))
+        if fns:
+          if ss:
+            result=process(a,fns,ss,'print('+code+');\n')[0].rstrip('\n')
+          ec=_checkecode(fns,es.nsec,False)
+          if ec is not None:
+            pusererror(_failmsg(fns,ec))
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
       self._print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}")
