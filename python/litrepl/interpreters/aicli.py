@@ -3,8 +3,9 @@ from os import system
 from os.path import join
 from copy import copy
 
-from ..utils import fillspaces, runsocat
+from ..utils import fillspaces, runsocat, SOCAT_HINT
 from ..types import Iterable, LitreplArgs, EvalState, Interpreter, SECVAR_RE
+from ..eval import eval_code_raw
 
 PATTERN_GPT4ALLCLI_1=('/echo 1121312\n', '1121312\n')
 PATTERN_GPT4ALLCLI_2=('/echo 8893223\n', '8893223\n')

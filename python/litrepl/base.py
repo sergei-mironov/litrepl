@@ -32,7 +32,7 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
                     Interpreter)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally,
-                   with_fd, read_nonblock)
+                   with_fd, read_nonblock, eval_code, eval_code_)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
                    cursor_within, nlines, wraplong, remove_silent)
 
@@ -350,42 +350,6 @@ def parse_(grammar, tty_ok=True):
 
 GRAMMARS={'markdown':grammar_md,'tex':grammar_latex,'latex':grammar_latex}
 SYMBOLS={'markdown':symbols_md,'tex':symbols_latex,'latex':symbols_latex}
-
-def eval_code(*args, **kwargs) -> str:
-  res,_=eval_code_(*args, **kwargs)
-  return res
-
-def eval_code_(a:LitreplArgs,
-               fns:FileNames,
-               ss:Interpreter,
-               es:EvalState,
-               code:str,
-               runr:Optional[RunResult]=None) -> Tuple[str,ReadResult]:
-  """ Start or complete the snippet evaluation process. `runr`
-  contains the already existing runner's context, if any.
-
-  The function returns either the evaluation result or the running context
-  encoded in the result for later reference.
-  """
-  rr:ReadResult
-  rr,runr=eval_code_raw(ss,interp_code_preprocess(a,ss,es,code),
-                        a.timeout_initial,a.timeout_continue,a.propagate_sigint,runr)
-  pptext=interp_result_postprocess(a,ss,rr.text)
-  res=rresultSave(pptext,runr) if rr.timeout else pptext
-  return res,rr
-
-def eval_code_raw(ss:Interpreter,
-                  code:str,
-                  timeout_initial,
-                  timeout_continue,
-                  propagate_sigint,
-                  runr:Optional[RunResult]=None) -> Tuple[ReadResult,RunResult]:
-  fns=ss.fns
-  if runr is None:
-    rr,runr=processAdapt(fns,ss,code,timeout_initial,propagate_sigint)
-  else:
-    rr=processCont(fns,ss,runr,timeout_continue,propagate_sigint)
-  return rr,runr
 
 
 def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:

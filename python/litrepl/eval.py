@@ -22,7 +22,7 @@ from errno import ESRCH
 from signal import (pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK,
                     SIG_SETMASK)
 
-from .types import (LitreplArgs, RunResult, ReadResult, FileNames,
+from .types import (LitreplArgs, RunResult, ReadResult, FileNames, EvalState,
                     ECode, ECODE_OK, ECODE_RUNNING, ECODE_UNDEFINED)
 from .utils import remove_silent
 
@@ -444,4 +444,40 @@ def rresultSave(text:str, presult:RunResult)->str:
   check it later. """
   sep='\n' if text and text[-1]!='\n' else ''
   return (text+f"{sep}[BG:{presult.fname}]\n")
+
+def eval_code(*args, **kwargs) -> str:
+  res,_=eval_code_(*args, **kwargs)
+  return res
+
+def eval_code_(a:LitreplArgs,
+               fns:FileNames,
+               ss:Interpreter,
+               es:EvalState,
+               code:str,
+               runr:Optional[RunResult]=None) -> Tuple[str,ReadResult]:
+  """ Start or complete the snippet evaluation process. `runr`
+  contains the already existing runner's context, if any.
+
+  The function returns either the evaluation result or the running context
+  encoded in the result for later reference.
+  """
+  rr:ReadResult
+  rr,runr=eval_code_raw(ss,interp_code_preprocess(a,ss,es,code),
+                        a.timeout_initial,a.timeout_continue,a.propagate_sigint,runr)
+  pptext=interp_result_postprocess(a,ss,rr.text)
+  res=rresultSave(pptext,runr) if rr.timeout else pptext
+  return res,rr
+
+def eval_code_raw(ss:Interpreter,
+                  code:str,
+                  timeout_initial,
+                  timeout_continue,
+                  propagate_sigint,
+                  runr:Optional[RunResult]=None) -> Tuple[ReadResult,RunResult]:
+  fns=ss.fns
+  if runr is None:
+    rr,runr=processAdapt(fns,ss,code,timeout_initial,propagate_sigint)
+  else:
+    rr=processCont(fns,ss,runr,timeout_continue,propagate_sigint)
+  return rr,runr
 
