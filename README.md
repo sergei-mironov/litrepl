@@ -35,7 +35,7 @@ _Notes:_
   [IPython](https://ipython.org/) **|**
   [Aicli](https://github.com/sergei-mironov/aicli)
 * **Editor integration** <br/>
-  Vim _(plugin included)_
+  [Vim](https://www.vim.org/scripts/script.php?script_id=6117) _(plugin source included)_
 
 ✅ Requirements
 ---------------
