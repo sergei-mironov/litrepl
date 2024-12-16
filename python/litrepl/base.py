@@ -370,9 +370,9 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
 
   def _getinterp(bmarker:str)->Tuple[Optional[FileNames],Optional[Interpreter]]:
     st=bmarker2st(bmarker)
-    es.stypes.add(st)
     if isdisabled(a,st):
       return (None,None)
+    es.stypes.add(st)
     fns=pipenames(a,st)
     if not running(a,st):
       start(a,st)

@@ -522,6 +522,8 @@ SRC = $(shell find -name '*\.py')
 	cp README.md _README.md.in
 	cat _README.md.in | \
 		litrepl --foreground --exception-exit=100 \
+                --python-interpreter=ipython \
+                --sh-interpreter=- \
 		eval-sections >README.md
 	touch $@
 
@@ -529,8 +531,9 @@ SRC = $(shell find -name '*\.py')
 readme: .stamp_readme
 ```
 
-Here, `$(SRC)` is expected to include the filenames of dependencies. By using
-this recipe, you can execute `make readme` to start the processing.
+Here, `$(SRC)` is expected to include the filenames of dependencies. With this
+recipe, we can run `make readme` to evaluate the python sections. By passing `-`
+wealso tell Litrepl to ignore shell sections.
 
 
 #### Vim, Setting Up Keybindings
