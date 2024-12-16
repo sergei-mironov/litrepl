@@ -694,7 +694,7 @@ through `aicli` text commands.
 
 Where
 
-* `T` Type of the interpreter: `python` or `ai` (some commands also accept `all`)
+* `T` Type of the interpreter: `python`, `ai` or `sh` (some commands also accept `all`)
 * `F` Path to a Markdown or LaTeX file
 * `P` Path to a Python script
 * `N` Number of code section to evaluate, starting from 0.
@@ -705,16 +705,20 @@ Where
 | Vim setting  <img width=200/>   | CLI argument  <img width=200/> | Description                       |
 |---------------------------------|--------------------------------|-----------------------------------|
 | `set filetype`                  | `--filetype=T`                 | Input file type: `latex`\|`markdown` |
-| `let g:litrepl_python_interpreter=B` | `--python-interpreter=B`  | The Python interpreter to use: `python`\|`ipython`\|`auto` (the default) |
-| `let g:litrepl_ai_interpreter=B`     | `--ai-interpreter=B`      | The AI interpreter to use: `aicli`\|`auto` (the default) |
+| `let g:litrepl_python_interpreter=B` | `--python-interpreter=B`  | The Python interpreter to use |
+| `let g:litrepl_ai_interpreter=B`     | `--ai-interpreter=B`      | The AI interpreter to use |
+| `let g:litrepl_sh_interpreter=B`     | `--sh-interpreter=B`      | The shell interpreter to use |
 | `let g:litrepl_python_auxdir=D` | `--python-auxdir=D`            | The auxiliary files directory used by Python interpreter |
 | `let g:litrepl_ai_auxdir=D`     | `--ai-auxdir=D`                | The auxiliary files directory used by AI interpreter |
+| `let g:litrepl_sh_auxdir=D`     | `--sh-auxdir=D`                | The auxiliary files directory used by a shell interpreter |
 | `let g:litrepl_workdir=D`       | `--workdir=D`                  | The auxiliary files directory used by AI interpreter |
 | `let g:litrepl_debug=0/1`       | `--debug=0/1`                  | Print debug messages to the stderr |
 | `let g:litrepl_timeout=FLOAT`   | `--timeout=FLOAT`              | Timeout to wait for the new executions, in seconds, defaults to inf |
 
 * `T` Type of the document: `tex` or `markdown` (the default).
-* `B` Interpreter binary to use, defaults to `auto` which guesses the best one.
+* `B` Interpreter command to use, `-` or `auto` (the default). `-` value
+  disabled this type of interpreters; `auto` asks litrep to guess the best
+  available interpreter.
 * `D` Filesystem directory
 * `FLOAT` Should be formatted as `1` or `1.1` or `inf`. Note: command line
   argument also accepts a pair of timeouts.
