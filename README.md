@@ -378,22 +378,22 @@ prompting it to return control sooner (with an exception).
   the background.
 
 
-#### Direct Interaction with Interpreters
+#### Attaching to the Interpreters
 
 The command `litrepl repl [TYPE]` where `TYPE` stands for `python` (the default)
-or `ai`, connects to interpreter sessions, enabling users to interact with them
-directly.  For this command to work, [socat](https://linux.die.net/man/1/socat)
-tool needs to be installed on your system. Litrepl blocks the pipes for the time
-of interaction so no evaluation is possible while the repl session is active.
-For Python interpreter, the command prompt is disabled which is a current technical
-limitation. All other interpreter functionality is kept unchanged. Use `Ctrl+D`
-to safely detach the session. For example:
+`ai` or `sh`, attaches to interpreter sessions.  For this command to work,
+[socat](https://linux.die.net/man/1/socat) tool needs to be installed on your
+system. Litrepl blocks the pipes for the time of interaction so no evaluation is
+possible while the repl session is active.  For Python and Shell interpreters,
+the command prompt is disabled which is a current technical limitation. Use
+`Ctrl+D` to safely detach the session. For example:
 
 ``` sh
 $ litrepl repl python
 Opening the interpreter terminal (NO PROMPTS, USE `Ctrl+D` TO DETACH)
 W = 'Hello from repl'
 ^D
+$
 ```
 
 - The equivalent Vim commands are `:LRepl [TYPE]` or `:LTerm [TYPE]`. Both
