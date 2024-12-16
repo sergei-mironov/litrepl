@@ -47,6 +47,9 @@ Hello, World!
 <!--ai-->
 AI MESSAGE
 <!--noai-->
+``` sh
+a shell command
+```
 EOF
 
 run_latex <<"EOF"
@@ -94,6 +97,9 @@ Bartext
   %lresult
   hello("Verbose")
   %lnoresult
+\begin{sh}
+shell command
+\end{sh}
 \end{itemize}
 \end{document}
 EOF
