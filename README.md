@@ -58,7 +58,7 @@ _Notes:_
         * [Selecting Sections for Execution](#selecting-sections-for-execution)
         * [Managing Interpreter Sessions](#managing-interpreter-sessions)
         * [Asynchronous Processing](#asynchronous-processing)
-        * [Direct Interaction with Interpreters](#direct-interaction-with-interpreters)
+        * [Attaching Interpreter Sessions](#attaching-interpreter-sessions)
         * [Experimental AI Features](#experimental-ai-features)
     * [Application Scenarios](#application-scenarios)
         * [Command Line, Foreground Evaluation](#command-line-foreground-evaluation)
@@ -378,7 +378,7 @@ prompting it to return control sooner (with an exception).
   the background.
 
 
-#### Attaching to the Interpreters
+#### Attaching Interpreter Sessions
 
 The command `litrepl repl [TYPE]` where `TYPE` stands for `python` (the default)
 `ai` or `sh`, attaches to interpreter sessions.  For this command to work,
