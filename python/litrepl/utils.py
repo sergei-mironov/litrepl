@@ -1,8 +1,10 @@
 from textwrap import dedent, wrap
 from re import match as re_match, compile as re_compile
 from typing import Iterable,List
-from os import unlink
+from os import unlink, system
 from .types import CursorPos
+
+DEBUG:bool=False
 
 def unindent(col:int, lines:str)->str:
   def _rmspaces(l):
@@ -117,3 +119,11 @@ def remove_silent(f:str)->None:
     unlink(f)
   except FileNotFoundError:
     pass
+
+SOCAT_HINT="Attaching to the interpreter (NO PROMPTS, USE `Ctrl+D` TO DETACH)\n"
+def runsocat(fns, hint=None):
+  if hint is None:
+    hint=SOCAT_HINT
+  print(hint,end='')
+  system(f"socat - 'PIPE:{fns.outp},flock-ex-nb=1!!PIPE:{fns.inp},flock-ex-nb=1'")
+

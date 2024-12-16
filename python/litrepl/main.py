@@ -145,6 +145,7 @@ def main(args=None):
   if a.debug>0:
     litrepl.eval.DEBUG=True
     litrepl.base.DEBUG=True
+    litrepl.utils.DEBUG=True
 
   if a.filetype in {None,''}:
     a.filetype="markdown"

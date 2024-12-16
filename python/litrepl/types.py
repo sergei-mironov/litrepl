@@ -1,5 +1,5 @@
 import re
-from typing import (Any, Set, List, Dict, Tuple, Callable, Optional)
+from typing import (Any, Set, List, Dict, Tuple, Callable, Optional, Iterable)
 from re import compile as re_compile
 from dataclasses import dataclass
 from enum import Enum
