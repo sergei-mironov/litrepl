@@ -198,13 +198,6 @@ def start(a:LitreplArgs, st:SType)->int:
 
 
 
-def interp_code_preprocess(a:LitreplArgs, ss:Interpreter, es:EvalState, code:str) -> str:
-  return ss.code_preprocess(a,es,code)
-
-def interp_result_postprocess(a:LitreplArgs, ss:Interpreter, text:str) -> str:
-  s=ss.result_postprocess(a,text)
-  return wraplong(s,a.result_textwidth) if a.result_textwidth else s
-
 def restart(a:LitreplArgs,st:SType):
   stop(a,st); start(a,st)
 

@@ -24,7 +24,7 @@ from signal import (pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK,
 
 from .types import (LitreplArgs, RunResult, ReadResult, FileNames, EvalState,
                     ECode, ECODE_OK, ECODE_RUNNING, ECODE_UNDEFINED)
-from .utils import remove_silent
+from .utils import remove_silent, wraplong
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs, flush=True)
@@ -444,6 +444,14 @@ def rresultSave(text:str, presult:RunResult)->str:
   check it later. """
   sep='\n' if text and text[-1]!='\n' else ''
   return (text+f"{sep}[BG:{presult.fname}]\n")
+
+
+def interp_code_preprocess(a:LitreplArgs, ss:Interpreter, es:EvalState, code:str) -> str:
+  return ss.code_preprocess(a,es,code)
+
+def interp_result_postprocess(a:LitreplArgs, ss:Interpreter, text:str) -> str:
+  s=ss.result_postprocess(a,text)
+  return wraplong(s,a.result_textwidth) if a.result_textwidth else s
 
 def eval_code(*args, **kwargs) -> str:
   res,_=eval_code_(*args, **kwargs)
