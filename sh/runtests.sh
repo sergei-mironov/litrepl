@@ -356,9 +356,9 @@ cat >source.tex <<"EOF"
 % == Ignore non-tags ==
 \newcommand{\linline}[2]{#2}
 % == Normal evaluation ==
-\begin{lcode}
+\begin{lpython}
 print("A"+"B")
-\end{lcode}
+\end{lpython}
 Text
 \begin{enumerate}
 \item
@@ -372,15 +372,15 @@ PLACEHOLDER
 % == Inline evaluation ==
 \linline{"A"+"B"}
 {XX}\linline{"C"+"D"}{}
-\begin{lcode}
+\begin{lpython}
 tag='\\textbf{bold}'
-\end{lcode}
+\end{lpython}
 \linline{tag+tag}{\textbf{old}\textbf{old}}
 % == Meta-comments ==
 %lignore
-\begin{lcode}
+\begin{lpython}
 print("X"+"Y")
-\end{lcode}
+\end{lpython}
 %lresult
 ZZZZZ
 %lnoresult
@@ -413,9 +413,9 @@ diff -u out.tex - <<"EOF"
 % == Ignore non-tags ==
 \newcommand{\linline}[2]{#2}
 % == Normal evaluation ==
-\begin{lcode}
+\begin{lpython}
 print("A"+"B")
-\end{lcode}
+\end{lpython}
 Text
 \begin{enumerate}
 \item
@@ -429,15 +429,15 @@ AB
 % == Inline evaluation ==
 \linline{"A"+"B"}
 {AB}\linline{"C"+"D"}{CD}
-\begin{lcode}
+\begin{lpython}
 tag='\\textbf{bold}'
-\end{lcode}
+\end{lpython}
 \linline{tag+tag}{\textbf{bold}\textbf{bold}}
 % == Meta-comments ==
 %lignore
-\begin{lcode}
+\begin{lpython}
 print("X"+"Y")
-\end{lcode}
+\end{lpython}
 %lresult
 ZZZZZ
 %lnoresult

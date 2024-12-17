@@ -264,18 +264,25 @@ class SymbolsMarkdown(Symbols):
 @dataclass
 class SymbolsLatex(Symbols):
   def __init__(self, a:LitreplArgs):
+    markers=[]
+    for st in SType:
+      markers.extend(getattr(a,f"{st2name(st)}_markers").split(","))
+    codebegin_vim_re='|'.join([r"\\begin\{[ ]*l\?"+m+r"\}" for m in markers])
+    codebegin_lark_re='|'.join([r"\\begin\{[ ]*l?"+m+r"\}" for m in markers])
+    codeend_re='|'.join([r"\\end\{l?"+m+r"\}" for m in markers])
+    comcodebegin_re='|'.join([fr"\%[ ]*l?{m}" for m in markers])
+    comcodeend_re='|'.join([fr"\%[ ]*l?no{m}" for m in markers])
+
     self.codebegin_dict = {
-      'vim': r'\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l\?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}',
-      'lark': r'\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}'
+      'vim': codebegin_vim_re,
+      'lark': codebegin_lark_re
     }
     self.codebegin = self.codebegin_dict['lark']
-    self.codeend = r"\\end\{l[a-zA-Z0-9]*code\}|\\end\{l?python\}|" \
-                   r"\\end\{ai\}|\\end\{sh\}|\\end\{bash\}"
+    self.codeend = codeend_re
     self.resultbegin = r"\\begin\{l?[a-zA-Z0-9]*result\}"
     self.resultend = r"\\end\{l?[a-zA-Z0-9]*result\}"
-    self.comcodebegin = r"\%[ ]*lcode|\%[ ]*l?python|\%[ ]*l?ai|\%[ ]*l?sh"
-    self.comcodeend = r"\%[ ]*lnocode|\%[ ]*l?nopython|\%[ ]*l?noai|" \
-                      r"\%[ ]*l?nosh"
+    self.comcodebegin = comcodebegin_re
+    self.comcodeend = comcodeend_re
     self.comresultbegin = r"\%[ ]*l?result"
     self.comresultend = r"\%[ ]*l?noresult"
     self.ignorebegin = r"\%lignore"
