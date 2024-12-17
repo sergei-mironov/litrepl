@@ -88,6 +88,19 @@ class EvalState:
   def __init__(self,sr:SecRec):
     self.sr,self.sres,self.ledder,self.ecodes,self.stypes,self.nsec=sr,{},{},{},set(),-1
 
+@dataclass
+class Symbols:
+  codebegin:str
+  codeend:str
+  resultbegin:str
+  resultend:str
+  comcodebegin:str
+  comcodeend:str
+  comresultbegin:str
+  comresultend:str
+  ignorebegin:str
+  ignoreend:str
+
 
 class Interpreter:
   """ Interpreter abstraction. """
