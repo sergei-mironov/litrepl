@@ -717,11 +717,12 @@ usage: litrepl [-h] [-v] [--filetype STR] [--python-interpreter EXE]
                [--ai-auxdir DIR] [--sh-auxdir DIR] [-C DIR]
                [--pending-exit INT] [--exception-exit INT] [--foreground]
                [--map-cursor LINE:COL:FILE] [--result-textwidth NUM]
-               {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
+              
+{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp}
                ...
 
 positional arguments:
-  {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt}
+  {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp}
                               Commands to execute
     start                     Start the background interpreter.
     stop                      Stop the background interpreters.
@@ -738,22 +739,24 @@ positional arguments:
     repl                      Connect to the background terminal using GNU
                               socat.
     interrupt                 Send SIGINT to the background interpreter.
+    print-regexp              Print regexp matching start of code sections for
+                              the given file type.
 
 options:
   -h, --help                  show this help message and exit
   -v, --version               Print version.
   --filetype STR              Specify the type of input formatting
                               (markdown|[la]tex).
-  --python-interpreter EXE    Python interpreter command, or `auto`. It
-                              defaults to the LITREPL_PYTHON_INTERPRETER
+  --python-interpreter EXE    Python interpreter command line, or `auto`.
+                              Defaults to the LITREPL_PYTHON_INTERPRETER
                               environment variable if set, otherwise "auto".
                               Litrepl determines "python" or "ipython" type
                               according to the value.
-  --ai-interpreter EXE        `aicli` interpreter command or `auto`. It
-                              defaults to the LITREPL_AI_INTERPRETER
+  --ai-interpreter EXE        `aicli` interpreter command line or `auto`.
+                              Defaults to the LITREPL_AI_INTERPRETER
                               environment variable if set, otherwise "auto".
-  --sh-interpreter EXE        Shell interpreter command or `auto`. It
-                              defaults to the LITREPL_SH_INTERPRETER
+  --sh-interpreter EXE        Shell interpreter command line or `auto`.
+                              Defaults to the LITREPL_SH_INTERPRETER
                               environment variable if set, otherwise "auto".
   --timeout F[,F]             Timeouts for initial evaluation and for pending
                               checks, in seconds. If the latter is omitted, it
