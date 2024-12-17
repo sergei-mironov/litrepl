@@ -236,8 +236,11 @@ def stop(a:LitreplArgs,st:SType)->None:
 
 @dataclass
 class SymbolsMarkdown:
-  # vim_icodebeginmarker=r'```[ ]*ai|```[ ]*l\?python|```[ ]*l\?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash'
-  codebegin="```[ ]*ai|```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash"
+  codebegin_dict={
+    'vim':r'```[ ]*ai|```[ ]*l\?python|```[ ]*l\?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash',
+    'lark':r"```[ ]*ai|```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash"
+  }
+  codebegin=codebegin_dict['lark']
   codeend="```"
   resultbegin="```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
   resultend="```"
@@ -292,7 +295,11 @@ aitext : /(.(?!{symbols_md.aiend}))*./s
 
 @dataclass
 class SymbolsLatex:
-  codebegin=r"\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}"
+  codebegin_dict={
+    'vim':r'\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l\?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}',
+    'lark':r'\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}'
+  }
+  codebegin=codebegin_dict['lark']
   codeend=r"\\end\{l[a-zA-Z0-9]*code\}|\\end\{l?python\}|\\end\{ai\}|\\end\{sh\}|\\end\{bash\}"
   comcodebegin=r"\%[ ]*lcode|\%[ ]*l?python|\%[ ]*l?ai|\%[ ]*l?sh"
   comcodeend=r"\%[ ]*lnocode|\%[ ]*l?nopython|\%[ ]*l?noai|\%[ ]*l?nosh"

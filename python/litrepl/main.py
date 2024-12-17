@@ -128,6 +128,10 @@ def make_parser():
   interrupt=sps.add_parser('interrupt',
     help='Send SIGINT to the background interpreter.')
   interrupt.add_argument('locs',metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
+  regexp=sps.add_parser('print-regexp',
+    help='Print regexp matching start of code sections for the given file type.')
+  regexp.add_argument('format',metavar='STR',default='vim',
+    help=dedent('''Regexp format to print: 'vim' or 'lark'. Defaults to 'vim'''),nargs='?')
   return ap
 
 AP=make_parser()
@@ -253,6 +257,14 @@ def main(args=None):
           sts.append(st)
       ecode=status(a,sts,__version__)
       exit(0 if ecode is None else ecode)
+  elif a.command=='print-regexp':
+    s=SYMBOLS.get(a.filetype)
+    if s is None:
+      raise ValueError(f"Invalid filetype \"{a.filetype}\"")
+    regexp=s.codebegin_dict.get(a.format)
+    if regexp is None:
+      raise ValueError(f"Invalid regexp format \"{a.format}\"")
+    print(regexp)
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)
