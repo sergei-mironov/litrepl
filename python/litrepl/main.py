@@ -117,17 +117,17 @@ def make_parser():
     help='Parse the input file without futher processing (diagnostics).')
   sps.add_parser('parse-print',
     help=dedent('''Parse and print the input file back (diagnostics).'''))
-  eps=sps.add_parser('eval-sections',
+  evalsec=sps.add_parser('eval-sections',
     help=dedent('''Parse stdin, evaluate the sepcified sections (by default - all
     available sections), print the resulting file to stdout.'''))
-  eps.add_argument('locs',type=str,metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
+  evalsec.add_argument('locs',type=str,metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
   _with_type(sps.add_parser('eval-code',
     help='Evaluate the code snippet.'),default='python')
   _with_type(sps.add_parser('repl',
     help='Connect to the background terminal using GNU socat.'),default='python')
-  ips=sps.add_parser('interrupt',
+  interrupt=sps.add_parser('interrupt',
     help='Send SIGINT to the background interpreter.')
-  ips.add_argument('locs',metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
+  interrupt.add_argument('locs',metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
   return ap
 
 AP=make_parser()

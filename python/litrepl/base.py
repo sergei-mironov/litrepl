@@ -236,72 +236,73 @@ def stop(a:LitreplArgs,st:SType)->None:
 
 @dataclass
 class SymbolsMarkdown:
-  icodebeginmarker="```[ ]*ai|```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash"
-  icodendmarker="```"
-  ocodebeginmarker="```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
-  ocodendmarker="```"
-  verbeginmarker="<!--[ ]*l?result[ ]*-->"
-  verendmarker="<!--[ ]*l?noresult[ ]*-->"
-  aibeginmarker="<!--[ ]*ai[ ]*-->"
-  aiendmarker="<!--[ ]*noai[ ]*-->"
-  combeginmarker=r"<!--[ ]*l?ignore[ ]*-->"
-  comendmarker=r"<!--[ ]*l?noignore[ ]*-->"
+  # vim_icodebeginmarker=r'```[ ]*ai|```[ ]*l\?python|```[ ]*l\?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash'
+  codebegin="```[ ]*ai|```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash"
+  codeend="```"
+  resultbegin="```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
+  resultend="```"
+  comresultbegin="<!--[ ]*l?result[ ]*-->"
+  comresultend="<!--[ ]*l?noresult[ ]*-->"
+  aibegin="<!--[ ]*ai[ ]*-->"
+  aiend="<!--[ ]*noai[ ]*-->"
+  ignorebegin=r"<!--[ ]*l?ignore[ ]*-->"
+  ignoreend=r"<!--[ ]*l?noignore[ ]*-->"
 
 symbols_md=SymbolsMarkdown()
 
 def toplevel_markers_markdown():
   sl=symbols_md
-  return '|'.join([sl.icodebeginmarker,
-                   sl.ocodebeginmarker,
-                   sl.verbeginmarker,
-                   sl.combeginmarker,
-                   sl.aibeginmarker
+  return '|'.join([sl.codebegin,
+                   sl.resultbegin,
+                   sl.comresultbegin,
+                   sl.ignorebegin,
+                   sl.aibegin
                    ])
 
 # For the `?!` syntax, see https://stackoverflow.com/questions/56098140/how-to-exclude-certain-possibilities-from-a-regular-expression
 grammar_md = fr"""
 start: (topleveltext)? (snippet (topleveltext)?)*
-snippet : icodesection -> e_icodesection
-        | ocodesection -> e_ocodesection
-        | comsection -> e_comsection
-comsection.2 : combeginmarker comtext comendmarker
-icodesection.1 : icodebeginmarker ctext icodendmarker
-               | aibeginmarker aitext aiendmarker
-ocodesection.1 : ocodebeginmarker ctext ocodendmarker
-               | verbeginmarker vertext verendmarker
-icodebeginmarker : /{symbols_md.icodebeginmarker}/
-icodendmarker : /{symbols_md.icodendmarker}/
-aibeginmarker : /{symbols_md.aibeginmarker}/
-aiendmarker : /{symbols_md.aiendmarker}/
-ocodebeginmarker : /{symbols_md.ocodebeginmarker}/
-ocodendmarker : /{symbols_md.ocodendmarker}/
-verbeginmarker : /{symbols_md.verbeginmarker}/
-verendmarker : /{symbols_md.verendmarker}/
+snippet : codesec -> e_icodesection
+        | resultsec -> e_ocodesection
+        | ignoresec -> e_comsection
+ignoresec.2 : ignorebegin ignoretext ignoreend
+codesec.1 : codebegin ctext codeend
+               | aibegin aitext aiend
+resultsec.1 : resultbegin ctext resultend
+               | comresultbegin vertext comresultend
+codebegin : /{symbols_md.codebegin}/
+codeend : /{symbols_md.codeend}/
+aibegin : /{symbols_md.aibegin}/
+aiend : /{symbols_md.aiend}/
+resultbegin : /{symbols_md.resultbegin}/
+resultend : /{symbols_md.resultend}/
+comresultbegin : /{symbols_md.comresultbegin}/
+comresultend : /{symbols_md.comresultend}/
 inlinebeginmarker : "`"
 inlinendmarker : "`"
-combeginmarker : /{symbols_md.combeginmarker}/
-comendmarker : /{symbols_md.comendmarker}/
+ignorebegin : /{symbols_md.ignorebegin}/
+ignoreend : /{symbols_md.ignoreend}/
 topleveltext : /(.(?!{toplevel_markers_markdown()}))*./s
-ctext : /(.(?!{symbols_md.ocodendmarker}|{symbols_md.icodendmarker}))*./s
-comtext : /(.(?!{symbols_md.comendmarker}))*./s
-vertext : /(.(?!{symbols_md.verendmarker}))*./s
-aitext : /(.(?!{symbols_md.aiendmarker}))*./s
+ctext : /(.(?!{symbols_md.resultend}|{symbols_md.codeend}))*./s
+ignoretext : /(.(?!{symbols_md.ignoreend}))*./s
+vertext : /(.(?!{symbols_md.comresultend}))*./s
+aitext : /(.(?!{symbols_md.aiend}))*./s
 """
 
 
 @dataclass
 class SymbolsLatex:
-  icodebeginmarker=r"\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}"
-  icodendmarker=r"\\end\{l[a-zA-Z0-9]*code\}|\\end\{l?python\}|\\end\{ai\}|\\end\{sh\}|\\end\{bash\}"
-  icodebeginmarker2=r"\%[ ]*lcode|\%[ ]*l?python|\%[ ]*l?ai|\%[ ]*l?sh"
-  icodendmarker2=r"\%[ ]*lnocode|\%[ ]*l?nopython|\%[ ]*l?noai|\%[ ]*l?nosh"
-  ocodebeginmarker=r"\\begin\{l?[a-zA-Z0-9]*result\}"
-  ocodendmarker=r"\\end\{l?[a-zA-Z0-9]*result\}"
-  verbeginmarker=r"\%[ ]*l?result"
-  verendmarker=r"\%[ ]*l?noresult"
+  codebegin=r"\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}"
+  codeend=r"\\end\{l[a-zA-Z0-9]*code\}|\\end\{l?python\}|\\end\{ai\}|\\end\{sh\}|\\end\{bash\}"
+  comcodebegin=r"\%[ ]*lcode|\%[ ]*l?python|\%[ ]*l?ai|\%[ ]*l?sh"
+  comcodeend=r"\%[ ]*lnocode|\%[ ]*l?nopython|\%[ ]*l?noai|\%[ ]*l?nosh"
+  resultbegin=r"\\begin\{l?[a-zA-Z0-9]*result\}"
+  resultend=r"\\end\{l?[a-zA-Z0-9]*result\}"
+  comresultbegin=r"\%[ ]*l?result"
+  comresultend=r"\%[ ]*l?noresult"
   inlinemarker=r"\\l[a-zA-Z0-9]*inline"
-  combeginmarker=r"\%lignore"
-  comendmarker=r"\%lnoignore"
+  ignorebegin=r"\%lignore"
+  ignoreend=r"\%lnoignore"
 
 symbols_latex=SymbolsLatex()
 
@@ -312,39 +313,39 @@ BOBR="\\{"
 
 def toplevel_markers_latex():
   sl=symbols_latex
-  return '|'.join([sl.icodebeginmarker,sl.icodendmarker,
-                   sl.icodebeginmarker2,sl.icodendmarker2,
-                   sl.ocodebeginmarker,sl.ocodendmarker,
-                   sl.verbeginmarker,sl.verendmarker,
-                   sl.combeginmarker,sl.comendmarker,
+  return '|'.join([sl.codebegin,sl.codeend,
+                   sl.comcodebegin,sl.comcodeend,
+                   sl.resultbegin,sl.resultend,
+                   sl.comresultbegin,sl.comresultend,
+                   sl.ignorebegin,sl.ignoreend,
                    sl.inlinemarker+BOBR])
 grammar_latex = fr"""
 start: (topleveltext)? (snippet (topleveltext)? )*
-snippet : icodesection -> e_icodesection
-        | ocodesection -> e_ocodesection
-        | inlinesection -> e_inline
-        | comsection -> e_comment
-comsection.2 : combeginmarker comtext comendmarker
-icodesection.1 : icodebeginmarker innertext icodendmarker
-               | icodebeginmarker2 innertext icodendmarker2
-ocodesection.1 : ocodebeginmarker innertext ocodendmarker
-               | verbeginmarker innertext verendmarker
-inlinesection.1 : inlinemarker "{OBR}" inltext "{CBR}" spaces obr inltext cbr
+snippet : codesec -> e_icodesection
+        | resultsec -> e_ocodesection
+        | inlinecodesec -> e_inline
+        | ignoresec -> e_comment
+ignoresec.2 : ignorebegin ignoretext ignoreend
+codesec.1 : codebegin innertext codeend
+          | comcodebegin innertext comcodeend
+resultsec.1 : resultbegin innertext resultend
+            | comresultbegin innertext comresultend
+inlinecodesec.1 : inlinemarker "{OBR}" inltext "{CBR}" spaces obr inltext cbr
 inlinemarker : /{symbols_latex.inlinemarker}/
-icodebeginmarker : /{symbols_latex.icodebeginmarker}/
-icodendmarker : /{symbols_latex.icodendmarker}/
-icodebeginmarker2 : /{symbols_latex.icodebeginmarker2}/
-icodendmarker2 : /{symbols_latex.icodendmarker2}/
-ocodebeginmarker : /{symbols_latex.ocodebeginmarker}/
-ocodendmarker : /{symbols_latex.ocodendmarker}/
-verbeginmarker : /{symbols_latex.verbeginmarker}/
-verendmarker : /{symbols_latex.verendmarker}/
-combeginmarker : /{symbols_latex.combeginmarker}/
-comendmarker : /{symbols_latex.comendmarker}/
+codebegin : /{symbols_latex.codebegin}/
+codeend : /{symbols_latex.codeend}/
+comcodebegin : /{symbols_latex.comcodebegin}/
+comcodeend : /{symbols_latex.comcodeend}/
+resultbegin : /{symbols_latex.resultbegin}/
+resultend : /{symbols_latex.resultend}/
+comresultbegin : /{symbols_latex.comresultbegin}/
+comresultend : /{symbols_latex.comresultend}/
+ignorebegin : /{symbols_latex.ignorebegin}/
+ignoreend : /{symbols_latex.ignoreend}/
 topleveltext : /(.(?!{toplevel_markers_latex()}))*./s
-innertext : /(.(?!{symbols_latex.icodendmarker2}|{symbols_latex.icodendmarker}|{symbols_latex.ocodendmarker}|{symbols_latex.verendmarker}))*./s
+innertext : /(.(?!{symbols_latex.comcodeend}|{symbols_latex.codeend}|{symbols_latex.resultend}|{symbols_latex.comresultend}))*./s
 inltext : ( /[^{OBR}{CBR}]+({OBR}[^{CBR}]*{CBR}[^{OBR}{CBR}]*)*/ )?
-comtext : ( /(.(?!{symbols_latex.comendmarker}))*./s )?
+ignoretext : ( /(.(?!{symbols_latex.ignoreend}))*./s )?
 spaces : ( /[ \t\r\n]+/s )?
 obr : "{OBR}"
 cbr : "{CBR}"
@@ -420,7 +421,7 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
       return self.text(tree)
     def innertext(self,tree):
       return self.text(tree)
-    def icodesection(self,tree):
+    def codesec(self,tree):
       es.nsec+=1
       bmarker=tree.children[0].children[0].value
       t=tree.children[1].children[0].value
@@ -439,7 +440,7 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
             msg=_failmsg(fns,ec)
             pstderr(msg)
             es.sres[es.nsec]=es.sres.get(es.nsec,'')+msg
-    def ocodesection(self,tree):
+    def resultsec(self,tree):
       bmarker=tree.children[0].children[0].value
       t=tree.children[1].children[0].value
       emarker=tree.children[2].children[0].value
@@ -451,7 +452,7 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
         self._print(t2)
       else:
         self._print(f"{bmarker}{tree.children[1].children[0].value}{emarker}")
-    def inlinesection(self,tree):
+    def inlinecodesec(self,tree):
       # FIXME: Latex-only
       bm,em=tree.children[0].meta,tree.children[4].meta
       code=tree.children[1].children[0].value
@@ -468,7 +469,7 @@ def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
       self._print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}")
-    def comsection(self,tree):
+    def ignoresec(self,tree):
       bmarker=tree.children[0].children[0].value
       emarker=tree.children[2].children[0].value
       self._print(f"{bmarker}{tree.children[1].children[0].value}{emarker}")
@@ -511,10 +512,10 @@ def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
       results[self.nsec]=unindent(column,text1)
       if pend is not None:
         rres[self.nsec].add(pend)
-    def icodesection(self,tree):
+    def codesec(self,tree):
       self.nsec+=1
       self._count(tree.children[0].meta,tree.children[2].meta)
-    def ocodesection(self,tree):
+    def resultsec(self,tree):
       self._count(tree.children[0].meta,tree.children[2].meta)
       contents=tree.children[1].children[0].value
       bm,em=tree.children[0].meta,tree.children[2].meta
@@ -522,7 +523,7 @@ def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
     def oversection(self,tree):
       self._count(tree.children[0].meta,tree.children[2].meta)
       self._getrr(tree.children[1].children[0].value)
-    def inlinesection(self,tree):
+    def inlinecodesec(self,tree):
       self._count(tree.children[0].meta,tree.children[5].meta)
   c=C()
   c.visit(tree)
