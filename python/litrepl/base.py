@@ -251,16 +251,7 @@ class SymbolsMarkdown(Symbols):
   ignorebegin:str=r"<!--[ ]*l?ignore[ ]*-->"
   ignoreend:str=r"<!--[ ]*l?noignore[ ]*-->"
 
-symbols_md=SymbolsMarkdown()
 
-def toplevel_markers_markdown():
-  sl=symbols_md
-  return '|'.join([sl.codebegin,
-                   sl.resultbegin,
-                   sl.comresultbegin,
-                   sl.ignorebegin,
-                   sl.comcodebegin
-                   ])
 
 
 
@@ -282,21 +273,11 @@ class SymbolsLatex(Symbols):
   ignoreend:str=r"\%lnoignore"
   inlinemarker:str=r"\\l[a-zA-Z0-9]*inline"
 
-symbols_latex=SymbolsLatex()
-
 OBR="{"
 CBR="}"
 BCBR="\\}"
 BOBR="\\{"
 
-def toplevel_markers_latex():
-  sl=symbols_latex
-  return '|'.join([sl.codebegin,sl.codeend,
-                   sl.comcodebegin,sl.comcodeend,
-                   sl.resultbegin,sl.resultend,
-                   sl.comresultbegin,sl.comresultend,
-                   sl.ignorebegin,sl.ignoreend,
-                   sl.inlinemarker+BOBR])
 
 def parse_(grammar:LarkGrammar, tty_ok=True):
   pdebug(f"parsing start")
@@ -306,10 +287,17 @@ def parse_(grammar:LarkGrammar, tty_ok=True):
   pdebug(f"parsing finish")
   return tree
 
-def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Any]]:
+def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Symbols]]:
   # For the `?!` syntax, see
   # https://stackoverflow.com/questions/56098140/how-to-exclude-certain-possibilities-from-a-regular-expression
   if a.filetype in ["md","markdown"]:
+    symbols_md=SymbolsMarkdown()
+    sl=symbols_md
+    toplevel_markers_markdown='|'.join([
+      sl.codebegin,sl.resultbegin,
+      sl.comresultbegin, sl.ignorebegin, sl.comcodebegin
+    ])
+    symbols_md=SymbolsMarkdown()
     return (dedent(fr"""
       start: (topleveltext)? (snippet (topleveltext)?)*
       snippet : codesec -> e_icodesection
@@ -332,13 +320,20 @@ def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Any]]:
       inlinendmarker : "`"
       ignorebegin : /{symbols_md.ignorebegin}/
       ignoreend : /{symbols_md.ignoreend}/
-      topleveltext : /(.(?!{toplevel_markers_markdown()}))*./s
+      topleveltext : /(.(?!{toplevel_markers_markdown}))*./s
       ctext : /(.(?!{symbols_md.resultend}|{symbols_md.codeend}))*./s
       ignoretext : /(.(?!{symbols_md.ignoreend}))*./s
       vertext : /(.(?!{symbols_md.comresultend}))*./s
       aitext : /(.(?!{symbols_md.comcodeend}))*./s
-      """),SymbolsMarkdown)
+      """), symbols_md)
   elif a.filetype in ["tex","latex"]:
+    symbols_latex=SymbolsLatex()
+    sl=symbols_latex
+    toplevel_markers_latex='|'.join([
+      sl.codebegin,sl.codeend,sl.comcodebegin,sl.comcodeend,
+      sl.resultbegin,sl.resultend,sl.comresultbegin,sl.comresultend,
+      sl.ignorebegin,sl.ignoreend,sl.inlinemarker+BOBR
+    ])
     return (dedent(fr"""
       start: (topleveltext)? (snippet (topleveltext)? )*
       snippet : codesec -> e_icodesection
@@ -362,14 +357,14 @@ def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Any]]:
       comresultend : /{symbols_latex.comresultend}/
       ignorebegin : /{symbols_latex.ignorebegin}/
       ignoreend : /{symbols_latex.ignoreend}/
-      topleveltext : /(.(?!{toplevel_markers_latex()}))*./s
+      topleveltext : /(.(?!{toplevel_markers_latex}))*./s
       innertext : /(.(?!{symbols_latex.comcodeend}|{symbols_latex.codeend}|{symbols_latex.resultend}|{symbols_latex.comresultend}))*./s
       inltext : ( /[^{OBR}{CBR}]+({OBR}[^{CBR}]*{CBR}[^{OBR}{CBR}]*)*/ )?
       ignoretext : ( /(.(?!{symbols_latex.ignoreend}))*./s )?
       spaces : ( /[ \t\r\n]+/s )?
       obr : "{OBR}"
       cbr : "{CBR}"
-      """), SymbolsLatex)
+      """), symbols_latex)
   else:
     return None
 
