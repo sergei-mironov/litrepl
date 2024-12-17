@@ -189,7 +189,7 @@ XX
 Stop tag protection
 -------------------
 
-``` code
+``` python
 print("<!-- noresult -->")
 ```
 <!-- result -->
@@ -309,7 +309,7 @@ FOO
 Stop tag protection
 -------------------
 
-``` code
+``` python
 print("<!-- noresult -->")
 ```
 <!-- result -->

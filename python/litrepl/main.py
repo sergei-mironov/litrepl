@@ -45,6 +45,15 @@ def make_parser():
     help='Print version.')
   ap.add_argument('--filetype',metavar='STR',default=None,
     help='Specify the type of input formatting (markdown|[la]tex).')
+  ap.add_argument('--python-markers',metavar='STR[,STR]',
+    default=environ.get('LITREPL_PYTHON_MARKERS','python'),
+    help=dedent('''TODO'''))
+  ap.add_argument('--ai-markers',metavar='STR[,STR]',
+    default=environ.get('LITREPL_AI_MARKERS','ai'),
+    help=dedent('''TODO'''))
+  ap.add_argument('--sh-markers',metavar='STR[,STR]',
+    default=environ.get('LITREPL_SH_MARERS','sh,bash'),
+    help=dedent('''TODO'''))
   ap.add_argument('--python-interpreter',metavar='EXE',
     default=environ.get('LITREPL_PYTHON_INTERPRETER','auto'),
     help=dedent('''Python interpreter command line, or `auto`. Defaults to the
@@ -58,18 +67,6 @@ def make_parser():
     default=environ.get('LITREPL_SH_INTERPRETER','auto'),
     help=dedent('''Shell interpreter command line or `auto`. Defaults to the
     LITREPL_SH_INTERPRETER environment variable if set, otherwise "auto".'''))
-  ap.add_argument('--timeout',type=str,metavar='F[,F]',default='inf',
-    help=dedent('''Timeouts for initial evaluation and for pending checks, in
-    seconds. If the latter is omitted, it is considered to be equal to the
-    former one.'''))
-  ap.add_argument('--propagate-sigint',action='store_true',
-    help=dedent('''If set, litrepl will catch and resend SIGINT signals to the
-    running interpreter. Otherwise it will just terminate itself leaving the
-    interpreter as-is.'''))
-  ap.add_argument('-d','--debug',type=int,metavar='INT',default=0,
-    help="Enable (a lot of) debug messages.")
-  ap.add_argument('--verbose',action='store_true',
-    help='Be more verbose (used in status).')
   ap.add_argument('--python-auxdir',type=str,metavar='DIR',
     default=environ.get('LITREPL_PYTHON_AUXDIR'),
     help=dedent('''This directory stores Python interpreter pipes. It defaults
@@ -85,6 +82,18 @@ def make_parser():
     help=dedent('''This directory stores AI interpreter pipes. It defaults to
     LITREPL_SH_AUXDIR if set; otherwise, it's created in the system's temporary
     directory, named after the current working directory.'''))
+  ap.add_argument('--timeout',type=str,metavar='F[,F]',default='inf',
+    help=dedent('''Timeouts for initial evaluation and for pending checks, in
+    seconds. If the latter is omitted, it is considered to be equal to the
+    former one.'''))
+  ap.add_argument('--propagate-sigint',action='store_true',
+    help=dedent('''If set, litrepl will catch and resend SIGINT signals to the
+    running interpreter. Otherwise it will just terminate itself leaving the
+    interpreter as-is.'''))
+  ap.add_argument('-d','--debug',type=int,metavar='INT',default=0,
+    help="Enable (a lot of) debug messages.")
+  ap.add_argument('--verbose',action='store_true',
+    help='Be more verbose (used in status).')
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',
     default=environ.get('LITREPL_WORKDIR',None),
     help=dedent('''Set the working directory before execution. By default, it

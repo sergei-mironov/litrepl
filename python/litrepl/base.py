@@ -237,16 +237,25 @@ def stop(a:LitreplArgs,st:SType)->None:
 @dataclass
 class SymbolsMarkdown(Symbols):
   def __init__(self, a:LitreplArgs):
+    markers=[]
+    for st in SType:
+      markers.extend(getattr(a,f"{st2name(st)}_markers").split(","))
+    codebegin_re='|'.join(
+      [fr"```[ ]*l?{m}" for m in markers]+
+      [r"```[ ]*{[^}]*"+m+r"[^}]*}" for m in markers]
+    )
+    comcodebegin_re='|'.join([fr"<!--[ ]*l?{m}[ ]*-->" for m in markers])
+    comcodeend_re='|'.join([fr"<!--[ ]*l?no{m}[ ]*-->" for m in markers])
     self.codebegin_dict = {
-      'vim': r'```[ ]*ai|```[ ]*l\?python|```[ ]*l\?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash',
-      'lark': r"```[ ]*ai|```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash"
+      'vim': codebegin_re,
+      'lark': codebegin_re
     }
     self.codebegin = self.codebegin_dict['lark']
     self.codeend = "```"
     self.resultbegin = r"```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
     self.resultend = "```"
-    self.comcodebegin = "<!--[ ]*ai[ ]*-->"
-    self.comcodeend = "<!--[ ]*noai[ ]*-->"
+    self.comcodebegin = comcodebegin_re
+    self.comcodeend = comcodeend_re
     self.comresultbegin = "<!--[ ]*l?result[ ]*-->"
     self.comresultend = "<!--[ ]*l?noresult[ ]*-->"
     self.ignorebegin = r"<!--[ ]*l?ignore[ ]*-->"
