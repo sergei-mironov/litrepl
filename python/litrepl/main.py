@@ -29,11 +29,14 @@ def _with_type(p, default=None, allow_all=False):
   )
   return p
 
-def grammar(ft):
-  g=GRAMMARS.get(ft)
+def grammar(a:LitreplArgs, raise_:bool=True)->LarkGrammar:
+  g=grammar_(a)
   if g is None:
-    raise ValueError(f"Invalid filetype \"{ft}\"")
-  return g
+    if raise_:
+      raise ValueError(f"Invalid filetype \"{ft}\"")
+    else:
+      return None
+  return g[0]
 
 def make_parser():
   ap=ArgumentParser(prog='litrepl',
@@ -201,16 +204,16 @@ def main(args=None):
     else:
       restart(a,name2st(a.type))
   elif a.command=='parse':
-    g=grammar(a.filetype)
+    g=grammar(a)
     t=parse_(g)
     print(t.pretty())
     exit(0)
   elif a.command=='parse-print':
     sr0=SecRec(set(),{})
-    ecode=eval_section_(a,parse_(grammar(a.filetype)),sr0)
+    ecode=eval_section_(a,parse_(grammar(a)),sr0)
     exit(0 if ecode is None else ecode)
   elif a.command=='eval-sections':
-    t=parse_(grammar(a.filetype))
+    t=parse_(grammar(a))
     nsecs=solve_sloc(a.locs,t)
     ecode=eval_section_(a,t,nsecs)
     exit(0 if ecode is None else ecode)
@@ -226,7 +229,7 @@ def main(args=None):
       ecode=interpExitCode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='interrupt':
-    tree=parse_(grammar(a.filetype))
+    tree=parse_(grammar(a))
     sr=solve_sloc(a.locs,tree)
     sr.nsecs|=set(sr.preproc.pending.keys())
     ecode=eval_section_(a,tree,sr,interrupt=True)
@@ -244,21 +247,23 @@ def main(args=None):
       ecode=interpExitCode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='status':
+    g=grammar(a)
     if a.foreground:
       st=name2st(a.type)
       with with_parent_finally(partial(_foreground_stop,st)):
         start(a,st)
-        ecode=status(a,[st],__version__)
+        ecode=status(a,g,[st],__version__)
       exit(0 if ecode is None else ecode)
     else:
       sts=[]
       for st in SType:
         if a.type in {st2name(st),"all",None}:
           sts.append(st)
-      ecode=status(a,sts,__version__)
+      ecode=status(a,g,sts,__version__)
       exit(0 if ecode is None else ecode)
   elif a.command=='print-regexp':
-    s=SYMBOLS.get(a.filetype)
+    gs=grammar_(a)
+    s=gs[1] if gs is not None else None
     if s is None:
       raise ValueError(f"Invalid filetype \"{a.filetype}\"")
     regexp=s.codebegin_dict.get(a.format)

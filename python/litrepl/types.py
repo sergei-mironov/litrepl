@@ -6,6 +6,7 @@ from enum import Enum
 
 FileName=str
 LitreplArgs=Any
+LarkGrammar=str
 
 # Process exit code or None (running)
 ECode=Optional[int]

@@ -29,7 +29,7 @@ from contextlib import contextmanager
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
                     CursorPos, ReadResult, SType, LitreplArgs,
                     EvalState, ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE,
-                    Interpreter)
+                    Interpreter, LarkGrammar)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally,
                    with_fd, read_nonblock, eval_code, eval_code_)
@@ -262,35 +262,6 @@ def toplevel_markers_markdown():
                    sl.aibegin
                    ])
 
-# For the `?!` syntax, see https://stackoverflow.com/questions/56098140/how-to-exclude-certain-possibilities-from-a-regular-expression
-grammar_md = fr"""
-start: (topleveltext)? (snippet (topleveltext)?)*
-snippet : codesec -> e_icodesection
-        | resultsec -> e_ocodesection
-        | ignoresec -> e_comsection
-ignoresec.2 : ignorebegin ignoretext ignoreend
-codesec.1 : codebegin ctext codeend
-               | aibegin aitext aiend
-resultsec.1 : resultbegin ctext resultend
-               | comresultbegin vertext comresultend
-codebegin : /{symbols_md.codebegin}/
-codeend : /{symbols_md.codeend}/
-aibegin : /{symbols_md.aibegin}/
-aiend : /{symbols_md.aiend}/
-resultbegin : /{symbols_md.resultbegin}/
-resultend : /{symbols_md.resultend}/
-comresultbegin : /{symbols_md.comresultbegin}/
-comresultend : /{symbols_md.comresultend}/
-inlinebeginmarker : "`"
-inlinendmarker : "`"
-ignorebegin : /{symbols_md.ignorebegin}/
-ignoreend : /{symbols_md.ignoreend}/
-topleveltext : /(.(?!{toplevel_markers_markdown()}))*./s
-ctext : /(.(?!{symbols_md.resultend}|{symbols_md.codeend}))*./s
-ignoretext : /(.(?!{symbols_md.ignoreend}))*./s
-vertext : /(.(?!{symbols_md.comresultend}))*./s
-aitext : /(.(?!{symbols_md.aiend}))*./s
-"""
 
 
 @dataclass
@@ -326,39 +297,8 @@ def toplevel_markers_latex():
                    sl.comresultbegin,sl.comresultend,
                    sl.ignorebegin,sl.ignoreend,
                    sl.inlinemarker+BOBR])
-grammar_latex = fr"""
-start: (topleveltext)? (snippet (topleveltext)? )*
-snippet : codesec -> e_icodesection
-        | resultsec -> e_ocodesection
-        | inlinecodesec -> e_inline
-        | ignoresec -> e_comment
-ignoresec.2 : ignorebegin ignoretext ignoreend
-codesec.1 : codebegin innertext codeend
-          | comcodebegin innertext comcodeend
-resultsec.1 : resultbegin innertext resultend
-            | comresultbegin innertext comresultend
-inlinecodesec.1 : inlinemarker "{OBR}" inltext "{CBR}" spaces obr inltext cbr
-inlinemarker : /{symbols_latex.inlinemarker}/
-codebegin : /{symbols_latex.codebegin}/
-codeend : /{symbols_latex.codeend}/
-comcodebegin : /{symbols_latex.comcodebegin}/
-comcodeend : /{symbols_latex.comcodeend}/
-resultbegin : /{symbols_latex.resultbegin}/
-resultend : /{symbols_latex.resultend}/
-comresultbegin : /{symbols_latex.comresultbegin}/
-comresultend : /{symbols_latex.comresultend}/
-ignorebegin : /{symbols_latex.ignorebegin}/
-ignoreend : /{symbols_latex.ignoreend}/
-topleveltext : /(.(?!{toplevel_markers_latex()}))*./s
-innertext : /(.(?!{symbols_latex.comcodeend}|{symbols_latex.codeend}|{symbols_latex.resultend}|{symbols_latex.comresultend}))*./s
-inltext : ( /[^{OBR}{CBR}]+({OBR}[^{CBR}]*{CBR}[^{OBR}{CBR}]*)*/ )?
-ignoretext : ( /(.(?!{symbols_latex.ignoreend}))*./s )?
-spaces : ( /[ \t\r\n]+/s )?
-obr : "{OBR}"
-cbr : "{CBR}"
-"""
 
-def parse_(grammar, tty_ok=True):
+def parse_(grammar:LarkGrammar, tty_ok=True):
   pdebug(f"parsing start")
   parser=Lark(grammar,propagate_positions=True)
   inp=sys.stdin.read() if (not isatty(sys.stdin.fileno()) or tty_ok) else ""
@@ -366,8 +306,72 @@ def parse_(grammar, tty_ok=True):
   pdebug(f"parsing finish")
   return tree
 
-GRAMMARS={'markdown':grammar_md,'tex':grammar_latex,'latex':grammar_latex}
-SYMBOLS={'markdown':symbols_md,'tex':symbols_latex,'latex':symbols_latex}
+def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Any]]:
+  # For the `?!` syntax, see
+  # https://stackoverflow.com/questions/56098140/how-to-exclude-certain-possibilities-from-a-regular-expression
+  if a.filetype in ["md","markdown"]:
+    return (dedent(fr"""
+      start: (topleveltext)? (snippet (topleveltext)?)*
+      snippet : codesec -> e_icodesection
+              | resultsec -> e_ocodesection
+              | ignoresec -> e_comsection
+      ignoresec.2 : ignorebegin ignoretext ignoreend
+      codesec.1 : codebegin ctext codeend
+                     | aibegin aitext aiend
+      resultsec.1 : resultbegin ctext resultend
+                     | comresultbegin vertext comresultend
+      codebegin : /{symbols_md.codebegin}/
+      codeend : /{symbols_md.codeend}/
+      aibegin : /{symbols_md.aibegin}/
+      aiend : /{symbols_md.aiend}/
+      resultbegin : /{symbols_md.resultbegin}/
+      resultend : /{symbols_md.resultend}/
+      comresultbegin : /{symbols_md.comresultbegin}/
+      comresultend : /{symbols_md.comresultend}/
+      inlinebeginmarker : "`"
+      inlinendmarker : "`"
+      ignorebegin : /{symbols_md.ignorebegin}/
+      ignoreend : /{symbols_md.ignoreend}/
+      topleveltext : /(.(?!{toplevel_markers_markdown()}))*./s
+      ctext : /(.(?!{symbols_md.resultend}|{symbols_md.codeend}))*./s
+      ignoretext : /(.(?!{symbols_md.ignoreend}))*./s
+      vertext : /(.(?!{symbols_md.comresultend}))*./s
+      aitext : /(.(?!{symbols_md.aiend}))*./s
+      """),SymbolsMarkdown)
+  elif a.filetype in ["tex","latex"]:
+    return (dedent(fr"""
+      start: (topleveltext)? (snippet (topleveltext)? )*
+      snippet : codesec -> e_icodesection
+              | resultsec -> e_ocodesection
+              | inlinecodesec -> e_inline
+              | ignoresec -> e_comment
+      ignoresec.2 : ignorebegin ignoretext ignoreend
+      codesec.1 : codebegin innertext codeend
+                | comcodebegin innertext comcodeend
+      resultsec.1 : resultbegin innertext resultend
+                  | comresultbegin innertext comresultend
+      inlinecodesec.1 : inlinemarker "{OBR}" inltext "{CBR}" spaces obr inltext cbr
+      inlinemarker : /{symbols_latex.inlinemarker}/
+      codebegin : /{symbols_latex.codebegin}/
+      codeend : /{symbols_latex.codeend}/
+      comcodebegin : /{symbols_latex.comcodebegin}/
+      comcodeend : /{symbols_latex.comcodeend}/
+      resultbegin : /{symbols_latex.resultbegin}/
+      resultend : /{symbols_latex.resultend}/
+      comresultbegin : /{symbols_latex.comresultbegin}/
+      comresultend : /{symbols_latex.comresultend}/
+      ignorebegin : /{symbols_latex.ignorebegin}/
+      ignoreend : /{symbols_latex.ignoreend}/
+      topleveltext : /(.(?!{toplevel_markers_latex()}))*./s
+      innertext : /(.(?!{symbols_latex.comcodeend}|{symbols_latex.codeend}|{symbols_latex.resultend}|{symbols_latex.comresultend}))*./s
+      inltext : ( /[^{OBR}{CBR}]+({OBR}[^{CBR}]*{CBR}[^{OBR}{CBR}]*)*/ )?
+      ignoretext : ( /(.(?!{symbols_latex.ignoreend}))*./s )?
+      spaces : ( /[ \t\r\n]+/s )?
+      obr : "{OBR}"
+      cbr : "{CBR}"
+      """), SymbolsLatex)
+  else:
+    return None
 
 
 def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
@@ -603,9 +607,9 @@ def solve_sloc(s:str, tree)->SecRec:
     ppi)
 
 
-def status(a:LitreplArgs,sts:List[SType],version):
+def status(a:LitreplArgs, g:LarkGrammar, sts:List[SType], version):
   if a.verbose:
-    return status_verbose(a,sts,version)
+    return status_verbose(a,g,sts,version)
   else:
     return status_oneline(a,sts)
 
@@ -626,7 +630,9 @@ def status_oneline(a:LitreplArgs,sts:List[SType])->int:
       ecode = '-'
     print(f"{st2name(st):6s} {pid:10s} {ecode:3s} {cmd}")
 
-def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
+def status_verbose(a:LitreplArgs, g:LarkGrammar, sts:List[SType], version:str)->int:
+  t=parse_(g,a.tty) if g is not None else None
+  sr=solve_sloc('0..$',t) if t is not None else None
   print(f"version: {version}")
   print(f"workdir: {getcwd()}")
   print(f"litrepl PATH: {environ.get('PATH','')}")
@@ -639,10 +645,6 @@ def status_verbose(a:LitreplArgs,sts:List[SType],version:str)->int:
       print(f"{st2name(st)} interpreter pid: {pid}")
     except Exception:
       print(f"{st2name(st)} interpreter pid: ?")
-
-    g=GRAMMARS.get(a.filetype)
-    t=parse_(g,a.tty) if g is not None else None
-    sr=solve_sloc('0..$',t) if t is not None else None
     if sr is not None:
       for nsec,pend in sr.preproc.pending.items():
         fname=pend.fname
