@@ -85,6 +85,8 @@ fun! LitReplEvalSelection(type) range " -> [int, string]
   if errcode == 0
     let result = split(result, '\n')
     call append(line_end, result)
+  else
+    call LitReplOpenErr("Failed (".string(errcode).")")
   endif
   return [errcode, result]
 endfun
@@ -159,11 +161,14 @@ fun! LitReplTaskNew(scope, prompt) range " -> [int, string]
   let [errcode, result] = LitReplAIQuery(selection, 1, prompt)
   if errcode == 0
     if scope == 3
+      " Show response in the terminal
       execute "terminal ".LitReplCmd()." repl ai"
       call feedkeys("/cat out\n")
     else
       let b:airegion = LitReplRegionReplace(b:airegion, trim(result))
     endif
+  else
+    call LitReplOpenErr("Failed (".string(errcode).")")
   endif
   return [errcode, result]
 endfun

@@ -147,10 +147,12 @@ fun! LitReplCmdTimeout(timeout)
   return LitReplCmd().' --timeout='.a:timeout.' '
 endfun
 
-fun! LitReplOpenErr(file, message)
-  if bufwinnr(a:file) <= 0
+fun! LitReplOpenErr(message)
+  " Open error file and show the message
+  let file = LitReplGet('litrepl_errfile')
+  if bufwinnr(file) <= 0
     let nr = winnr()
-    execute "botright vs ".a:file
+    execute "botright vs ".file
     execute "setlocal autoread"
     execute string(nr) . 'wincmd w'
   endif
@@ -180,27 +182,42 @@ fun! LitReplNotice(message)
   echohl None
 endfun
 
-fun! LitReplVisualize(errcode, result)
-  let [errcode, result] = [a:errcode, a:result]
+fun! LitReplVisualize(errcode, errmsg)
+  let [errcode, errmsg] = [a:errcode, a:errmsg]
   if errcode == LitReplGet('litrepl_pending')
     call LitReplNotice('Re-evaluate to continue')
   else
     if errcode == 0
       call LitReplNotice('Done')
       if LitReplGet('litrepl_always_show_stderr') != 0
-        call LitReplOpenErr(LitReplGet('litrepl_errfile'), result)
+        call LitReplOpenErr('')
       endif
     else
-      call LitReplOpenErr(LitReplGet('litrepl_errfile'), result)
+      call LitReplOpenErr(errmsg." (".string(errcode).")")
     endif
   endif
+endfun
+
+fun! LitReplLogInput(file, command, input) range
+  let l:dir = fnamemodify(a:file, ':h')
+  if !isdirectory(l:dir)
+    call mkdir(l:dir, 'p')
+  endif
+  let l:file = a:file
+  call writefile([
+    \ "COMMAND", "=======", a:command,
+    \ "", "STDIN", "======"] + split(a:input, '\n') + [
+    \ "", "STDERR", "======",
+    \ ], l:file, '')
 endfun
 
 fun! LitReplRun(command, input) range
   " Take the command part of litrepl command-line and its input and return
   " errorcode and stdout.
   let cur = getcharpos('.')
-  let cmd = LitReplCmdTimeout('inf').' '.a:command.' 2>'.LitReplGet('litrepl_errfile')
+  let errfile = LitReplGet('litrepl_errfile')
+  let cmd = LitReplCmdTimeout('inf').' '.a:command.' 2>>'.errfile
+  call LitReplLogInput(errfile, cmd, a:input)
   let result = system(cmd, a:input)
   let errcode = v:shell_error
   return [errcode, result]
@@ -214,7 +231,9 @@ endfun
 
 fun! LitReplRunBuffer(command, timeout) range
   " Run the current buffer 'through' the litrepl processor.
-  let cmd = '%!'.LitReplCmdTimeout(a:timeout).' '.a:command.' 2>'.LitReplGet('litrepl_errfile')
+  let errfile = LitReplGet('litrepl_errfile')
+  let cmd = '%!'.LitReplCmdTimeout(a:timeout).' '.a:command.' 2>>'.errfile
+  call LitReplLogInput(errfile, cmd, "<omitted>")
   silent execute cmd
   let errcode = v:shell_error
   return errcode
@@ -225,7 +244,7 @@ fun! LitReplRunBufferVC(command, timeout) range
   " update the cursor if needed.
   let cur = getcharpos('.')
   let errcode = LitReplRunBuffer(a:command, a:timeout)
-  call LitReplVisualize(errcode, '')
+  call LitReplVisualize(errcode, 'Failed')
   call LitReplUpdateCursor(cur)
   return errcode
 endfun
@@ -283,7 +302,7 @@ fun! LitReplRunBufferMonitor()
         else
           execute "u"
           call setcharpos('.', cur)
-          call LitReplVisualize(errcode, '')
+          call LitReplVisualize(errcode, 'Failed')
           break
         endif
       endif
@@ -300,7 +319,7 @@ fun! LitReplStatus()
   silent execute '%!'.LitReplCmd(). ' --verbose status 2>'.LitReplGet('litrepl_errfile').' >&2'
   call setcharpos('.', cur)
   execute "u"
-  call LitReplOpenErr(LitReplGet('litrepl_errfile'), '')
+  call LitReplOpenErr('')
 endfun
 
 let b:litrepl_lastpos = "0:0"
@@ -350,7 +369,7 @@ if !exists(":LTerm")
   command! -bar -nargs=? LTerm call LitReplTerm(<q-args>)
 endif
 if !exists(":LOpenErr")
-  command! -bar -nargs=0 LOpenErr call LitReplOpenErr(LitReplGet('litrepl_errfile'),'')
+  command! -bar -nargs=0 LOpenErr call LitReplOpenErr('')
 endif
 if !exists(":LVersion")
   command! -bar -nargs=0 LVersion call LitReplVersion()
