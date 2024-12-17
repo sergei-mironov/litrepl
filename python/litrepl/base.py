@@ -236,42 +236,42 @@ def stop(a:LitreplArgs,st:SType)->None:
 
 @dataclass
 class SymbolsMarkdown(Symbols):
-  codebegin_dict={
-    'vim':r'```[ ]*ai|```[ ]*l\?python|```[ ]*l\?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash',
-    'lark':r"```[ ]*ai|```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash"
-  }
-  codebegin:str=codebegin_dict['lark']
-  codeend:str="```"
-  resultbegin:str="```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
-  resultend:str="```"
-  comcodebegin:str="<!--[ ]*ai[ ]*-->"
-  comcodeend:str="<!--[ ]*noai[ ]*-->"
-  comresultbegin:str="<!--[ ]*l?result[ ]*-->"
-  comresultend:str="<!--[ ]*l?noresult[ ]*-->"
-  ignorebegin:str=r"<!--[ ]*l?ignore[ ]*-->"
-  ignoreend:str=r"<!--[ ]*l?noignore[ ]*-->"
-
-
-
-
+  def __init__(self, a:LitreplArgs):
+    self.codebegin_dict = {
+      'vim': r'```[ ]*ai|```[ ]*l\?python|```[ ]*l\?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash',
+      'lark': r"```[ ]*ai|```[ ]*l?python|```[ ]*l?code|```[ ]*{[^}]*python[^}]*}|```[ ]*sh|```[ ]*bash"
+    }
+    self.codebegin = self.codebegin_dict['lark']
+    self.codeend = "```"
+    self.resultbegin = r"```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
+    self.resultend = "```"
+    self.comcodebegin = "<!--[ ]*ai[ ]*-->"
+    self.comcodeend = "<!--[ ]*noai[ ]*-->"
+    self.comresultbegin = "<!--[ ]*l?result[ ]*-->"
+    self.comresultend = "<!--[ ]*l?noresult[ ]*-->"
+    self.ignorebegin = r"<!--[ ]*l?ignore[ ]*-->"
+    self.ignoreend = r"<!--[ ]*l?noignore[ ]*-->"
 
 @dataclass
 class SymbolsLatex(Symbols):
-  codebegin_dict={
-    'vim':r'\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l\?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}',
-    'lark':r'\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}'
-  }
-  codebegin:str=codebegin_dict['lark']
-  codeend:str=r"\\end\{l[a-zA-Z0-9]*code\}|\\end\{l?python\}|\\end\{ai\}|\\end\{sh\}|\\end\{bash\}"
-  resultbegin:str=r"\\begin\{l?[a-zA-Z0-9]*result\}"
-  resultend:str=r"\\end\{l?[a-zA-Z0-9]*result\}"
-  comcodebegin:str=r"\%[ ]*lcode|\%[ ]*l?python|\%[ ]*l?ai|\%[ ]*l?sh"
-  comcodeend:str=r"\%[ ]*lnocode|\%[ ]*l?nopython|\%[ ]*l?noai|\%[ ]*l?nosh"
-  comresultbegin:str=r"\%[ ]*l?result"
-  comresultend:str=r"\%[ ]*l?noresult"
-  ignorebegin:str=r"\%lignore"
-  ignoreend:str=r"\%lnoignore"
-  inlinemarker:str=r"\\l[a-zA-Z0-9]*inline"
+  def __init__(self, a:LitreplArgs):
+    self.codebegin_dict = {
+      'vim': r'\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l\?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}',
+      'lark': r'\\begin\{l[a-zA-Z0-9]*code\}|\\begin\{l?python\}|\\begin\{ai\}|\\begin\{sh\}|\\begin\{bash\}'
+    }
+    self.codebegin = self.codebegin_dict['lark']
+    self.codeend = r"\\end\{l[a-zA-Z0-9]*code\}|\\end\{l?python\}|" \
+                   r"\\end\{ai\}|\\end\{sh\}|\\end\{bash\}"
+    self.resultbegin = r"\\begin\{l?[a-zA-Z0-9]*result\}"
+    self.resultend = r"\\end\{l?[a-zA-Z0-9]*result\}"
+    self.comcodebegin = r"\%[ ]*lcode|\%[ ]*l?python|\%[ ]*l?ai|\%[ ]*l?sh"
+    self.comcodeend = r"\%[ ]*lnocode|\%[ ]*l?nopython|\%[ ]*l?noai|" \
+                      r"\%[ ]*l?nosh"
+    self.comresultbegin = r"\%[ ]*l?result"
+    self.comresultend = r"\%[ ]*l?noresult"
+    self.ignorebegin = r"\%lignore"
+    self.ignoreend = r"\%lnoignore"
+    self.inlinemarker = r"\\l[a-zA-Z0-9]*inline"
 
 OBR="{"
 CBR="}"
@@ -291,13 +291,12 @@ def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Symbols]]:
   # For the `?!` syntax, see
   # https://stackoverflow.com/questions/56098140/how-to-exclude-certain-possibilities-from-a-regular-expression
   if a.filetype in ["md","markdown"]:
-    symbols_md=SymbolsMarkdown()
+    symbols_md=SymbolsMarkdown(a)
     sl=symbols_md
     toplevel_markers_markdown='|'.join([
       sl.codebegin,sl.resultbegin,
       sl.comresultbegin, sl.ignorebegin, sl.comcodebegin
     ])
-    symbols_md=SymbolsMarkdown()
     return (dedent(fr"""
       start: (topleveltext)? (snippet (topleveltext)?)*
       snippet : codesec -> e_icodesection
@@ -327,7 +326,7 @@ def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Symbols]]:
       aitext : /(.(?!{symbols_md.comcodeend}))*./s
       """), symbols_md)
   elif a.filetype in ["tex","latex"]:
-    symbols_latex=SymbolsLatex()
+    symbols_latex=SymbolsLatex(a)
     sl=symbols_latex
     toplevel_markers_latex='|'.join([
       sl.codebegin,sl.codeend,sl.comcodebegin,sl.comcodeend,
