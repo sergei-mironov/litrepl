@@ -8,6 +8,7 @@ result*
 !__init__.py
 dist
 build
+build.vim
 *.egg-info
 semver.py
 revision.py
