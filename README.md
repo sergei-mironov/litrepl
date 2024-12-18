@@ -6,10 +6,14 @@
 [Changelog](./CHANGELOG.md) | [Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-gallery)
 </div>
 
-**LitRepl** is a command-line application that brings together the benefits of
-**literate programming** and **read-eval-print-loop coding**.
-The tool comes with an interface Vim plugin, integrating the functionality into the editor.
-
+**Litrepl** is a command-line text processor that works with code sections in
+Markdown or LaTeX documents styled for **literate programming**. Instructed by
+command line arguments, it identifies these sections, evaluates them using a
+background interpreter, and inserts the results back into the document. The
+interpreters can remain running in the background, facilitating a
+**read-eval-paste-loop** editing style. The tool operates as a standalone
+command-line application. The repository includes an interface Vim plugin to
+demonstrate editor integration.
 
 <div align="center">
 
