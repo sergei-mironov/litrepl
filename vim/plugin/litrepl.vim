@@ -131,6 +131,9 @@ fun! LitReplCmd()
     let cmd = cmd . ' --ai-interpreter="'.LitReplGet('litrepl_ai_interpreter').'"'
   endif
   let ft = &filetype
+  if ft == ''
+    let ft = "auto"
+  endif
   let cur = getcharpos('.')
   let tw = string(&textwidth)
   let cmd = cmd .

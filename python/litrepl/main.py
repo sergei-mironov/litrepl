@@ -34,7 +34,7 @@ def make_parser():
                     formatter_class=make_wide(HelpFormatter))
   ap.add_argument('-v','--version',action='version',version=__version__ or '?',
     help='Print version.')
-  ap.add_argument('--filetype',metavar='STR',default=None,
+  ap.add_argument('--filetype',metavar='STR',default='auto',
     help='Specify the type of input formatting (markdown|[la]tex|auto).')
   ap.add_argument('--python-markers',metavar='STR[,STR]',
     default=environ.get('LITREPL_PYTHON_MARKERS','python'),
@@ -173,11 +173,6 @@ def main(args=None):
     litrepl.eval.DEBUG=True
     litrepl.base.DEBUG=True
     litrepl.utils.DEBUG=True
-
-  if a.filetype in {None,'','md'}:
-    a.filetype="markdown"
-  if a.filetype in {'latex'}:
-    a.filetype='tex'
 
   if a.workdir:
     chdir(a.workdir)
