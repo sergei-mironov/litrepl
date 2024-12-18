@@ -218,7 +218,7 @@ You pass it to Litrepl using:
 $ cat hello.md | litrepl eval-sections > result.md
 ~~~~
 
-The resulting `result.md` will have the result section filled in correctly.
+The `result.md` will have all sections filled in correctly.
 <!--
 ``` python
 print("~~~~ markdown")
@@ -238,15 +238,11 @@ Hello Markdown!
 ~~~~
 <!-- noresult -->
 
-By default, `litrepl eval-sections` evaluates all sections in a document. The
-equivalent Vim command is `:LEval all`. `:LEval` without arguments evaluates the
-section at the cursor.
-
 * For additional details on Markdown formatting, refer to [Formatting Markdown
   documents](./doc/formatting.md#markdown)
 
-By default, Litrepl assumes Markdown formatting. Use the `--filetype=tex` option
-to change the format to LaTeX.
+Correspondingly, the in a LaTeX document we format code and result secions as
+follows:
 
 ~~~~ tex
 \begin{python}
@@ -258,28 +254,40 @@ Hello LaTeX!
 \end{result}
 ~~~~
 
-- LaTeX documents usually require a preamble to introduce python/result tags to
+- LaTeX documents require a preamble introducing python/result environments to
   the TeX processor. For more information, see [Formatting LaTeX
   documents](./doc/formatting.md#latex).
 
+By default, Litrepl tried to guess the format of the input document. Use the
+`--filetype=(latex|markdown)` option to set the format explicitly:
+
+``` sh
+$ cat doc.md | litrepl --filetype=markdown eval-sections
+$ cat doc.tex | litrepl --filetype=latex eval-sections
+```
 
 #### Selecting Sections for Execution
 
-Both `eval-sections` command-line command and `:LEval` vim command takes
-an optional argument that specifies which sections to evaluate. The overall
-command-line syntax is `litrepl eval-sections WHICH`, where `WHICH` can be:
+By default, `litrepl eval-sections` evaluates all sections in a document.  To
+evaluate only specific sections, range argument shold be specified. The overall
+syntax is `litrepl eval-sections RANGE`, where `RANGE` can be:
 
 * `N`: Represents a specific code section to evaluate, with the following
   possible formats:
-  - A number starting from 0.
-  - `$`, indicating the last section.
+  - A number starting from `0`.
+  - `$` symbol, indicating the last section.
   - `L:C`, referring to the line and column position. Litrepl calculates the
     section number based on this position.
 * `N..N`: Represents a range of sections, determined using the rules mentioned
   above.
 
-In addition to the above generic format, the `:LEval` of Vim accepts the
-following strings: `all`, `above` (the cursor) and `below` (the cursor).
+Some examples:
+
+``` sh
+$ litrepl eval-sections '0'       # First section in a document
+$ litrepl eval-sections '3..$'    # Sections from fourth section (zero based) to the last one
+$ litrepl eval-sections '34:1..$' # Sections starting from line 34 column 1
+```
 
 #### Managing Interpreter Sessions
 
