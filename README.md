@@ -6,14 +6,11 @@
 [Changelog](./CHANGELOG.md) | [Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-gallery)
 </div>
 
-**Litrepl** is a command-line text processor that works with code sections in
-Markdown or LaTeX documents styled for **literate programming**. Instructed by
-command line arguments, it identifies these sections, evaluates them using a
-background interpreter, and inserts the results back into the document. The
-interpreters can remain running in the background, facilitating a
-**read-eval-paste-loop** editing style. The tool operates as a standalone
-command-line application. The repository includes an interface Vim plugin to
-demonstrate editor integration.
+**Litrepl** is a command-line tool for *Markdown* or *LaTeX* documents with
+**literate programming** code sections. Instructed by its arguments, it
+evaluates and updates sections via background interpreters. Interpreters can
+stay active for a **read-eval-paste-loop** style. The repository includes a Vim
+plugin to demonstrate editor integration.
 
 <div align="center">
 
