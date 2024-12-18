@@ -320,7 +320,7 @@ def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Symbols]]:
               | ignoresec -> e_comsection
       ignoresec.2 : ignorebegin ignoretext ignoreend
       codesec.1 : codebegin ctext codeend
-                     | comcodebegin aitext comcodeend
+                     | comcodebegin codesectext comcodeend
       resultsec.1 : resultbegin ctext resultend
                      | comresultbegin vertext comresultend
       codebegin : /{symbols_md.codebegin}/
@@ -339,7 +339,7 @@ def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Symbols]]:
       ctext : /(.(?!{symbols_md.resultend}|{symbols_md.codeend}))*./s
       ignoretext : /(.(?!{symbols_md.ignoreend}))*./s
       vertext : /(.(?!{symbols_md.comresultend}))*./s
-      aitext : /(.(?!{symbols_md.comcodeend}))*./s
+      codesectext : /(.(?!{symbols_md.comcodeend}))*./s
       """), symbols_md)
   elif a.filetype in ["tex","latex"]:
     symbols_latex=SymbolsLatex(a)

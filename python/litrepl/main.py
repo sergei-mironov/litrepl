@@ -144,6 +144,8 @@ def make_parser():
     help='Print regexp matching start of code sections for the given file type.')
   regexp.add_argument('format',metavar='STR',default='vim',
     help=dedent('''Regexp format to print: 'vim' or 'lark'. Defaults to 'vim'''),nargs='?')
+  sps.add_parser('print-grammar',
+    help=dedent('''Print the resulting grammar for the given filetype.'''))
   return ap
 
 AP=make_parser()
@@ -274,11 +276,16 @@ def main(args=None):
     gs=grammar_(a)
     s=gs[1] if gs is not None else None
     if s is None:
-      raise ValueError(f"Invalid filetype \"{a.filetype}\"")
+      raise ValueError(f"Unsupported filetype \"{a.filetype}\"")
     regexp=s.codebegin_dict.get(a.format)
     if regexp is None:
       raise ValueError(f"Invalid regexp format \"{a.format}\"")
     print(regexp)
+  elif a.command=='print-grammar':
+    gs=grammar_(a)
+    if gs is None:
+      raise ValueError(f"Unsupported filetype \"{a.filetype}\"")
+    print(gs[0])
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)
