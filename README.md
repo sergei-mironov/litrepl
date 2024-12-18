@@ -241,8 +241,7 @@ Hello Markdown!
 * For additional details on Markdown formatting, refer to [Formatting Markdown
   documents](./doc/formatting.md#markdown)
 
-Correspondingly, the in a LaTeX document we format code and result secions as
-follows:
+Similarly, in a LaTeX document, we format code and result sections as follows:
 
 ~~~~ tex
 \begin{python}
