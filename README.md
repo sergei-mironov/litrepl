@@ -266,11 +266,15 @@ $ cat doc.md | litrepl --filetype=markdown eval-sections
 $ cat doc.tex | litrepl --filetype=latex eval-sections
 ```
 
+* The main Vim command for code section evaluation is `:LEval`. By default, it
+  executes the section at the cursor. To execute all sections in a document, use
+  `:LEval all`.
+
 #### Selecting Sections for Execution
 
-By default, `litrepl eval-sections` evaluates all sections in a document.  To
-evaluate only specific sections, range argument shold be specified. The overall
-syntax is `litrepl eval-sections RANGE`, where `RANGE` can be:
+By default, `litrepl eval-sections` evaluates all sections in a document. To
+evaluate only specific sections, the range argument should be specified. The
+overall syntax is `litrepl eval-sections [RANGE]`, where `RANGE` can be:
 
 * `N`: Represents a specific code section to evaluate, with the following
   possible formats:
@@ -289,6 +293,11 @@ $ litrepl eval-sections '3..$'    # Sections from fourth section (zero based) to
 $ litrepl eval-sections '34:1..$' # Sections starting from line 34 column 1
 ```
 
+* The Vim command `:LEval` accepts similar syntax and also recognizes specific
+  keywords `all`, `above`, and `below`. These keywords allow you to evaluate all
+  sections, only those above the cursor, or just the ones below the cursor,
+  respectively.
+
 #### Managing Interpreter Sessions
 
 Each interpreter session uses an auxiliary directory where Litrepl stores
@@ -301,40 +310,43 @@ This behavior can be configured by:
 * Setting the working directory with `LITREPL_WORKDIR` environment
   variable or `--workdir=DIR` command-line argument (this may also affect the
   current directory of the interpreters), or
-* Explicitly setting the auxiliary directory with `LITREPL_<ITYP>_AUXDIR`
-  environment variable or `--<ityp>-auxdir=DIR` command-line argument, where
-  `<ityp>` stands for either `python` or `ai`.
+* Explicitly setting the auxiliary directory with `LITREPL_<CLASS>_AUXDIR`
+  environment variable or `--<class>-auxdir=DIR` command-line argument, where
+  `<class>` stands for either `python`, `ai` or `sh`.
 
 
 The commands `litrepl start`, `litrepl stop`, and `litrepl restart` are used to
 manage interpreter sessions. They accept the interpreter type to operate on or
 the keyword `all` to apply the command to all interpreters. Add the
-`--<ityp>-interpteter=CMDLINE` to set the exact command line for
+`--<class>-interpteter=CMDLINE` to set the exact command line for
 Litrepl to execute.
 
 ``` sh
 $ litrepl start python
+$ litrepl start sh
 $ litrepl restart ai
 $ litrepl stop all
 ```
 
-The equivalent Vim commands are `:LStart`, `:LStop`, and `:LRestart`. For the
-corresponding Vim configuration variables, see the reference section below.
+* The equivalent Vim commands are `:LStart`, `:LStop`, and `:LRestart`. For the
+  corresponding Vim configuration variables, see the reference section below.
 
 
-The `litrepl status` command queries the information about the currently running
-interpreters running. The command reveals the process PID and the command-line
+The `litrepl status [CLASS]` command queries the information about the currently
+running interpreters. The command reveals the process PID and the command-line
 arguments. For stopped interpreters, the last exit codes are also listed.
+Specifying `CLASS` prints the status for this class of interpreters only.
 
 ``` sh
 $ litrepl status
 # Format:
-# TYP  PID      EXITCODE  CMD
-python 3900919  -         python3 -m IPython --config=/tmp/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
-ai     3904696  -         aicli --readline-prompt=
+# CLASS  PID      EXITCODE  CMD
+python   3900919  -         python3 -m IPython --config=/tmp/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
+ai       3904696  -         aicli --readline-prompt=
 ```
 
-The corresponding Vim command is `:LStatus`.
+* The corresponding Vim command is `:LStatus`. No `CLASS` argument is currently
+  supported.
 
 #### Asynchronous Processing
 
@@ -371,9 +383,9 @@ evaluation concludes, it removes the marker from the output section.
 The command `litrepl interrupt` sends an interrupt signal to the interpreter,
 prompting it to return control sooner (with an exception).
 
-- The equivalent Vim commands are `:LEvalAsync` (defaulting to a 0.5-second
+* The equivalent Vim commands are `:LEvalAsync` (defaulting to a 0.5-second
   timeout) and `:LInterrupt`.
-- The Vim plugin also provides the `:LEvalMon` command, which facilitates
+* The Vim plugin also provides the `:LEvalMon` command, which facilitates
   continuous code evaluation with no delay. Interrupting this with Ctrl+C will
   make Litrepl return control to the editor, leaving the evaluation ongoing in
   the background.
@@ -381,13 +393,13 @@ prompting it to return control sooner (with an exception).
 
 #### Attaching Interpreter Sessions
 
-The command `litrepl repl [TYPE]` where `TYPE` stands for `python` (the default)
-`ai` or `sh`, attaches to interpreter sessions.  For this command to work,
-[socat](https://linux.die.net/man/1/socat) tool needs to be installed on your
-system. Litrepl blocks the pipes for the time of interaction so no evaluation is
-possible while the repl session is active.  For Python and Shell interpreters,
-the command prompt is disabled which is a current technical limitation. Use
-`Ctrl+D` to safely detach the session. For example:
+The command `litrepl repl [CLASS]` where `CLASS` specifies interpreter class:
+`python` (the default) `ai` or `sh`, attaches to interpreter sessions.  For this
+command to work, [socat](https://linux.die.net/man/1/socat) tool needs to be
+installed on your system. Litrepl blocks the pipes for the time of interaction
+so no evaluation is possible while the repl session is active.  For Python and
+Shell interpreters, the command prompt is disabled which is a current technical
+limitation. Use `Ctrl+D` to safely detach the session. For example:
 
 ``` sh
 $ litrepl repl python
@@ -397,11 +409,7 @@ W = 'Hello from repl'
 $
 ```
 
-- The equivalent Vim commands are `:LRepl [TYPE]` or `:LTerm [TYPE]`. Both
-  commands open Vim terminal window.
-- Python prompts are internally disabled, so no `>>>` symbols will appear.
-
-Use `litrepl eval-code [TYPE]` to direct code straight to the interpreter,
+Use `litrepl eval-code [CLASS]` to direct code straight to the interpreter,
 bypassing any section formatting steps. In contrast to the `repl` command,
 `eval-code` mode features prompt detection, allowing the tool to display the
 interpreter's response and detach while keeping the session open.
@@ -416,6 +424,9 @@ $ echo 'W' | litrepl eval-code
 
 The `eval-code` command can be utilized for batch processing and managing
 sessions, in a manner similar to how the `expect` tool is used.
+
+* The equivalent Vim commands are `:LRepl [CLASS]` or `:LTerm [CLASS]`. Both
+  commands open Vim terminal window.
 
 #### Experimental AI Features
 
