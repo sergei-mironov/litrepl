@@ -29,22 +29,13 @@ def _with_type(p, default=None, allow_all=False):
   )
   return p
 
-def grammar(a:LitreplArgs, raise_:bool=True)->LarkGrammar:
-  g=grammar_(a)
-  if g is None:
-    if raise_:
-      raise ValueError(f"Invalid filetype \"{ft}\"")
-    else:
-      return None
-  return g[0]
-
 def make_parser():
   ap=ArgumentParser(prog='litrepl',
                     formatter_class=make_wide(HelpFormatter))
   ap.add_argument('-v','--version',action='version',version=__version__ or '?',
     help='Print version.')
   ap.add_argument('--filetype',metavar='STR',default=None,
-    help='Specify the type of input formatting (markdown|[la]tex).')
+    help='Specify the type of input formatting (markdown|[la]tex|auto).')
   ap.add_argument('--python-markers',metavar='STR[,STR]',
     default=environ.get('LITREPL_PYTHON_MARKERS','python'),
     help=dedent('''TODO'''))
@@ -144,8 +135,12 @@ def make_parser():
     help='Print regexp matching start of code sections for the given file type.')
   regexp.add_argument('format',metavar='STR',default='vim',
     help=dedent('''Regexp format to print: 'vim' or 'lark'. Defaults to 'vim'''),nargs='?')
-  sps.add_parser('print-grammar',
+  regexp.add_argument('--tty',action='store_true',
+    help='Read intput document from stdin (required to get per-section status).')
+  grammar=sps.add_parser('print-grammar',
     help=dedent('''Print the resulting grammar for the given filetype.'''))
+  grammar.add_argument('--tty',action='store_true',
+    help='Read intput document from stdin (required to get per-section status).')
   return ap
 
 AP=make_parser()
@@ -187,6 +182,9 @@ def main(args=None):
   if a.workdir:
     chdir(a.workdir)
 
+  if not hasattr(a,'tty'):
+    a.tty=False
+
   ecode=1
 
   def _foreground_stop(st):
@@ -215,16 +213,15 @@ def main(args=None):
     else:
       restart(a,name2st(a.type))
   elif a.command=='parse':
-    g=grammar(a)
-    t=parse_(g)
+    t=parse_(a).tree
     print(t.pretty())
     exit(0)
   elif a.command=='parse-print':
     sr0=SecRec(set(),{})
-    ecode=eval_section_(a,parse_(grammar(a)),sr0)
+    ecode=eval_section_(a,parse_(a).tree,sr0)
     exit(0 if ecode is None else ecode)
   elif a.command=='eval-sections':
-    t=parse_(grammar(a))
+    t=parse_(a).tree
     nsecs=solve_sloc(a.locs,t)
     ecode=eval_section_(a,t,nsecs)
     exit(0 if ecode is None else ecode)
@@ -240,7 +237,7 @@ def main(args=None):
       ecode=interpExitCode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='interrupt':
-    tree=parse_(grammar(a))
+    tree=parse_(a).tree
     sr=solve_sloc(a.locs,tree)
     sr.nsecs|=set(sr.preproc.pending.keys())
     ecode=eval_section_(a,tree,sr,interrupt=True)
@@ -258,34 +255,29 @@ def main(args=None):
       ecode=interpExitCode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='status':
-    g=grammar(a)
+    t=parse_(a).tree
     if a.foreground:
       st=name2st(a.type)
       with with_parent_finally(partial(_foreground_stop,st)):
         start(a,st)
-        ecode=status(a,g,[st],__version__)
+        ecode=status(a,t,[st],__version__)
       exit(0 if ecode is None else ecode)
     else:
       sts=[]
       for st in SType:
         if a.type in {st2name(st),"all",None}:
           sts.append(st)
-      ecode=status(a,g,sts,__version__)
+      ecode=status(a,t,sts,__version__)
       exit(0 if ecode is None else ecode)
   elif a.command=='print-regexp':
-    gs=grammar_(a)
-    s=gs[1] if gs is not None else None
-    if s is None:
-      raise ValueError(f"Unsupported filetype \"{a.filetype}\"")
+    s=parse_(a).symbols
     regexp=s.codebegin_dict.get(a.format)
     if regexp is None:
-      raise ValueError(f"Invalid regexp format \"{a.format}\"")
+      raise ValueError(f"Unsupported regexp format \"{a.format}\"")
     print(regexp)
   elif a.command=='print-grammar':
-    gs=grammar_(a)
-    if gs is None:
-      raise ValueError(f"Unsupported filetype \"{a.filetype}\"")
-    print(gs[0])
+    g=parse_(a).grammar
+    print(g)
   else:
     pstderr(f'Unknown command: {a.command}')
     exit(1)

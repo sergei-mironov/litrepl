@@ -3,6 +3,7 @@ from typing import (Any, Set, List, Dict, Tuple, Callable, Optional, Iterable)
 from re import compile as re_compile
 from dataclasses import dataclass
 from enum import Enum
+from lark import ParseTree as LarkTree
 
 FileName=str
 LitreplArgs=Any
@@ -34,6 +35,26 @@ class ReadResult:
   timeout:bool       # Did the current read attmept timeout? If so, Litrepl
                      # would return control to the user with a
                      # continuation-looking result..
+
+@dataclass
+class Symbols:
+  codebegin:str
+  codeend:str
+  resultbegin:str
+  resultend:str
+  comcodebegin:str
+  comcodeend:str
+  comresultbegin:str
+  comresultend:str
+  ignorebegin:str
+  ignoreend:str
+
+@dataclass
+class ParseResult:
+  grammar:LarkGrammar
+  symbols:Symbols
+  tree:LarkTree
+  filetype:str
 
 NSec=int
 CursorPos=Tuple[int,int]
@@ -87,19 +108,6 @@ class EvalState:
 
   def __init__(self,sr:SecRec):
     self.sr,self.sres,self.ledder,self.ecodes,self.stypes,self.nsec=sr,{},{},{},set(),-1
-
-@dataclass
-class Symbols:
-  codebegin:str
-  codeend:str
-  resultbegin:str
-  resultend:str
-  comcodebegin:str
-  comcodeend:str
-  comresultbegin:str
-  comresultend:str
-  ignorebegin:str
-  ignoreend:str
 
 
 class Interpreter:

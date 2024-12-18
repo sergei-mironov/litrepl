@@ -179,25 +179,20 @@ processes the code by sending it to the appropriate interpreters and populates
 the result sections with their responses. The interpreters remain active in the
 background, ready to handle new inputs.
 
-Litrepl supports Markdown and LaTeX formatting and also can treat plain code
-as a single code section.
-
-At present, Litrepl includes support for two Python interpreter variants and a
-custom Aicli interpreter by the same author.
+Litrepl supports subsets of **Markdown** and **LaTeX** formatting in order to
+recognize the sections. Some aspects of the recognized grammars, such as section
+labels, could be configured.
 
 #### Basic Execution
 
-Litrepl recognises and executes verbatim code sections followed by zero or more
-result sections. In Markdown documents, the Python code is any triple-quoted
-section labeled as `python`. The result is any triple-quoted `result` section.
-In LaTeX documents, sections are marked with `\begin{python}\end{python}` and
-`\begin{result}\end{result}` environments correspondingly.
+Litrepl searches for verbatim code sections followed by zero or more result
+sections. In Markdown documents, the Python code is any triple-quoted section
+with a pre-configured label such as `python`. The result is any triple-quoted
+`result` section.  In LaTeX documents, sections are marked with
+`\begin{...}\end{...}` environments correspondingly.
 
 The primary command for evaluating formatted documents is `litrepl
-eval-sections`. To execute the evaluation, redirect the file into the shell
-command's input.
-
-Consider a [hello.md](./doc/hello.md) document:
+eval-sections`. Consider a [hello.md](./doc/hello.md) document:
 
 <!--
 ``` python
@@ -251,9 +246,7 @@ section at the cursor.
   documents](./doc/formatting.md#markdown)
 
 By default, Litrepl assumes Markdown formatting. Use the `--filetype=tex` option
-to change the format to LaTeX. The Vim plugin automatically handles this based
-on the `filetype` variable. Here is how the earlier example would appear in
-LaTeX:
+to change the format to LaTeX.
 
 ~~~~ tex
 \begin{python}
@@ -711,18 +704,21 @@ Where
 -->
 
 ``` result
-usage: litrepl [-h] [-v] [--filetype STR] [--python-interpreter EXE]
-               [--ai-interpreter EXE] [--sh-interpreter EXE] [--timeout F[,F]]
-               [--propagate-sigint] [-d INT] [--verbose] [--python-auxdir DIR]
-               [--ai-auxdir DIR] [--sh-auxdir DIR] [-C DIR]
-               [--pending-exit INT] [--exception-exit INT] [--foreground]
+usage: litrepl [-h] [-v] [--filetype STR] [--python-markers STR[,STR]]
+               [--ai-markers STR[,STR]] [--sh-markers STR[,STR]]
+               [--python-interpreter EXE] [--ai-interpreter EXE]
+               [--sh-interpreter EXE] [--python-auxdir DIR] [--ai-auxdir DIR]
+               [--sh-auxdir DIR] [--timeout F[,F]] [--propagate-sigint]
+               [-d INT] [--verbose] [-C DIR] [--pending-exit INT]
+               [--exception-exit INT] [--foreground]
                [--map-cursor LINE:COL:FILE] [--result-textwidth NUM]
               
-{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp}
+{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar}
                ...
 
 positional arguments:
-  {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp}
+ 
+{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar}
                               Commands to execute
     start                     Start the background interpreter.
     stop                      Stop the background interpreters.
@@ -741,12 +737,17 @@ positional arguments:
     interrupt                 Send SIGINT to the background interpreter.
     print-regexp              Print regexp matching start of code sections for
                               the given file type.
+    print-grammar             Print the resulting grammar for the given
+                              filetype.
 
 options:
   -h, --help                  show this help message and exit
   -v, --version               Print version.
   --filetype STR              Specify the type of input formatting
-                              (markdown|[la]tex).
+                              (markdown|[la]tex|auto).
+  --python-markers STR[,STR]  TODO
+  --ai-markers STR[,STR]      TODO
+  --sh-markers STR[,STR]      TODO
   --python-interpreter EXE    Python interpreter command line, or `auto`.
                               Defaults to the LITREPL_PYTHON_INTERPRETER
                               environment variable if set, otherwise "auto".
@@ -758,15 +759,6 @@ options:
   --sh-interpreter EXE        Shell interpreter command line or `auto`.
                               Defaults to the LITREPL_SH_INTERPRETER
                               environment variable if set, otherwise "auto".
-  --timeout F[,F]             Timeouts for initial evaluation and for pending
-                              checks, in seconds. If the latter is omitted, it
-                              is considered to be equal to the former one.
-  --propagate-sigint          If set, litrepl will catch and resend SIGINT
-                              signals to the running interpreter. Otherwise it
-                              will just terminate itself leaving the
-                              interpreter as-is.
-  -d INT, --debug INT         Enable (a lot of) debug messages.
-  --verbose                   Be more verbose (used in status).
   --python-auxdir DIR         This directory stores Python interpreter pipes.
                               It defaults to LITREPL_PYTHON_AUXDIR if set;
                               otherwise, it's created in the system's
@@ -782,6 +774,15 @@ options:
                               it's created in the system's temporary
                               directory, named after the current working
                               directory.
+  --timeout F[,F]             Timeouts for initial evaluation and for pending
+                              checks, in seconds. If the latter is omitted, it
+                              is considered to be equal to the former one.
+  --propagate-sigint          If set, litrepl will catch and resend SIGINT
+                              signals to the running interpreter. Otherwise it
+                              will just terminate itself leaving the
+                              interpreter as-is.
+  -d INT, --debug INT         Enable (a lot of) debug messages.
+  --verbose                   Be more verbose (used in status).
   -C DIR, --workdir DIR       Set the working directory before execution. By
                               default, it uses LITREPL_WORKDIR if set,
                               otherwise remains the current directory. This

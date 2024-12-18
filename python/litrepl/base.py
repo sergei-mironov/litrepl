@@ -9,7 +9,7 @@ from typing import List, Optional, Tuple, Set, Dict, Callable, Any, Iterable
 from select import select
 from os import (environ, system, isatty, getpid, unlink, getpgid, setpgid,
                 mkfifo, kill)
-from lark import Lark, Visitor, Transformer, Token, Tree
+from lark import Lark, Visitor, Transformer, Token, Tree, LarkError
 from lark.visitors import Interpreter as LarkInterpreter
 from os.path import isfile, join, exists
 from signal import signal, SIGINT, SIGKILL, SIGTERM
@@ -29,7 +29,7 @@ from contextlib import contextmanager
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
                     CursorPos, ReadResult, SType, LitreplArgs,
                     EvalState, ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE,
-                    Interpreter, LarkGrammar, Symbols)
+                    Interpreter, LarkGrammar, Symbols, LarkTree, ParseResult)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally,
                    with_fd, read_nonblock, eval_code, eval_code_)
@@ -294,19 +294,10 @@ CBR="}"
 BCBR="\\}"
 BOBR="\\{"
 
-
-def parse_(grammar:LarkGrammar, tty_ok=True):
-  pdebug(f"parsing start")
-  parser=Lark(grammar,propagate_positions=True)
-  inp=sys.stdin.read() if (not isatty(sys.stdin.fileno()) or tty_ok) else ""
-  tree=parser.parse(inp)
-  pdebug(f"parsing finish")
-  return tree
-
-def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Symbols]]:
+def grammar_(a:LitreplArgs, filetype:str)->Tuple[LarkGrammar,Symbols]:
   # For the `?!` syntax, see
   # https://stackoverflow.com/questions/56098140/how-to-exclude-certain-possibilities-from-a-regular-expression
-  if a.filetype in ["md","markdown"]:
+  if filetype in ["md","markdown"]:
     symbols_md=SymbolsMarkdown(a)
     sl=symbols_md
     toplevel_markers_markdown='|'.join([
@@ -341,7 +332,7 @@ def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Symbols]]:
       vertext : /(.(?!{symbols_md.comresultend}))*./s
       codesectext : /(.(?!{symbols_md.comcodeend}))*./s
       """), symbols_md)
-  elif a.filetype in ["tex","latex"]:
+  elif filetype in ["tex","latex"]:
     symbols_latex=SymbolsLatex(a)
     sl=symbols_latex
     toplevel_markers_latex='|'.join([
@@ -381,10 +372,52 @@ def grammar_(a:LitreplArgs)->Optional[Tuple[LarkGrammar,Symbols]]:
       cbr : "{CBR}"
       """), symbols_latex)
   else:
-    return None
+    raise ValueError(f"Unsupported filetype \"{filetype}\"")
 
+def readinput(tty_ok=True)->str:
+  return sys.stdin.read() if (not isatty(sys.stdin.fileno()) or tty_ok) else ""
 
-def eval_section_(a:LitreplArgs, tree, sr:SecRec, interrupt:bool=False)->ECode:
+def parse_as(a,inp,filetype)->ParseResult|LarkError:
+  try:
+    g,s=grammar_(a,filetype)
+    parser=Lark(g,propagate_positions=True)
+    tree=parser.parse(inp)
+    return ParseResult(g,s,tree,filetype)
+  except LarkError as e:
+    return e
+
+def numcodesec(tree:LarkTree)->int:
+  class C(LarkInterpreter):
+    def __init__(self):
+      self.n=0
+    def codesec(self,tree):
+      self.n+=1
+    def inlinecodesec(self,tree):
+      self.n+=1
+  c=C()
+  c.visit(tree)
+  return c.n
+
+def parse_(a:LitreplArgs)->ParseResult:
+  pdebug(f"parsing start")
+  inp=readinput(a.tty)
+  rs=[]
+  if a.filetype in ['auto','tex','latex']:
+    rs.append(parse_as(a,inp,'latex'))
+  if a.filetype in ['auto','md','markdown']:
+    rs.append(parse_as(a,inp,'markdown'))
+  prs=[r for r in rs if isinstance(r,ParseResult)]
+  if len(prs)==0:
+    ers=[r for r in rs if isinstance(r,LarkError)]
+    if len(ers)==0:
+      raise ValueError(f"Unsupported filetype \"{a.filetype}\"")
+    else:
+      raise ers[0]
+  res=sorted(prs,key=lambda pr:numcodesec(pr.tree))[-1]
+  pdebug(f"parsing finish")
+  return res
+
+def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)->ECode:
   """ Evaluate code sections of the parsed `tree`, as specified in the `sr`
   request.  """
   nsecs=sr.nsecs
@@ -566,7 +599,7 @@ const : num -> s_const_num
 num : /[0-9]+/
 """
 
-def solve_sloc(s:str, tree)->SecRec:
+def solve_sloc(s:str, tree:LarkTree)->SecRec:
   """ Translate "sloc" string `s` into a `SecRec` processing request on the
   given parsed document `tree`. """
   p=Lark(grammar_sloc)
@@ -617,9 +650,9 @@ def solve_sloc(s:str, tree)->SecRec:
     ppi)
 
 
-def status(a:LitreplArgs, g:LarkGrammar, sts:List[SType], version):
+def status(a:LitreplArgs, t:LarkTree|None, sts:List[SType], version):
   if a.verbose:
-    return status_verbose(a,g,sts,version)
+    return status_verbose(a,t,sts,version)
   else:
     return status_oneline(a,sts)
 
@@ -640,8 +673,7 @@ def status_oneline(a:LitreplArgs,sts:List[SType])->int:
       ecode = '-'
     print(f"{st2name(st):6s} {pid:10s} {ecode:3s} {cmd}")
 
-def status_verbose(a:LitreplArgs, g:LarkGrammar, sts:List[SType], version:str)->int:
-  t=parse_(g,a.tty) if g is not None else None
+def status_verbose(a:LitreplArgs, t:LarkTree|None, sts:List[SType], version:str)->int:
   sr=solve_sloc('0..$',t) if t is not None else None
   print(f"version: {version}")
   print(f"workdir: {getcwd()}")

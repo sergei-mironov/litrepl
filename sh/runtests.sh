@@ -1155,7 +1155,7 @@ echo "${my_array[3]}"
 ```result
 ```
 EOF
-cat source.md | runlitrepl --filetype=markdown eval-sections >out.md
+cat source.md | runlitrepl --filetype=auto eval-sections >out.md
 diff -u out.md - <<"EOF"
 ```bash
 my_array=(one two three)
@@ -1178,7 +1178,7 @@ echo "${my_array[3]}"
 \begin{result}
 \end{result}
 EOF
-cat source.tex | runlitrepl --filetype=tex eval-sections >out.tex
+cat source.tex | runlitrepl --filetype=auto eval-sections >out.tex
 diff -u out.tex - <<"EOF"
 \begin{bash}
 my_array=(one two three)
