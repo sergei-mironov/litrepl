@@ -730,8 +730,8 @@ usage: litrepl [-h] [-v] [--filetype STR] [--python-markers STR[,STR]]
                [--python-interpreter EXE] [--ai-interpreter EXE]
                [--sh-interpreter EXE] [--python-auxdir DIR] [--ai-auxdir DIR]
                [--sh-auxdir DIR] [--timeout F[,F]] [--propagate-sigint]
-               [-d INT] [--verbose] [-C DIR] [--pending-exit INT]
-               [--exception-exit INT] [--foreground]
+               [-d INT] [--verbose] [-C DIR] [--pending-exitcode INT]
+               [--exception-exitcode INT] [--foreground]
                [--map-cursor LINE:COL:FILE] [--result-textwidth NUM]
               
 {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar}
@@ -809,9 +809,9 @@ options:
                               otherwise remains the current directory. This
                               affects the directory of a new interpreter and
                               the --<interpreter>-auxdir option.
-  --pending-exit INT          Return this error code if whenever a section
+  --pending-exitcode INT      Return this error code if whenever a section
                               hits timeout.
-  --exception-exit INT        Return this error code at exception, if any.
+  --exception-exitcode INT    Return this error code at exception, if any.
                               Note: this option might not be defined for some
                               interpreters. It takes affect only for newly-
                               started interpreters.

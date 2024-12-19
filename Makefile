@@ -26,7 +26,7 @@ test: .stamp_test
 .stamp_readme: $(PY)
 	cp README.md _README.md.in
 	cat _README.md.in | \
-		litrepl --foreground --exception-exit=100 \
+		litrepl --foreground --exception-exitcode=100 \
   	        --result-textwidth=100 --sh-interpreter=- \
 		eval-sections >README.md
 	touch $@

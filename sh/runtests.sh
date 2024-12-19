@@ -529,7 +529,7 @@ for i in tqdm(range(4)):
 ```
 EOF
 cat source.md | runlitrepl --filetype=markdown --timeout=1,inf eval-sections >out1.md
-cat out1.md | runlitrepl --filetype=markdown --timeout=inf,1 --pending-exit=33 eval-sections >out2.md ||
+cat out1.md | runlitrepl --filetype=markdown --timeout=inf,1 --pending-exitcode=33 eval-sections >out2.md ||
 test "$?" = "33"
 grep -q 'BG' out2.md
 runlitrepl stop
@@ -668,7 +668,7 @@ not grep -q "^after-exit" out.md
 
 test_exception_errcode() {( #{{{
 mktest "_test_exception_errcode"
-runlitrepl --exception-exit=123 start python
+runlitrepl --exception-exitcode=123 start python
 
 cat >source.md <<"EOF"
 ``` python
@@ -1017,7 +1017,7 @@ cat source.md | runlitrepl --filetype=markdown eval-sections '0,2' >out1.md
 grep -q "^common-session" out1.md
 cat source.md | runlitrepl \
   --foreground \
-  --exception-exit=123 \
+  --exception-exitcode=123 \
   --filetype=markdown \
   eval-sections '1,2' >out2.md
 grep -q "^foreground" out2.md

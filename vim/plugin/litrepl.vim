@@ -137,7 +137,7 @@ fun! LitReplCmd()
   let cur = getcharpos('.')
   let tw = string(&textwidth)
   let cmd = cmd .
-        \ ' --pending-exit='.LitReplGet('litrepl_pending').
+        \ ' --pending-exitcode='.LitReplGet('litrepl_pending').
         \ ' --debug='.LitReplGet('litrepl_debug').
         \ ' --filetype='.ft.
         \ ' --map-cursor='.cur[1].':'.cur[2].':'.LitReplGet('litrepl_map_cursor_output').

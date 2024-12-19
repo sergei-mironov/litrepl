@@ -93,9 +93,9 @@ def make_parser():
     uses LITREPL_WORKDIR if set, otherwise remains the current directory. This
     affects the directory of a new interpreter and the --<interpreter>-auxdir
     option.'''))
-  ap.add_argument('--pending-exit',type=str,metavar='INT',default=None,
+  ap.add_argument('--pending-exitcode',type=str,metavar='INT',default=None,
     help=dedent('''Return this error code if whenever a section hits timeout.'''))
-  ap.add_argument('--exception-exit',type=str,metavar='INT',default=None,
+  ap.add_argument('--exception-exitcode',type=str,metavar='INT',default=None,
     help=dedent('''Return this error code at exception, if any. Note: this
     option might not be defined for some interpreters. It takes affect only for
     newly-started interpreters.'''))
@@ -153,11 +153,11 @@ def main(args=None):
   a.timeout_initial=float(timeouts[0])
   a.timeout_continue=float(timeouts[1] if len(timeouts)==2 else timeouts[0])
 
-  if a.exception_exit:
-    a.exception_exit=int(a.exception_exit)
+  if a.exception_exitcode:
+    a.exception_exitcode=int(a.exception_exitcode)
 
-  if a.pending_exit:
-    a.pending_exit=int(a.pending_exit)
+  if a.pending_exitcode:
+    a.pending_exitcode=int(a.pending_exitcode)
 
   if a.result_textwidth:
     a.result_textwidth=int(a.result_textwidth)

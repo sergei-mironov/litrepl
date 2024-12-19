@@ -21,11 +21,11 @@ class PythonInterpreter(Interpreter):
       '  raise KeyboardInterrupt()\n\n'
       '_=signal.signal(signal.SIGINT,_handler)\n'
     )
-    if a.exception_exit is not None:
+    if a.exception_exitcode is not None:
       finp.write(
         'import sys; import os\n'
         'def _exceptexithook(type,value,traceback):\n'
-        f'  os._exit({a.exception_exit})\n\n'
+        f'  os._exit({a.exception_exitcode})\n\n'
         'sys.excepthook=_exceptexithook\n'
       )
   def patterns(self):

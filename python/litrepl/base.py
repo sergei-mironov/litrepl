@@ -201,11 +201,11 @@ def start(a:LitreplArgs, st:SType)->int:
     else:
       raise ValueError(f"Unsupported python interpreter: {a.python_interpreter}")
   elif st is SType.SAI:
-    assert not a.exception_exit, "Not supported"
+    assert not a.exception_exitcode, "Not supported"
     interpreter='aicli' if a.ai_interpreter=='auto' else a.ai_interpreter
     return start_(a,interpreter,AicliInterpreter(fns))
   elif st is SType.SShell:
-    assert not a.exception_exit, "Not supported"
+    assert not a.exception_exitcode, "Not supported"
     interpreter='/bin/sh' if a.sh_interpreter=='auto' else a.sh_interpreter
     return start_(a,interpreter,ShellInterpreter(fns))
   else:
@@ -447,8 +447,8 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
     ec=interpExitCode(fns)
     pdebug(f"interpreter exit code: {ec}")
     if ec is ECODE_RUNNING:
-      if pending and a.pending_exit:
-        es.ecodes[nsec]=a.pending_exit
+      if pending and a.pending_exitcode:
+        es.ecodes[nsec]=a.pending_exitcode
       else:
         es.ecodes[nsec]=ECODE_RUNNING
     else:
@@ -648,7 +648,6 @@ def solve_sloc(s:str, tree:LarkTree)->SecRec:
     set.union(*[_safeset(lambda:range(_get(q[0]),_get(q[1])+1)) if len(q)==2
                 else _safeset(lambda:[_get(q[0])]) for q in qs]),
     ppi)
-
 
 def status(a:LitreplArgs, t:LarkTree|None, sts:List[SType], version):
   if a.verbose:

@@ -45,11 +45,11 @@ class IPythonInterpreter(Interpreter):
       '  raise KeyboardInterrupt()\n\n'
       '_=signal.signal(signal.SIGINT,_handler)\n'
     )
-    if a.exception_exit is not None:
+    if a.exception_exitcode is not None:
       finp.write(
         'import IPython; import os\n'
         'def _exithandler(*args, **kwargs):\n'
-        f'  os._exit({int(a.exception_exit)})\n\n'
+        f'  os._exit({int(a.exception_exitcode)})\n\n'
         'IPython.get_ipython().set_custom_exc((Exception,), _exithandler)\n'
       )
   def patterns(self):
