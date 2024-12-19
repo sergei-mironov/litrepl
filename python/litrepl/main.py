@@ -23,9 +23,11 @@ def make_wide(formatter, w=180, h=28):
     return formatter
 
 def _with_type(p, default=None, allow_all=False):
+  defhint=f"Default is \"{default}\"" if default else ''
   p.add_argument(
-    'type',metavar='SECTYPE',default=default,
-    help=f"Interpreter type: python|ai|sh{'|all' if allow_all else ''}",nargs='?'
+    'type',metavar='CLASS',default=default,
+    help=dedent(f'''Interpreter class: python|ai|sh{'|all' if allow_all else ''}.
+    {defhint}'''),nargs='?' if default is not None else None
   )
   return p
 
@@ -107,11 +109,11 @@ def make_parser():
     help=dedent('''Wrap result lines longer than NUM symbols.'''))
   sps=ap.add_subparsers(dest='command',help='Commands to execute')
   sstart=_with_type(sps.add_parser('start',
-    help='Start the background interpreter.'),default='python')
+    help='Start the background interpreter.'))
   _with_type(sps.add_parser('stop',
     help='Stop the background interpreters.'),allow_all=True,default='all')
   _with_type(sps.add_parser('restart',
-    help='Restart the background interpreters.'),allow_all=True)
+    help='Restart the background interpreters.'),allow_all=True,default='all')
   sstatus=_with_type(sps.add_parser('status',
     help='Print background interpreter\'s status.'),allow_all=True,default='all')
   sstatus.add_argument('--tty',action='store_true',
@@ -124,10 +126,8 @@ def make_parser():
     help=dedent('''Parse stdin, evaluate the sepcified sections (by default - all
     available sections), print the resulting file to stdout.'''))
   evalsec.add_argument('locs',type=str,metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
-  _with_type(sps.add_parser('eval-code',
-    help='Evaluate the code snippet.'),default='python')
-  _with_type(sps.add_parser('repl',
-    help='Connect to the background terminal using GNU socat.'),default='python')
+  _with_type(sps.add_parser('eval-code', help='Evaluate the code snippet.'))
+  _with_type(sps.add_parser('repl', help='Connect to the background terminal using GNU socat.'))
   interrupt=sps.add_parser('interrupt',
     help='Send SIGINT to the background interpreter.')
   interrupt.add_argument('locs',metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')

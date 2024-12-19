@@ -77,7 +77,7 @@ def st2name(st:SType)->str:
   elif st==SType.SShell:
     return "sh"
   else:
-    raise ValueError(f"Invalid section type: {st}")
+    raise ValueError(f"Invalid interpreter class: {st}")
 
 def name2st(name:str)->SType:
   if name=="python":
@@ -87,7 +87,7 @@ def name2st(name:str)->SType:
   elif name=="sh":
     return SType.SShell
   else:
-    raise ValueError(f"Invalid section name: {name}")
+    raise ValueError(f"Invalid interpreter class name: {name}")
 
 def bmarker2st(bmarker:str)->SType:
   """ Maps section code marker to section type """

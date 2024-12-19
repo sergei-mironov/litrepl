@@ -354,7 +354,7 @@ fun! LitReplTerm(what)
 endfun
 
 if !exists(":LStart")
-  command! -bar -nargs=? LStart call LitReplRunV('start '.<q-args>, '')
+  command! -bar -nargs=1 LStart call LitReplRunV('start '.<q-args>, '')
 endif
 if !exists(":LStop")
   command! -bar -nargs=? LStop call LitReplRunV('stop '.<q-args>, '')
@@ -366,10 +366,10 @@ if !exists(":LPP")
   command! -bar -nargs=0 LPP call LitRepRunV('parse-print', '')
 endif
 if !exists(":LRepl")
-  command! -bar -nargs=? LRepl call LitReplTerm(<q-args>)
+  command! -bar -nargs=1 LRepl call LitReplTerm(<q-args>)
 endif
 if !exists(":LTerm")
-  command! -bar -nargs=? LTerm call LitReplTerm(<q-args>)
+  command! -bar -nargs=1 LTerm call LitReplTerm(<q-args>)
 endif
 if !exists(":LOpenErr")
   command! -bar -nargs=0 LOpenErr call LitReplOpenErr('')

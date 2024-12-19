@@ -12,7 +12,7 @@ mktest() {
 
 test_parse_print() {( # {{{
 mktest "_test_parse_print"
-runlitrepl start
+runlitrepl start python
 run_md() {
   cat > "source.md"
   cat "source.md" | runlitrepl --filetype=markdown parse-print > "parsed.md"
@@ -108,7 +108,7 @@ EOF
 
 test_eval_md() {( #{{{
 mktest "_test_eval_md"
-runlitrepl start
+runlitrepl start python
 cat >source.md <<"EOF"
 Python
 ======
@@ -351,7 +351,7 @@ EOF
 
 test_eval_tex() {( #{{{
 mktest "_test_eval_tex"
-runlitrepl start
+runlitrepl start python
 cat >source.tex <<"EOF"
 % == Ignore non-tags ==
 \newcommand{\linline}[2]{#2}
@@ -468,7 +468,7 @@ EOF
 
 test_eval_ignore() {( #{{{
 mktest "_test_eval_ignore"
-runlitrepl start
+runlitrepl start python
 cat >source.tex <<"EOF"
 \linline{"A"+"B"}
 {XX}\linline{"C"+"D"}{}
@@ -497,7 +497,7 @@ runlitrepl stop
 
 test_tqdm() {( #{{{
 mktest "_test_tqdm"
-runlitrepl start
+runlitrepl start python
 cat >source.md <<"EOF"
 ```python
 from tqdm import tqdm
@@ -516,7 +516,7 @@ runlitrepl stop
 
 test_async() {( #{{{
 mktest "_test_async"
-runlitrepl start
+runlitrepl start python
 cat >source.md <<"EOF"
 ```python
 from tqdm import tqdm
@@ -537,14 +537,14 @@ runlitrepl stop
 
 test_eval_code() {( #{{{
 mktest "_test_eval_code"
-runlitrepl start
+runlitrepl start python
 cat >source.py <<"EOF"
 def hello(name):
   print(f"Hello, {name}!")
 
 hello('World')
 EOF
-cat source.py | runlitrepl eval-code >out.txt
+cat source.py | runlitrepl eval-code python >out.txt
 diff -u out.txt - <<"EOF"
 Hello, World!
 EOF
@@ -553,7 +553,7 @@ runlitrepl stop
 
 test_eval_with_empty_lines() {( #{{{
 mktest "_test_eval_with_empty_lines"
-runlitrepl start
+runlitrepl start python
 cat >source.py <<"EOF"
 def hello():
   var = 33  # EMPTY LINE BELOW
@@ -562,7 +562,7 @@ def hello():
 
 hello()
 EOF
-cat source.py | runlitrepl eval-code >out.txt
+cat source.py | runlitrepl eval-code python >out.txt
 diff -u out.txt - <<"EOF"
 Hello, 33!
 EOF
@@ -578,7 +578,7 @@ def hello():
 
 hello()
 EOF
-cat source.py | runlitrepl eval-code >out.txt
+cat source.py | runlitrepl eval-code python >out.txt
 diff -u out.txt - <<"EOF"
 Try-finally, 33!
 Done
@@ -590,7 +590,7 @@ if True:
 
     print(f"If-true, {var}!")
 EOF
-cat source.py | runlitrepl eval-code >out.txt
+cat source.py | runlitrepl eval-code python >out.txt
 diff -u out.txt - <<"EOF"
 If-true, 33!
 EOF
@@ -604,7 +604,7 @@ def foo():
 
 foo()
 EOF
-cat source.py | runlitrepl eval-code >out.txt
+cat source.py | runlitrepl eval-code python >out.txt
 diff -u out.txt - <<"EOF"
 33
 EOF
@@ -621,7 +621,7 @@ def foo():
     ''').strip())
 foo()
 EOF
-cat source.py | runlitrepl --debug=0 eval-code >out.txt
+cat source.py | runlitrepl --debug=0 eval-code python >out.txt
 diff -u out.txt - <<"EOF"
 aa
 
@@ -634,7 +634,7 @@ runlitrepl stop
 
 test_exit_errcode() {( #{{{
 mktest "_test_exit_errcode"
-runlitrepl start
+runlitrepl start python
 
 cat >source.md <<"EOF"
 ``` python
@@ -668,7 +668,7 @@ not grep -q "^after-exit" out.md
 
 test_exception_errcode() {( #{{{
 mktest "_test_exception_errcode"
-runlitrepl --exception-exit=123 start
+runlitrepl --exception-exit=123 start python
 
 cat >source.md <<"EOF"
 ``` python
@@ -702,7 +702,7 @@ runlitrepl stop
 test_print_system_order() {( #{{{
 # See https://github.com/ipython/ipython/issues/14246
 mktest "_test_eval_behavior"
-runlitrepl start
+runlitrepl start python
 
 cat >in.md <<"EOF"
 ``` python
@@ -734,7 +734,7 @@ runlitrepl stop
 
 test_vim_leval_cursor() {( #{{{
 mktest "_test_vim_leval_cursor"
-runlitrepl start
+runlitrepl start python
 
 cat >file.md <<"EOF"
 ``` python
@@ -764,7 +764,7 @@ grep -q '^result-2' file.md
 
 test_vim_textwidth() {( #{{{
 mktest "_test_vim_textwidth"
-runlitrepl start
+runlitrepl start python
 
 cat >file.md <<"EOF"
 ``` python
@@ -838,7 +838,7 @@ EOF
 
 test_vim_leval_explicit() {( #{{{
 mktest "_test_vim_leval_explicit"
-runlitrepl start
+runlitrepl start python
 
 cat >source.md <<"EOF"
 ``` python
@@ -905,7 +905,7 @@ grep -q '^result-3' file-below.md
 
 test_vim_lmon() {( #{{{
 mktest "_test_vim_lmon"
-runlitrepl start
+runlitrepl start python
 
 cat >file.md <<"EOF"
 ``` python
@@ -938,7 +938,7 @@ grep -q '0123@' file.md
 
 test_vim_lstatus() {( #{{{
 mktest "_test_vim_lstatus"
-runlitrepl start
+runlitrepl start python
 
 runvim >_vim.log 2>&1 <<"EOF"
 :let g:litrepl_errfile = '_litrepl.err'
@@ -951,7 +951,7 @@ not grep -q -i error _litrepl.err
 
 test_vim_eval_code() {( #{{{
 mktest "_test_vim_eval_code"
-runlitrepl start
+runlitrepl start python
 
 echo >file.md
 runvim file.md >_vim.log 2>&1 <<"EOF"
@@ -964,7 +964,7 @@ grep -q '7' file.md
 
 test_vim_eval_selection() {( #{{{
 mktest "_test_vim_eval_selection"
-runlitrepl start
+runlitrepl start python
 
 cat >file.md <<"EOF"
 3 + 4
@@ -998,7 +998,7 @@ grep -q -i 'dummy:dummy' file.md
 
 test_foreground() {( #{{{
 mktest "_test_foreground"
-runlitrepl start
+runlitrepl start python
 
 cat >source.md <<"EOF"
 ``` python
@@ -1050,7 +1050,7 @@ not grep -q '?' status2.txt
 
 test_interrupt() {( #{{{
 mktest "_test_interrupt"
-runlitrepl start
+runlitrepl start python
 cat >source.md <<"EOF"
 ```python
 from time import sleep
@@ -1195,8 +1195,8 @@ EOF
 
 test_interp_disabled() {( #{{{
 mktest "_test_interp_disabled"
-runlitrepl start python
-runlitrepl start sh
+runlitrepl --sh-interpreter=- start python
+not runlitrepl --sh-interpreter=- start sh
 cat >source.md <<"EOF"
 ``` python
 3+4

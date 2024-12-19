@@ -315,21 +315,23 @@ This behavior can be configured by:
   `<class>` stands for either `python`, `ai` or `sh`.
 
 
-The commands `litrepl start`, `litrepl stop`, and `litrepl restart` are used to
-manage interpreter sessions. They accept the interpreter type to operate on or
-the keyword `all` to apply the command to all interpreters. Add the
-`--<class>-interpteter=CMDLINE` to set the exact command line for
-Litrepl to execute.
+The commands `litrepl start CLASS`, `litrepl stop [CLASS]`, and `litrepl restart
+[CLASS]` are used to manage interpreter sessions. They accept the interpreter
+type to operate on or (for some commands) the keyword `all` to apply the command
+to all interpreters. Add the `--<class>-interpteter=CMDLINE` to adjust the
+command line to run, but be careful - Litrepl adds more arguments to configure
+prompts and verbosity to some interpreters, notably to the pythons.
 
 ``` sh
-$ litrepl start python
-$ litrepl start sh
-$ litrepl restart ai
-$ litrepl stop all
+$ litrepl --python-interpreter=ipython start python
+$ litrepl --sh-interpreter=/opt/bin/mybash start sh
+$ litrepl restart all
+$ litrepl stop
 ```
 
-* The equivalent Vim commands are `:LStart`, `:LStop`, and `:LRestart`. For the
-  corresponding Vim configuration variables, see the reference section below.
+* The equivalent Vim commands are `:LStart CLASS`, `:LStop [CLASS]`, and
+  `:LRestart [CLASS]`. For the corresponding Vim configuration variables, see
+  the reference section below.
 
 
 The `litrepl status [CLASS]` command queries the information about the currently
