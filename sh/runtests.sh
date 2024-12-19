@@ -208,6 +208,14 @@ print('`'+'`'+'`')
 ```
 <!--noresult-->
 
+Non-python markers
+------------------
+```foo
+print("A")
+```
+```result
+```
+
 Shell
 =====
 
@@ -226,9 +234,9 @@ myfun
 ``` result
 ```
 EOF
-cat source.md | runlitrepl --filetype=markdown parse-print >out.md
+cat source.md | runlitrepl --python-markers=python,foo --filetype=markdown parse-print >out.md
 diff -u source.md out.md
-cat source.md | runlitrepl --filetype=markdown eval-sections >out.md
+cat source.md | runlitrepl --python-markers=python,foo --filetype=markdown eval-sections >out.md
 diff -u out.md - <<"EOF"
 Python
 ======
@@ -328,6 +336,15 @@ print('`'+'`'+'`')
 ```
 <!--noresult-->
 
+Non-python markers
+------------------
+```foo
+print("A")
+```
+```result
+A
+```
+
 Shell
 =====
 
@@ -405,10 +422,18 @@ echo $A
 \end{sh}
 \begin{result}
 \end{result}
+\begin{zzz}
+print("AB")
+\end{zzz}
+\begin{result}
+\end{result}
 EOF
 cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
 diff -u source.tex out.tex
-cat source.tex | runlitrepl --filetype=latex eval-sections '0..$' >out.tex
+cat source.tex | runlitrepl \
+  --python-markers=python,zzz \
+  --filetype=latex \
+  eval-sections '0..$' >out.tex
 diff -u out.tex - <<"EOF"
 % == Ignore non-tags ==
 \newcommand{\linline}[2]{#2}
@@ -462,6 +487,12 @@ echo $A
 \end{sh}
 \begin{result}
 1
+\end{result}
+\begin{zzz}
+print("AB")
+\end{zzz}
+\begin{result}
+AB
 \end{result}
 EOF
 )} #}}}
