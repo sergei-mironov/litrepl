@@ -89,14 +89,23 @@ def name2st(name:str)->SType:
   else:
     raise ValueError(f"Invalid interpreter class name: {name}")
 
-def bmarker2st(bmarker:str)->SType:
+def bmarker2st(a:LitreplArgs, bmarker:str)->Optional[SType]:
   """ Maps section code marker to section type """
-  if 'ai' in bmarker:
-    return SType.SAI
-  elif 'sh' in bmarker:
-    return SType.SShell
+  acc=[]
+  for st in SType:
+    if not isdisabled(a,st):
+      bms=a.markers[st]
+      if any((bm in bmarker) for bm in bms):
+        acc.append(st)
+  if len(acc)==1:
+    return acc[0]
   else:
-    return SType.SPython
+    if len(acc)==0:
+      return None
+    else:
+      raise ValueError(
+        f"Marker \"{bmarker}\" matches more than one interpreter class: {acc}"
+      )
 
 def pipenames(a:LitreplArgs, st:SType)->FileNames:
   """ Return the interpreter state: input and output pipe names, pid, etc. If
@@ -187,6 +196,8 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter)->int:
       return 1
 
 def start(a:LitreplArgs, st:SType)->int:
+  if isdisabled(a,st):
+    raise ValueError(f"Interpreter class {st2name(st)} is disabled by the user")
   fns=pipenames(a,st)
   if st is SType.SPython:
     if 'ipython' in a.python_interpreter.lower():
@@ -212,8 +223,7 @@ def start(a:LitreplArgs, st:SType)->int:
     raise ValueError(f"Unsupported section type: {st}")
 
 def isdisabled(a:LitreplArgs, st:SType)->bool:
-  i=getattr(a,f"{st2name(st)}_interpreter")
-  return i in ['-','no']
+  return getattr(a,f"{st2name(st)}_interpreter",None)=='-'
 
 def restart(a:LitreplArgs,st:SType):
   stop(a,st); start(a,st)
@@ -239,7 +249,7 @@ class SymbolsMarkdown(Symbols):
   def __init__(self, a:LitreplArgs):
     markers=[]
     for st in SType:
-      markers.extend(getattr(a,f"{st2name(st)}_markers").split(","))
+      markers.extend(a.markers[st])
     codebegin_re='|'.join(
       [fr"```[ ]*l?{m}" for m in markers]+
       [r"```[ ]*{[^}]*"+m+r"[^}]*}" for m in markers]
@@ -423,10 +433,7 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
   nsecs=sr.nsecs
   es=EvalState(sr)
 
-  def _getinterp(bmarker:str)->Tuple[Optional[FileNames],Optional[Interpreter]]:
-    st=bmarker2st(bmarker)
-    if isdisabled(a,st):
-      return (None,None)
+  def _st2interp(st)->Tuple[Optional[FileNames],Optional[Interpreter]]:
     es.stypes.add(st)
     fns=pipenames(a,st)
     if not running(a,st):
@@ -442,6 +449,12 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       else:
         pdebug("Failed to determine interpreter pid, not sending SIGINT")
     return fns,ss
+
+  def _bm2interp(bmarker:str)->Tuple[Optional[FileNames],Optional[Interpreter]]:
+    st=bmarker2st(a,bmarker)
+    if st is None:
+      return (None, None)
+    return _st2interp(st)
 
   def _checkecode(fns,nsec,pending:bool)->ECode:
     ec=interpExitCode(fns)
@@ -484,7 +497,7 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       bm,em=tree.children[0].meta,tree.children[2].meta
       code=unindent(bm.column-1,t)
       if es.nsec in nsecs:
-        fns,ss=_getinterp(bmarker)
+        fns,ss=_bm2interp(bmarker)
         if fns:
           rr=None
           if ss:
@@ -504,8 +517,11 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
                                escape(es.sres[es.nsec],emarker)+emarker)
         es.ledder[bm.line]=nlines(t2)-nlines(t)
         self._print(t2)
+        if a.irreproducible_exitcode and t!=t2:
+          pstderr(f"Result mismatch:\nExisting:\n{t}\nNew:\n{t2}")
+          es.ecodes[es.nsec]=a.irreproducible_exitcode
       else:
-        self._print(f"{bmarker}{tree.children[1].children[0].value}{emarker}")
+        self._print(f"{bmarker}{t}{emarker}")
     def inlinecodesec(self,tree):
       # FIXME: Latex-only
       bm,em=tree.children[0].meta,tree.children[4].meta
@@ -513,7 +529,7 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       spaces=tree.children[2].children[0].value if tree.children[2].children else ''
       im=tree.children[0].children[0].value
       if es.nsec in nsecs:
-        fns,ss=_getinterp("python")
+        fns,ss=_st2interp(SType.SPython)
         if fns:
           if ss:
             result=process(a,fns,ss,'print('+code+');\n')[0].rstrip('\n')

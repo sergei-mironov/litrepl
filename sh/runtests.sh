@@ -1196,7 +1196,8 @@ EOF
 test_interp_disabled() {( #{{{
 mktest "_test_interp_disabled"
 runlitrepl --sh-interpreter=- start python
-not runlitrepl --sh-interpreter=- start sh
+not runlitrepl --sh-interpreter=- start sh 2>disabled.txt
+grep -q 'disabled by the user' disabled.txt
 cat >source.md <<"EOF"
 ``` python
 3+4

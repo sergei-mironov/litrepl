@@ -95,6 +95,9 @@ def make_parser():
     option.'''))
   ap.add_argument('--pending-exitcode',type=str,metavar='INT',default=None,
     help=dedent('''Return this error code if whenever a section hits timeout.'''))
+  ap.add_argument('--irreproducible-exitcode',type=str,metavar='INT',default=None,
+    help=dedent('''Return this error code if a section outputs a different
+    result than the one that is already present in the document.'''))
   ap.add_argument('--exception-exitcode',type=str,metavar='INT',default=None,
     help=dedent('''Return this error code at exception, if any. Note: this
     option might not be defined for some interpreters. It takes affect only for
@@ -152,6 +155,16 @@ def main(args=None):
   assert len(timeouts) in {1,2}, f"invalid timeout value {timeouts}"
   a.timeout_initial=float(timeouts[0])
   a.timeout_continue=float(timeouts[1] if len(timeouts)==2 else timeouts[0])
+
+  a.markers={
+    SType.SAI:a.ai_markers.split(","),
+    SType.SShell:a.sh_markers.split(","),
+    SType.SPython:a.python_markers.split(",")
+  }
+  for st in SType:
+    for bm in a.markers[st]:
+      st2=bmarker2st(a,bm)
+      assert isdisabled(a,st) or (st2 is not None), (st,bm,st2)
 
   if a.exception_exitcode:
     a.exception_exitcode=int(a.exception_exitcode)
