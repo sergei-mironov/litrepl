@@ -172,6 +172,9 @@ def main(args=None):
   if a.pending_exitcode:
     a.pending_exitcode=int(a.pending_exitcode)
 
+  if a.irreproducible_exitcode:
+    a.irreproducible_exitcode=int(a.irreproducible_exitcode)
+
   if a.result_textwidth:
     a.result_textwidth=int(a.result_textwidth)
     if a.result_textwidth==0:

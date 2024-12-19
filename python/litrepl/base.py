@@ -513,10 +513,9 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       emarker=tree.children[2].children[0].value
       bm,em=tree.children[0].meta,tree.children[2].meta
       if (es.nsec in nsecs) and (es.nsec in es.sres):
-        t2=bmarker+"\n"+indent(bm.column-1,
-                               escape(es.sres[es.nsec],emarker)+emarker)
+        t2="\n"+indent(bm.column-1,escape(es.sres[es.nsec],emarker))
         es.ledder[bm.line]=nlines(t2)-nlines(t)
-        self._print(t2)
+        self._print(bmarker+t2+emarker)
         if a.irreproducible_exitcode and t!=t2:
           pstderr(f"Result mismatch:\nExisting:\n{t}\nNew:\n{t2}")
           es.ecodes[es.nsec]=a.irreproducible_exitcode
@@ -559,9 +558,10 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
   with with_parent_finally(_finally):
     C().visit(tree)
 
-  pdebug(f"eval_code_ ecodes {es.ecodes}")
-  return max(map(lambda x:ECODE_OK if x is None else x,
+  ec=max(map(lambda x:ECODE_OK if x is None else x,
                  es.ecodes.values()),default=ECODE_OK)
+  pdebug(f"eval_code_ ecodes {es.ecodes} => {ec}")
+  return ec
 
 def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
   """ Preprocess the document tree. Resolve the list of cursor locations `cs`

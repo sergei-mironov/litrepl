@@ -1256,6 +1256,42 @@ EOF
 )}
 #}}}
 
+test_irreproducible() {( #{{{
+mktest "_test_irreproducible"
+runlitrepl start python
+cat >source.md <<"EOF"
+``` python
+3+4
+```
+``` result
+6
+```
+``` python
+1+3
+```
+``` result
+5
+```
+EOF
+cat source.md | runlitrepl --irreproducible-exitcode=33 eval-sections >out.md 2>err.txt || test "$?" = 33
+grep -q 'mismatch' err.txt
+diff -u out.md - <<"EOF"
+``` python
+3+4
+```
+``` result
+7
+```
+``` python
+1+3
+```
+``` result
+4
+```
+EOF
+)}
+#}}}
+
 die() {
   echo "$@" >&2
   exit 1
@@ -1320,6 +1356,7 @@ tests() {
   echo test_vim_eval_selection $(which python) - -
   echo test_vim_ai_query - $(which aicli) -
   echo test_interp_disabled $(which python) - $(which sh)
+  echo test_irreproducible $(which ipython) - -
 }
 
 runlitrepl() {
@@ -1332,6 +1369,7 @@ runlitrepl() {
   unset LITREPL_WORKDIR
   test -n "$LITREPL_TEST_PYTHON_INTERPRETER"
   test -n "$LITREPL_TEST_AI_INTERPRETER"
+  test -n "$LITREPL_TEST_SH_INTERPRETER"
   test -n "$LITREPL_BIN"
   $LITREPL_BIN/litrepl --debug="$LITREPL_DEBUG" \
     --python-interpreter="$LITREPL_TEST_PYTHON_INTERPRETER" \
