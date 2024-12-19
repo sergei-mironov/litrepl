@@ -21,7 +21,7 @@ let
       version;
 
     inherit (pkgs) lib stdenv fetchFromGitHub imagemagick makeWrapper cloc
-    gnumake socat latexrun;
+    gnumake socat latexrun sloc;
 
     callPackage = pkgs.lib.callPackageWith collection;
 
@@ -167,6 +167,7 @@ let
         pkgs.pandoc
         pkgs.inkscape
         (aicli.aicli python-dev.pkgs)
+        sloc
       ];
       shellHook = with pkgs; ''
         if test -f ./env.sh ; then
