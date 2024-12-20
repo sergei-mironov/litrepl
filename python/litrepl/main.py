@@ -180,7 +180,7 @@ def main(args=None):
     a.pending_exitcode=int(a.pending_exitcode)
 
   if a.irreproducible_exitcode:
-    if (a.timeout_initial,a.timeout_continue) != (float('inf'),float('inf')):
+    if (a.timeout_initial,a.timeout_continue)!=(float('inf'),float('inf')):
       raise ValueError(
         f"Setting --irreproducible-exitcode requires setting infinite "
         f"--timeout, not \"{a.timeout_initial},{a.timeout_continue}\""
