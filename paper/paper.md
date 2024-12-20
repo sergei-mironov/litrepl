@@ -5,7 +5,6 @@ tags:
   - literate programming
   - repl
   - reproducible research
-  - vim
 authors:
   - name: Sergei Mironov
     orcid: TODO
