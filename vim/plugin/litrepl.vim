@@ -208,9 +208,14 @@ fun! LitReplLogInput(file, command, input) range
   endif
   let l:file = a:file
   call writefile([
-    \ "COMMAND", "=======", a:command,
-    \ "", "STDIN", "======"] + split(a:input, '\n') + [
-    \ "", "STDERR", "======",
+    \ "REPORT", "======", "",
+    \ "litrepl:     ".LitReplGet('litrepl_tool_version'),
+    \ "litrepl.vim: ".LitReplGet('litrepl_plugin_version'), "",
+    \ "COMMAND", "-------",
+    \ a:command, "",
+    \ "STDIN", "------"] +
+    \ split(a:input, "\n") + ["",
+    \ "STDERR", "------",
     \ ], l:file, '')
 endfun
 
