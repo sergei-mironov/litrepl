@@ -1,9 +1,11 @@
 import re
 from os import system
-from os.path import join
+from os.path import join, abspath
 
-from ..utils import fillspaces, runsocat, DEBUG
+from ..utils import fillspaces, runsocat
 from ..types import LitreplArgs, EvalState, Interpreter
+
+DEBUG:bool=False
 
 PATTERN_PYTHON_1=('3256748426384\n',)*2
 PATTERN_PYTHON_2=('325674801010\n',)*2
@@ -12,7 +14,7 @@ class IPythonInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
     assert 'ipython' in interpreter.lower()
-    cfg=join(fns.wd, 'litrepl_ipython_config.py')
+    cfg=join(abspath(fns.wd), 'litrepl_ipython_config.py')
     log=f"--logfile={join(fns.wd, '_ipython.log')}" if DEBUG else ""
     with open(cfg,'w') as f:
       f.write(

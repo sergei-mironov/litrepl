@@ -189,6 +189,7 @@ def main(args=None):
     litrepl.eval.DEBUG=True
     litrepl.base.DEBUG=True
     litrepl.utils.DEBUG=True
+    litrepl.interpreters.ipython.DEBUG=True
 
   if a.workdir:
     chdir(a.workdir)
