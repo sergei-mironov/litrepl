@@ -227,6 +227,7 @@ fun! LitReplRun(command, input) range
   let cmd = LitReplCmdTimeout('inf').' '.a:command.' 2>>'.errfile
   call LitReplLogInput(errfile, cmd, a:input)
   let result = system(cmd, a:input)
+  call writefile(['<end-of-stderr>'],errfile,'a')
   let errcode = v:shell_error
   return [errcode, result]
 endfun
@@ -241,8 +242,9 @@ fun! LitReplRunBuffer(command, timeout) range
   " Run the current buffer 'through' the litrepl processor.
   let errfile = LitReplGet('litrepl_errfile')
   let cmd = '%!'.LitReplCmdTimeout(a:timeout).' '.a:command.' 2>>'.errfile
-  call LitReplLogInput(errfile, cmd, "<omitted>")
+  call LitReplLogInput(errfile, cmd, "<vim-buffer>")
   silent execute cmd
+  call writefile(['<end-of-stderr>'],errfile,'a')
   let errcode = v:shell_error
   return errcode
 endfun
