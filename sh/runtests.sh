@@ -1273,6 +1273,8 @@ cat >source.md <<"EOF"
 5
 ```
 EOF
+cat source.md | not runlitrepl --timeout=1,1 --irreproducible-exitcode=33 eval-sections >out.md 2>err.txt
+grep -q 'infinite --timeout' err.txt
 cat source.md | runlitrepl --irreproducible-exitcode=33 eval-sections >out.md 2>err.txt || test "$?" = 33
 grep -q 'mismatch' err.txt
 diff -u out.md - <<"EOF"
