@@ -1,9 +1,5 @@
 " Set the identation size
 
-set wrap
-set conceallevel=0
-set textwidth=80
-
 " vim-markdown
 " Disable buggy nested markdown
 " let g:vim_markdown_fenced_languages = [ 'markdown=xxx' ]
@@ -52,6 +48,10 @@ nnoremap <F6> :LitEvalWait1<CR>
 nnoremap <F9> :unlet g:litrepl_bin<CR>:unlet g:litrepl_loaded<CR>:runtime plugin/litrepl.vim<CR>
 
 if &filetype == 'tex'
+
+  setlocal wrap
+  setlocal conceallevel=0
+  setlocal textwidth=80
 
   if !exists("g:vimtex_reloaded")
     execute "VimtexReload"
