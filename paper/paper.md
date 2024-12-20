@@ -61,5 +61,7 @@ TODO: The plan:
 11. The tool has only two Python dependencies so far, at the cost of an additional dependency on the
     operating system intefaces for which we choos POSIX as a wide-spread openly available standard.
 
+![](./pic.svg)
+
 # References
 
