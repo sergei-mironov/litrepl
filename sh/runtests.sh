@@ -1292,6 +1292,13 @@ EOF
 )}
 #}}}
 
+test_invalid_markers() {( #{{{
+mktest "_test_invalid_markers"
+not runlitrepl --python-markers=python,foo --sh-markers=foo,zsh start python 2>err.txt
+grep -q "foo" err.txt
+grep -q "\"python\", \"sh\"" err.txt
+)} #}}}
+
 die() {
   echo "$@" >&2
   exit 1
@@ -1357,6 +1364,7 @@ tests() {
   echo test_vim_ai_query - $(which aicli) -
   echo test_interp_disabled $(which python) - $(which sh)
   echo test_irreproducible $(which ipython) - -
+  echo test_invalid_markers $(which python) $(which aicli) $(which sh)
 }
 
 runlitrepl() {

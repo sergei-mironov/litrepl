@@ -151,6 +151,12 @@ AP=make_parser()
 def main(args=None):
   a=AP.parse_args(args or sys.argv[1:])
 
+  if a.debug>0:
+    litrepl.eval.DEBUG=True
+    litrepl.base.DEBUG=True
+    litrepl.utils.DEBUG=True
+    litrepl.interpreters.ipython.DEBUG=True
+
   timeouts=a.timeout.split(',')
   assert len(timeouts) in {1,2}, f"invalid timeout value {timeouts}"
   a.timeout_initial=float(timeouts[0])
@@ -164,6 +170,7 @@ def main(args=None):
   for st in SType:
     for bm in a.markers[st]:
       st2=bmarker2st(a,bm)
+      pdebug(st,bm, f"dis:{isdisabled(a,st)}", '======>',st2)
       assert isdisabled(a,st) or (st2 is not None), (st,bm,st2)
 
   if a.exception_exitcode:
@@ -184,12 +191,6 @@ def main(args=None):
     line,col,output=a.map_cursor.split(":")
     a.map_cursor=(int(line),int(col))
     a.map_cursor_output=output
-
-  if a.debug>0:
-    litrepl.eval.DEBUG=True
-    litrepl.base.DEBUG=True
-    litrepl.utils.DEBUG=True
-    litrepl.interpreters.ipython.DEBUG=True
 
   if a.workdir:
     chdir(a.workdir)

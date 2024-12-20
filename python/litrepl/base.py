@@ -104,7 +104,8 @@ def bmarker2st(a:LitreplArgs, bmarker:str)->Optional[SType]:
       return None
     else:
       raise ValueError(
-        f"Marker \"{bmarker}\" matches more than one interpreter class: {acc}"
+        f"Marker \"{bmarker}\" matches more than one interpreter class: "+
+        ', '.join([f'"{st2name(c)}"' for c in acc])
       )
 
 def pipenames(a:LitreplArgs, st:SType)->FileNames:
