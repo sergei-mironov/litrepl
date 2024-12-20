@@ -731,8 +731,9 @@ usage: litrepl [-h] [-v] [--filetype STR] [--python-markers STR[,STR]]
                [--sh-interpreter EXE] [--python-auxdir DIR] [--ai-auxdir DIR]
                [--sh-auxdir DIR] [--timeout F[,F]] [--propagate-sigint]
                [-d INT] [--verbose] [-C DIR] [--pending-exitcode INT]
-               [--exception-exitcode INT] [--foreground]
-               [--map-cursor LINE:COL:FILE] [--result-textwidth NUM]
+               [--irreproducible-exitcode INT] [--exception-exitcode INT]
+               [--foreground] [--map-cursor LINE:COL:FILE]
+               [--result-textwidth NUM]
               
 {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar}
                ...
@@ -811,6 +812,10 @@ options:
                               the --<interpreter>-auxdir option.
   --pending-exitcode INT      Return this error code if whenever a section
                               hits timeout.
+  --irreproducible-exitcode INT
+                              Return this error code if a section outputs a
+                              different result than the one that is already
+                              present in the document.
   --exception-exitcode INT    Return this error code at exception, if any.
                               Note: this option might not be defined for some
                               interpreters. It takes affect only for newly-
