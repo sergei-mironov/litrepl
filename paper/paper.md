@@ -1,5 +1,6 @@
 ---
-title: 'Litrepl: read-eval-print your literate papers
+<!-- title: Litrepl: read-eval-print your literate papers -->
+title: Litrepl: a minimalistic literate paper evaluation interface
 tags:
   - python
   - literate programming
@@ -14,6 +15,11 @@ bibliography: biblio_litrepl.bib
 ---
 
 # Summary
+
+Litrepl is a Python text processor and a text terminal session manager for
+recognizing and evaluation code sections in Markdown or LaTeX documents.
+
+# Statement of need
 
 TODO: The plan:
 
