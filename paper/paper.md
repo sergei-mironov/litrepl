@@ -32,22 +32,21 @@ TODO: The plan:
 
 2. Since then, the concept was largely simplified
    - NOWEB
+   - IPython?
+   - Literate Haskell?
 
-3. And simplified even more, notable representative is
-   - Literate Haskell
-
-4. Independently, the concept of REPL appeared in the LISP developer community and get recognition
+3. Independently, the concept of REPL appeared in the LISP developer community and get recognition
    through the IPython, interactive Haskell interpreter GHCi, RStudio IDE.
 
-5. Eventually, the tools appear which combine both styles up to a some degree. Probably, the most
+4. Eventually, the tools appear which combine both styles up to a some degree. Probably, the most
    well-known representative project is ''Jupyter Notebooks'', despite the fact that we can call it
    Literate programming tool with a little exageration.
 
-6. We present ''Litrepl'' which unifies the two concepts into one paradigm of repeatedly running
+5. We present ''Litrepl'' which unifies the two concepts into one paradigm of repeatedly running
    code sections while editing a "literate" document. As for Jupyter Notebook autohrs, our main goal
    is to make editing of research papers simpler.
 
-7. The second goal is to promote reproducible research practices by supporting the verification mode
+6. The second goal is to promote reproducible research practices by supporting the verification mode
    which evaluates sections and warns if the new results differ from the expected ones.
 
 7. Finally, we pursue a technical goal of having the tool modular, small and easliy-maintanable, for
