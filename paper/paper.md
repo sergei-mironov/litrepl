@@ -11,7 +11,7 @@ authors:
     orcid: TODO
     affiliation: "0"
 date: 20 December 2024
-bibliography: biblio_litrepl.bib
+bibliography: paper.bib
 ---
 
 # Summary
