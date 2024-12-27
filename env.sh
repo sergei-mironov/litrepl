@@ -1,4 +1,5 @@
 CWD=$(pwd)
+export PROJECT_ROOT=$CWD
 export PATH=\
 $CWD/sh:\
 $CWD/python/bin:\
