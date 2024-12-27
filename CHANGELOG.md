@@ -1,6 +1,29 @@
 Changelog
 =========
 
+Version 3.11
+------------
+
+1. **Python**
+   - The interpreters have been refactored into their own submodule, improving
+     code organization.
+   - Added preliminary support for
+     [shell](./python/litrepl/interpreters/shell.py) interpreters, allowing the
+     system to handle shell commands.
+   - Introduced new commands: `print-grammar` to output the grammar and
+     `print-regexp` for regular expression management.
+   - Introduced adjustable code section labels, removing the default `lcode`
+     sections support.
+   - Improved debugging and configuration support in IPython by ensuring
+     expanded paths and correct handling of the DEBUG setting.
+   - Support for automatic file type detection with `--filetype=auto` has been
+     implemented.
+   - The support for `--irreproducible-exitcode` argument was added
+
+2. **Vim**
+   - Fixed cursor handling issues in `LEvalMon`, improving text navigation and
+     evaluation feedback within Vim.
+
 Version 3.10.1
 --------------
 
