@@ -427,6 +427,11 @@ print("AB")
 \end{zzz}
 \begin{result}
 \end{result}
+%python
+print('\end{python}')
+%nopython
+%result
+%noresult
 EOF
 cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
 diff -u source.tex out.tex
@@ -494,6 +499,12 @@ print("AB")
 \begin{result}
 AB
 \end{result}
+%python
+print('\end{python}')
+%nopython
+%result
+\end{python}
+%noresult
 EOF
 )} #}}}
 

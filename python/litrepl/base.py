@@ -321,9 +321,9 @@ def grammar_(a:LitreplArgs, filetype:str)->Tuple[LarkGrammar,Symbols]:
               | resultsec -> e_ocodesection
               | ignoresec -> e_comsection
       ignoresec.2 : ignorebegin ignoretext ignoreend
-      codesec.1 : codebegin ctext codeend
+      codesec.1 : codebegin codetext codeend
                      | comcodebegin codesectext comcodeend
-      resultsec.1 : resultbegin ctext resultend
+      resultsec.1 : resultbegin resulttext resultend
                      | comresultbegin vertext comresultend
       codebegin : /{symbols_md.codebegin}/
       codeend : /{symbols_md.codeend}/
@@ -338,7 +338,8 @@ def grammar_(a:LitreplArgs, filetype:str)->Tuple[LarkGrammar,Symbols]:
       ignorebegin : /{symbols_md.ignorebegin}/
       ignoreend : /{symbols_md.ignoreend}/
       topleveltext : /(.(?!{toplevel_markers_markdown}))*./s
-      ctext : /(.(?!{symbols_md.resultend}|{symbols_md.codeend}))*./s
+      codetext : /(.(?!{symbols_md.codeend}))*./s
+      resulttext : /(.(?!{symbols_md.resultend}))*./s
       ignoretext : /(.(?!{symbols_md.ignoreend}))*./s
       vertext : /(.(?!{symbols_md.comresultend}))*./s
       codesectext : /(.(?!{symbols_md.comcodeend}))*./s
@@ -358,10 +359,10 @@ def grammar_(a:LitreplArgs, filetype:str)->Tuple[LarkGrammar,Symbols]:
               | inlinecodesec -> e_inline
               | ignoresec -> e_comment
       ignoresec.2 : ignorebegin ignoretext ignoreend
-      codesec.1 : codebegin innertext codeend
-                | comcodebegin innertext comcodeend
-      resultsec.1 : resultbegin innertext resultend
-                  | comresultbegin innertext comresultend
+      codesec.1 : codebegin codetext codeend
+                | comcodebegin comcodetext comcodeend
+      resultsec.1 : resultbegin resulttext resultend
+                  | comresultbegin comresulttext comresultend
       inlinecodesec.1 : inlinemarker "{OBR}" inltext "{CBR}" spaces obr inltext cbr
       inlinemarker : /{symbols_latex.inlinemarker}/
       codebegin : /{symbols_latex.codebegin}/
@@ -375,7 +376,10 @@ def grammar_(a:LitreplArgs, filetype:str)->Tuple[LarkGrammar,Symbols]:
       ignorebegin : /{symbols_latex.ignorebegin}/
       ignoreend : /{symbols_latex.ignoreend}/
       topleveltext : /(.(?!{toplevel_markers_latex}))*./s
-      innertext : /(.(?!{symbols_latex.comcodeend}|{symbols_latex.codeend}|{symbols_latex.resultend}|{symbols_latex.comresultend}))*./s
+      comcodetext : /(.(?!{symbols_latex.comcodeend}))*./s
+      codetext : /(.(?!{symbols_latex.codeend}))*./s
+      resulttext : /(.(?!{symbols_latex.resultend}))*./s
+      comresulttext : /(.(?!{symbols_latex.comresultend}))*./s
       inltext : ( /[^{OBR}{CBR}]+({OBR}[^{CBR}]*{CBR}[^{OBR}{CBR}]*)*/ )?
       ignoretext : ( /(.(?!{symbols_latex.ignoreend}))*./s )?
       spaces : ( /[ \t\r\n]+/s )?
@@ -486,8 +490,6 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
     def text(self,tree):
       self._print(tree.children[0].value)
     def topleveltext(self,tree):
-      return self.text(tree)
-    def innertext(self,tree):
       return self.text(tree)
     def codesec(self,tree):
       es.nsec+=1
