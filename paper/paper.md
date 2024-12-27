@@ -1,7 +1,7 @@
 ---
 <!-- title: Litrepl: read-eval-print your literate papers -->
 <!-- title: Litrepl: a minimalistic literate paper evaluation interface. -->
-title: Litrepl: aim at transparency not reproducibility
+title: Litrepl: literate paper processor valuing transparency over reproducibility
 tags:
   - python
   - literate programming
@@ -17,11 +17,11 @@ bibliography: paper.bib
 
 # Summary
 
-Litrepl is a Python text processor for recognizing and evaluation code sections in Markdown or LaTeX
-documents. Litrepl is designed as a middleware aimed at separating text editors from the programming
-language interpreter management logic thus contributing to the diversity of both. In this role,
-Litrepl can become a component of modular "UNIX Way" interactive development or typesetting
-environments.
+Litrepl is a Python-based text processor designed to identify and evaluate code sections within
+Markdown or LaTeX documents. Serving as middleware, Litrepl separates the logic of text editors from
+programming language interpreter management. This separation encourages diversity in both text
+editing environments and programming languages. As a result, Litrepl can become an integral
+component of modular, "UNIX Way" inspired interactive development or typesetting systems.
 
 # Statement of need
 
@@ -40,40 +40,39 @@ TODO: The plan:
    interpreter allowed incremental and, most importantly, interactive programming by directly
    changing the interpreter state. Keep human in the loop, thus, helps human to think.
 
-3. The next milestone was the IPython project evolved later as the Jupyter Project. The
-   creators suggested the new document format called Notebook represented by a series of sections of
-   various types not limited to text, some of which represented code and some the computation
-   results.  Pairs of code and result sections of Notebooks can be used to communicate a programming
-   language interpreter interactively allowing REPL style programming (keep human in the loop). The
-   well-formed document allows readers to follow the narrative and is suitable for presentations and
-   sharing.
+3. The major milestone was the IPython project evolved later as the Jupyter Project. The creators
+   suggested the new document format called Notebook represented by a series of logical sections of
+   various types not limited to text, some of which contained code and some the computation results.
+   The pairs of code and result sections of Notebooks are to communicate the programming language
+   interpreter interactively, thus allowing REPL style programming. The resulting well-formed
+   document allows readers to follow the narrative and is suitable for presentations and sharing.
 
    The authors formulated these ideas under the umbrella concept of Literate Computing, or building
    a computational narrative which is (1) spanning wide range of audience (2) bosting
    reproducibility and (3) collaboraiton.
 
    To fulfill these goals a number of technical decisions were made, the most important of these,
-   along with the introduction of a document format, are: the inter-module communication between the
-   computational core, known as Jupyter Kernel, and the Notebook plaing the role of a client,
+   along with the introduction of a new document format, are: the inter-module communication between
+   the computational core, known as Jupyter Kernel, and the Notebook plaing the role of a client,
    another client-server communication between Notebook web-server and the user web-browser.
 
-5. While we agree on the importance of the main concept of Literate Computing, but we argue that the
-   goal of reproducibility overshadows other mentioned goals. Being solved, it would both allow
+5. While we agree on the importance of concept of Literate Computing, but we argue that the goal of
+   reproducibility overshadows other mentioned goals. Being solved, it would both allow
    time-separated communication between parties of a research project and widen its audience. Yet,
-   this problem, as shown by [Doostra et al] exceeds not only the scope of human-computer
-   interaction system but even the scope of a typical programming language library distribution
-   manager. An adequate solution to the softare deployment problem would necessarily be a
-   whole-system solution such as Nix manager or a Docker container.
+   we believe that this problem, as shown by [Doostra et al] exceeds not only the scope of
+   human-computer interaction system but also the scope of a typical software distribution manager.
+   for a particular programming language. An adequate solution to the softare deployment problem as
+   Doostra called it, should span over a whole operating system scale.
 
 6. For this reason, we suggest focusing human-computer interaction at transparency rahter than
    reproducibility. Below we describe ''Litrepl'' tool which is simple yet powerful to bring the
-   REPL interactive programming style into a common text editor.
+   REPL interactive programming style into the existing editors.
 
-8. First, we suggest re-using the existing text document formats and editors. In each of the two
-   formats we implemented, Markdown and LaTeX, we use a simplified parsers to destinguish code and
-   result sections from everything else. Second, we rely on the simple bi-directional text streams
-   to communicate language interpreters via inter-process communication to evaluate code. At the
-   time of this writing, we support families of Python and Shell interpreters and a custom AI
+8. First, we suggest re-using the existing text document formats. In each of the two formats we
+   implemented, Markdown and LaTeX, we use a simplified parsers to destinguish code and result
+   sections from everything else. Second, we rely on the simple bi-directional text streams to
+   communicate language interpreters via inter-process communication to evaluate code. At the time
+   of this writing, we support families of Python and Shell interpreters and a custom AI
    communication interpreter. Finally, we leave as much as possible to the operating system
    facilities.
 
@@ -91,6 +90,10 @@ When the file appears on the Litrepl's stdin stream, it uses Earley parser to re
    code and result sections.
 
 ## Evaluation
+
+TODO
+
+## Session management
 
 TODO
 
