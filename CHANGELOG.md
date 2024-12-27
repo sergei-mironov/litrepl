@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Version 3.11
-------------
+Version 3.11.0
+--------------
 
 1. **Python**
    - The interpreters have been refactored into their own submodule, improving
