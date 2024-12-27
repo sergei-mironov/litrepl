@@ -23,6 +23,7 @@ Version 3.11.0
 2. **Vim**
    - Fixed cursor handling issues in `LEvalMon`, improving text navigation and
      evaluation feedback within Vim.
+   - Improve error reporting performed by the `LOpenErr` command.
 
 Version 3.10.1
 --------------
