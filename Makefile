@@ -128,6 +128,12 @@ upload: $(WHEEL_REV) $(VIMB_REV)
 		--password $(shell cat _token.pypi) \
 		dist/*
 
+.PHONY: paper # Compile the paper PDF out of its LaTeX source
+paper: ./paper/paper.pdf
+
+./paper/paper.pdf: ./paper/paper.tex ./paper/pic.svg ./paper/paper.bib
+	latexmk -cd -shell-escape -pdf -latex=pdflatex ./paper/paper.tex
+
 .PHONY: all
 all: wheel
 
