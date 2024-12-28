@@ -199,7 +199,7 @@ let
           pdflscape environ trimspaces mdframed zref needspace import
           beamerposter qcircuit xypic standalone preview amsmath thmtools
           tocloft tocbibind varwidth beamer tabulary ifoddpage relsize svg
-          transparent biber biblatex;
+          transparent biber biblatex comment;
         }
       );
 
