@@ -8,7 +8,9 @@
 \usepackage{hyperref}
 \usepackage{fancyhdr}
 \usepackage{svg}
-\usepackage{natbib}
+
+\usepackage{biblatex}
+\addbibresource{paper.bib}
 
 \geometry{margin=1in}
 
@@ -18,6 +20,14 @@
   \rhead{Litrepl}
   \rfoot{\thepage}
 }
+
+\newcommand{\ls}{\begin{itemize}\item}
+\newcommand{\li}{\item}
+\renewcommand{\le}{\end{itemize}}
+
+\newcommand{\es}{\begin{enumerate}\item}
+\newcommand{\ei}{\item}
+\newcommand{\ee}{\end{enumerate}}
 
 \pagestyle{plain}
 
@@ -56,7 +66,8 @@ community and through the APL language designed for mathematical computations.
 The combination of a command-line interface and a language interpreter enables
 incremental and interactive programming, allowing users to directly modify the
 interpreter state. By maintaining human involvement in the loop, this approach
-facilitates human thought processes \cite{McCarthy1959recfun, Iverson1962apl}.
+facilitates human thought processes \cite{Spence1975apl, McCarthy1959recfun,
+Iverson1962apl}.
 
 A significant milestone in this area was the development of the IPython project,
 which later evolved into the Jupyter Project. The creators introduced a new
@@ -96,31 +107,85 @@ for the reuse of existing text document formats. In both the Markdown and LaTeX
 formats that we have implemented, simplified parsers are utilized to distinguish
 code and result sections from the rest of the document. As of now, we support
 Python and Shell interpreter families, as well as a custom AI communication
-interpreter. Finally, we strive to leverage operating system facilities as much
-as possible.
+interpreter. Finally, we strive to leverage POSIX \cite{POSIX2024} operating
+system facilities as much as possible.
 
 
 \section{How it works}
+
+Litrepl is implemented in Python as a command-line text processor utility. Its
+primary function is to take a text document as input, process it according to
+specified command line arguments and environment settings, and then output the
+resulting document through its standard output.
+
+The operation of Litrepl is best illustrated through the following example:
+
+\begin{verbatim}
+$ cat input.tex
+\begin{python}
+print("Hello")
+\end{python}
+\begin{result}
+\end{result}
+
+$ cat input.tex | litrepl
+\begin{python}
+print("Hello")
+\end{python}
+\begin{result}
+Hello
+\end{result}
+\end{verbatim}
+
+In this example, the input document \verb|input.tex| contains a Python code
+block that outputs the string "Hello". When the document is piped through
+Litrepl, it processes the code block and inserts the result directly into the
+document where specified.
 
 
 \begin{figure*}[t]
   \centering
   \includesvg[inkscapelatex=false,width=0.8\textwidth]{pic}
   \caption{Caption describing the image shown in the figure.}
-  \label{fig:example}
+  \label{fig:resource-allocation}
 \end{figure*}
 
 
-\subsection{Inter-process communication}
+\subsection{Interfacing Interpreters}
 
-When the file appears on the Litrepl's stdin stream, it uses Earley parser to
-reliably recognize code and result sections.
+Litrepl communicates with interpreters using two uni-directional text streams:
+one for writing input and another for reading outputs. To establish effective
+communication, the interpreter should conform to the following general
+assumptions:
 
-\subsection{Parsing and Evaluation}
+\begin{itemize}
+  \item Synchronous single-user mode, which is implemented in most interpreters.
+  \item A capability to disable command line prompts. Litrepl relies on the echo
+        response, as described below, rather than on prompt detection.
+  \item The presence of an echo command or equivalent. The interpreter must be
+        able to echo an argument string provided by the user in response to the
+        echo command.
+\end{itemize}
+
+In Litrepl, these details are hardcoded for several prominent interpreter
+families, which we refer to as \textbf{interpreter classes}. At the time of
+writing, Litrepl supports three classes: \textbf{python}, \textbf{sh}, and
+\textbf{ai}. Using command line arguments, users can configure how to map code
+section labels to the correct class and specify which interpreter command to
+execute to start a session for each class.
+
+\subsection{Session Management}
 
 Details and discussions about the second subsection.
 
-\subsection{Session Management}
+1. In order to start interpreter sessions, Litrepl allocates resources as shown
+on the Figure \ref{fig:resource-allocation}. First, the auxilary directory is
+created using the name, computed from the current interpreter class, working
+directory and the name of a system folder for temporary files.  Next, the two
+POSIX pipes, in.pipe and out.pipe, are created. Finally, the configured
+interpreter is started with the pipes attached.
+
+\subsection{Parsing and Evaluation}
 
 Details and discussions about the second subsection.
 
@@ -132,8 +197,8 @@ dependency on the operating system intefaces for which we choose POSIX as a
 wide-spread openly available standard.
 
 \section*{References}
-\bibliographystyle{plain} % Set the bibliography style
-\bibliography{paper} % Include the .bib file named 'paper'
+\printbibliography
+
 
 \end{document}
 
