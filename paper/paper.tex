@@ -8,6 +8,7 @@
 \usepackage{hyperref}
 \usepackage{fancyhdr}
 \usepackage{svg}
+\usepackage{comment}
 
 \usepackage{biblatex}
 \addbibresource{paper.bib}
@@ -118,30 +119,62 @@ primary function is to take a text document as input, process it according to
 specified command line arguments and environment settings, and then output the
 resulting document through its standard output.
 
-The operation of Litrepl is best illustrated through the following example:
+The operation of Litrepl is best illustrated through the example below. Consider
+the document named \verb|input.tex|:
 
+\begin{comment}
+\begin{sh}
+echo '\begin{verbatim}'
+echo '$ cat input.tex'
+cat input.tex
+echo '\end{verbatim}'
+\end{sh}
+\end{comment}
+%lresult
 \begin{verbatim}
 $ cat input.tex
 \begin{python}
-print("Hello")
+import sys
+print(f"Hello, {sys.platform}!")
 \end{python}
 \begin{result}
-\end{result}
-
-$ cat input.tex | litrepl
-\begin{python}
-print("Hello")
-\end{python}
-\begin{result}
-Hello
 \end{result}
 \end{verbatim}
+%lnoresult
 
-In this example, the input document \verb|input.tex| contains a Python code
-block that outputs the string "Hello". When the document is piped through
-Litrepl, it processes the code block and inserts the result directly into the
-document where specified.
+This document contains a Python code section and an empty result section marked
+with the corresponding Latex environment tags. To "execute" the document we
+pipe it though the Litrepl processor as follows:
 
+\begin{comment}
+\begin{sh}
+echo '\begin{verbatim}'
+echo '$ cat input.tex | litrepl'
+echo "sys.platform='linux'" | litrepl repl python >/dev/null
+cat input.tex | litrepl
+echo '\end{verbatim}'
+\end{sh}
+\end{comment}
+%lresult
+\begin{verbatim}
+$ cat input.tex | litrepl
+\begin{python}
+import sys
+print(f"Hello, {sys.platform}!")
+\end{python}
+\begin{result}
+Hello, linux!
+\end{result}
+\end{verbatim}
+%lnoresult
+
+Now we can see the expected greeting of the author's operating system platform.
+The side-effect of this execution is the started session of the python
+interpreter which is now running in the background. We can modify its state by
+adding more section to the document and executing them selectively or e.g. by
+accessing \verb|litrepl repl python| terminal. So for example, setting
+\verb|sys.platform| to another value and re-evaluating the document would yield
+a different greeting.
 
 \begin{figure*}[t]
   \centering
