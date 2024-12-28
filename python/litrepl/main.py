@@ -126,18 +126,20 @@ def make_parser():
   sps.add_parser('parse-print',
     help=dedent('''Parse and print the input file back (diagnostics).'''))
   evalsec=sps.add_parser('eval-sections',
-    help=dedent('''Parse stdin, evaluate the sepcified sections (by default - all
-    available sections), print the resulting file to stdout.'''))
-  evalsec.add_argument('locs',type=str,metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
+    help=dedent('''Parse stdin, evaluate the specified sections (by default -
+    all available sections), print the resulting file to stdout.'''))
+  evalsec.add_argument('locs',type=str,metavar='LOCS',default='0..$',
+    help=LOCSHELP,nargs='?')
   _with_type(sps.add_parser('eval-code', help='Evaluate the code snippet.'))
-  _with_type(sps.add_parser('repl', help='Connect to the background terminal using GNU socat.'))
+  _with_type(sps.add_parser('repl',
+    help='Connect to the background terminal using GNU socat.'))
   interrupt=sps.add_parser('interrupt',
     help='Send SIGINT to the background interpreter.')
   interrupt.add_argument('locs',metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
   regexp=sps.add_parser('print-regexp',
     help='Print regexp matching start of code sections for the given file type.')
-  regexp.add_argument('format',metavar='STR',default='vim',
-    help=dedent('''Regexp format to print: 'vim' or 'lark'. Defaults to 'vim'''),nargs='?')
+  regexp.add_argument('format',metavar='STR',default='vim',nargs='?',
+    help=dedent('''Regexp format to print: 'vim' or 'lark'. Defaults to 'vim'''))
   regexp.add_argument('--tty',action='store_true',
     help='Read intput document from stdin (required to get per-section status).')
   grammar=sps.add_parser('print-grammar',
@@ -149,7 +151,10 @@ def make_parser():
 AP=make_parser()
 
 def main(args=None):
-  a=AP.parse_args(args or sys.argv[1:])
+  args=args or sys.argv[1:]
+  a=AP.parse_args(args)
+  if a.command is None:
+    a=AP.parse_args(args+['eval-sections'])
 
   if a.debug>0:
     litrepl.eval.DEBUG=True
@@ -297,7 +302,7 @@ def main(args=None):
     g=parse_(a).grammar
     print(g)
   else:
-    pstderr(f'Unknown command: {a.command}')
+    pstderr(f'Unknown or invalid command: \"{a.command}\".')
     exit(1)
 
 
