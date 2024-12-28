@@ -340,9 +340,9 @@ fun! LitReplPos(arg)
   if a:arg == ""
     let pos = loc
   elseif tolower(a:arg) == "all"
-    let pos = "0..$"
+    let pos = "1..$"
   elseif tolower(a:arg) == "above"
-    let pos = "0..".loc
+    let pos = "1..".loc
   elseif tolower(a:arg) == "below"
     let pos = loc."..$"
   else

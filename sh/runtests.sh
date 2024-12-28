@@ -438,7 +438,7 @@ diff -u source.tex out.tex
 cat source.tex | runlitrepl \
   --python-markers=python,zzz \
   --filetype=latex \
-  eval-sections '0..$' >out.tex
+  eval-sections '1..$' >out.tex
 diff -u out.tex - <<"EOF"
 % == Ignore non-tags ==
 \newcommand{\linline}[2]{#2}
@@ -525,7 +525,7 @@ EOF
 cat source.tex | runlitrepl --filetype=latex parse
 cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
 diff -u source.tex out.tex
-cat source.tex | runlitrepl --filetype=latex eval-sections '0..$' >out.tex
+cat source.tex | runlitrepl --filetype=latex eval-sections '1..$' >out.tex
 diff -u out.tex - <<"EOF"
 \linline{"A"+"B"}
 {AB}\linline{"C"+"D"}{CD}
@@ -551,7 +551,7 @@ for i in tqdm(range(100)):
 EOF
 cat source.md | runlitrepl --filetype=markdown parse-print >out.md
 diff -u source.md out.md
-cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md
+cat source.md | runlitrepl --filetype=markdown eval-sections '1..$' >out.md
 test "$(cat out.md | grep '100%' | wc -l)" = "1"
 runlitrepl stop
 )} #}}}
@@ -699,7 +699,7 @@ print("after-exit")
 EOF
 (
 set +e
-cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md 2>/dev/null
+cat source.md | runlitrepl --filetype=markdown eval-sections '1..$' >out.md 2>/dev/null
 echo $?>ret.txt
 )
 test `cat ret.txt` = "123"
@@ -731,7 +731,7 @@ print("after-exception")
 EOF
 (
 set +e
-cat source.md | runlitrepl --filetype=markdown eval-sections '0..$' >out.md 2>/dev/null
+cat source.md | runlitrepl --filetype=markdown eval-sections '1..$' >out.md 2>/dev/null
 echo $?>ret.txt
 )
 test `cat ret.txt` = "123"
@@ -756,7 +756,7 @@ _=system("echo 2")
 ``` result
 ```
 EOF
-cat in.md | runlitrepl --debug=0 --filetype=markdown eval-sections '0..$' >out.md
+cat in.md | runlitrepl --debug=0 --filetype=markdown eval-sections '1..$' >out.md
 diff -u out.md - <<"EOF"
 ``` python
 from os import system
@@ -907,7 +907,7 @@ EOF
 
 runvim >_vim.log 2>&1 <<"EOF"
 :e! source.md
-:LEval 1
+:LEval 2
 :w! file1.md
 
 :e! source.md
@@ -1055,15 +1055,15 @@ print(session)
 ``` result
 ```
 EOF
-cat source.md | runlitrepl --filetype=markdown eval-sections '0,2' >out1.md
+cat source.md | runlitrepl --filetype=markdown eval-sections '1,3' >out1.md
 grep -q "^common-session" out1.md
 cat source.md | runlitrepl \
   --foreground \
   --exception-exitcode=123 \
   --filetype=markdown \
-  eval-sections '1,2' >out2.md
+  eval-sections '2,3' >out2.md
 grep -q "^foreground" out2.md
-cat source.md | runlitrepl --filetype=markdown eval-sections '2' >out3.md
+cat source.md | runlitrepl --filetype=markdown eval-sections '3' >out3.md
 grep -q "^common-session" out3.md
 )} #}}}
 
@@ -1085,7 +1085,7 @@ grep -q '?' status1.txt
 cat source.md | runlitrepl \
   --filetype=markdown \
   --timeout=1,1 \
-  eval-sections '0..$' >out.md
+  eval-sections '1..$' >out.md
 runlitrepl --verbose status python </dev/null >status2.txt
 not grep -q '?' status2.txt
 )} #}}}
@@ -1105,7 +1105,7 @@ EOF
 cat source.md | runlitrepl \
   --filetype=markdown \
   --timeout=0,inf \
-  eval-sections '0..$' >out1.md
+  eval-sections '1..$' >out1.md
 grep -q 'BG' out1.md
 sleep 1 # IPython seems to die without this delay
 cat out1.md | runlitrepl \

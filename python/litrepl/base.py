@@ -642,7 +642,7 @@ def solve_sloc(s:str, tree:LarkTree)->SecRec:
       return tree[0]
     def s_const_num(self,tree):
       self.q+=1
-      nknown[self.q]=int(tree[0].children[0].value)
+      nknown[self.q]=int(tree[0].children[0].value)-1
       return int(self.q)
     def s_const_last(self,tree):
       return int(lastq)
