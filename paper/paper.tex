@@ -9,6 +9,7 @@
 \usepackage{fancyhdr}
 \usepackage{svg}
 \usepackage{comment}
+\usepackage{float}
 
 \usepackage{biblatex}
 \addbibresource{paper.bib}
@@ -51,6 +52,13 @@ environments.
 \end{abstract}
 
 \section{Statement of Need}
+
+\begin{figure*}[!hbt]
+  \centering
+  \includesvg[inkscapelatex=false,width=0.8\textwidth]{pic}
+  \caption{Caption describing the image shown in the figure.}
+  \label{fig:resource-allocation}
+\end{figure*}
 
 The concept of Literate Programming, initially proposed by Donald Knuth,
 revolves around explaining to human beings what we want a computer to do. This
@@ -111,7 +119,6 @@ Python and Shell interpreter families, as well as a custom AI communication
 interpreter. Finally, we strive to leverage POSIX \cite{POSIX2024} operating
 system facilities as much as possible.
 
-
 \section{How it works}
 
 Litrepl is implemented in Python as a command-line text processor utility. Its
@@ -135,7 +142,7 @@ echo '\end{verbatim}'
 $ cat input.tex
 \begin{python}
 import sys
-print(f"Hello, {sys.platform}!")
+print(f"I use {sys.platform} btw!")
 \end{python}
 \begin{result}
 \end{result}
@@ -160,28 +167,21 @@ echo '\end{verbatim}'
 $ cat input.tex | litrepl
 \begin{python}
 import sys
-print(f"Hello, {sys.platform}!")
+print(f"I use {sys.platform} btw!")
 \end{python}
 \begin{result}
-Hello, linux!
+I use linux btw!
 \end{result}
 \end{verbatim}
 %lnoresult
 
-Now we can see the expected greeting of the author's operating system platform.
-The side-effect of this execution is the started session of the python
-interpreter which is now running in the background. We can modify its state by
-adding more section to the document and executing them selectively or e.g. by
-accessing \verb|litrepl repl python| terminal. So for example, setting
-\verb|sys.platform| to another value and re-evaluating the document would yield
-a different greeting.
-
-\begin{figure*}[t]
-  \centering
-  \includesvg[inkscapelatex=false,width=0.8\textwidth]{pic}
-  \caption{Caption describing the image shown in the figure.}
-  \label{fig:resource-allocation}
-\end{figure*}
+Now we can see the expected statement about the author's operating system.  The
+side-effect of this execution is the started session of the python interpreter
+which is now running in the background. We can modify its state by adding more
+section to the document and executing them selectively or e.g. by accessing
+\verb|litrepl repl python| terminal. So for example, setting \verb|sys.platform|
+to another value and re-evaluating the document would yield a different
+statement.
 
 
 \subsection{Interfacing Interpreters}
@@ -209,6 +209,37 @@ execute to start a session for each class.
 
 \subsection{Session Management}
 
+\begin{comment}
+\begin{sh}
+echo -n '\begin' ; echo '{verbatim}'
+echo '\begin{result}'
+litrepl --python-auxdir=/tmp/litrepl/python restart python
+{
+cat <<EOF
+import time
+print('... some output ...')
+time.sleep(9999)
+EOF
+}|litrepl --python-auxdir=/tmp/litrepl/python --timeout=1,inf eval-code python
+echo '\end{result}'
+echo -n '\end'; echo '{verbatim}'
+\end{sh}
+\end{comment}
+
+\begin{figure*}[hbt!]
+  \centering
+  %lresult
+  \begin{verbatim}
+  \begin{result}
+  ... some output ...
+  [LR:/tmp/litrepl/python/partial_7b81e1e.txt]
+  \end{result}
+  \end{verbatim}
+  %lnoresult
+  \caption{Example output in a verbatim format displayed above two columns.}
+  \label{fig:verbatim_example}
+\end{figure*}
+
 To initiate interpreter sessions, Litrepl allocates resources as depicted in
 Figure \ref{fig:resource-allocation}. The process begins by creating an
 auxiliary directory. The name of this directory is derived from the combination
@@ -230,49 +261,41 @@ the response is ready. In instances where the response exceeds the configured
 time to completion, Litrepl provides a partial result. This partial result can
 be updated with complete details in subsequent calls. The format for a partial
 result section appears as follows:
-% Displaying a verbatim box above two columns in a two-column paper
-
-\begin{comment}
-\begin{sh}
-echo -n '\begin' ; echo '{verbatim}'
-echo '\begin{result}'
-litrepl --python-auxdir=/tmp/litrepl/python restart python
-{
-cat <<EOF
-import time
-print('... some output ...')
-time.sleep(9999)
-EOF
-}|litrepl --python-auxdir=/tmp/litrepl/python --timeout=1,inf eval-code python
-echo '\end{result}'
-echo -n '\end'; echo '{verbatim}'
-\end{sh}
-\end{comment}
-
-\begin{figure*}[t]
-  \centering
-  \begin{minipage}{\textwidth}
-    \centering
-    %lresult
-    \begin{verbatim}
-    \begin{result}
-    ... some output ...
-    [LR:/tmp/litrepl/python/partial_7b81e1e.txt]
-    \end{result}
-    \end{verbatim}
-    %lnoresult
-  \end{minipage}
-  \caption{Example output in a verbatim format displayed above two columns.}
-  \label{fig:verbatim_example}
-\end{figure*}
-
-% The figure* environment is used to span two columns, while a minipage is
-% used to contain the verbatim listing. This code creates a box above the
-% two-column layout with a caption explaining the contents.
 
 \subsection{Parsing and Evaluation}
 
-Details and discussions about the second subsection.
+\begin{figure*}[hbt!]
+  \centering
+  \begin{verbatim}
+  document ::= (code_section | result_section | ignore_section | text)*
+  code_section ::= code_bmarker code_section_text code_emarker
+  result_section ::= result_bmarker result_section_text result_emarker
+  ignore_section ::= ignore_bmarker ignore_section_text ignore_emarker
+  \end{verbatim}
+  \caption{Example output in a verbatim format displayed above two columns.}
+  \label{fig:document_representation}
+\end{figure*}
+
+To efficiently detect sections within a document, Litrepl employs simplified
+versions of each document markup grammar, which it defines and parses. In this
+approach, documents are abstracted as a straightforward sequence comprising
+code, result, and text sections. Additionally, Litrepl identifies ignore blocks,
+which serve as block comments. Any sections encapsulated within these ignore
+blocks are excluded from parsing and evaluation. The structure of any document,
+therefore, can be articulated using the following informal grammar:
+
+The specific markers that denote each block type are determined by the document
+format and configuration settings. For example, in a LaTeX document containing
+Python code, Litrepl recognizes markers such as \verb|\begin|\verb|{python}| or
+\verb|% |\verb|python| as code section begin markers, and
+\verb|\end|\verb|{python}| or \verb|% |\verb|nopython| as end markers. These
+latter variants are transparent to LaTeX, facilitating the inclusion of LaTeX
+markup seamlessly.
+
+This parsing strategy allows Litrepl to navigate and process documents with
+precision, ensuring that relevant sections are evaluated while non-relevant
+parts are effectively ignored. By integrating document format-specific markers,
+Litrepl maintains flexibility and adaptability in diverse document scenarios.
 
 \section{Conclusion}
 
