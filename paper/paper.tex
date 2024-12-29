@@ -209,14 +209,66 @@ execute to start a session for each class.
 
 \subsection{Session Management}
 
-Details and discussions about the second subsection.
+To initiate interpreter sessions, Litrepl allocates resources as depicted in
+Figure \ref{fig:resource-allocation}. The process begins by creating an
+auxiliary directory. The name of this directory is derived from the combination
+of the current interpreter class name, the Litrepl working directory, and a
+system-designated folder for temporary files. Subsequently, two POSIX
+pipes—\texttt{in.pipe} and \texttt{out.pipe} are established. The configured
+interpreter is then launched with these pipes attached, and the interpreter's
+process identifier is recorded in a dedicated file.
 
-1. In order to start interpreter sessions, Litrepl allocates resources as shown
-on the Figure \ref{fig:resource-allocation}. First, the auxilary directory is
-created using the name, computed from the current interpreter class, working
-directory and the name of a system folder for temporary files.  Next, the two
-POSIX pipes, in.pipe and out.pipe, are created. Finally, the configured
-interpreter is started with the pipes attached.
+The initialization routine incorporates additional open calls on the pipes to
+prevent premature termination of the interpreter due to detachments. This
+ensures the interpreter remains active and responsive.
+
+When an evaluation request is received, Litrepl calculates the name of the
+anticipated response storage file and forwards the request to the interpreter.
+It concurrently initiates a response reader process. The response storage is
+secured using soft POSIX file locks, enabling the main process to ascertain when
+the response is ready. In instances where the response exceeds the configured
+time to completion, Litrepl provides a partial result. This partial result can
+be updated with complete details in subsequent calls. The format for a partial
+result section appears as follows:
+% Displaying a verbatim box above two columns in a two-column paper
+
+\begin{comment}
+\begin{sh}
+echo -n '\begin' ; echo '{verbatim}'
+echo '\begin{result}'
+litrepl --python-auxdir=/tmp/litrepl/python restart python
+{
+cat <<EOF
+import time
+print('... some output ...')
+time.sleep(9999)
+EOF
+}|litrepl --python-auxdir=/tmp/litrepl/python --timeout=1,inf eval-code python
+echo '\end{result}'
+echo -n '\end'; echo '{verbatim}'
+\end{sh}
+\end{comment}
+
+\begin{figure*}[t]
+  \centering
+  \begin{minipage}{\textwidth}
+    \centering
+    %lresult
+    \begin{verbatim}
+    \begin{result}
+    ... some output ...
+    [LR:/tmp/litrepl/python/partial_7b81e1e.txt]
+    \end{result}
+    \end{verbatim}
+    %lnoresult
+  \end{minipage}
+  \caption{Example output in a verbatim format displayed above two columns.}
+  \label{fig:verbatim_example}
+\end{figure*}
+
+% The figure* environment is used to span two columns, while a minipage is
+% used to contain the verbatim listing. This code creates a box above the
+% two-column layout with a caption explaining the contents.
 
 \subsection{Parsing and Evaluation}
 
