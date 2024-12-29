@@ -573,7 +573,7 @@ EOF
 cat source.md | runlitrepl --filetype=markdown --timeout=1,inf eval-sections >out1.md
 cat out1.md | runlitrepl --filetype=markdown --timeout=inf,1 --pending-exitcode=33 eval-sections >out2.md ||
 test "$?" = "33"
-grep -q 'BG' out2.md
+grep -q 'LR' out2.md
 runlitrepl stop
 )} #}}}
 
@@ -1106,7 +1106,7 @@ cat source.md | runlitrepl \
   --filetype=markdown \
   --timeout=0,inf \
   eval-sections '1..$' >out1.md
-grep -q 'BG' out1.md
+grep -q 'LR' out1.md
 sleep 1 # IPython seems to die without this delay
 cat out1.md | runlitrepl \
   --filetype=markdown \

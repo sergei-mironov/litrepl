@@ -339,7 +339,7 @@ def processAsync(fns:FileNames, ss:Interpreter, code:str)->RunResult:
   """
   wd,inp,outp,_,_,_=astuple(fns)
   codehash=abs(hash(code))
-  fname=join(wd,f"litrepl_eval_{codehash}.txt")
+  fname=join(wd,f"partial_{codehash}.txt")
   pdebug(f"processAsync starting via {fname}")
   with with_locked_fd(fname,CREATE_WRONLY_EMPTY,LOCK_NONBLOCKING) as fo:
     if fo is not None:
@@ -399,7 +399,6 @@ def processCont(fns:FileNames,
         pdebug(f"processCont final readout start")
         res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
         pdebug(f"processCont final readout finish")
-        # res=res+f"\nDBG Obtained from:{runr.fname}\n"
         rr=ReadResult(res,False) # Return final result
         remove_silent(runr.fname)
         pdebug(f"processCont unlinked {runr.fname}")
@@ -429,7 +428,7 @@ def processAdapt(fns:FileNames,
   rr=processCont(fns,ss,runr,timeout=timeout,propagate_sigint=propagate_sigint)
   return rr,runr
 
-PRESULT_RE=re_compile(r"(.*)\[BG:([a-zA-Z0-9_\/\.-]+)\]\n.*",
+PRESULT_RE=re_compile(r"(.*)\[LR:([a-zA-Z0-9_\/\.-]+)\]\s*",
                       re.A|re.MULTILINE|re.DOTALL)
 
 def rresultLoad(text:str)->Tuple[str,Optional[RunResult]]:
@@ -443,7 +442,7 @@ def rresultSave(text:str, presult:RunResult)->str:
   """ Saves uncompleted RunRestult into the response text in order to load and
   check it later. """
   sep='\n' if text and text[-1]!='\n' else ''
-  return (text+f"{sep}[BG:{presult.fname}]\n")
+  return (text+f"{sep}[LR:{presult.fname}]\n")
 
 
 def interp_code_preprocess(a:LitreplArgs, ss:Interpreter, es:EvalState, code:str) -> str:
