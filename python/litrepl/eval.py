@@ -428,8 +428,8 @@ def processAdapt(fns:FileNames,
   rr=processCont(fns,ss,runr,timeout=timeout,propagate_sigint=propagate_sigint)
   return rr,runr
 
-PRESULT_RE=re_compile(r"(.*)\[LR:([a-zA-Z0-9_\/\.-]+)\]\s*",
-                      re.A|re.MULTILINE|re.DOTALL)
+PRESULT_RE=re_compile(r"(.*)\[LR:([a-zA-Z0-9_\/\.-]+)\]\s*$",
+                      re.A|re.DOTALL)
 
 def rresultLoad(text:str)->Tuple[str,Optional[RunResult]]:
   m=re_match(PRESULT_RE,text)
