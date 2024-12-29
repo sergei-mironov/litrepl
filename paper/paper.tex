@@ -10,6 +10,7 @@
 \usepackage{svg}
 \usepackage{comment}
 \usepackage{float}
+\usepackage[font=small,skip=0pt]{caption}
 
 \usepackage{biblatex}
 \addbibresource{paper.bib}
@@ -228,6 +229,7 @@ echo -n '\end'; echo '{verbatim}'
 
 \begin{figure*}[hbt!]
   \centering
+  \begin{minipage}{\textwidth}
   %lresult
   \begin{verbatim}
   \begin{result}
@@ -236,6 +238,7 @@ echo -n '\end'; echo '{verbatim}'
   \end{result}
   \end{verbatim}
   %lnoresult
+  \end{minipage}
   \caption{Example output in a verbatim format displayed above two columns.}
   \label{fig:verbatim_example}
 \end{figure*}
@@ -266,13 +269,22 @@ result section appears as follows:
 
 \begin{figure*}[hbt!]
   \centering
+  \begin{minipage}{\textwidth}
   \begin{verbatim}
-  document ::= (code_section | result_section | ignore_section | text)*
-  code_section ::= code_bmarker code_section_text code_emarker
-  result_section ::= result_bmarker result_section_text result_emarker
-  ignore_section ::= ignore_bmarker ignore_section_text ignore_emarker
+  document       ::= (code | result | ignore | text)*
+  code           ::= (code-normal | code-comment)
+  result         ::= (result-normal | result-comment)
+  code-normal    ::= "\begin{MARKER}" text "\end{MARKER}"
+  code-comment   ::= "% MARKER" text "% noMARKER"
+  result-normal  ::= "\begin{result}" text "\end{result}"
+  result-comment ::= "% result" text "% noresult"
+  ignore         ::= "% ignore" text "% noignore"
+  text           ::= ...
   \end{verbatim}
-  \caption{Example output in a verbatim format displayed above two columns.}
+  \end{minipage}
+  \caption{An illustrative grammar template for LaTeX documents where marker
+  serves as a parameter configured via command-line arguments for each supported
+  interpreter class.}
   \label{fig:document_representation}
 \end{figure*}
 
@@ -292,10 +304,14 @@ Python code, Litrepl recognizes markers such as \verb|\begin|\verb|{python}| or
 latter variants are transparent to LaTeX, facilitating the inclusion of LaTeX
 markup seamlessly.
 
-This parsing strategy allows Litrepl to navigate and process documents with
-precision, ensuring that relevant sections are evaluated while non-relevant
-parts are effectively ignored. By integrating document format-specific markers,
-Litrepl maintains flexibility and adaptability in diverse document scenarios.
+The template grammars similar to the example are hardcoded for Markdown and
+LaTeX document formats. In each run, Litrepl compiles them to the document
+parser based on its configuration options using the Lark\cite{Lark} parsing
+library.
+
+\section{Discussion}
+
+TODO
 
 \section{Conclusion}
 
@@ -304,7 +320,6 @@ metric, and has only two Python dependencies so far, at the cost of the
 dependency on the operating system intefaces for which we choose POSIX as a
 wide-spread openly available standard.
 
-\section*{References}
 \printbibliography
 
 
