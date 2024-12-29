@@ -2,6 +2,7 @@ from textwrap import dedent, wrap
 from re import match as re_match, compile as re_compile
 from typing import Iterable,List
 from os import unlink, system
+from hashlib import sha256
 from .types import CursorPos
 
 DEBUG:bool=False
@@ -126,4 +127,7 @@ def runsocat(fns, hint=None):
     hint=SOCAT_HINT
   print(hint,end='')
   system(f"socat - 'PIPE:{fns.outp},flock-ex-nb=1!!PIPE:{fns.inp},flock-ex-nb=1'")
+
+def hashdigest(x)->str:
+  return sha256(str(hash(x)).encode('utf-8')).hexdigest()[:7]
 

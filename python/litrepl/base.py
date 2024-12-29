@@ -20,7 +20,6 @@ from argparse import ArgumentParser
 from collections import defaultdict
 from os import makedirs, getuid, getcwd, WEXITSTATUS, remove
 from tempfile import gettempdir
-from hashlib import sha256
 from psutil import Process, NoSuchProcess
 from textwrap import dedent
 from subprocess import check_output, DEVNULL, CalledProcessError
@@ -34,7 +33,7 @@ from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally,
                    with_fd, read_nonblock, eval_code, eval_code_)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
-                   cursor_within, nlines, wraplong, remove_silent)
+                   cursor_within, nlines, wraplong, remove_silent, hashdigest)
 
 from .interpreters.python import PythonInterpreter
 from .interpreters.ipython import IPythonInterpreter
@@ -64,9 +63,7 @@ def defauxdir(st:SType, suffix:Optional[str]=None)->str:
   """ Calculate the default aux. directory name. """
   suffix_=f"{suffix}_" if suffix is not None else ""
   return join(gettempdir(),
-              (f"litrepl_{getuid()}_"+suffix_+
-               sha256(getcwd().encode('utf-8')).hexdigest()[:6]),
-              st2name(st))
+              f"litrepl_{getuid()}_{suffix}{hashdigest(getcwd())}", st2name(st))
 
 def st2name(st:SType)->str:
   """ Return string representation of the code section type """

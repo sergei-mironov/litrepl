@@ -24,7 +24,7 @@ from signal import (pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK,
 
 from .types import (LitreplArgs, RunResult, ReadResult, FileNames, EvalState,
                     ECode, ECODE_OK, ECODE_RUNNING, ECODE_UNDEFINED)
-from .utils import remove_silent, wraplong
+from .utils import remove_silent, wraplong, hashdigest
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs, flush=True)
@@ -338,7 +338,7 @@ def processAsync(fns:FileNames, ss:Interpreter, code:str)->RunResult:
   file is locked and its name is saved into the resulting `RunResult` object.
   """
   wd,inp,outp,_,_,_=astuple(fns)
-  codehash=abs(hash(code))
+  codehash=hashdigest(code)
   fname=join(wd,f"partial_{codehash}.txt")
   pdebug(f"processAsync starting via {fname}")
   with with_locked_fd(fname,CREATE_WRONLY_EMPTY,LOCK_NONBLOCKING) as fo:
