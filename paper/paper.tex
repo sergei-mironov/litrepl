@@ -202,8 +202,8 @@ assumptions:
 \end{itemize}
 
 In Litrepl, these details are hardcoded for several prominent interpreter
-families, which we refer to as \textbf{interpreter classes}. At the time of
-writing, Litrepl supports three classes: \textbf{python}, \textbf{sh}, and
+families, which we refer to as \textit{interpreter classes}. At the time of
+writing, Litrepl supports three such classes: \textbf{python}, \textbf{sh}, and
 \textbf{ai}. Using command line arguments, users can configure how to map code
 section labels to the correct class and specify which interpreter command to
 execute to start a session for each class.
@@ -240,33 +240,83 @@ echo -n '\end'; echo '{verbatim}'
   %lnoresult
   \end{minipage}
   \caption{Example output in a verbatim format displayed above two columns.}
-  \label{fig:verbatim_example}
+  \label{fig:partial-result}
 \end{figure*}
 
-To initiate interpreter sessions, Litrepl allocates resources as depicted in
-Figure \ref{fig:resource-allocation}. The process begins by creating an
-auxiliary directory. The name of this directory is derived from the combination
-of the current interpreter class name, the Litrepl working directory, and a
-system-designated folder for temporary files. Subsequently, two POSIX
-pipes—\texttt{in.pipe} and \texttt{out.pipe} are established. The configured
-interpreter is then launched with these pipes attached, and the interpreter's
-process identifier is recorded in a dedicated file.
+\begin{comment}
+%lai
+Lets rewrite the "Session management" section. Please consider the following
+points, check the grammar and combine them into a linked narrative. Please
+generate it using Latex markup. Wrap your own comments in Latex line comments.
+Please don't generate figures. Just text.
 
-The initialization routine incorporates additional open calls on the pipes to
-prevent premature termination of the interpreter due to detachments. This
-ensures the interpreter remains active and responsive.
+----
 
-When an evaluation request is received, Litrepl calculates the name of the
-anticipated response storage file and forwards the request to the interpreter.
-It concurrently initiates a response reader process. The response storage is
-secured using soft POSIX file locks, enabling the main process to ascertain when
-the response is ready. In instances where the response exceeds the configured
-time to completion, Litrepl provides a partial result. This partial result can
-be updated with complete details in subsequent calls. The format for a partial
-result section appears as follows:
+1. As mentioned earlier, the necessary side-effect of code section evaluation,
+which makes read-eval loop possible - is the the interpreter session left
+running in the background. The resources required to manage this mode of
+operation are shown on the Figure \ref{fig:resource-allocation}. All of them are
+visible as files residing in some auxiliary directory.
+
+2. If not set via arguments or environment, the path to this directory
+is calculated out of interpreter class name, current working directory and the
+operating system temporary folder name.
+
+3. The code to be evaluated determines (via hashing) the name of the response file,
+containing interpreter response for this code.
+
+4. Also, aux. dir contains a couple of pipes providing an access to the
+interpreter standard input and ouput streams.
+
+5. Finally, the PID of the interpreter process is also stored in a file.
+
+6. When evaluating, Litrepl forks a response reader which keeps it soft-locked
+until the interpreter signals the completion by answering to the echo probe. If
+the response takes longer than configured, Litrepl outputs a pratial response
+result which can be read and checked for completion during next runs.
+
+7. Litrepl provides \textbf{start}, \textbf{stop}, \textbf{restart} commands
+accepting the name of interpreter class to act on to start, stop or restart
+interpreter sessions.
+
+----
+
+%lnoai
+\end{comment}
+
+%lresult
+Litrepl's ability to maintain interpreter sessions in the background is crucial
+for enabling a Read-Eval-Print Loop (REPL) environment. These resources, shown
+in Figure \ref{fig:resource-allocation}, are stored as files within an auxiliary
+directory.
+
+If not specified by command-line arguments or environment variables, the
+directory path is automatically derived from the interpreter class name, the
+current working directory, and the OS's temporary file location.
+
+The auxiliary directory includes two POSIX pipes for interpreter I/O and a file
+recording the running interpreter's process ID, aiding session management.
+
+When a code section is evaluated, Litrepl assigns a response file name derived
+from hashing the code. This response file stores the output from the
+interpreter.
+
+During evaluation, Litrepl spawns a response reader process with a soft lock,
+active until the interpreter completes and responds to an echo probe. If the
+response exceeds the configured duration, Litrepl outputs a partial result tag,
+which is recognized and reevaluated in subsequent runs. Figure
+\ref{fig:partial-result} shows an example partial result section.
+
+Litrepl provides \textbf{start}, \textbf{stop}, and \textbf{restart} commands to
+control background sessions. The \textbf{interrupt} command sends an
+interruption signal to the interpreter. Finally, the \textbf{repl} command
+establishes direct communication with the interpreter, allowing manual
+inspection of its state.
+%lnoresult
 
 \subsection{Parsing and Evaluation}
 
+%lignore
 \begin{figure*}[hbt!]
   \centering
   \begin{minipage}{\textwidth}
@@ -287,6 +337,7 @@ result section appears as follows:
   interpreter class.}
   \label{fig:document_representation}
 \end{figure*}
+%lnoignore
 
 To efficiently detect sections within a document, Litrepl employs simplified
 versions of each document markup grammar, which it defines and parses. In this
