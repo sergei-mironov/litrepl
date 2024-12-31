@@ -339,26 +339,13 @@ inspection of its state.
 \end{figure*}
 %lnoignore
 
-To efficiently detect sections within a document, Litrepl employs simplified
-versions of each document markup grammar, which it defines and parses. In this
-approach, documents are abstracted as a straightforward sequence comprising
-code, result, and text sections. Additionally, Litrepl identifies ignore blocks,
-which serve as block comments. Any sections encapsulated within these ignore
-blocks are excluded from parsing and evaluation. The structure of any document,
-therefore, can be articulated using the following informal grammar:
+Litrepl abstracts documents as a straightforward sequence comprising code,
+result, and text sections. Additionally, Litrepl identifies ignore blocks, which
+act as comments that prevent enclosed sections from being evaluated.
 
-The specific markers that denote each block type are determined by the document
-format and configuration settings. For example, in a LaTeX document containing
-Python code, Litrepl recognizes markers such as \verb|\begin|\verb|{python}| or
-\verb|% |\verb|python| as code section begin markers, and
-\verb|\end|\verb|{python}| or \verb|% |\verb|nopython| as end markers. These
-latter variants are transparent to LaTeX, facilitating the inclusion of LaTeX
-markup seamlessly.
-
-The template grammars similar to the example are hardcoded for Markdown and
-LaTeX document formats. In each run, Litrepl compiles them to the document
-parser based on its configuration options using the Lark\cite{Lark} parsing
-library.
+Template grammars similar to the illustrative example above are encoded for
+Markdown and LaTeX formats. Before each run, Litrepl calls Lark\cite{Lark} to
+compile a customized parser and uses it to access the sections.
 
 \section{Discussion}
 
