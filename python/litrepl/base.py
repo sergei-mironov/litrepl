@@ -293,8 +293,8 @@ class SymbolsLatex(Symbols):
     self.comcodeend = comcodeend_re
     self.comresultbegin = r"\%[ ]*l?result"
     self.comresultend = r"\%[ ]*l?noresult"
-    self.ignorebegin = r"\%lignore"
-    self.ignoreend = r"\%lnoignore"
+    self.ignorebegin = r"\%[ ]*lignore"
+    self.ignoreend = r"\%[ ]*lnoignore"
     self.inlinemarker = r"\\l[a-zA-Z0-9]*inline"
 
 OBR="{"
