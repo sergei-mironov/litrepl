@@ -122,10 +122,10 @@ system facilities as much as possible.
 
 \section{How it works}
 
-Litrepl is implemented in Python as a command-line text processor utility. Its
-primary function is to take a text document as input, process it according to
-specified command line arguments and environment settings, and then output the
-resulting document through its standard output.
+Litrepl is implemented as a command-line text processor utility. Its primary
+function is to take a text document as input, process it according to specified
+command line arguments and environment settings, and then output the resulting
+document through its standard output.
 
 The operation of Litrepl is best illustrated through the example below. Consider
 the document named \verb|input.tex|:
@@ -286,9 +286,9 @@ interpreter sessions.
 
 %lresult
 Litrepl's ability to maintain interpreter sessions in the background is crucial
-for enabling a Read-Eval-Print Loop (REPL) environment. These resources, shown
-in Figure \ref{fig:resource-allocation}, are stored as files within an auxiliary
-directory.
+for enabling a Read-Eval-Print Loop (REPL) environment. The associated
+resources, shown in Figure \ref{fig:resource-allocation}, are stored as files
+within an auxiliary directory.
 
 If not specified by command-line arguments or environment variables, the
 directory path is automatically derived from the interpreter class name, the
@@ -316,7 +316,7 @@ inspection of its state.
 
 \subsection{Parsing and Evaluation}
 
-%lignore
+%% ignore %%
 \begin{figure*}[hbt!]
   \centering
   \begin{minipage}{\textwidth}
@@ -335,21 +335,111 @@ inspection of its state.
   \caption{An illustrative grammar template for LaTeX documents where marker
   serves as a parameter configured via command-line arguments for each supported
   interpreter class.}
-  \label{fig:document_representation}
+  \label{fig:document-representation}
 \end{figure*}
-%lnoignore
+%% noignore %%
 
 Litrepl abstracts documents as a straightforward sequence comprising code,
 result, and text sections. Additionally, Litrepl identifies ignore blocks, which
 act as comments that prevent enclosed sections from being evaluated.
 
-Template grammars similar to the illustrative example above are encoded for
-Markdown and LaTeX formats. Before each run, Litrepl calls Lark\cite{Lark} to
-compile a customized parser and uses it to access the sections.
+Template grammars similar to the illustrative example in Figure
+\ref{fig:document-representation} are encoded for Markdown and LaTeX formats.
+Before each run, Litrepl calls Lark\cite{Lark} to compile a customized parser
+and uses it to access the sections.
+
+Evaluation results are encoded back into the result sections, and the entire
+document is printed. At this stage, certain conditions can be optionally
+checked. First, setting \verb|--pending-exitcode| to a non-zero value instructs
+Litrepl to report an error if a section takes longer than the timeout to
+evaluate. Second, setting \verb|--exception-exitcode| directs Litrepl to detect
+Python exceptions. Lastly, \verb|--irreproducible-exitcode| triggers an error if
+the evaluation result doesn't match the text initially present in the result
+section.
+
+The last option implements the only formal check for aiding reproducibility that
+Litrepl provides.
 
 \section{Discussion}
 
-TODO
+\begin{comment}
+% lai
+
+Lets write the "Discussion" section. of the paper. Please check the grammar of
+the following points and make a linked narrative out of them. Please use Latex
+markup.
+
+---
+
+The technical decision to abstract interpreters using text streams has its
+positive and negative sides. While simplicity is the obvious bonus, the negatvie
+consequences can be groouped into (1) No parallel evaluation at the
+communication level. Th interpreter gets locked until it finishes evaluation of
+one snippet before it can proceed to another one. (2) Transferrable data type is
+limited to text-only streams.
+
+We argue that the lack of parallel execution at the communication level can be
+compensated by using interpreter-specific parallelism where and if it is
+supported. For example, Python programs can use all sort of subprocess
+utilities while shell programs have full access to shell job control.
+
+Restricting streams to text-only data type seems to be a more funcdamental
+limitation. Litrepl lifts this limitation by supporting text-only document
+formats. Both Latex and Markdown have means of including rich data but they
+don't encode these data directly. Instead they rely on side channels: file
+system or network for referring such objects. Litrepl shares both pros such as
+good representation in well-known version control systems, and cons, e.g.
+requirement to organize such a side-channel data transfer explicitly.
+
+Another controversial technical solution - to transfer the whole document at
+input and output - can have performance penalties. In our experience the system
+works sufficienlty good for few-thousand line documents, but for larger
+documents delays might become uncomfortable even on modern computers. Still we
+prefer to keep this interface to make editor integration as simple as possible:
+typical plugin can just pipe the whole document through the tool using few lines
+of code.
+
+In addition, we allow a more performant integrations which take responsibility
+for pre-parsing and piping only the relevant parts of the document. For these
+approach, Litrepl offers \verb|print-regexp| command printing the anchor regexp
+in a few common formats.
+% lnoai
+\end{comment}
+
+% lresult
+The technical decision to abstract interpreters using text streams comes with
+both advantages and disadvantages. A key advantage is simplicity. However, there
+are notable negative aspects. Firstly, there is no parallel evaluation at the
+communication level, meaning the interpreter is locked until it completes the
+evaluation of one snippet before proceeding to the next. Secondly, the
+transferable data type is restricted to text-only streams.
+
+We argue that the lack of parallel execution at the communication level can be
+mitigated using interpreter-specific parallelism, where supported. For instance,
+Python programs can utilize various subprocess utilities, while shell programs
+have full access to shell job control.
+
+The restriction to text-only data types presents a more fundamental limitation.
+Litrepl lifts this restriction by supporting text-only document formats. Both
+LaTeX and Markdown incorporate rich data without encoding it directly, instead
+relying on side channels, such as the file system or network, to refer to such
+objects. Consequently, Litrepl shares the advantages of good representation in
+well-known version control systems, and the disadvantages, such as the need to
+explicitly organize side-channel data transfer.
+
+Another controversial technical decision is transferring the entire document as
+input and output, which can negatively impact performance. Our experience shows
+that the system performs adequately for documents of a few thousand lines.
+However, larger documents may experience uncomfortable delays, even on modern
+computers. Despite this, we choose to maintain this interface because it
+simplifies editor integration. A typical plugin can pipe the whole document
+through the tool using just a few lines of code.
+
+Moreover, we support more performance-oriented integrations that handle
+pre-parsing and piping only relevant document parts. For these approaches,
+Litrepl offers the \verb|print-regexp| command, which outputs the anchor regexp
+in several common formats.
+% lnoresult
 
 \section{Conclusion}
 
