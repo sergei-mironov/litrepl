@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt,twocolumn]{article}
+\documentclass[letterpaper,12pt,twocolumn]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
@@ -69,12 +69,12 @@ approach is embodied in tools like WEB, CWEB, and NOWEB, which focus on
 non-interactive, ahead-of-time compilation. The process includes two primary
 modes of operation: weaving, which creates human-readable documentation, and
 tangling, which generates machine-executable code. Over time, the concept has
-evolved, showing a trend towards simplification \cite{Knuth1984lp,
-Ramsey1994lps}.
+evolved, showing a trend towards simplification \textcite{Knuth1984lp},
+\textcite{Ramsey1994lps}.
 
 Concurrently, a concept of human-computer interaction called the
-Read-Evaluate-Print Loop or ''REPL'' gained traction, notably within the LISP
-an APL communities.\cite{Spence1975apl, McCarthy1959recfun, Iverson1962apl}
+Read-Evaluate-Print Loop or ''REPL'' gained traction, notably within the LISP an
+APL communities.\textcite{Spence1975apl, McCarthy1959recfun, Iverson1962apl}
 
 The combination of a command-line interface and a language interpreter enables
 incremental and interactive programming, allowing users to directly modify the
@@ -94,14 +94,14 @@ objectives, several technical decisions were made, notably the introduction of
 bidirectional communication—between the computational core, known as the Jupyter
 Kernel, and the Notebook acting as a client, along with another layer of
 client-server communication between the Notebook web server and the user’s web
-browser \cite{Perez2007IPython, Granger2021litcomp, Kluyver2016jupnb}.
+browser \textcite{Perez2007IPython, Granger2021litcomp, Kluyver2016jupnb}.
 
 While we recognize the importance of these goals within the Literate Computing
 framework, we argue that reproducibility is paramount. Successfully addressing
 reproducibility would alone suffice to enhance communication over time among
 research project participants and significantly expand the audience.  However,
-as it became clear (\cite{Dolstra2010, Vallet2022}), this challenge extends far
-beyond the scope of a human-computer interaction system, and even beyond the
+as it became clear (\textcite{Dolstra2010, Vallet2022}), this challenge extends
+far beyond the scope of a human-computer interaction system, and even beyond the
 typical boundaries of software distribution management for a particular
 programming language. A comprehensive solution to the software deployment
 problem should operate at the entire operating system level.
@@ -120,8 +120,8 @@ text document formats. In both the Markdown and \Latex evaluators that we have
 implemented, simplified parsers are utilized to distinguish code and result
 sections from the rest of the document. As of now, we support Python and Shell
 interpreter families, as well as a custom AI communication interpreter. Finally,
-we strive to leverage POSIX \cite{POSIX2024} operating system facilities as much
-as possible.
+we strive to leverage POSIX \textcite{POSIX2024} operating system facilities as
+much as possible.
 
 \section{How it works}
 
@@ -348,8 +348,8 @@ act as comments that prevent enclosed sections from being evaluated.
 
 Template grammars similar to the illustrative example in Figure
 \ref{fig:document-representation} are encoded for Markdown and \Latex formats.
-Before each run, Litrepl calls Lark\cite{Lark} to compile a customized parser
-and uses it to access the sections.
+Before each run, Litrepl calls Lark\textcite{Lark} to compile a customized
+parser and uses it to access the sections.
 
 Evaluation results are encoded back into the result sections, and the entire
 document is printed. At this stage, certain conditions can be optionally
