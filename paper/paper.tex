@@ -6,7 +6,7 @@
 \usepackage{amssymb}
 \usepackage{geometry}
 \usepackage{hyperref}
-\usepackage{fancyhdr}
+% \usepackage{fancyhdr}
 \usepackage{svg}
 \usepackage{comment}
 \usepackage{float}
@@ -17,12 +17,12 @@
 
 \geometry{margin=1in}
 
-\fancypagestyle{plain}{
-  \fancyhf{}
-  \lhead{Sergei Mironov}
-  \rhead{Litrepl}
-  \rfoot{\thepage}
-}
+% \fancypagestyle{plain}{
+%   \fancyhf{}
+%   \lhead{Sergei Mironov}
+%   \rhead{Litrepl}
+%   \rfoot{\thepage}
+% }
 
 \newcommand{\ls}{\begin{itemize}\item}
 \newcommand{\li}{\item}
@@ -68,7 +68,7 @@ is established.
 The concept of \textit{Literate Programming} was formulated by Donald Knuth,
 suggesting a shift in focus from writing code to explaining to human beings what
 we want a computer to do (\textcite{Knuth1984lp}). This approach is embodied in
-the WEB system and its derived family of tools, which translate combined code
+the WEB system and its descendant family of tools, which translate combined code
 and narrative documents into human-readable documentation and machine-executable
 code. Over time, the concept has evolved, showing a trend towards simplification
 (\textcite{Ramsey1994lps}).
@@ -83,7 +83,7 @@ incremental and interactive programming, allowing users to directly modify the
 interpreter state. By maintaining human involvement in the loop, this approach
 is believed to facilitate human thought processes (\textcite{Granger2021litcomp}).
 
-A significant milestone in this area became the IPython interpreter
+A significant milestone in this field was the IPython interpreter
 (\textcite{Perez2007IPython}), which later evolved into the Jupyter Project. The
 creators introduced a new document format called the Jupyter Notebook
 (\textcite{Kluyver2016jupnb}), characterized by a series of logical sections of
@@ -97,41 +97,40 @@ collaboration. To achieve these objectives, several technical decisions were
 made, notably the introduction of bidirectional communication between the
 computational core, known as the Jupyter Kernel, and the Notebook web-based
 renderer, along with another layer of client-server communication between the
-renderer and the user’s web browser.
+web-server and the user’s web browser.
 
 While we recognize the importance of all goals within the Literate Computing
 framework, we argue that the goal of reproducibility is paramount. Successfully
-addressing reproducibility would alone suffice to enhance communication over the
-time and space separated researchers and significantly expand the audience.
-However, as it became clear (\textcite{Dolstra2010}), this challenge extends
-beyond the scope of a single human-computer interaction system, and even beyond
-the typical boundaries of software distribution management for a particular
-programming language. A comprehensive solution to the software deployment
-problem should operate at the entire operating system level.
+addressing reproducibility would alone suffice to enhance communication among
+time-separated and space-separated researchers and significantly expand the
+audience. However, as it became clear (\textcite{Dolstra2010}), this challenge
+extends beyond the scope of a single human-computer interaction system, and even
+beyond the typical boundaries of software distribution management for a
+particular programming language. A comprehensive solution to the software
+deployment problem should operate at the entire operating system level.
 
 Following \textcite{Vallet2022}, we suggest changing the focus of human-computer
 interaction towards simplicity and transparency. We saw an opportunity to
-implement a tool that would offer familiar REPL-style editing, be compatible
-with existing code editors and text formats, thus maintaining familiar editing
-practices, and have a gradually smaller codebase.
+implement a tool that would offer REPL-style editing, be compatible with
+existing code editors and text formats, thus maintaining familiar editing
+practices, and have a significantly smaller codebase.
 
-We introduce \textit{Litrepl}, a processor designed to achieve these goals
-through several means. First, we employ straightforward bidirectional text
-streams for inter-process communication with language interpreters to evaluate
-code.  Second, we advocate for the reuse of existing text document formats. In
-both the Markdown and \Latex evaluators that we have implemented, simplified
-parsers are utilized to distinguish code and result sections from the rest of
-the document.  As of now, we support Python and Shell interpreter families, as
-well as a custom large language model communication interpreter. Finally, we
-strive to leverage POSIX\cite{POSIX2024} operating system facilities as much as
-possible.
+We introduce \textit{Litrepl}, a text processor that employs the following
+approaches: first, utilizing straightforward bidirectional text streams for
+inter-process communication with language interpreters to evaluate code; second,
+advocating for the reuse of existing text document formats. In both the Markdown
+and \LaTeX\ evaluators we have implemented, simplified parsers are used to
+distinguish code and result sections from the rest of the document. As of now,
+we support Python and Shell interpreter families, as well as a custom large
+language model communication interpreter. Finally, we strive to leverage
+POSIX\cite{POSIX2024} operating system facilities as much as possible.
 
 \section{How it works}
 
-Litrepl is implemented as a command-line text processor utility. Its primary
-function is to take a text document as input, process it according to specified
-command line arguments and environment settings, and then output the resulting
-document through its standard output.
+Litrepl is implemented as a command-line text utility. Its primary function is
+to take a text document as input, process it according to specified command-line
+arguments and environment settings, and then output the resulting document
+through its standard output.
 
 The operation of Litrepl is best illustrated through the example below. Consider
 the document named \verb|input.tex|:
