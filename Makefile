@@ -18,7 +18,7 @@ TESTS = ./sh/runtests.sh
 help:
 	@echo "LitREPL is a macroprocessing Python library for Litrate programming and code execution"
 	@echo Build targets:
-	@cat Makefile | sed -n 's@^.PHONY: \([a-z]\+\) # \(.*\)@    \1:   \2@p' | column -t -l2
+	@cat Makefile | sed -n 's@^.PHONY: \([a-z_]\+\) # \(.*\)@    \1:   \2@p' | column -t -l2
 
 .PHONY: test # Run the test script (./sh/runtests.sh)
 test: .stamp_test
@@ -80,9 +80,18 @@ upload: $(WHEEL_REV) $(VIMB_REV)
 
 .PHONY: paper # Compile the paper PDF out of its LaTeX source
 paper: ./paper/paper.pdf
-
 ./paper/paper.pdf: ./paper/paper.tex ./paper/pic.svg ./paper/paper.bib
 	latexmk -cd -shell-escape -pdf -latex=pdflatex ./paper/paper.tex
+
+.PHONY: paper_checked # Check and compile the paper PDF out of its LaTeX source
+paper_checked: ./paper/paper_checked.pdf
+./paper/paper_checked.pdf: ./paper/paper_checked.tex ./paper/pic.svg ./paper/paper.bib
+	latexmk -cd -shell-escape -pdf -latex=pdflatex ./paper/paper_checked.tex
+./paper/paper_checked.tex: ./paper/paper.tex
+	cat paper/paper.tex | litrepl -C paper \
+		--filetype=latex --ai-interpreter=- \
+		--pending-exitcode=3 --irreproducible-exitcode=4 \
+		--foreground >paper/paper_checked.tex
 
 .PHONY: all
 all: wheel

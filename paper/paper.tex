@@ -59,7 +59,9 @@ is established.
 \begin{figure*}[!hbt]
   \centering
   \includesvg[inkscapelatex=false,width=0.8\textwidth]{pic}
-  \caption{Caption describing the image shown in the figure.}
+  \caption{Litrepl resource allocation diagram. Hash \textbf{A} is computed
+  based on the Litrepl working directory and the interpreter class. Hash
+  \textbf{B} is computed based on the contents of the code section.}
   \label{fig:resource-allocation}
 \end{figure*}
 
@@ -449,8 +451,9 @@ in several common formats.
 
 The tool is implemented in Python in about 2K lines of code according to the LOC
 metric, and has only two Python dependencies so far, at the cost of the
-dependency on the operating system intefaces for which we choose POSIX as a
-wide-spread openly available standard.
+dependency on the operating system interfaces for which we choose POSIX as a
+widespread openly available standard. Needless to say, we used Litrepl to
+evaluate and verify the examples presented in this document.
 
 \printbibliography
 
