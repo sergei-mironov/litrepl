@@ -46,11 +46,10 @@
 
 \begin{abstract}
 
-Litrepl is a simple and lightweight text processing tool designed to recognize
-and evaluate code sections within Markdown or \Latex documents. This
-functionality is useful for both batch document section evaluation and
-interactive coding within a text editor, provided a straightforward integration
-is established.
+Litrepl is a lightweight text processing tool designed to recognize and evaluate
+code sections within Markdown or \Latex documents. This functionality is useful
+for both batch document section evaluation and interactive coding within a text
+editor, provided a straightforward integration is established.
 
 \end{abstract}
 
@@ -244,7 +243,7 @@ echo -n '\end'; echo '{verbatim}'
   \end{verbatim}
   %lnoresult
   \end{minipage}
-  \caption{Example output in a verbatim format displayed above two columns.}
+  \caption{Partial result section with a continuation tag.}
   \label{fig:partial-result}
 \end{figure*}
 
@@ -350,7 +349,7 @@ act as comments that prevent enclosed sections from being evaluated.
 
 Template grammars similar to the illustrative example in Figure
 \ref{fig:document-representation} are encoded for Markdown and \Latex formats.
-Before each run, Litrepl calls Lark\textcite{Lark} to compile a customized
+Before each run, Litrepl calls Lark (\textcite{Lark}) to compile a customized
 parser and uses it to access the sections.
 
 Evaluation results are encoded back into the result sections, and the entire
@@ -426,11 +425,11 @@ have full access to shell job control.
 
 The restriction to text-only data types presents a more fundamental limitation.
 Litrepl lifts this restriction by supporting text-only document formats. Both
-\Latex and Markdown incorporate rich data without encoding it directly, instead
-relying on side channels, such as the file system or network, to refer to such
-objects. Consequently, Litrepl shares the advantages of good representation in
-well-known version control systems, and the disadvantages, such as the need to
-explicitly organize side-channel data transfer.
+\Latex and Markdown incorporate non-text data without encoding it directly,
+instead relying on references and side channels, such as the file system or
+network resource identifiers. Consequently, Litrepl shares, for example, the
+benefits of human-readable representation in version control systems and the
+penalties, such as the need to explicitly organize side-channel data transfer.
 
 Another controversial technical decision is transferring the entire document as
 input and output, which can negatively impact performance. Our experience shows
@@ -440,10 +439,10 @@ computers. Despite this, we choose to maintain this interface because it
 simplifies editor integration. A typical plugin can pipe the whole document
 through the tool using just a few lines of code.
 
-Moreover, we support more performance-oriented integrations that handle
-pre-parsing and piping only relevant document parts. For these approaches,
-Litrepl offers the \verb|print-regexp| command, which outputs the anchor regexp
-in several common formats.
+A more performance-oriented integrations can make pre-parsing and pipe only
+relevant document parts. For these approaches, Litrepl offers the
+\verb|print-regexp| command, which outputs the anchor regexp in several common
+formats.
 % lnoresult
 
 \section{Conclusion}
