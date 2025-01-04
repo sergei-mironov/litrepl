@@ -1,3 +1,0 @@
-[submodule "modules/pylightnix"]
-	path = modules/pylightnix
-	url = https://github.com/stagedml/pylightnix
