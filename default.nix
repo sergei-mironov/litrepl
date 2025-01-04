@@ -398,11 +398,12 @@ let
       '';
     };
 
-    vim-plug = pkgs.vim_configurable.customize {
-      name = "vim-plug";
+    vim-plug-test = pkgs.vim_configurable.customize {
+      name = "vim-plug-test";
 
       vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
         start = [
+          # vim-plug # <--- Does not work as-is, so the below override is required.
           (vim-plug.overrideAttrs (old: {
             postInstall = ''
               mkdir -pv $target/autoload
@@ -412,12 +413,11 @@ let
         ];
       };
       vimrcConfig.customRC = ''
-        runtime! plug.vim
-
         call plug#begin($HOME.'/_vim')
-        Plug 'https://github.com/grwlf/litrepl.vim' , { 'rtp': 'vim' }
+        Plug 'https://github.com/sergei-mironov/litrepl.vim' , { 'rtp': 'vim' }
         call plug#end()
 
+        " Setting PATH is a custom requirement of the above Litrepl plugin
         let $PATH="${pkgs.socat}/bin:${litrepl python}/bin:".$PATH
       '';
     };
@@ -459,7 +459,7 @@ let
     collection = rec {
       inherit aicli;
       inherit pkgs shell shell-dev shell-screencast vim-litrepl-release vim-test
-      vim-demo grechanik-st vimtex-local litrepl-release litrepl-dev
+      vim-demo vim-plug-test grechanik-st vimtex-local litrepl-release litrepl-dev
       litrepl-release-pypi vim-litrepl-release-pypi python-release;
     };
   };
