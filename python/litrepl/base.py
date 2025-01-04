@@ -111,8 +111,8 @@ def pipenames(a:LitreplArgs, st:SType)->FileNames:
   the current directory. """
   auxdir=st2auxdir(a,st)
   return FileNames(auxdir,
-                   join(auxdir,"_in.pipe"),join(auxdir,"_out.pipe"),
-                   join(auxdir,"_pid.txt"),join(auxdir,"_ecode.txt"),join(auxdir,"_emsg.txt"))
+                   join(auxdir,"in.pipe"),join(auxdir,"out.pipe"),
+                   join(auxdir,"pid.txt"),join(auxdir,"ecode.txt"),join(auxdir,"emsg.txt"))
 
 def attach(fns:FileNames, st:SType|None=None)->Optional[Interpreter]:
   """ Attach to the interpreter associated with the given pipe filenames. """
@@ -158,7 +158,7 @@ def write_child_pid(pidf,pid):
 
 def start_(a:LitreplArgs, interpreter:str, i:Interpreter)->int:
   """ Starts the background Python interpreter. Kill an existing interpreter if
-  any. Creates files `_inp.pipe`, `_out.pipe`, `_pid.txt`, etc."""
+  any. Creates files `inp.pipe`, `out.pipe`, `pid.txt`, etc."""
   fns=i.fns
   makedirs(fns.wd, exist_ok=True)
   try:
