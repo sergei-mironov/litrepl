@@ -18,7 +18,7 @@ TESTS = ./sh/runtests.sh
 help:
 	@echo "LitREPL is a macroprocessing Python library for Litrate programming and code execution"
 	@echo Build targets:
-	@cat Makefile | sed -n 's@^.PHONY: \([a-z_]\+\) # \(.*\)@    \1:   \2@p' | column -t -l2
+	@cat Makefile | sed -n 's@^.PHONY: \([a-z_]\+\) # \(.*\)@    \1:   \2@p' | sort | column -t -l2
 
 .PHONY: test # Run the test script (./sh/runtests.sh)
 test: .stamp_test
