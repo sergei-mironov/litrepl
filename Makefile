@@ -128,20 +128,30 @@ upload: $(WHEEL_REV) $(VIMB_REV)
 		--password $(shell cat _token.pypi) \
 		dist/*
 
-.PHONY: paper # Compile the paper PDF out of its LaTeX source
-paper: ./paper/paper.pdf
-./paper/paper.pdf: ./paper/paper.tex ./paper/pic.svg ./paper/paper.bib
-	latexmk -cd -shell-escape -pdf -latex=pdflatex ./paper/paper.tex
+.PHONY: paper-quick # Compile the paper PDF out of its LaTeX source without re-evaluation
+.PHONY: pq
+paper-quick: ./paper/paper_quick.pdf
+pq: ./paper/paper_quick.pdf
+./paper/paper_quick.pdf: ./paper/paper.tex ./paper/pic.svg ./paper/paper.bib
+	cd ./paper && \
+	cp paper.tex paper_quick.tex && \
+	latexmk -shell-escape -pdf -latex=pdflatex paper_quick.tex && \
+	touch `basename $@`
 
-.PHONY: paper_checked # Check and compile the paper PDF out of its LaTeX source
-paper_checked: ./paper/paper_checked.pdf
+.PHONY: paper # Check and compile the paper PDF out of its LaTeX source
+.PHONY: p
+paper: ./paper/paper_checked.pdf
+p: ./paper/paper_checked.pdf
 ./paper/paper_checked.pdf: ./paper/paper_checked.tex ./paper/pic.svg ./paper/paper.bib
-	latexmk -cd -shell-escape -pdf -latex=pdflatex ./paper/paper_checked.tex
+	cd paper && \
+	latexmk -shell-escape -pdf -latex=pdflatex paper_checked.tex && \
+	touch `basename $@`
 ./paper/paper_checked.tex: ./paper/paper.tex
-	cat paper/paper.tex | litrepl -C paper \
+	cd paper && \
+	cat paper.tex | litrepl \
 		--filetype=latex --ai-interpreter=- \
 		--pending-exitcode=3 --irreproducible-exitcode=4 \
-		--foreground >paper/paper_checked.tex
+		--foreground >paper_checked.tex
 
 .PHONY: all
 all: wheel
