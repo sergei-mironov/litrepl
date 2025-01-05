@@ -130,24 +130,24 @@ upload: $(WHEEL_REV) $(VIMB_REV)
 
 .PHONY: paper-quick # Compile the paper PDF out of its LaTeX source without re-evaluation
 .PHONY: pq
-paper-quick: ./paper/paper_quick.pdf
-pq: ./paper/paper_quick.pdf
-./paper/paper_quick.pdf: ./paper/paper.tex ./paper/pic.svg ./paper/paper.bib
-	cd ./paper && \
+paper-quick: ./paper/tex/paper_quick.pdf
+pq: ./paper/tex/paper_quick.pdf
+./paper/tex/paper_quick.pdf: ./paper/tex/paper.tex ./paper/tex/pic.svg ./paper/tex/paper.bib
+	cd ./paper/tex && \
 	cp paper.tex paper_quick.tex && \
 	latexmk -shell-escape -pdf -latex=pdflatex paper_quick.tex && \
 	touch `basename $@`
 
 .PHONY: paper # Check and compile the paper PDF out of its LaTeX source
 .PHONY: p
-paper: ./paper/paper.pdf
-p: ./paper/paper.pdf
-./paper/paper.pdf: ./paper/paper_checked.tex ./paper/pic.svg ./paper/paper.bib
-	cd paper && \
+paper: ./paper/tex/paper.pdf
+p: ./paper/tex/paper.pdf
+./paper/tex/paper.pdf: ./paper/tex/paper_checked.tex ./paper/tex/pic.svg ./paper/tex/paper.bib
+	cd paper/tex && \
 	latexmk -shell-escape -pdf -latex=pdflatex paper_checked.tex && \
 	cp paper_checked.pdf paper.pdf
-./paper/paper_checked.tex: ./paper/paper.tex
-	cd paper && \
+./paper/tex/paper_checked.tex: ./paper/tex/paper.tex
+	cd paper/tex && \
 	cat paper.tex | litrepl \
 		--filetype=latex --ai-interpreter=- \
 		--pending-exitcode=3 --irreproducible-exitcode=4 \
