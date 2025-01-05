@@ -1,17 +1,15 @@
 ---
-<!-- title: Litrepl: read-eval-print your literate papers -->
-<!-- title: Litrepl: a minimalistic literate paper evaluation interface. -->
-title: Litrepl: literate paper processor valuing transparency over reproducibility
+title: "Litrepl: Literate Paper Processor Promoting Transparency More Than Reproducibility"
 tags:
   - python
   - literate programming
-  - repl
+  - human-computer interaction
   - reproducible research
 authors:
   - name: Sergei Mironov
     orcid: TODO
     affiliation: "0"
-date: 20 December 2024
+date: 05 January 2025
 bibliography: paper.bib
 ---
 
