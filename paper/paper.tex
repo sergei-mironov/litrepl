@@ -115,7 +115,7 @@ Following \textcite{Vallet2022}, we suggest changing the focus of human-computer
 interaction towards simplicity and transparency. We saw an opportunity to
 implement a tool that would offer REPL-style editing, be compatible with
 existing code editors and text formats, thus maintaining familiar editing
-practices, contain no important hidden state variables and have a significantly
+practices, contain only a few hidden state variables, and have a significantly
 smaller codebase.
 
 We introduce \textit{Litrepl}, a text processor that employs the following
@@ -218,7 +218,6 @@ interpreter command to execute to start a session for each class. For example,
 to select a Bourne-Again Shell interpreter as \verb|sh|, we add the
 \verb|--sh-interpreter=/usr/bin/bash| argument assuming that this binary is
 present in the system.
-%lnoresult
 
 \subsection{Session Management}
 
