@@ -156,13 +156,6 @@ binary is present in the system.
 
 ## Session Management
 
-``` tex
-\begin{result}
-... some output ...
-[LR:/tmp/litrepl/python/partial_7b81e1e.txt]
-\end{result}
-```
-
 Litrepl's ability to maintain interpreter sessions in the background is crucial
 for enabling a Read-Eval-Print Loop (REPL) environment. The associated
 resources, shown in Figure 1, are stored as files within an auxiliary directory.
@@ -184,8 +177,15 @@ machine that operates the probe is the only added hidden state in the entire
 system.
 
 If the response exceeds the configured duration, Litrepl outputs a partial
-result tag, which is recognized and reevaluated in subsequent runs. Figure 2
-shows an example partial result section.
+result tag, which is recognized and reevaluated in subsequent runs. Below we
+show an example partial result section.
+
+``` tex
+\begin{result}
+... some output ...
+[LR:/tmp/litrepl/python/partial_7b81e1e.txt]
+\end{result}
+```
 
 Litrepl provides **start**, **stop**, **restart** and **status** commands to
 control background sessions, so, for example
@@ -204,6 +204,13 @@ available.
 
 ## Parsing and Evaluation
 
+Litrepl abstracts documents as a straightforward sequence comprising code,
+result, and text sections. Additionally, Litrepl identifies ignore blocks, which
+act as comments that prevent enclosed sections from being evaluated.
+
+Template grammars similar to the illustrative example below are encoded
+for Markdown and Latex formats. Before each run, Litrepl calls Lark [@Lark] to
+compile a customized parser and uses it to access the sections.
 
 ``` txt
 document       ::= (code | result | ignore | text)*
@@ -216,14 +223,6 @@ result-comment ::= "% result" text "% noresult"
 ignore         ::= "% ignore" text "% noignore"
 text           ::= ...
 ```
-
-Litrepl abstracts documents as a straightforward sequence comprising code,
-result, and text sections. Additionally, Litrepl identifies ignore blocks, which
-act as comments that prevent enclosed sections from being evaluated.
-
-Template grammars similar to the illustrative example in Figure 3 are encoded
-for Markdown and Latex formats. Before each run, Litrepl calls Lark [@Lark] to
-compile a customized parser and uses it to access the sections.
 
 Evaluation results are written back into the result sections, and the entire
 document is printed. At this stage, certain conditions can be optionally
