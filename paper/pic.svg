@@ -131,7 +131,7 @@
      <g class="Page">
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id3">
-        <rect class="BoundingBox" stroke="none" fill="none" x="9281" y="1770" width="333" height="335"/>
+        <rect class="BoundingBox" stroke="none" fill="none" x="9281" y="1770" width="334" height="335"/>
         <path fill="rgb(255,255,255)" stroke="none" d="M 9606,1937 C 9606,1965 9599,1993 9585,2017 9571,2041 9551,2062 9527,2076 9502,2090 9475,2097 9447,2097 9419,2097 9392,2090 9368,2076 9343,2062 9323,2041 9309,2017 9295,1993 9288,1965 9288,1937 9288,1910 9295,1882 9309,1858 9323,1834 9343,1813 9368,1799 9392,1785 9419,1778 9447,1778 9475,1778 9502,1785 9527,1799 9551,1813 9571,1834 9585,1858 9599,1882 9606,1910 9606,1937 L 9606,1937 Z"/>
         <path fill="none" stroke="rgb(255,0,0)" stroke-width="14" stroke-linejoin="round" d="M 9606,1937 C 9606,1965 9599,1993 9585,2017 9571,2041 9551,2062 9527,2076 9502,2090 9475,2097 9447,2097 9419,2097 9392,2090 9368,2076 9343,2062 9323,2041 9309,2017 9295,1993 9288,1965 9288,1937 9288,1910 9295,1882 9309,1858 9323,1834 9343,1813 9368,1799 9392,1785 9419,1778 9447,1778 9475,1778 9502,1785 9527,1799 9551,1813 9571,1834 9585,1858 9599,1882 9606,1910 9606,1937 L 9606,1937 Z"/>
        </g>
@@ -262,7 +262,7 @@
         <rect class="BoundingBox" stroke="none" fill="none" x="6955" y="5256" width="3042" height="638"/>
         <path fill="rgb(255,255,255)" stroke="none" d="M 8476,5892 L 6956,5892 6956,5257 9995,5257 9995,5892 8476,5892 Z"/>
         <path fill="none" stroke="rgb(52,101,164)" d="M 8476,5892 L 6956,5892 6956,5257 9995,5257 9995,5892 8476,5892 Z"/>
-        <text class="SVGTextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="353px" font-weight="400"><tspan class="TextPosition" x="7620" y="5695"><tspan fill="rgb(0,0,0)" stroke="none" style="white-space: pre">Litrepl </tspan><tspan font-size="191px" fill="rgb(0,0,0)" stroke="none" style="white-space: pre">(froked)</tspan></tspan></tspan></text>
+        <text class="SVGTextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="353px" font-weight="400"><tspan class="TextPosition" x="7620" y="5695"><tspan fill="rgb(0,0,0)" stroke="none" style="white-space: pre">Litrepl </tspan><tspan font-size="191px" fill="rgb(0,0,0)" stroke="none" style="white-space: pre">(forked)</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
