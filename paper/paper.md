@@ -1,14 +1,18 @@
 ---
-title: "Litrepl: Literate Paper Processor Promoting Transparency More Than Reproducibility"
+title: 'Litrepl: Literate Paper Processor Promoting Transparency More Than Reproducibility'
 tags:
   - python
   - literate programming
-  - human-computer interaction
+  - human computer interaction
   - reproducible research
 authors:
   - name: Sergei Mironov
     orcid: TODO
-    affiliation: "0"
+    affiliation: 1
+affiliations:
+  - name: Independent Researcher, Armenia
+    orcid: 0009-0005-1604-722X
+    index: 1
 date: 05 January 2025
 bibliography: paper.bib
 ---
@@ -36,7 +40,7 @@ compile machine-executable code. Over time, this concept has evolved, showing a
 trend towards simplification [Ramsey1994lps].
 
 Concurrently, a concept of human-computer interaction often called the
-*Read-Evaluate-Print Loop* or ''REPL'' gained traction, notably within the LISP
+*Read-Evaluate-Print Loop* or "REPL" gained traction, notably within the LISP
 an APL communities [Spence1975apl], [McCarthy1959recfun], [Iverson1962apl].
 
 The combination of a command-line interface and a language interpreter enables
