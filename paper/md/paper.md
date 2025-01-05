@@ -25,37 +25,37 @@ editor, provided a straightforward integration is established.
 
 # Statement of need
 
-![Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](./pic.svg)
+![Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](./pic.png)
 
 
 The concept of *Literate Programming* was formulated by Donald Knuth, suggesting
 a shift in focus from writing code to explaining to human beings what we want a
-computer to do. This approach is embodied in the WEB system [Knuth1984lp] and
+computer to do. This approach is embodied in the WEB system [@Knuth1984lp] and
 its descendant family of tools, whose name refers to a text document format
 containing the "network" of code sections interleaved with text.
 
 The system could both render such text into human-readable documentation and
 compile machine-executable code. Over time, this concept has evolved, showing a
-trend towards simplification [Ramsey1994lps].
+trend towards simplification [@Ramsey1994lps].
 
 Concurrently, a concept of human-computer interaction often called the
 *Read-Evaluate-Print Loop* or "REPL" gained traction, notably within the LISP
-an APL communities [Spence1975apl], [McCarthy1959recfun], [Iverson1962apl].
+an APL communities [@Spence1975apl], [@McCarthy1959recfun], [@Iverson1962apl].
 
 The combination of a command-line interface and a language interpreter enables
 incremental and interactive programming, allowing users to directly modify the
 interpreter state. By maintaining human involvement in the loop, this approach
-is believed to facilitate human thought processes [Granger2021litcomp].
+is believed to facilitate human thought processes [@Granger2021litcomp].
 
 A significant milestone in this field was the IPython interpreter
-[Perez2007IPython], which later evolved into the Jupyter Project. Its creators
-introduced a new document format called the Jupyter Notebook [Kluyver2016jupnb],
+[@Perez2007IPython], which later evolved into the Jupyter Project. Its creators
+introduced a new document format called the Jupyter Notebook [@Kluyver2016jupnb],
 characterized by a series of logical sections of various types, including text
 and code, which could directly interact with programming language interpreters.
 This interactive communication, akin to REPL style programming, allows the
 creation of well-structured documents suitable for presentations and sharing.
 The concept underpinning these developments is termed *Literate Computing*
-[Perez2015blog], which includes goals of spanning a wide audience range,
+[@Perez2015blog], which includes goals of spanning a wide audience range,
 boosting reproducibility, and fostering collaboration. To achieve these
 objectives, several technical decisions were made, notably the introduction of
 bidirectional communication between the computational core, known as the Jupyter
@@ -66,13 +66,13 @@ While we recognize the importance of all goals within the Literate Computing
 framework, we think that the goal of reproducibility is more important than
 others. Addressing it alone would suffice to enhance communication among
 time-separated and space-separated researchers and significantly expand the
-audience. However, as it became clear [Dolstra2010], this challenge extends
+audience. However, as it became clear [@Dolstra2010], this challenge extends
 beyond the scope of a single human-computer interaction system, and even beyond
 the typical boundaries of software distribution management for a particular
 programming language. A comprehensive solution to the software deployment
 problem operates at the entire operating system level.
 
-Following [Vallet2022], we suggest changing the focus of human-computer
+Following [@Vallet2022], we suggest changing the focus of human-computer
 interaction towards simplicity and transparency. We saw an opportunity to
 implement a tool that would offer REPL-style editing, be compatible with
 existing code editors and text formats, thus maintaining familiar editing
@@ -86,7 +86,7 @@ for the reuse of existing text document formats. In both the Markdown and LaTeX
 evaluators we have implemented, simplified parsers are used to distinguish code
 and result sections from the rest of the document. As of now, we support Python
 and Shell interpreter families, as well as a custom large language model
-communication interpreter. Finally, we strive to leverage POSIX [POSIX2024]
+communication interpreter. Finally, we strive to leverage POSIX [@POSIX2024]
 operating system facilities as much as possible.
 
 # How it works
@@ -222,7 +222,7 @@ result, and text sections. Additionally, Litrepl identifies ignore blocks, which
 act as comments that prevent enclosed sections from being evaluated.
 
 Template grammars similar to the illustrative example in Figure 3 are encoded
-for Markdown and Latex formats. Before each run, Litrepl calls Lark [Lark] to
+for Markdown and Latex formats. Before each run, Litrepl calls Lark [@Lark] to
 compile a customized parser and uses it to access the sections.
 
 Evaluation results are written back into the result sections, and the entire
