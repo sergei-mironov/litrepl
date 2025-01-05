@@ -7,11 +7,10 @@ tags:
   - reproducible research
 authors:
   - name: Sergei Mironov
-    orcid: TODO
+    orcid: 0009-0005-1604-722X
     affiliation: 1
 affiliations:
   - name: Independent Researcher, Armenia
-    orcid: 0009-0005-1604-722X
     index: 1
 date: 05 January 2025
 bibliography: paper.bib
