@@ -90,12 +90,12 @@ pq: ./paper/paper_quick.pdf
 
 .PHONY: paper # Check and compile the paper PDF out of its LaTeX source
 .PHONY: p
-paper: ./paper/paper_checked.pdf
-p: ./paper/paper_checked.pdf
-./paper/paper_checked.pdf: ./paper/paper_checked.tex ./paper/pic.svg ./paper/paper.bib
+paper: ./paper/paper.pdf
+p: ./paper/paper.pdf
+./paper/paper.pdf: ./paper/paper_checked.tex ./paper/pic.svg ./paper/paper.bib
 	cd paper && \
 	latexmk -shell-escape -pdf -latex=pdflatex paper_checked.tex && \
-	touch `basename $@`
+	cp paper_checked.pdf paper.pdf
 ./paper/paper_checked.tex: ./paper/paper.tex
 	cd paper && \
 	cat paper.tex | litrepl \
