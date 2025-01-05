@@ -315,15 +315,13 @@ from hashing the code. This response file stores the output from the
 interpreter.
 
 During evaluation, Litrepl spawns a response reader process with a soft lock,
-active until the interpreter completes and responds to an echo probe. If the
-response exceeds the configured duration, Litrepl outputs a partial result tag,
-which is recognized and reevaluated in subsequent runs.  Figure
-\ref{fig:partial-result} shows an example partial result section.
+active until the interpreter completes and responds to an echo probe. The state
+machine that operates the probe is the only added hidden state in the entire
+system.
 
-As already mentioned, most of the resources are exposed to user via the
-filesystem. The only added hidden state in the entire system resides in the
-reader process, in a small finite state machine that handles special ASCII
-characters used by some applications for text animation.
+If the response exceeds the configured duration, Litrepl outputs a partial
+result tag, which is recognized and reevaluated in subsequent runs.  Figure
+\ref{fig:partial-result} shows an example partial result section.
 
 Litrepl provides \textbf{start}, \textbf{stop}, \textbf{restart} and
 \textbf{status} commands to control background sessions, so, for example
