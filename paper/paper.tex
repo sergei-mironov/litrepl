@@ -66,11 +66,14 @@ editor, provided a straightforward integration is established.
 
 The concept of \textit{Literate Programming} was formulated by Donald Knuth,
 suggesting a shift in focus from writing code to explaining to human beings what
-we want a computer to do (\textcite{Knuth1984lp}). This approach is embodied in
-the WEB system and its descendant family of tools, which translate combined code
-and narrative documents into human-readable documentation and machine-executable
-code. Over time, the concept has evolved, showing a trend towards simplification
-(\textcite{Ramsey1994lps}).
+we want a computer to do. This approach is embodied in the WEB
+system\cite{Knuth1984lp} and its descendant family of tools, whose name refers
+to a text document format containing the "network" of code sections interleaved
+with text.
+
+The system could both render such text into human-readable documentation and
+compile machine-executable code. Over time, this concept has evolved, showing a
+trend towards simplification (\textcite{Ramsey1994lps}).
 
 Concurrently, a concept of human-computer interaction often called the
 \textit{Read-Evaluate-Print Loop} or ''REPL'' gained traction, notably within
@@ -83,7 +86,7 @@ interpreter state. By maintaining human involvement in the loop, this approach
 is believed to facilitate human thought processes (\textcite{Granger2021litcomp}).
 
 A significant milestone in this field was the IPython interpreter
-(\textcite{Perez2007IPython}), which later evolved into the Jupyter Project. The
+(\textcite{Perez2007IPython}), which later evolved into the Jupyter Project. Its
 creators introduced a new document format called the Jupyter Notebook
 (\textcite{Kluyver2016jupnb}), characterized by a series of logical sections of
 various types, including text and code, which could directly interact with
@@ -99,20 +102,21 @@ renderer, along with another layer of client-server communication between the
 web-server and the user’s web browser.
 
 While we recognize the importance of all goals within the Literate Computing
-framework, we argue that the goal of reproducibility is paramount. Successfully
-addressing reproducibility would alone suffice to enhance communication among
+framework, we think that the goal of reproducibility is more important than
+others. Addressing it alone would suffice to enhance communication among
 time-separated and space-separated researchers and significantly expand the
 audience. However, as it became clear (\textcite{Dolstra2010}), this challenge
 extends beyond the scope of a single human-computer interaction system, and even
 beyond the typical boundaries of software distribution management for a
 particular programming language. A comprehensive solution to the software
-deployment problem should operate at the entire operating system level.
+deployment problem operates at the entire operating system level.
 
 Following \textcite{Vallet2022}, we suggest changing the focus of human-computer
 interaction towards simplicity and transparency. We saw an opportunity to
 implement a tool that would offer REPL-style editing, be compatible with
 existing code editors and text formats, thus maintaining familiar editing
-practices, and have a significantly smaller codebase.
+practices, contain no important hidden state variables and have a significantly
+smaller codebase.
 
 We introduce \textit{Litrepl}, a text processor that employs the following
 approaches: first, utilizing straightforward bidirectional text streams for
@@ -207,10 +211,14 @@ assumptions:
 
 In Litrepl, these details are hardcoded for several prominent interpreter
 families, which we refer to as \textit{interpreter classes}. At the time of
-writing, Litrepl supports three such classes: \textbf{python}, \textbf{sh}, and
-\textbf{ai}. Using command line arguments, users can configure how to map code
-section labels to the correct class and specify which interpreter command to
-execute to start a session for each class.
+writing, Litrepl supports three such classes: \texttt{python}, \texttt{sh}, and
+\texttt{ai}. Using these names in command line arguments, users can configure
+how to map code section labels to the correct class and specify which
+interpreter command to execute to start a session for each class. For example,
+to select a Bourne-Again Shell interpreter as \verb|sh|, we add the
+\verb|--sh-interpreter=/usr/bin/bash| argument assuming that this binary is
+present in the system.
+%lnoresult
 
 \subsection{Session Management}
 
@@ -243,7 +251,9 @@ echo -n '\end'; echo '{verbatim}'
   \end{verbatim}
   %lnoresult
   \end{minipage}
-  \caption{Partial result section with a continuation tag.}
+  \caption{Example partial result section that ends with a continuation tag,
+  where \texttt{LR:} is a distinguishable prefix, and the rest is the filename
+  storing a response of the interpreter to the section being evaluated.}
   \label{fig:partial-result}
 \end{figure*}
 
@@ -308,14 +318,27 @@ interpreter.
 During evaluation, Litrepl spawns a response reader process with a soft lock,
 active until the interpreter completes and responds to an echo probe. If the
 response exceeds the configured duration, Litrepl outputs a partial result tag,
-which is recognized and reevaluated in subsequent runs. Figure
+which is recognized and reevaluated in subsequent runs.  Figure
 \ref{fig:partial-result} shows an example partial result section.
 
-Litrepl provides \textbf{start}, \textbf{stop}, and \textbf{restart} commands to
-control background sessions. The \textbf{interrupt} command sends an
-interruption signal to the interpreter. Finally, the \textbf{repl} command
-establishes direct communication with the interpreter, allowing manual
-inspection of its state.
+As already mentioned, most of the resources are exposed to user via the
+filesystem. The only added hidden state in the entire system resides in the
+reader process, in a small finite state machine that handles special ASCII
+characters used by some applications for text animation.
+
+Litrepl provides \textbf{start}, \textbf{stop}, \textbf{restart} and
+\textbf{status} commands to control background sessions, so, for example
+
+\begin{verbatim}
+$ litrepl restart python
+\end{verbatim}
+
+stops the Python interpreter if it was running and starts a new instance of it.
+The \textbf{interrupt} command sends an interruption signal to the interpreter.
+Finally, the \textbf{repl} command establishes direct communication with the
+interpreter, allowing manual inspection of its state. The \textbf{help} command
+prints the detailed description of each command and the configuration
+arguments available.
 %lnoresult
 
 \subsection{Parsing and Evaluation}
@@ -352,7 +375,7 @@ Template grammars similar to the illustrative example in Figure
 Before each run, Litrepl calls Lark (\textcite{Lark}) to compile a customized
 parser and uses it to access the sections.
 
-Evaluation results are encoded back into the result sections, and the entire
+Evaluation results are written back into the result sections, and the entire
 document is printed. At this stage, certain conditions can be optionally
 checked. First, setting \verb|--pending-exitcode| to a non-zero value instructs
 Litrepl to report an error if a section takes longer than the timeout to
@@ -413,9 +436,9 @@ in a few common formats.
 % lresult
 The technical decision to abstract interpreters using text streams comes with
 both advantages and disadvantages. A key advantage is simplicity. However, there
-are notable negative aspects. Firstly, there is no parallel evaluation at the
+are notable negative aspects. First, there is no parallel evaluation at the
 communication level, meaning the interpreter is locked until it completes the
-evaluation of one snippet before proceeding to the next. Secondly, the
+evaluation of one snippet before proceeding to the next. Second, the
 transferable data type is restricted to text-only streams.
 
 We argue that the lack of parallel execution at the communication level can be
