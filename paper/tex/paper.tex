@@ -11,9 +11,9 @@
 \usepackage{comment}
 \usepackage{float}
 \usepackage[font=small,skip=0pt]{caption}
-
 \usepackage{biblatex}
 \addbibresource{paper.bib}
+\usepackage[para,bottom]{footmisc}
 
 \geometry{margin=1in}
 
@@ -118,15 +118,17 @@ existing code editors and text formats, thus maintaining familiar editing
 practices, contain only a few hidden state variables, and have a significantly
 smaller codebase.
 
-We introduce \textit{Litrepl}, a text processor that employs the following
-approaches: first, utilizing straightforward bidirectional text streams for
-inter-process communication with language interpreters to evaluate code; second,
-advocating for the reuse of existing text document formats. In both the Markdown
-and \LaTeX\ evaluators we have implemented, simplified parsers are used to
-distinguish code and result sections from the rest of the document. As of now,
-we support Python and Shell interpreter families, as well as a custom large
-language model communication interpreter. Finally, we strive to leverage
-POSIX\cite{POSIX2024} operating system facilities as much as possible.
+We introduce
+\textit{Litrepl}\footnote{\url{https://github.com/sergei-mironov/litrepl}},
+a text processor that employs the following approaches: first, utilizing
+straightforward bidirectional text streams for inter-process communication with
+language interpreters to evaluate code; second, advocating for the reuse of
+existing text document formats. In both the Markdown and \Latex evaluators we
+have implemented, simplified parsers are used to distinguish code and result
+sections from the rest of the document.  As of now, we support Python and Shell
+interpreter families, as well as a custom large language model communication
+interpreter. Finally, we strive to leverage POSIX\cite{POSIX2024} operating
+system facilities as much as possible.
 
 \section{How it works}
 
