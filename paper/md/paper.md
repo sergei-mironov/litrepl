@@ -99,7 +99,16 @@ through its standard output.
 The operation of Litrepl is best illustrated through the example below. Consider
 the document named `input.tex`:
 
+<!--
 ``` sh
+echo '~~~ sh'
+echo '$ cat input.tex'
+cat input.tex
+echo '~~~'
+```
+-->
+<!--result-->
+~~~ sh
 $ cat input.tex
 \begin{python}
 import sys
@@ -107,13 +116,24 @@ print(f"I use {sys.platform} btw!")
 \end{python}
 \begin{result}
 \end{result}
-```
+~~~
+<!--noresult-->
 
 This document contains a Python code section and an empty result section marked
 with the corresponding Latex environment tags. To "execute" the document we
 pipe it though the Litrepl processor as follows:
 
+<!--
 ``` sh
+echo '~~~ sh'
+echo '$ cat input.tex | litrepl'
+echo "sys.platform='linux'" | litrepl repl python >/dev/null
+cat input.tex | litrepl
+echo '~~~'
+```
+-->
+<!--result-->
+~~~ sh
 $ cat input.tex | litrepl
 \begin{python}
 import sys
@@ -122,7 +142,8 @@ print(f"I use {sys.platform} btw!")
 \begin{result}
 I use linux btw!
 \end{result}
-```
+~~~
+<!--noresult-->
 
 Now we can see the expected statement about the author's operating system. The
 side-effect of this execution is the started session of the python interpreter
@@ -180,12 +201,26 @@ If the response exceeds the configured duration, Litrepl outputs a partial
 result tag, which is recognized and reevaluated in subsequent runs. Below we
 show an example partial result section.
 
-``` tex
-\begin{result}
+<!--
+``` sh
+echo '~~~ tex'
+litrepl --python-auxdir=/tmp/litrepl/python restart python
+{
+cat <<EOF
+import time
+print('... some output ...')
+time.sleep(9999)
+EOF
+}|litrepl --python-auxdir=/tmp/litrepl/python --timeout=1,inf eval-code python
+echo '~~~'
+```
+-->
+<!--result-->
+~~~ tex
 ... some output ...
 [LR:/tmp/litrepl/python/partial_7b81e1e.txt]
-\end{result}
-```
+~~~
+<!--noresult-->
 
 Litrepl provides **start**, **stop**, **restart** and **status** commands to
 control background sessions, so, for example
