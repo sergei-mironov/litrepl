@@ -150,12 +150,12 @@ fun! LitReplCmdTimeout(timeout)
   return LitReplCmd().' --timeout='.a:timeout.' '
 endfun
 
-fun! LitReplOpenErr(message)
+fun! LitReplOpenErrS(message, splitcmd)
   " Open error file and show the message
   let file = LitReplGet('litrepl_errfile')
   if bufwinnr(file) <= 0
     let nr = winnr()
-    execute "botright vs ".file
+    execute "botright ".a:splitcmd." ".file
     execute "setlocal autoread"
     execute string(nr) . 'wincmd w'
   endif
@@ -164,6 +164,11 @@ fun! LitReplOpenErr(message)
     echon a:message
     echohl None
   endif
+endfun
+
+fun! LitReplOpenErr(message)
+  " Open error file and show the message
+  return LitReplOpenErrS(message, "vs")
 endfun
 
 fun! LitReplUpdateCursor(cur)
@@ -323,13 +328,18 @@ fun! LitReplRunBufferMonitor()
 endfun
 
 fun! LitReplStatus()
+  if LitReplGet('litrepl_debug') != 0
+    let [flag,splitcmd] = ["--verbose","vs"]
+  else
+    let [flag,splitcmd] = ["","3split"]
+  endif
   let cur = getcharpos('.')
   execute "normal! I "
   execute "normal! x"
-  silent execute '%!'.LitReplCmd(). ' --verbose status 2>'.LitReplGet('litrepl_errfile').' >&2'
+  silent execute '%!'.LitReplCmd().' '.flag.' status 2>'.LitReplGet('litrepl_errfile').' >&2'
   call setcharpos('.', cur)
   execute "u"
-  call LitReplOpenErr('')
+  call LitReplOpenErrS('',splitcmd)
 endfun
 
 let b:litrepl_lastpos = "0:0"
