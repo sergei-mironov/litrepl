@@ -141,17 +141,36 @@ endfun
 
 let b:airegion = LitReplRegionFromCursor()
 
-fun! LitReplTaskNew(scope, prompt) range " -> [int, string]
+fun! LitReplDedentString(str)
+  let lines = split(a:str, "\n")
+  let min_indent = min(map(filter(copy(lines), 'v:val !=# ""'),
+    \ 'strlen(matchstr(v:val, ''^\s*''))'))
+  let dedented_lines = map(lines, 'substitute(v:val, ''^\s\{'' . min_indent .  ''\}'', '''', '''')')
+  return [min_indent, join(dedented_lines, "\n")]
+endfun
+
+fun! LitReplIndentString(nspaces, str)
+  let indent = repeat(' ', a:nspaces)
+  let lines = split(a:str, "\n")
+  let indented_lines = map(lines, 'indent . v:val')
+  return join(indented_lines, "\n")
+endfun
+
+fun! LitReplTaskNew(scope, prompt, reindent_selection) range " -> [int, string]
   " Start a new AI task, by (a) taking a taget scope (0 - cursor, 1 - selection,
   " 2 - whole file, 3 - stanalone terminal) (b) combining the pompt (c)
   " piping the prompt through the interpreter and (d) populating the result.
-  let [scope, prompt] = [a:scope, a:prompt]
+  let [scope, prompt, reindent_selection] = [a:scope, a:prompt, a:reindent_selection]
+  let nindent = 0
   if scope == 0
     let b:airegion = LitReplRegionFromCursor()
     let selection = ""
   elseif scope == 1 || scope == 3
     let b:airegion = LitReplRegionFromSelection()
     let selection = LitReplRegionRead(b:airegion)
+    if reindent_selection != 0
+      let [nindent, selection] = LitReplDedentString(selection)
+    endif
   elseif scope == 2
     let b:airegion = LitReplRegionFromFile()
     let selection = LitReplRegionRead(LitReplRegionFromSelection())
@@ -165,7 +184,10 @@ fun! LitReplTaskNew(scope, prompt) range " -> [int, string]
       execute "terminal ".LitReplCmd()." repl ai"
       call feedkeys("/cat out\n")
     else
-      let b:airegion = LitReplRegionReplace(b:airegion, trim(result))
+      if nindent != 0
+        let result = LitReplIndentString(nindent, result)
+      endif
+      let b:airegion = LitReplRegionReplace(b:airegion, trim(result, "", 2))
     endif
   else
     call LitReplOpenErr("Failed (".string(errcode).")")
@@ -174,10 +196,10 @@ fun! LitReplTaskNew(scope, prompt) range " -> [int, string]
 endfun
 
 if !exists(":LAI")
-  command! -range -bar -nargs=* LAI call LitReplTaskNew(<range>!=0, <q-args>)
+  command! -range -bar -nargs=* LAI call LitReplTaskNew(<range>!=0, <q-args>, 0)
 endif
 if !exists(":LAITell")
-  command! -range -bar -nargs=* LAITell call LitReplTaskNew(3, <q-args>)
+  command! -range -bar -nargs=* LAITell call LitReplTaskNew(3, <q-args>, 0)
 endif
 
 
@@ -231,7 +253,7 @@ fun! LitReplStyle(scope, task) range " -> [int, string]
       \ "After that you can put your own comments wrapped into the appropriate comment blocks. ".
       \ "For commenting, mind that the overall text is ".&filetype." "
   endif
-  let result = LitReplTaskNew(scope, prompt)
+  let result = LitReplTaskNew(scope, prompt, 0)
   return result
 endfun
 if !exists(":LAIStyle")
@@ -262,7 +284,8 @@ fun! LitReplAIFile(prompt) range " -> [int, string]
     \ prompt . "\n".
     \ "Please arrange the output so the resulting program appears as-is " .
     \ "without any text formatting, especially without markdown \"```\" formatting! ".
-    \ "Put your own comments in the header code comment of the resulting program.")
+    \ "Put your own comments in the header code comment of the resulting program.",
+    \ 0)
   let &textwidth = tw_old
   return result
 endfun
@@ -292,7 +315,7 @@ fun! LitReplAICode(scope, prompt) range " -> [int, string]
   let footer = ''.
     \ "Please print the resulting code snippet as-is " .
     \ "without any markdown formatting, especially avoid the \"```\" ".
-    \ "formatting! Please preserve the original identation whenever possible! "
+    \ "formatting!"
   let vm = visualmode()
   if (scope == 1 && vm == 'V') || (scope == 0 && getpos('.')[2] == 1)
     let footer = footer .
@@ -311,7 +334,8 @@ fun! LitReplAICode(scope, prompt) range " -> [int, string]
     \ task .
     \ "You need to do the following: " .
     \ prompt . "\n".
-    \ footer)
+    \ footer,
+    \ 1)
 endfun
 
 if !exists(":LAICode")
