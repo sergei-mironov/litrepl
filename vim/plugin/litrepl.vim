@@ -168,7 +168,7 @@ endfun
 
 fun! LitReplOpenErr(message)
   " Open error file and show the message
-  return LitReplOpenErrS(message, "vs")
+  return LitReplOpenErrS(a:message, "vs")
 endfun
 
 fun! LitReplUpdateCursor(cur)
