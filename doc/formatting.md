@@ -1,13 +1,17 @@
 Formatting
 ==========
 
+<!-- vim-markdown-toc GFM -->
 
-1. [Markdown](#markdown)
-   * [Syntax](#syntax)
-   * [Converting to Jupyter Notebook](#converting-to-jupyter-notebook)
-2. [Latex](#latex)
-   * [Syntax](#syntax)
-   * [Python code highlighting](#python-code-highlighting)
+* [Markdown](#markdown)
+    * [Syntax](#syntax)
+    * [Converting to Jupyter Notebook](#converting-to-jupyter-notebook)
+* [Latex](#latex)
+    * [Syntax](#syntax-1)
+    * [Python code highlighting](#python-code-highlighting)
+    * [Python source navigation](#python-source-navigation)
+
+<!-- vim-markdown-toc -->
 
 Markdown
 --------
@@ -173,3 +177,16 @@ call vimtex#syntax#core#new_env({
       \})
 ```
 
+### Python source navigation
+
+For the python language server one use a workaround: register the whole .tex
+source as a Python source.
+
+``` vim
+if exists('*RegisterLanguageServer')
+  call RegisterLanguageServer('tex', {
+    \ 'command': 'pylsp',
+    \ 'languageId': 'python'
+    \ })
+endif
+```
