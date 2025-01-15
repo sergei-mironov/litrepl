@@ -166,7 +166,10 @@ the `BufEnter` event handler.
 ``` vim
 " .localvimrc
 call vimtex#syntax#nested#include('python')
-call vimtex#syntax#core#new_region_env('texLitreplZone', 'l[a-zA-Z0-9]*code',
-  \ {'contains': '@vimtex_nested_python'})
+call vimtex#syntax#core#new_env({
+      \ 'name': 'l\?[a-zA-Z0-9]*python',
+      \ 'region': 'texLitreplZone',
+      \ 'contains': '@vimtex_nested_python'
+      \})
 ```
 
