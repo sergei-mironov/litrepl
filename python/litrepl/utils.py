@@ -129,5 +129,5 @@ def runsocat(fns, hint=None):
   system(f"socat - 'PIPE:{fns.outp},flock-ex-nb=1!!PIPE:{fns.inp},flock-ex-nb=1'")
 
 def hashdigest(x)->str:
-  return sha256(str(hash(x)).encode('utf-8')).hexdigest()[:7]
+  return sha256(str(x).encode('utf-8')).hexdigest()[:7]
 

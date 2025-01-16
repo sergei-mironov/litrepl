@@ -49,7 +49,7 @@ def pdebug(*args,**kwargs):
 def st2auxdir(a:LitreplArgs, st:SType, default=None)->str:
   """ Return the aux.dir name for this section type """
   d=None
-  if st == SType.SPython:
+  if st==SType.SPython:
     d=a.python_auxdir
   elif st==SType.SAI:
     d=a.ai_auxdir
@@ -63,7 +63,7 @@ def defauxdir(st:SType, suffix:Optional[str]=None)->str:
   """ Calculate the default aux. directory name. """
   suffix_=f"{suffix}_" if suffix is not None else ""
   return join(gettempdir(),
-              f"litrepl_{getuid()}_{suffix}{hashdigest(getcwd())}", st2name(st))
+              f"litrepl_{getuid()}_{suffix_}{hashdigest(getcwd())}", st2name(st))
 
 def st2name(st:SType)->str:
   """ Return string representation of the code section type """
