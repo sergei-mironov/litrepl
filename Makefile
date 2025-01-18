@@ -107,7 +107,7 @@ p: ./paper/tex/paper.pdf
 .PHONY: paper.tar.gz
 paper.tar.gz: $(PAPER_TAR_GZ)
 $(PAPER_TAR_GZ): ./paper/tex/paper.pdf
-	tar -czvf $@ -C paper/tex paper.tex pic.svg paper.bib
+	tar -czvf $@ -C paper/tex paper.tex pic.svg paper.bib paper.bbl
 
 
 .PHONY: all
