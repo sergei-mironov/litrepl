@@ -171,6 +171,7 @@ pipe it though the Litrepl processor as follows:
 
 \begin{comment}
 \begin{sh}
+litrepl restart python
 echo '\begin{verbatim}'
 echo '$ cat input.tex | litrepl'
 echo "sys.platform='linux'" | litrepl repl python >/dev/null
@@ -252,7 +253,7 @@ echo -n '\end'; echo '{verbatim}'
   \begin{verbatim}
   \begin{result}
   ... some output ...
-  [LR:/tmp/litrepl/python/partial_7b81e1e.txt]
+  [LR:/tmp/litrepl/python/partial_c335adc.txt]
   \end{result}
   \end{verbatim}
   %lnoresult
@@ -393,51 +394,6 @@ Litrepl provides.
 
 \section{Discussion}
 
-\begin{comment}
-% lai
-
-Lets write the "Discussion" section. of the paper. Please check the grammar of
-the following points and make a linked narrative out of them. Please use Latex
-markup.
-
----
-
-The technical decision to abstract interpreters using text streams has its
-positive and negative sides. While simplicity is the obvious bonus, the negatvie
-consequences can be groouped into (1) No parallel evaluation at the
-communication level. Th interpreter gets locked until it finishes evaluation of
-one snippet before it can proceed to another one. (2) Transferrable data type is
-limited to text-only streams.
-
-We argue that the lack of parallel execution at the communication level can be
-compensated by using interpreter-specific parallelism where and if it is
-supported. For example, Python programs can use all sort of subprocess
-utilities while shell programs have full access to shell job control.
-
-Restricting streams to text-only data type seems to be a more funcdamental
-limitation. Litrepl lifts this limitation by supporting text-only document
-formats. Both Latex and Markdown have means of including rich data but they
-don't encode these data directly. Instead they rely on side channels: file
-system or network for referring such objects. Litrepl shares both pros such as
-good representation in well-known version control systems, and cons, e.g.
-requirement to organize such a side-channel data transfer explicitly.
-
-Another controversial technical solution - to transfer the whole document at
-input and output - can have performance penalties. In our experience the system
-works sufficienlty good for few-thousand line documents, but for larger
-documents delays might become uncomfortable even on modern computers. Still we
-prefer to keep this interface to make editor integration as simple as possible:
-typical plugin can just pipe the whole document through the tool using few lines
-of code.
-
-In addition, we allow a more performant integrations which take responsibility
-for pre-parsing and piping only the relevant parts of the document. For these
-approach, Litrepl offers \verb|print-regexp| command printing the anchor regexp
-in a few common formats.
-% lnoai
-\end{comment}
-
-% lresult
 The technical decision to abstract interpreters using text streams comes with
 both advantages and disadvantages. A key advantage is simplicity. However, there
 are notable negative aspects. First, there is no parallel evaluation at the
@@ -470,7 +426,6 @@ A more performance-oriented integrations can make pre-parsing and pipe only
 relevant document parts. For these approaches, Litrepl offers the
 \verb|print-regexp| command, which outputs the anchor regexp in several common
 formats.
-% lnoresult
 
 \section{Conclusion}
 
