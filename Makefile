@@ -6,6 +6,7 @@ WHEEL = dist/litrepl-$(VERSION)-py3-none-any.whl
 PY = $(shell find -name '*\.py' | grep -v semver.py | grep -v revision.py)
 VIM = $(shell find vim -name '*\.vim')
 VIMB_REV = _dist/vim-litrepl-$(VERSION)-$(REVISION).tar.gz
+PAPER_TAR_GZ = paper/tex/paper-$(VERSION)-$(REVISION).tar.gz
 TESTS = ./sh/runtests.sh
 MAN = man/litrepl.1
 DOCS = $(shell find docs -name '*\.md' | grep -v static | grep -v examples)
@@ -152,6 +153,12 @@ p: ./paper/tex/paper.pdf
 		--filetype=latex --ai-interpreter=- \
 		--pending-exitcode=3 --irreproducible-exitcode=4 \
 		--foreground >paper_checked.tex
+
+.PHONY: paper.tar.gz
+paper.tar.gz: $(PAPER_TAR_GZ)
+$(PAPER_TAR_GZ): ./paper/tex/paper.pdf
+	tar -czvf $@ -C paper/tex paper.tex pic.svg paper.bib
+
 
 .PHONY: all
 all: wheel
