@@ -133,7 +133,7 @@ upload: $(WHEEL_REV) $(VIMB_REV)
 .PHONY: pq
 paper-quick: ./paper/tex/paper_quick.pdf
 pq: ./paper/tex/paper_quick.pdf
-./paper/tex/paper_quick.pdf: ./paper/tex/paper.tex ./paper/tex/pic.svg ./paper/tex/paper.bib
+./paper/tex/paper_quick.pdf: ./paper/tex/paper.tex ./paper/tex/pic.pdf ./paper/tex/paper.bib
 	cd ./paper/tex && \
 	cp paper.tex paper_quick.tex && \
 	latexmk -shell-escape -pdf -latex=pdflatex paper_quick.tex && \
@@ -143,7 +143,7 @@ pq: ./paper/tex/paper_quick.pdf
 .PHONY: p
 paper: ./paper/tex/paper.pdf
 p: ./paper/tex/paper.pdf
-./paper/tex/paper.pdf: ./paper/tex/paper_checked.tex ./paper/tex/pic.png ./paper/tex/paper.bib
+./paper/tex/paper.pdf: ./paper/tex/paper_checked.tex ./paper/tex/pic.pdf ./paper/tex/paper.bib
 	cd paper/tex && \
 	latexmk -shell-escape -pdf -latex=pdflatex paper_checked.tex && \
 	cp paper_checked.pdf paper.pdf
@@ -157,7 +157,7 @@ p: ./paper/tex/paper.pdf
 .PHONY: paper.tar.gz
 paper.tar.gz: $(PAPER_TAR_GZ)
 $(PAPER_TAR_GZ): ./paper/tex/paper.pdf
-	tar -czvf $@ -C paper/tex paper.tex pic.png paper.bib paper.bbl
+	tar -czvf $@ -C paper/tex paper.tex pic.pdf paper.bib paper.bbl
 
 
 .PHONY: all
