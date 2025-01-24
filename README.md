@@ -26,7 +26,10 @@ plugin to demonstrate editor integration.
       </a>
     </td>
     <td>
-      Preprint: <i>(2025, Sergei Mironov)</i> <u>Litrepl: Literate Paper Processor Promoting Transparency More Than Reproducibility</u>
+      Preprint: <i>(2025, Sergei Mironov)</i>
+      <span style="text-decoration: underline;">
+        Litrepl: Literate Paper Processor Promoting Transparency More Than Reproducibility
+      </span>
       <a href="https://arxiv.org/abs/2501.10738">arXiv:2501.10738</a>
     </td>
   </tr>
