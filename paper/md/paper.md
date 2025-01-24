@@ -59,9 +59,9 @@ bidirectional communication between the Jupyter Kernel and Notebook renderer,
 alongside client-server interactions between the web server and user browser.
 
 We believe that reproducibility is crucial in the Literate Computing framework,
-enhancing communication among dispersed researchers. However, as noted by
+enhancing communication among dispersed researchers. However, as illustrated by
 [@Dolstra2010], we argue that this challenge exceeds the capacity of a single
-system, needing operating system-level solutions. Inspired by [@Vallet2022], we
+system, needing operating system-level solutions. Following [@Vallet2022], we
 introduce *Litrepl*, which enables REPL-style editing by integrating with existing
 editors and formats, and reduces hidden state variables in a compact codebase.
 Litrepl uses bidirectional text streams for inter-process communication and
