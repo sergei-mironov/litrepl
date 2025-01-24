@@ -29,8 +29,8 @@ stay active for a **read-eval-paste-loop** style.
 
 
 _Notes:_
-* _[literate programming](https://en.wikipedia.org/wiki/Literate_programming)_
-* _[read-eval-print-loop coding](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)_
+* _[Literate programming](https://en.wikipedia.org/wiki/Literate_programming)_
+* _[Read-eval-print loop](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)_
 
 
 <table border="0">
