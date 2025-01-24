@@ -150,7 +150,7 @@ I use linux btw!
 ~~~
 <!--noresult-->
 
-Now we can see the expected statement about the author's operating system. The
+Now we can see the bold statement about the author's operating system. The
 side-effect of this execution is the started session of the python interpreter
 which is now running in the background. We can modify its state by adding more
 section to the document and executing them selectively or e.g. by accessing
@@ -170,15 +170,6 @@ assumptions:
   response, as described below, rather than on prompt detection.
 * The presence of an echo command or equivalent. The interpreter must be able to
   echo an argument string provided by the user in response to the echo command.
-
-In Litrepl, these details are hardcoded for several prominent interpreter
-families, which we refer to as *interpreter classes*. At the time of writing,
-Litrepl supports three such classes: `python`, `sh`, and `ai`. Using these names
-in command line arguments, users can configure how to map code section labels to
-the correct class and specify which interpreter command to execute to start a
-session for each class. For example, to select a Bourne-Again Shell interpreter
-as `sh`, we add the `--sh-interpreter=/usr/bin/bash` argument assuming that this
-binary is present in the system.
 
 ## Session Management
 
@@ -201,31 +192,6 @@ During evaluation, Litrepl spawns a response reader process with a soft lock,
 active until the interpreter completes and responds to an echo probe. The state
 machine that operates the probe is the only added hidden state in the entire
 system.
-
-If the response exceeds the configured duration, Litrepl outputs a partial
-result tag, which is recognized and reevaluated in subsequent runs. Below we
-show an example partial result section.
-
-<!--
-``` sh
-echo '~~~ tex'
-litrepl --python-auxdir=/tmp/litrepl/python restart python
-{
-cat <<EOF
-import time
-print('... some output ...')
-time.sleep(9999)
-EOF
-}|litrepl --python-auxdir=/tmp/litrepl/python --timeout=1,inf eval-code python
-echo '~~~'
-```
--->
-<!--result-->
-~~~ tex
-... some output ...
-[LR:/tmp/litrepl/python/partial_7b81e1e.txt]
-~~~
-<!--noresult-->
 
 Litrepl provides **start**, **stop**, **restart** and **status** commands to
 control background sessions, so, for example
@@ -296,7 +262,7 @@ The restriction to text-only data types presents a more fundamental limitation.
 Litrepl lifts this restriction by supporting text-only document formats. Both
 Latex and Markdown incorporate non-text data without encoding it directly,
 instead relying on references and side channels, such as the file system or
-network resource identifiers. Consequently, Litrepl shares, for example, the
+network resource identifiers. Consequently, Litrepl shares both the
 benefits of human-readable representation in version control systems and the
 penalties, such as the need to explicitly organize side-channel data transfer.
 
