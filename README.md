@@ -18,6 +18,20 @@ plugin to demonstrate editor integration.
 
 </div>
 
+<table border="0">
+  <tr>
+    <td>
+      <a href="https://arxiv.org/abs/2501.10738">
+        <img src="img/adobe_pdf.png" alt="PDF Icon">
+      </a>
+    </td>
+    <td>
+      Preprint: <i>(2025, Sergei Mironov)</i> <u>Litrepl: Literate Paper Processor Promoting Transparency More Than Reproducibility</u>
+      <a href="https://arxiv.org/abs/2501.10738">arXiv:2501.10738</a>
+    </td>
+  </tr>
+</table>
+
 _Notes:_
 * _[literate programming](https://en.wikipedia.org/wiki/Literate_programming)_
 * _[read-eval-print-loop coding](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)_
