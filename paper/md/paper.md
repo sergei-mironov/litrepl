@@ -33,24 +33,20 @@ clearly exposing mutable states within the communication process.
 ![Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](./pic.png)
 
 
-The concept of *Literate Programming* was formulated by Donald Knuth, suggesting
-a shift in focus from writing code to explaining to human beings what we want a
-computer to do. This approach is embodied in the WEB system [@Knuth1984lp] and
-its descendant family of tools, whose name refers to a text document format
-containing the "network" of code sections interleaved with text.
+Literate Programming, formulated by Donald Knuth, shifts the focus from merely
+coding to explaining computational tasks to humans. This approach is seen in the
+WEB system [@Knuth1984lp] and its successor tools, which use a document format
+that interleaves code sections with explanatory text. These systems can produce
+both readable documentation and executable code, and over time, this concept has
+evolved towards simplification [@Ramsey1994lps].
 
-The system could both render such text into human-readable documentation and
-compile machine-executable code. Over time, this concept has evolved, showing a
-trend towards simplification [@Ramsey1994lps].
-
-Concurrently, a concept of human-computer interaction often called the
-*Read-Evaluate-Print Loop* or "REPL" gained traction, notably within the LISP
-an APL communities [@Spence1975apl], [@McCarthy1959recfun], [@Iverson1962apl].
-
-The combination of a command-line interface and a language interpreter enables
-incremental and interactive programming, allowing users to directly modify the
-interpreter state. By maintaining human involvement in the loop, this approach
-is believed to facilitate human thought processes [@Granger2021litcomp].
+The Read-Evaluate-Print Loop (REPL), a key concept in human-computer
+interaction, gained importance in the LISP and APL communities [@Spence1975apl],
+[@McCarthy1959recfun], [@Iverson1962apl]. By combining a command-line interface
+with a language interpreter, REPL enables incremental and interactive
+programming, allowing users to modify the interpreter state directly. This
+approach is believed to enhance human thought processes by keeping users
+actively involved [@Granger2021litcomp].
 
 A significant milestone in this field was the IPython interpreter
 [@Perez2007IPython], which later evolved into the Jupyter Project. Its creators
@@ -77,22 +73,15 @@ the typical boundaries of software distribution management for a particular
 programming language. A comprehensive solution to the software deployment
 problem operates at the entire operating system level.
 
-Following [@Vallet2022], we suggest changing the focus of human-computer
-interaction towards simplicity and transparency. We saw an opportunity to
-implement a tool that would offer REPL-style editing, be compatible with
-existing code editors and text formats, thus maintaining familiar editing
-practices, contain only a few hidden state variables, and have a significantly
-smaller codebase.
-
-We introduce *Litrepl*, a text processor that employs the following approaches:
-first, utilizing straightforward bidirectional text streams for inter-process
-communication with language interpreters to evaluate code; second, advocating
-for the reuse of existing text document formats. In both the Markdown and LaTeX
-evaluators we have implemented, simplified parsers are used to distinguish code
-and result sections from the rest of the document. As of now, we support Python
-and Shell interpreter families, as well as a custom large language model
-communication interpreter. Finally, we strive to leverage POSIX [@POSIX2024]
-operating system facilities as much as possible.
+Following [@Vallet2022], we propose shifting human-computer interaction towards
+simplicity and transparency by introducing *Litrepl*. This tool offers
+REPL-style editing, integrates with existing editors and text formats, and
+minimizes hidden state variables, all while maintaining a compact codebase.
+Litrepl uses bidirectional text streams for inter-process communication with
+language interpreters and supports existing text formats like Markdown and LaTeX
+through simplified parsers. It currently supports Python, Shell, and a custom
+large language model interpreter, aiming to utilize POSIX [@POSIX2024] system
+features extensively.
 
 # How it works
 
@@ -203,9 +192,7 @@ $ litrepl restart python
 stops the Python interpreter if it was running and starts a new instance of it.
 The **interrupt** command sends an interruption signal to the interpreter.
 Finally, the **repl** command establishes direct communication with the
-interpreter, allowing manual inspection of its state. The **help** command
-prints the detailed description of each command and the configuration arguments
-available.
+interpreter, allowing manual inspection of its state.
 
 
 ## Parsing and Evaluation
