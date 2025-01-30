@@ -1,5 +1,30 @@
+<!--
+vim: tw=80
+--!>
 Changelog
 =========
+
+Version 3.12.0
+--------------
+
+1. **Python**
+   - Fix the hashing algorithm to exclude the unstable `hash()` output from
+     digests thus fixed an issue with handling a `None` suffix in digests,
+     improving the stability and accuracy of digest computations.
+   - Section addressing has been adjusted to start from 1 instead of 0 for
+     readability.
+   - Made `eval-sections` the default command, reflecting a focus on ease of use
+     and user interaction.
+
+2. **Environment**
+   - Underscores have been removed from auxiliary directory file names.
+   - Add a link to the arXiv [paper](https://arxiv.org/abs/2501.10738).
+
+3. **Vim**
+   - Added new options for ignoring specific LaTeX sections with the `lignore`
+     feature, enhancing customization for LaTeX users.
+   - Updated the Vim async tag pattern `BG` -> `LR`.
+
 
 Version 3.11.0
 --------------
