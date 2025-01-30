@@ -254,20 +254,24 @@ class SymbolsMarkdown(Symbols):
     )
     comcodebegin_re='|'.join([fr"<!--[ ]*l?{m}[ ]*-->" for m in markers])
     comcodeend_re='|'.join([fr"<!--[ ]*l?no{m}[ ]*-->" for m in markers])
-    self.codebegin_dict = {
-      'vim': codebegin_re,
-      'lark': codebegin_re
+    self.codebegin = codebegin_re
+    self.codeend="```"
+    self.resultbegin=r"```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
+    self.resultend="```"
+    self.comcodebegin=comcodebegin_re
+    self.comcodeend=comcodeend_re
+    self.comresultbegin="<!--[ ]*l?result[ ]*-->"
+    self.comresultend="<!--[ ]*l?noresult[ ]*-->"
+    self.ignorebegin=r"<!--[ ]*l?ignore[ ]*-->"
+    self.ignoreend=r"<!--[ ]*l?noignore[ ]*-->"
+    self.secbegin_dict={
+      'vim':(codebegin_re+'|'+comcodebegin_re).replace('?','\?'),
+      'lark':(codebegin_re+'|'+comcodebegin_re)
     }
-    self.codebegin = self.codebegin_dict['lark']
-    self.codeend = "```"
-    self.resultbegin = r"```[ ]*l?result|```[ ]*{[^}]*result[^}]*}"
-    self.resultend = "```"
-    self.comcodebegin = comcodebegin_re
-    self.comcodeend = comcodeend_re
-    self.comresultbegin = "<!--[ ]*l?result[ ]*-->"
-    self.comresultend = "<!--[ ]*l?noresult[ ]*-->"
-    self.ignorebegin = r"<!--[ ]*l?ignore[ ]*-->"
-    self.ignoreend = r"<!--[ ]*l?noignore[ ]*-->"
+    self.secend_dict={
+      'vim':(self.resultend+'|'+self.comresultend).replace('?','\?'),
+      'lark':(self.resultend+'|'+self.comresultend),
+    }
 
 @dataclass
 class SymbolsLatex(Symbols):
@@ -278,24 +282,32 @@ class SymbolsLatex(Symbols):
     codebegin_vim_re='|'.join([r"\\begin\{[ ]*l\?"+m+r"\}" for m in markers])
     codebegin_lark_re='|'.join([r"\\begin\{[ ]*l?"+m+r"\}" for m in markers])
     codeend_re='|'.join([r"\\end\{l?"+m+r"\}" for m in markers])
-    comcodebegin_re='|'.join([fr"\%[ ]*l?{m}" for m in markers])
+    comcodebegin_vim_re='|'.join([fr"\%[ ]*l\?{m}" for m in markers])
+    comcodebegin_lark_re='|'.join([fr"\%[ ]*l?{m}" for m in markers])
     comcodeend_re='|'.join([fr"\%[ ]*l?no{m}" for m in markers])
-
-    self.codebegin_dict = {
-      'vim': codebegin_vim_re,
-      'lark': codebegin_lark_re
+    resultend_vim_re=r"\\end\{l\?[a-zA-Z0-9]*result\}"
+    resultend_lark_re=r"\\end\{l?[a-zA-Z0-9]*result\}"
+    comresultend_vim_re=r"\%[ ]*l\?noresult"
+    comresultend_lark_re=r"\%[ ]*l?noresult"
+    self.codebegin=codebegin_lark_re
+    self.codeend=codeend_re
+    self.resultbegin=r"\\begin\{l?[a-zA-Z0-9]*result\}"
+    self.resultend=resultend_lark_re
+    self.comcodebegin=comcodebegin_lark_re
+    self.comcodeend=comcodeend_re
+    self.comresultbegin=r"\%[ ]*l?result"
+    self.comresultend=comresultend_lark_re
+    self.ignorebegin=r"\%[ ]*lignore|\%[ ]*l?ignore[ ]*\%"
+    self.ignoreend=r"\%[ ]*lnoignore|\%[ ]*l?noignore[ ]*\%"
+    self.inlinemarker=r"\\l[a-zA-Z0-9]*inline"
+    self.secbegin_dict={
+      'vim':codebegin_vim_re+'|'+comcodebegin_vim_re,
+      'lark':codebegin_lark_re+'|'+comcodebegin_lark_re,
     }
-    self.codebegin = self.codebegin_dict['lark']
-    self.codeend = codeend_re
-    self.resultbegin = r"\\begin\{l?[a-zA-Z0-9]*result\}"
-    self.resultend = r"\\end\{l?[a-zA-Z0-9]*result\}"
-    self.comcodebegin = comcodebegin_re
-    self.comcodeend = comcodeend_re
-    self.comresultbegin = r"\%[ ]*l?result"
-    self.comresultend = r"\%[ ]*l?noresult"
-    self.ignorebegin = r"\%[ ]*lignore|\%[ ]*l?ignore[ ]*\%"
-    self.ignoreend = r"\%[ ]*lnoignore|\%[ ]*l?noignore[ ]*\%"
-    self.inlinemarker = r"\\l[a-zA-Z0-9]*inline"
+    self.secend_dict={
+      'vim':resultend_vim_re+'|'+comresultend_vim_re,
+      'lark':resultend_lark_re+'|'+comresultend_lark_re,
+    }
 
 OBR="{"
 CBR="}"

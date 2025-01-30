@@ -139,7 +139,7 @@ def make_parser():
   regexp=sps.add_parser('print-regexp',
     help='Print regexp matching start of code sections for the given file type.')
   regexp.add_argument('format',metavar='STR',default='vim',nargs='?',
-    help=dedent('''Regexp format to print: 'vim' or 'lark'. Defaults to 'vim'''))
+    help=dedent('''Regexp format to print: 'vim' or 'lark'. Defaults to 'vim'.'''))
   regexp.add_argument('--tty',action='store_true',
     help='Read intput document from stdin (required to get per-section status).')
   grammar=sps.add_parser('print-grammar',
@@ -294,10 +294,14 @@ def main(args=None):
       exit(0 if ecode is None else ecode)
   elif a.command=='print-regexp':
     s=parse_(a).symbols
-    regexp=s.codebegin_dict.get(a.format)
-    if regexp is None:
+    rbegin=s.secbegin_dict.get(a.format)
+    if rbegin is None:
       raise ValueError(f"Unsupported regexp format \"{a.format}\"")
-    print(regexp)
+    rend=s.secend_dict.get(a.format)
+    if rend is None:
+      raise ValueError(f"Unsupported regexp format \"{a.format}\"")
+    print(rbegin)
+    print(rend)
   elif a.command=='print-grammar':
     g=parse_(a).grammar
     print(g)
