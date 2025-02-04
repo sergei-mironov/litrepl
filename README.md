@@ -767,7 +767,7 @@ positional arguments:
                               (diagnostics).
     parse-print               Parse and print the input file back
                               (diagnostics).
-    eval-sections             Parse stdin, evaluate the sepcified sections (by
+    eval-sections             Parse stdin, evaluate the specified sections (by
                               default - all available sections), print the
                               resulting file to stdout.
     eval-code                 Evaluate the code snippet.
