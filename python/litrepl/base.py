@@ -136,8 +136,8 @@ def attach(fns:FileNames, st:SType|None=None)->Optional[Interpreter]:
       assert False, f"Unknown or undefined interpreter {cmd} (among {st})"
     pdebug(f"Interpreter pid {pid} cmd '{cmd}' was resolved into '{cls}'")
     return cls(fns)
-  except NoSuchProcess as p:
-    pdebug(f"Could not determine the interpreter classs for ({p})")
+  except NoSuchProcess as err:
+    pdebug(f"Could not determine the interpreter classs ({err})")
     return None
 
 def open_child_pipes(inp,outp):
