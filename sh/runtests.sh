@@ -1312,6 +1312,14 @@ grep -q "foo" err.txt
 grep -q "\"python\", \"sh\"" err.txt
 )} #}}}
 
+test_print_auxdir() {( #{{{
+mktest "_test_print_auxdir"
+runlitrepl --ai-auxdir=fooo print-auxdir ai >auxdir.txt
+grep -q "fooo" auxdir.txt
+runlitrepl --python-auxdir=baar print-auxdir python >auxdir.txt
+grep -q "baar" auxdir.txt
+)} #}}}
+
 die() {
   echo "$@" >&2
   exit 1
@@ -1378,6 +1386,7 @@ tests() {
   echo test_interp_disabled $(which python) - $(which sh)
   echo test_irreproducible $(which ipython) - -
   echo test_invalid_markers $(which python) $(which aicli) $(which sh)
+  echo test_print_auxdir $(which python) $(which aicli) $(which sh)
 }
 
 runlitrepl() {

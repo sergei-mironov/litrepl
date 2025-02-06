@@ -146,6 +146,8 @@ def make_parser():
     help=dedent('''Print the resulting grammar for the given filetype.'''))
   grammar.add_argument('--tty',action='store_true',
     help='Read intput document from stdin (required to get per-section status).')
+  _with_type(sps.add_parser('print-auxdir',
+    help=dedent('''Print the auxdir for the given interpreter type.''')))
   return ap
 
 AP=make_parser()
@@ -305,6 +307,10 @@ def main(args=None):
   elif a.command=='print-grammar':
     g=parse_(a).grammar
     print(g)
+  elif a.command=='print-auxdir':
+    st=name2st(a.type)
+    fns=pipenames(a,st)
+    print(fns.wd)
   else:
     pstderr(f'Unknown or invalid command: \"{a.command}\".')
     exit(1)
