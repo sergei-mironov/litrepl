@@ -42,7 +42,7 @@ def make_parser():
     default=environ.get('LITREPL_PYTHON_MARKERS','python'),
     help=dedent('''TODO'''))
   ap.add_argument('--ai-markers',metavar='STR[,STR]',
-    default=environ.get('LITREPL_AI_MARKERS','ai'),
+    default=environ.get('LITREPL_AI_MARKERS','codeai,ai'),
     help=dedent('''TODO'''))
   ap.add_argument('--sh-markers',metavar='STR[,STR]',
     default=environ.get('LITREPL_SH_MARERS','sh,bash'),
