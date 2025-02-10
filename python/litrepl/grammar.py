@@ -39,7 +39,7 @@ def latex_sec(tag:str, st:SectionType=SectionType.Code)->SectionGrammar:
   return SectionGrammar(tag, r'\\begin{%s}'%(tag,), r'\\end{%s}'%(tag,), st)
 
 def latex_com_sec(tag:str, st:SectionType=SectionType.Code)->SectionGrammar:
-  return SectionGrammar(f'com{tag}', f'\%[ ]*{tag}[ ]*\%', f'\%[ ]*no{tag}[ ]*\%', st)
+  return SectionGrammar(f'com{tag}', fr'\%[ ]*{tag}[ ]*\%', fr'\%[ ]*no{tag}[ ]*\%', st)
 
 def secbody(sg:SectionGrammar)->str:
   return dedent(f'''
@@ -51,13 +51,14 @@ def secbody(sg:SectionGrammar)->str:
   {sg.name.upper()}END.2: /{sg.emarker}/
   ''')
 
-def mkgrammar(sgs:list[SectionGrammar]) -> str:
-  bmarkers='|'.join([sg.bmarker for sg in sgs])
+def mkgrammar(sgs:list[SectionGrammar], others:dict[str,tuple[str,str]]={}) -> str:
+  bmarkers='|'.join([sg.bmarker for sg in sgs]+[str(v[0]) for v in others.values()])
   return '\n'.join([dedent(f'''
-    start: (topleveltext)? (({'|'.join([sg.name for sg in sgs])}) (topleveltext)?)*
+    start: (topleveltext)? (({'|'.join([sg.name for sg in sgs]+[str(k) for k in others.keys()])}) (topleveltext)?)*
     topleveltext : /(.(?!{bmarkers}))*./s
     '''),
-    *[secbody(sg) for sg in sgs]
+    *[secbody(sg) for sg in sgs],
+    *[str(v[1]) for v in others.values()],
   ])
 
 def mk_markdown_grammar(tags:list[str]|None=None)->str:
@@ -88,6 +89,16 @@ def mk_latex_grammar(tags:list[str]|None=None)->str:
     latex_com_sec('result', SectionType.Result),
     latex_com_sec('ignore', SectionType.Ignore),
   ]
-  return mkgrammar([*code_sections,*other_sections])
+
+  OBR="{"
+  CBR="}"
+  inlinemarker=r'\\l?[a-zA-Z0-9]*inline'
+  others = {'inline': (inlinemarker, dedent(fr'''
+  inline.1: inlinemarker "{OBR}" inltext "{CBR}" spaces "{OBR}" inltext "{CBR}"
+  inlinemarker: /{inlinemarker}/
+  inltext: ( /[^{OBR}{CBR}]+({OBR}[^{CBR}]*{CBR}[^{OBR}{CBR}]*)*/ )?
+  spaces: ( /[ \t\r\n]+/s )?
+  '''))}
+  return mkgrammar([*code_sections,*other_sections], others)
 
 

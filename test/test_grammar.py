@@ -153,18 +153,18 @@ def test_parse_markdown():
 
 
 def test_parse_latex():
-  latex_content = '''
+  latex_content = r'''
   % Sample Document
 
   Below is a code block in Python:
 
-  \\begin{foo}
+  \begin{foo}
   Foo section
-  \\end{foo}
+  \end{foo}
 
-  \\begin{python}
+  \begin{python}
   print("Hello, World!")
-  \\end{python}
+  \end{python}
 
   % python %
   print("Hello, World! (commented)")
@@ -176,9 +176,11 @@ def test_parse_latex():
 
   % noignore %
 
-  \\begin{result}
+  \inline{var}{value}
+
+  \begin{result}
   Output of the code goes here.
-  \\end{result}
+  \end{result}
   '''
 
   grammar = mk_latex_grammar(['foo'])
@@ -195,4 +197,5 @@ def test_parse_latex():
   assert _ntokens('pythonbegin')>0, tree
   assert _ntokens('compythonbegin')>0, tree
   assert _ntokens('resultbegin')>0, tree
+  assert _ntokens('inline')>0, tree
 
