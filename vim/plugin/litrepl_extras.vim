@@ -293,6 +293,18 @@ if !exists(":LAIFile")
   command! -range -bar -nargs=* LAIFile call LitReplAIFile(<q-args>)
 endif
 
+if ! exists("g:litrepl_extras_aicode_footer")
+  let g:litrepl_extras_aicode_footer =  ''.
+    \ "Please print the response as a code section suitable for pasting into " .
+    \ "a source file, without any code section formatting, especially avoid the ".
+    \ "Markdown-style \"``` XXX ... ```\" formatting!"
+endif
+if ! exists("g:litrepl_extras_aicode_footer_linewise")
+  let g:litrepl_extras_aicode_footer_linewise =  ''.
+    \ "Wrap your own comments, if any, into the appropriate comment blocks or " .
+    \ "line-comments suitable for the main programming language of the sinppet " .
+    \ "e.g. by using hash-comment or \\/\\/ symbols. "
+endif
 fun! LitReplAICode(scope, prompt) range " -> [int, string]
   " Start a new AI task, by (a) taking a target scope, verifying if prompt is
   " empty and requesting if so, (b) if the scope is for selection, prepend an
@@ -312,23 +324,21 @@ fun! LitReplAICode(scope, prompt) range " -> [int, string]
   else
     let task = ""
   endif
-  let footer = ''.
-    \ "Please print the resulting code snippet as-is " .
-    \ "without any markdown formatting, especially avoid the \"```\" ".
-    \ "formatting!"
+  let footer = LitReplGet("litrepl_extras_aicode_footer")
   let vm = visualmode()
   if (scope == 1 && vm == 'V') || (scope == 0 && getpos('.')[2] == 1)
-    let footer = footer .
-      \ "Wrap your own comments, if any, into the appropriate comment blocks or " .
-      \ "line-comments suitable for the main programming language of the sinppet " .
-      \ "e.g. by using hash-comment or \\/\\/ symbols. "
+    let footer = footer.' '.LitReplGet("litrepl_extras_aicode_footer_linewise")
   else
-    let footer = footer .
-      \ "Please generate no comments, just output the code snippet! "
+    let footer = footer . ' ' .
+      \ "Please generate no comments, output just the code snippet! "
   endif
   if &textwidth > 0
-    let footer = footer . "Please avoid generating lines longer than ".
+    let footer = footer . ' ' . "Please avoid generating lines longer than ".
       \ string(&textwidth)." characters. "
+  endif
+  if &filetype != ''
+    let footer = footer . " Assume that the source file wich is used as the paste ".
+      \ "target has the type \"". &filetype . "\"."
   endif
   return LitReplTaskNew(scope,
     \ task .
