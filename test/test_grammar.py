@@ -10,7 +10,8 @@ from litrepl.grammar import (
   latex_sec,
   secbody,
   mkgrammar,
-  mk_markdown_grammar
+  mk_markdown_grammar,
+  mk_latex_grammar
 )
 
 def test_st2rule():
@@ -51,8 +52,8 @@ def test_latex_sec():
   # Test latex_sec function
   sg = latex_sec('document')
   assert sg.name == 'document'
-  assert sg.bmarker == '\\begin{document}'
-  assert sg.emarker == '\\end{document}'
+  assert sg.bmarker == r'\\begin{document}'
+  assert sg.emarker == r'\\end{document}'
   assert sg.sectype == SectionType.Code
 
 def test_secbody():
@@ -116,6 +117,10 @@ def test_parse_markdown():
   print("Hello, World!")
   ```
 
+  <!-- python -->
+  print("Hello, World! (commented)")
+  <!-- nopython -->
+
   <!-- ignore -->
 
   This is a comment block that is ignored by the parser.
@@ -143,7 +148,51 @@ def test_parse_markdown():
   # Extract names from the tokens
   assert _ntokens('foobegin')>0, tree
   assert _ntokens('pythonbegin')>0, tree
+  assert _ntokens('compythonbegin')>0, tree
   assert _ntokens('resultbegin')>0, tree
 
 
+def test_parse_latex():
+  latex_content = '''
+  % Sample Document
+
+  Below is a code block in Python:
+
+  \\begin{foo}
+  Foo section
+  \\end{foo}
+
+  \\begin{python}
+  print("Hello, World!")
+  \\end{python}
+
+  % python %
+  print("Hello, World! (commented)")
+  % nopython %
+
+  % ignore %
+
+  This is a comment block that is ignored by the parser.
+
+  % noignore %
+
+  \\begin{result}
+  Output of the code goes here.
+  \\end{result}
+  '''
+
+  grammar = mk_latex_grammar(['foo'])
+  print(grammar)
+  parser = Lark(grammar, parser='earley', start='start', regex=True)
+  tree = parser.parse(latex_content)
+  assert tree is not None
+  print(tree)
+
+  def _ntokens(n):
+    return len(list(tree.find_data(n)))
+
+  assert _ntokens('foobegin')>0, tree
+  assert _ntokens('pythonbegin')>0, tree
+  assert _ntokens('compythonbegin')>0, tree
+  assert _ntokens('resultbegin')>0, tree
 
