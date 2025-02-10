@@ -94,7 +94,7 @@ def mk_latex_grammar(tags:list[str]|None=None)->str:
   CBR="}"
   inlinemarker=r'\\l?[a-zA-Z0-9]*inline'
   others = {'inline': (inlinemarker, dedent(fr'''
-  inline.1: inlinemarker "{OBR}" inltext "{CBR}" spaces "{OBR}" inltext "{CBR}"
+  inline.1: inlinemarker "{OBR}" inltext "{CBR}" spaces "{OBR}" inltext "{CBR}" -> e_inline
   inlinemarker: /{inlinemarker}/
   inltext: ( /[^{OBR}{CBR}]+({OBR}[^{CBR}]*{CBR}[^{OBR}{CBR}]*)*/ )?
   spaces: ( /[ \t\r\n]+/s )?

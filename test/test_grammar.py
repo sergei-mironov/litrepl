@@ -197,5 +197,5 @@ def test_parse_latex():
   assert _ntokens('pythonbegin')>0, tree
   assert _ntokens('compythonbegin')>0, tree
   assert _ntokens('resultbegin')>0, tree
-  assert _ntokens('inline')>0, tree
+  assert _ntokens('inlinemarker')>0, tree
 
