@@ -10,7 +10,6 @@ $CWD/python:\
 $PYTHONPATH
 export MYPYPATH=\
 $CWD/python:\
-alias ipython="sh $CWD/ipython.sh"
 
 export ONDIRRC=`pwd`/.ondirrc
 
