@@ -297,7 +297,7 @@ class SymbolsLatex(Symbols):
   def __init__(self, a:LitreplArgs):
     markers=[]
     for st in SType:
-      markers.extend(getattr(a,f"{st2name(st)}_markers").split(","))
+      markers.extend(a.markers[st])
     codebegin_vim_re='|'.join([r"\\begin\{[ ]*l\?"+m+r"\}" for m in markers])
     codebegin_lark_re='|'.join([r"\\begin\{[ ]*l?"+m+r"\}" for m in markers])
     codeend_re='|'.join([r"\\end\{l?"+m+r"\}" for m in markers])
