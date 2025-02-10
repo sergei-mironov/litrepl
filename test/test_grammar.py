@@ -137,7 +137,7 @@ def test_parse_markdown():
   # Check if parsed successfully by ensuring a tree is returned
   assert tree is not None
   print(tree)
-  # Extract all the Tokens from the tree
+  # Extract tokens of a certain kind from the tree
   def _ntokens(n):
     return len(list(tree.find_data(n)))
   # Extract names from the tokens
