@@ -5,6 +5,7 @@ from enum import Enum
 from enum import Enum
 
 class SectionType(Enum):
+  """ Sections types. `Ignore` are section-level block comments. """
   Code=0
   Result=1
   Ignore=2
@@ -22,6 +23,7 @@ def st2rule(st:SectionType)->str:
 
 @dataclass
 class SectionGrammar:
+  """ Section grammar parameters. """
   name:str
   bmarker:str
   emarker:str
@@ -39,9 +41,11 @@ def latex_sec(tag:str, st:SectionType=SectionType.Code)->SectionGrammar:
 def secbody(sg:SectionGrammar)->str:
   return dedent(f'''
   {sg.name}: {sg.name}begin {sg.name}text {sg.name}end -> {st2rule(sg.sectype)}
-  {sg.name}begin: /{sg.bmarker}/
+  {sg.name}begin: {sg.name.upper()}BEGIN
   {sg.name}text: /(.(?!{sg.emarker}))*./s
-  {sg.name}end: /{sg.emarker}/
+  {sg.name}end: {sg.name.upper()}END
+  {sg.name.upper()}BEGIN.2: /{sg.bmarker}/
+  {sg.name.upper()}END.2: /{sg.emarker}/
   ''')
 
 def mkgrammar(sgs:list[SectionGrammar]) -> str:
