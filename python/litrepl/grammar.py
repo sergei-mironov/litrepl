@@ -12,9 +12,9 @@ class SectionType(Enum):
 
 def st2rule(st:SectionType)->str:
   rule_mapping = {
-    SectionType.Code: "e_icodesection",
-    SectionType.Result: "e_ocodesection",
-    SectionType.Ignore: "e_comsection"
+    SectionType.Code: "codesec",
+    SectionType.Result: "resultsec",
+    SectionType.Ignore: "ignoresec"
   }
   rule = rule_mapping.get(st)
   if rule is None:
@@ -30,16 +30,16 @@ class SectionGrammar:
   sectype:SectionType
 
 def markdown_sec(tag:str, st:SectionType=SectionType.Code)->SectionGrammar:
-  return SectionGrammar(tag, f'```[ ]*{tag}', '```', st)
+  return SectionGrammar(tag, r'```[ ]*l?%s|```[ ]*{[^}]*%s[^}]*}'%(tag,tag), '```', st)
 
 def markdown_com_sec(tag:str, st:SectionType=SectionType.Code)->SectionGrammar:
-  return SectionGrammar(f'com{tag}', f'<!--[ ]*{tag}[ ]*-->', f'<!--[ ]*no{tag}[ ]*-->', st)
+  return SectionGrammar(f'com{tag}', fr'<!--[ ]*l?{tag}[ ]*-->', fr'<!--[ ]*l?no{tag}[ ]*-->', st)
 
 def latex_sec(tag:str, st:SectionType=SectionType.Code)->SectionGrammar:
-  return SectionGrammar(tag, r'\\begin{%s}'%(tag,), r'\\end{%s}'%(tag,), st)
+  return SectionGrammar(tag, r'\\begin{l?%s}'%(tag,), r'\\end{l?%s}'%(tag,), st)
 
 def latex_com_sec(tag:str, st:SectionType=SectionType.Code)->SectionGrammar:
-  return SectionGrammar(f'com{tag}', fr'\%[ ]*{tag}[ ]*\%', fr'\%[ ]*no{tag}[ ]*\%', st)
+  return SectionGrammar(f'com{tag}', fr'\%[ ]*l?{tag}[ ]*\%', fr'\%[ ]*l?no{tag}[ ]*\%', st)
 
 def secbody(sg:SectionGrammar)->str:
   return dedent(f'''
@@ -64,8 +64,6 @@ def mkgrammar(sgs:list[SectionGrammar], others:dict[str,tuple[str,str]]={}) -> s
 def mk_markdown_grammar(tags:list[str]|None=None)->str:
   tags=tags or []
   code_sections=[
-    markdown_sec('python', SectionType.Code),
-    markdown_com_sec('python', SectionType.Code),
     *[markdown_sec(tag, SectionType.Code) for tag in tags],
     *[markdown_com_sec(tag, SectionType.Code) for tag in tags]
   ]
@@ -79,8 +77,6 @@ def mk_markdown_grammar(tags:list[str]|None=None)->str:
 def mk_latex_grammar(tags:list[str]|None=None)->str:
   tags=tags or []
   code_sections=[
-    latex_sec('python', SectionType.Code),
-    latex_com_sec('python', SectionType.Code),
     *[latex_sec(tag, SectionType.Code) for tag in tags],
     *[latex_com_sec(tag, SectionType.Code) for tag in tags]
   ]
@@ -93,11 +89,13 @@ def mk_latex_grammar(tags:list[str]|None=None)->str:
   OBR="{"
   CBR="}"
   inlinemarker=r'\\l?[a-zA-Z0-9]*inline'
-  others = {'inline': (inlinemarker, dedent(fr'''
-  inline.1: inlinemarker "{OBR}" inltext "{CBR}" spaces "{OBR}" inltext "{CBR}" -> e_inline
+  others = {'inline': (inlinemarker+"\\{", dedent(fr'''
+  inline.1: inlinemarker "{OBR}" inltext "{CBR}" spaces obr inltext cbr -> inlinecodesec
   inlinemarker: /{inlinemarker}/
   inltext: ( /[^{OBR}{CBR}]+({OBR}[^{CBR}]*{CBR}[^{OBR}{CBR}]*)*/ )?
   spaces: ( /[ \t\r\n]+/s )?
+  obr: "{OBR}"
+  cbr: "{CBR}"
   '''))}
   return mkgrammar([*code_sections,*other_sections], others)
 

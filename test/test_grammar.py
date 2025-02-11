@@ -16,9 +16,9 @@ from litrepl.grammar import (
 
 def test_st2rule():
   # Test conversion of SectionType to rule
-  assert st2rule(SectionType.Code) == "e_icodesection"
-  assert st2rule(SectionType.Result) == "e_ocodesection"
-  assert st2rule(SectionType.Ignore) == "e_comsection"
+  assert st2rule(SectionType.Code) == "codesec"
+  assert st2rule(SectionType.Result) == "resultsec"
+  assert st2rule(SectionType.Ignore) == "ignoresec"
 
   # Test for unknown SectionType
   with pytest.raises(ValueError, match="Unknown section type"):
@@ -36,7 +36,7 @@ def test_markdown_sec():
   # Test markdown_sec function
   sg = markdown_sec('python')
   assert sg.name == 'python'
-  assert sg.bmarker == '```[ ]*python'
+  assert 'python' in sg.bmarker
   assert sg.emarker == '```'
   assert sg.sectype == SectionType.Code
 
@@ -44,16 +44,16 @@ def test_markdown_com_sec():
   # Test markdown_com_sec function
   sg = markdown_com_sec('tag')
   assert sg.name == 'comtag'
-  assert sg.bmarker == '<!--[ ]*tag[ ]*-->'
-  assert sg.emarker == '<!--[ ]*notag[ ]*-->'
+  assert 'tag' in sg.bmarker
+  assert 'tag' in sg.emarker
   assert sg.sectype == SectionType.Code
 
 def test_latex_sec():
   # Test latex_sec function
   sg = latex_sec('document')
   assert sg.name == 'document'
-  assert sg.bmarker == r'\\begin{document}'
-  assert sg.emarker == r'\\end{document}'
+  assert 'document' in sg.bmarker
+  assert 'document' in sg.emarker
   assert sg.sectype == SectionType.Code
 
 def test_secbody():
@@ -96,13 +96,13 @@ def test_mkgrammar():
 
 def test_mk_markdown_grammar():
   # Test mk_markdown_grammar
-  expected_output = mk_markdown_grammar(['javascript', 'html'])
-  assert '```[ ]*python' in expected_output
-  assert '```[ ]*javascript' in expected_output
-  assert '```[ ]*html' in expected_output
-  assert '<!--[ ]*ignore[ ]*-->' in expected_output
+  expected_output = mk_markdown_grammar(['python', 'javascript', 'html'])
+  assert '```[ ]*l?python' in expected_output
+  assert '```[ ]*l?javascript' in expected_output
+  assert '```[ ]*l?html' in expected_output
+  assert '<!--[ ]*l?ignore[ ]*-->' in expected_output
 
-def test_parse_markdown():
+def test_parse_markdown1():
   # Define a sample markdown document
   markdown_content = '''
   # Sample Document
@@ -133,7 +133,7 @@ def test_parse_markdown():
   '''
 
   # Get the grammar from mk_markdown_grammar
-  grammar = mk_markdown_grammar(['foo'])
+  grammar = mk_markdown_grammar(['python', 'foo'])
   print(grammar)
   # Initialize the Lark parser
   parser = Lark(grammar, parser='earley', start='start', regex=True)
@@ -149,6 +149,37 @@ def test_parse_markdown():
   assert _ntokens('foobegin')>0, tree
   assert _ntokens('pythonbegin')>0, tree
   assert _ntokens('compythonbegin')>0, tree
+  assert _ntokens('resultbegin')>0, tree
+
+def test_parse_markdown2():
+  # Define a sample markdown document
+  markdown_content = '''
+  Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+
+  ``` { .python }
+  print('Wowowou')
+  ```
+
+  ``` { .lresult }
+  Wowowou
+  ```
+  '''
+
+  # Get the grammar from mk_markdown_grammar
+  grammar = mk_markdown_grammar(['python'])
+  print(grammar)
+  # Initialize the Lark parser
+  parser = Lark(grammar, propagate_positions=True)
+  # Attempt to parse the markdown document
+  tree = parser.parse(markdown_content)
+  # Check if parsed successfully by ensuring a tree is returned
+  assert tree is not None
+  print(tree.pretty())
+  # Extract tokens of a certain kind from the tree
+  def _ntokens(n):
+    return len(list(tree.find_data(n)))
+  # Extract names from the tokens
+  assert _ntokens('pythonbegin')>0, tree
   assert _ntokens('resultbegin')>0, tree
 
 
@@ -183,7 +214,7 @@ def test_parse_latex():
   \end{result}
   '''
 
-  grammar = mk_latex_grammar(['foo'])
+  grammar = mk_latex_grammar(['python', 'foo'])
   print(grammar)
   parser = Lark(grammar, parser='earley', start='start', regex=True)
   tree = parser.parse(latex_content)
