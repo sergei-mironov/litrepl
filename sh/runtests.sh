@@ -234,8 +234,8 @@ myfun
 ``` result
 ```
 EOF
-cat source.md | runlitrepl --python-markers=python,foo --filetype=markdown parse-print >out.md
-diff -u source.md out.md
+cat source.md | runlitrepl --python-markers=python,foo --filetype=markdown parse-print >out_pp.md
+diff -u source.md out_pp.md
 cat source.md | runlitrepl --python-markers=python,foo --filetype=markdown eval-sections >out.md
 diff -u out.md - <<"EOF"
 Python
@@ -379,9 +379,9 @@ print("A"+"B")
 Text
 \begin{enumerate}
 \item
-  %lresult
+  %lresult%
   PLACEHOLDER
-  %lnoresult
+  %lnoresult%
 \end{enumerate}
 \begin{lresult}
 PLACEHOLDER
@@ -394,28 +394,28 @@ tag='\\textbf{bold}'
 \end{lpython}
 \linline{tag+tag}{\textbf{old}\textbf{old}}
 % == Meta-comments ==
-%lignore
+%lignore%
 \begin{lpython}
 print("X"+"Y")
 \end{lpython}
-%lresult
+%lresult%
 ZZZZZ
-%lnoresult
-%lnoignore
+%lnoresult%
+%lnoignore%
 \begin{lresult}
 PLACEHOLDER
 \end{lresult}
 \begin{python}
 print('FOOO')
 \end{python}
-%result
+%result%
 PLACEHOLDER
-%noresult
-% python
+%noresult%
+% python %
 3+4
-% nopython
-%result
-%noresult
+% nopython %
+%result%
+%noresult%
 \begin{sh}
 A=1
 echo $A
@@ -427,11 +427,11 @@ print("AB")
 \end{zzz}
 \begin{result}
 \end{result}
-%python
+%python%
 print('\end{python}')
-%nopython
-%result
-%noresult
+%nopython%
+%result%
+%noresult%
 EOF
 cat source.tex | runlitrepl --filetype=latex parse-print >out.tex
 diff -u source.tex out.tex
@@ -449,9 +449,9 @@ print("A"+"B")
 Text
 \begin{enumerate}
 \item
-  %lresult
+  %lresult%
   AB
-  %lnoresult
+  %lnoresult%
 \end{enumerate}
 \begin{lresult}
 AB
@@ -464,28 +464,28 @@ tag='\\textbf{bold}'
 \end{lpython}
 \linline{tag+tag}{\textbf{bold}\textbf{bold}}
 % == Meta-comments ==
-%lignore
+%lignore%
 \begin{lpython}
 print("X"+"Y")
 \end{lpython}
-%lresult
+%lresult%
 ZZZZZ
-%lnoresult
-%lnoignore
+%lnoresult%
+%lnoignore%
 \begin{lresult}
 \end{lresult}
 \begin{python}
 print('FOOO')
 \end{python}
-%result
+%result%
 FOOO
-%noresult
-% python
+%noresult%
+% python %
 3+4
-% nopython
-%result
+% nopython %
+%result%
 7
-%noresult
+%noresult%
 \begin{sh}
 A=1
 echo $A
@@ -499,12 +499,12 @@ print("AB")
 \begin{result}
 AB
 \end{result}
-%python
+%python%
 print('\end{python}')
-%nopython
-%result
+%nopython%
+%result%
 \end{python}
-%noresult
+%noresult%
 EOF
 )} #}}}
 
