@@ -35,6 +35,9 @@ from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    with_fd, read_nonblock, eval_code, eval_code_, interpIsRunning)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
                    cursor_within, nlines, wraplong, remove_silent, hashdigest)
+from .grammar import (SectionType, st2rule, SectionGrammar, markdown_sec,
+                      markdown_com_sec, latex_sec, secbody, mkgrammar,
+                      mk_markdown_grammar, mk_latex_grammar)
 
 from .interpreters.python import PythonInterpreter
 from .interpreters.ipython import IPythonInterpreter
@@ -284,11 +287,11 @@ class SymbolsMarkdown(Symbols):
     self.ignorebegin=r"<!--[ ]*l?ignore[ ]*-->"
     self.ignoreend=r"<!--[ ]*l?noignore[ ]*-->"
     self.secbegin_dict={
-      'vim':(codebegin_re+'|'+comcodebegin_re).replace('?','\?'),
+      'vim':(codebegin_re+'|'+comcodebegin_re).replace('?',r'\?'),
       'lark':(codebegin_re+'|'+comcodebegin_re)
     }
     self.secend_dict={
-      'vim':(self.resultend+'|'+self.comresultend).replace('?','\?'),
+      'vim':(self.resultend+'|'+self.comresultend).replace('?',r'\?'),
       'lark':(self.resultend+'|'+self.comresultend),
     }
 
@@ -333,89 +336,112 @@ CBR="}"
 BCBR="\\}"
 BOBR="\\{"
 
+
+# def grammar_(a:LitreplArgs, filetype:str)->Tuple[LarkGrammar,Symbols]:
+#   # For the `?!` syntax, see
+#   # https://stackoverflow.com/questions/56098140/how-to-exclude-certain-possibilities-from-a-regular-expression
+#   if filetype in ["md","markdown"]:
+#     symbols_md=SymbolsMarkdown(a)
+#     sl=symbols_md
+#     toplevel_markers_markdown='|'.join([
+#       sl.codebegin,sl.resultbegin,
+#       sl.comresultbegin, sl.ignorebegin, sl.comcodebegin
+#     ])
+#     return (dedent(fr"""
+#       start: (topleveltext)? (snippet (topleveltext)?)*
+#       snippet : codesec -> e_icodesection
+#               | resultsec -> e_ocodesection
+#               | ignoresec -> e_comsection
+#       ignoresec.2 : ignorebegin ignoretext ignoreend
+#       codesec.1 : codebegin codetext codeend
+#                      | comcodebegin codesectext comcodeend
+#       resultsec.1 : resultbegin resulttext resultend
+#                      | comresultbegin vertext comresultend
+#       codebegin : /{symbols_md.codebegin}/
+#       codeend : /{symbols_md.codeend}/
+#       comcodebegin : /{symbols_md.comcodebegin}/
+#       comcodeend : /{symbols_md.comcodeend}/
+#       resultbegin : /{symbols_md.resultbegin}/
+#       resultend : /{symbols_md.resultend}/
+#       comresultbegin : /{symbols_md.comresultbegin}/
+#       comresultend : /{symbols_md.comresultend}/
+#       inlinebeginmarker : "`"
+#       inlinendmarker : "`"
+#       ignorebegin : /{symbols_md.ignorebegin}/
+#       ignoreend : /{symbols_md.ignoreend}/
+#       topleveltext : /(.(?!{toplevel_markers_markdown}))*./s
+#       codetext : /(.(?!{symbols_md.codeend}))*./s
+#       resulttext : /(.(?!{symbols_md.resultend}))*./s
+#       ignoretext : /(.(?!{symbols_md.ignoreend}))*./s
+#       vertext : /(.(?!{symbols_md.comresultend}))*./s
+#       codesectext : /(.(?!{symbols_md.comcodeend}))*./s
+#       """), symbols_md)
+#   elif filetype in ["tex","latex"]:
+#     symbols_latex=SymbolsLatex(a)
+#     sl=symbols_latex
+#     toplevel_markers_latex='|'.join([
+#       sl.codebegin,sl.codeend,sl.comcodebegin,sl.comcodeend,
+#       sl.resultbegin,sl.resultend,sl.comresultbegin,sl.comresultend,
+#       sl.ignorebegin,sl.ignoreend,sl.inlinemarker+BOBR
+#     ])
+#     return (dedent(fr"""
+#       start: (topleveltext)? (snippet (topleveltext)? )*
+#       snippet : codesec -> e_icodesection
+#               | resultsec -> e_ocodesection
+#               | inlinecodesec -> e_inline
+#               | ignoresec -> e_comment
+#       ignoresec.2 : ignorebegin ignoretext ignoreend
+#       codesec.1 : codebegin codetext codeend
+#                 | comcodebegin comcodetext comcodeend
+#       resultsec.1 : resultbegin resulttext resultend
+#                   | comresultbegin comresulttext comresultend
+#       inlinecodesec.1 : inlinemarker "{OBR}" inltext "{CBR}" spaces obr inltext cbr
+#       inlinemarker : /{symbols_latex.inlinemarker}/
+#       codebegin : /{symbols_latex.codebegin}/
+#       codeend : /{symbols_latex.codeend}/
+#       comcodebegin : /{symbols_latex.comcodebegin}/
+#       comcodeend : /{symbols_latex.comcodeend}/
+#       resultbegin : /{symbols_latex.resultbegin}/
+#       resultend : /{symbols_latex.resultend}/
+#       comresultbegin : /{symbols_latex.comresultbegin}/
+#       comresultend : /{symbols_latex.comresultend}/
+#       ignorebegin : /{symbols_latex.ignorebegin}/
+#       ignoreend : /{symbols_latex.ignoreend}/
+#       topleveltext : /(.(?!{toplevel_markers_latex}))*./s
+#       comcodetext : /(.(?!{symbols_latex.comcodeend}))*./s
+#       codetext : /(.(?!{symbols_latex.codeend}))*./s
+#       resulttext : /(.(?!{symbols_latex.resultend}))*./s
+#       comresulttext : /(.(?!{symbols_latex.comresultend}))*./s
+#       inltext : ( /[^{OBR}{CBR}]+({OBR}[^{CBR}]*{CBR}[^{OBR}{CBR}]*)*/ )?
+#       ignoretext : ( /(.(?!{symbols_latex.ignoreend}))*./s )?
+#       spaces : ( /[ \t\r\n]+/s )?
+#       obr : "{OBR}"
+#       cbr : "{CBR}"
+#       """), symbols_latex)
+#   else:
+#     raise ValueError(f"Unsupported filetype \"{filetype}\"")
+
+
 def grammar_(a:LitreplArgs, filetype:str)->Tuple[LarkGrammar,Symbols]:
-  # For the `?!` syntax, see
-  # https://stackoverflow.com/questions/56098140/how-to-exclude-certain-possibilities-from-a-regular-expression
+  symbols=None
+  grammar=None
+  markers=[]
+  for st in SType:
+    markers.extend(a.markers[st])
   if filetype in ["md","markdown"]:
-    symbols_md=SymbolsMarkdown(a)
-    sl=symbols_md
-    toplevel_markers_markdown='|'.join([
-      sl.codebegin,sl.resultbegin,
-      sl.comresultbegin, sl.ignorebegin, sl.comcodebegin
-    ])
-    return (dedent(fr"""
-      start: (topleveltext)? (snippet (topleveltext)?)*
-      snippet : codesec -> e_icodesection
-              | resultsec -> e_ocodesection
-              | ignoresec -> e_comsection
-      ignoresec.2 : ignorebegin ignoretext ignoreend
-      codesec.1 : codebegin codetext codeend
-                     | comcodebegin codesectext comcodeend
-      resultsec.1 : resultbegin resulttext resultend
-                     | comresultbegin vertext comresultend
-      codebegin : /{symbols_md.codebegin}/
-      codeend : /{symbols_md.codeend}/
-      comcodebegin : /{symbols_md.comcodebegin}/
-      comcodeend : /{symbols_md.comcodeend}/
-      resultbegin : /{symbols_md.resultbegin}/
-      resultend : /{symbols_md.resultend}/
-      comresultbegin : /{symbols_md.comresultbegin}/
-      comresultend : /{symbols_md.comresultend}/
-      inlinebeginmarker : "`"
-      inlinendmarker : "`"
-      ignorebegin : /{symbols_md.ignorebegin}/
-      ignoreend : /{symbols_md.ignoreend}/
-      topleveltext : /(.(?!{toplevel_markers_markdown}))*./s
-      codetext : /(.(?!{symbols_md.codeend}))*./s
-      resulttext : /(.(?!{symbols_md.resultend}))*./s
-      ignoretext : /(.(?!{symbols_md.ignoreend}))*./s
-      vertext : /(.(?!{symbols_md.comresultend}))*./s
-      codesectext : /(.(?!{symbols_md.comcodeend}))*./s
-      """), symbols_md)
+    symbols=SymbolsMarkdown(a)
+    grammar=mk_markdown_grammar(markers)
+    pass
   elif filetype in ["tex","latex"]:
-    symbols_latex=SymbolsLatex(a)
-    sl=symbols_latex
-    toplevel_markers_latex='|'.join([
-      sl.codebegin,sl.codeend,sl.comcodebegin,sl.comcodeend,
-      sl.resultbegin,sl.resultend,sl.comresultbegin,sl.comresultend,
-      sl.ignorebegin,sl.ignoreend,sl.inlinemarker+BOBR
-    ])
-    return (dedent(fr"""
-      start: (topleveltext)? (snippet (topleveltext)? )*
-      snippet : codesec -> e_icodesection
-              | resultsec -> e_ocodesection
-              | inlinecodesec -> e_inline
-              | ignoresec -> e_comment
-      ignoresec.2 : ignorebegin ignoretext ignoreend
-      codesec.1 : codebegin codetext codeend
-                | comcodebegin comcodetext comcodeend
-      resultsec.1 : resultbegin resulttext resultend
-                  | comresultbegin comresulttext comresultend
-      inlinecodesec.1 : inlinemarker "{OBR}" inltext "{CBR}" spaces obr inltext cbr
-      inlinemarker : /{symbols_latex.inlinemarker}/
-      codebegin : /{symbols_latex.codebegin}/
-      codeend : /{symbols_latex.codeend}/
-      comcodebegin : /{symbols_latex.comcodebegin}/
-      comcodeend : /{symbols_latex.comcodeend}/
-      resultbegin : /{symbols_latex.resultbegin}/
-      resultend : /{symbols_latex.resultend}/
-      comresultbegin : /{symbols_latex.comresultbegin}/
-      comresultend : /{symbols_latex.comresultend}/
-      ignorebegin : /{symbols_latex.ignorebegin}/
-      ignoreend : /{symbols_latex.ignoreend}/
-      topleveltext : /(.(?!{toplevel_markers_latex}))*./s
-      comcodetext : /(.(?!{symbols_latex.comcodeend}))*./s
-      codetext : /(.(?!{symbols_latex.codeend}))*./s
-      resulttext : /(.(?!{symbols_latex.resultend}))*./s
-      comresulttext : /(.(?!{symbols_latex.comresultend}))*./s
-      inltext : ( /[^{OBR}{CBR}]+({OBR}[^{CBR}]*{CBR}[^{OBR}{CBR}]*)*/ )?
-      ignoretext : ( /(.(?!{symbols_latex.ignoreend}))*./s )?
-      spaces : ( /[ \t\r\n]+/s )?
-      obr : "{OBR}"
-      cbr : "{CBR}"
-      """), symbols_latex)
+    symbols=SymbolsLatex(a)
+    grammar=mk_latex_grammar(markers)
+    pass
   else:
     raise ValueError(f"Unsupported filetype \"{filetype}\"")
+  assert symbols is not None
+  assert grammar is not None
+  return (grammar,symbols)
+
 
 def readinput(tty_ok=True)->str:
   return sys.stdin.read() if (not isatty(sys.stdin.fileno()) or tty_ok) else ""
@@ -425,6 +451,7 @@ def parse_as(a,inp,filetype)->Union[ParseResult,LarkError]:
     g,s=grammar_(a,filetype)
     parser=Lark(g,propagate_positions=True)
     tree=parser.parse(inp)
+    pdebug(tree.pretty())
     return ParseResult(g,s,tree,filetype)
   except LarkError as e:
     return e
