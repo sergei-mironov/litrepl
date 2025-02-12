@@ -26,7 +26,9 @@ Project Jupyter, Litrepl aims to facilitate the creation of research documents.
 In the light of recent developments in software deployment, however, we have
 shifted our focus from informal reproducibility to enhancing transparency in
 communication with programming language interpreters, by either eliminating or
-clearly exposing mutable states within the communication process.
+clearly exposing mutable states within the communication process. The tool is
+designed to ensure easy code editor integration, and the project repository
+offers a reference Vim plugin.
 
 # Statement of need
 
@@ -87,7 +89,7 @@ echo '~~~'
 $ cat input.tex
 \begin{python}
 import sys
-print(f"I use {sys.platform} btw!")
+print(f"I use {sys.platform.upper()} btw!")
 \end{python}
 \begin{result}
 \end{result}
@@ -112,18 +114,17 @@ echo '~~~'
 $ cat input.tex | litrepl
 \begin{python}
 import sys
-print(f"I use {sys.platform} btw!")
+print(f"I use {sys.platform.upper()} btw!")
 \end{python}
 \begin{result}
-I use linux btw!
+I use LINUX btw!
 \end{result}
 ~~~
 <!--noresult-->
 
-Now we can see the bold statement about the author's operating system. The
-side-effect of this execution is the started session of the python interpreter
-which is now running in the background. We can modify its state by adding more
-section to the document and executing them selectively.
+The side-effect of this execution is the started session of the python
+interpreter which is now running in the background. We can modify its state by
+adding more section to the document and executing them selectively.
 
 Evaluation results are written back into the result sections, and the entire
 document is printed. At this stage, certain conditions can be optionally
@@ -137,16 +138,15 @@ section.
 
 ## Interfacing Interpreters
 
-Litrepl communicates with interpreters using two uni-directional text streams:
-one for writing input and another for reading outputs. To establish effective
-communication, the interpreter should conform to the following general
-assumptions:
+Litrepl communicates with interpreters using POSIX uni-directional streams, one
+for writing input and another for reading outputs. During the communication,
+Litrepl makes the following general assumptions:
 
-* Synchronous single-user mode, which is implemented in most interpreters.
-* A capability to disable command line prompts. Litrepl relies on the echo
-  response, as described below, rather than on prompt detection.
+* The streams implement synchronous single-user mode.
+* Command line prompts are disabled. Litrepl relies on the echo response, as
+  described below, rather than on prompt detection.
 * The presence of an echo command or equivalent. The interpreter must be able to
-  echo an argument string provided by the user in response to the echo command.
+  echo an argument string provided by the user in response to such command.
 
 The simplicity of this approach is a key advantage, but it also has drawbacks.
 There's no parallel evaluation at the communication level, locking the
@@ -160,15 +160,10 @@ transfer organization.
 
 ## Session Management
 
-Litrepl offers **start**, **stop**, **restart** and **status** commands to
-control background sessions. The **interrupt** command sends an interruption
-signal to the interpreter. Finally, the **repl** command establishes direct
-communication with the interpreter, allowing manual inspection of its state.
-
 Litrepl maintains interpreter sessions in the background to support a REPL
 environment. Resources are stored in an auxiliary directory specified by
 command-line arguments, environment variables, or automatically derived paths.
-This directory contains POSIX pipes for I/O and a file with the interpreter's
+This directory contains pipe files for I/O and a file with the interpreter's
 process ID for session management. When evaluating code, Litrepl creates a
 response file named by hashing the code to store interpreter output. A response
 reader process with a soft lock runs until the interpreter finishes and responds
