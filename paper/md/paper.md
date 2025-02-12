@@ -97,43 +97,39 @@ print(f"I use {sys.platform.upper()} btw!")
 <!--noresult-->
 
 This document contains a Python code section and an empty result section marked
-with the corresponding Latex environment tags. To "execute" the code sections of
-the document we pipe it though the Litrepl processor as follows:
+with the corresponding LaTeX environment tags. To "execute" the code sections of
+the document, we pipe the whole document through the Litrepl processor as
+follows (only the last three relevant lines of the result are shown).
 
 <!--
 ``` sh
 echo '~~~ sh'
-echo '$ cat input.tex | litrepl'
+echo '$ cat input.tex | litrepl | tail -n 3'
 echo "sys.platform='linux'" | litrepl repl python >/dev/null
-cat input.tex | litrepl
+cat input.tex | litrepl | tail -n 3
 echo '~~~'
 ```
 -->
 <!--result-->
 ~~~ sh
-$ cat input.tex | litrepl
-\begin{python}
-import sys
-print(f"I use {sys.platform.upper()} btw!")
-\end{python}
+$ cat input.tex | litrepl | tail -n 3
 \begin{result}
 I use LINUX btw!
 \end{result}
 ~~~
 <!--noresult-->
 
-The side-effect of this execution is the started session of the python
-interpreter which is now running in the background. We can modify its state by
-adding more section to the document and executing them selectively.
+The side effect of this execution is the starting of a session with the Python
+interpreter, which now runs in the background. We communicate with it by editing
+the document and re-running the above command.
 
 Evaluation results are written back into the result sections, and the entire
 document is printed. At this stage, certain conditions can be optionally
-checked. First, setting `--pending-exitcode` to a non-zero value instructs
-Litrepl to report an error if a section takes longer than the timeout to
-evaluate. Second, setting `--exception-exitcode` directs Litrepl to detect
-Python exceptions. Lastly, `--irreproducible-exitcode` triggers an error if the
-evaluation result doesn't match the text initially present in the result
-section.
+checked. First, adding `--pending-exitcode=INT` instructs Litrepl to report an
+error if a section takes longer than the timeout to evaluate. Second, setting
+`--exception-exitcode=INT` directs Litrepl to detect Python exceptions. Lastly,
+`--irreproducible-exitcode=INT` triggers an error if the evaluation result
+doesn't match the text initially present in the result section.
 
 
 ## Interfacing Interpreters
