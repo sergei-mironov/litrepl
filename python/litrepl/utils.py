@@ -87,7 +87,7 @@ def words_with_spaces(text):
   if word and any((not c.isspace()) for c in word):
     yield word
 
-def wraplong(lines, tw):
+def wraplong(lines:str, tw:int)->str:
   text, width = lines, tw
   wrapped_lines = []
   for line in text.split('\n'):
@@ -112,7 +112,7 @@ def wraplong(lines, tw):
       wrapped_lines.append(current_line)
 
   s = '\n'.join(wrapped_lines)
-  s = s if lines and lines.endswith('\n') else s + '\n'
+  s = s if len(lines)==0 or lines.endswith('\n') else s + '\n'
   return s
 
 def remove_silent(f:str)->None:

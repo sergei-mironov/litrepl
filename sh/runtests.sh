@@ -808,6 +808,16 @@ test_vim_textwidth() {( #{{{
 mktest "_test_vim_textwidth"
 runlitrepl start python
 
+cat >empty.md <<"EOF"
+``` python
+```
+``` result
+```
+EOF
+
+cat empty.md | litrepl --result-textwidth=100 eval-sections 1 >empty-result.md
+diff -u empty.md empty-result.md
+
 cat >file.md <<"EOF"
 ``` python
 print("0123456789 111")
