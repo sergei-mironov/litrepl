@@ -815,7 +815,7 @@ cat >empty.md <<"EOF"
 ```
 EOF
 
-cat empty.md | litrepl --result-textwidth=100 eval-sections 1 >empty-result.md
+cat empty.md | runlitrepl --result-textwidth=100 eval-sections 1 >empty-result.md
 diff -u empty.md empty-result.md
 
 cat >file.md <<"EOF"
