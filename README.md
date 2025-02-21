@@ -64,6 +64,36 @@ _Notes:_
 * **[Socat](http://www.dest-unreach.org/socat/)** (Optional) Needed for
   `litrepl repl` and Vim's `LTerm` commands to work.
 
+⚖️ Comparison
+------------
+
+| Name        | Document formats            | Interpreters    | Backend API  | Frontend API |
+|-------------|-----------------------------|-----------------|--------------|--------------|
+| Jupyter     | Jupyter[1]                  | Many(>50)[2]    | Server       | Web, IDE     |
+| Quarto      | Markdown+Quarto[3], Jupyter | Few(3)[4]       | Server       | Web, IDE     |
+| Codebraid   | Markdown+Codebraid[5]       | Many(>7,>50)[6] | Server       | IDE          |
+| R markdown  | RMarkdown[7]                | Many(>8)[8]     | Server       | IDE          |
+| Litrepl     | Markdown, LaTeX             | Few(3)          | Pipes        | Command line |
+
+
+* [Jupyter](https://jupyter.org/)
+  - [1] [Jupyter Notebook Format](https://nbformat.readthedocs.io/en/latest/)
+  - [2] [Available kernels](https://github.com/jupyter/jupyter/wiki/Jupyter-kernels)
+  - [Kernel](https://docs.jupyter.org/en/latest/projects/kernels.html)
+* [Quarto](https://quarto.org/docs/tools/text-editors.html)
+  - [3] [Quarto Markdown extensions](https://quarto.org/docs/computations/execution-options.html)
+  - [4] [Jupyter kernel support](https://quarto.org/docs/advanced/jupyter/kernel-execution.html)
+* [Codebraid](https://codebraid.org/)
+  - [5] [Code chunks formatting](https://codebraid.org/code_chunks/)
+  - [6] [Codebraid languages](https://github.com/gpoore/codebraid/blob/3f85800bd58c2a1587778a1fe0f24c46dc1c3a69/README.md?plain=1#L13-L16)
+* [R markdown](https://rmarkdown.rstudio.com/)
+  - [7] [R Markdown language](https://bookdown.org/yihui/rmarkdown/)
+  - [8] [Code languages](https://rmarkdown.rstudio.com/lesson-5.html)
+  - [Knitr](https://yihui.org/knitr/)
+    + No [repl](https://stackoverflow.com/a/40241421) ?
+    + [Reticulate](https://rstudio.github.io/reticulate/)
+
+
 📚 Contents
 -----------
 
