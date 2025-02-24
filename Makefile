@@ -129,6 +129,11 @@ upload: $(WHEEL_REV) $(VIMB_REV)
 		--password $(shell cat _token.pypi) \
 		dist/*
 
+.PHONY: paper-md
+paper-md: paper/md/paper.pdf
+paper/md/paper.pdf: paper/md/paper.md ./paper/tex/pic.png ./paper/md/input.tex
+	docker run --rm --volume $$PWD/paper/md:/data --user $(id -u):$(id -g) --env JOURNAL=joss openjournals/inara
+
 .PHONY: paper-quick # Compile the paper PDF out of its LaTeX source without re-evaluation
 .PHONY: pq
 paper-quick: ./paper/tex/paper_quick.pdf
