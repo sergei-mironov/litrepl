@@ -139,7 +139,7 @@ follows (only the last three relevant lines of the result are shown).
 <!--
 ``` sh
 echo '~~~ sh'
-echo '$ cat input.tex | litrepl | tail -n 3'
+echo '$ cat input.tex | litrepl eval-sections 1 | tail -n 3'
 echo "sys.platform='linux'" | litrepl repl python >/dev/null
 cat input.tex | litrepl | tail -n 3
 echo '~~~'
@@ -147,7 +147,7 @@ echo '~~~'
 -->
 <!--result-->
 ~~~ sh
-$ cat input.tex | litrepl | tail -n 3
+$ cat input.tex | litrepl eval-sections 1 | tail -n 3
 \begin{result}
 I use LINUX btw!
 \end{result}
