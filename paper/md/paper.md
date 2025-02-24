@@ -71,6 +71,41 @@ supports Markdown and LaTeX formats with simplified parsers. It supports Python,
 Shell, and a custom large language model communication interpreter while
 leveraging POSIX [@POSIX2024] system features.
 
+The difference between Litrepl and other solutions, including Jupyter, is
+highlighted in the table below.
+
+| Name        | Document formats   | Data formats | Interpreters | Backend                      | Frontend             |
+|-------------|--------------------|--------------|--------------|------------------------------|----------------------|
+| Jupyter     | Jupyter[j1]        | Rich         | Many[j2]     | Client-server via ZeroMQ[j3] | Web, Editor          |
+| Quarto      | Markdown+[q1]      | Rich         | Few          | Modified Jupyter[q2]         | Web, Editor          |
+| Codebraid   | Markdown+[c1]      | Rich         | Many[c2]     | Same as Jupyter[c3]          | Editor               |
+| R markdown  | Markdown+[r1]      | Rich         | Few[r2]      | Linked libraries[r3]         | Editor               |
+| Litrepl     | Markdown, LaTeX    | Text-only    | Few          | POSIX Pipes                  | Command line, Editor |
+
+
+* [Jupyter](https://jupyter.org/)
+  - [j1] [Jupyter Notebook Format](https://nbformat.readthedocs.io/en/latest/)
+  - [j2] [Available kernels](https://github.com/jupyter/jupyter/wiki/Jupyter-kernels)
+  - [j3] Details on Jupyter backend communication [link](https://docs.jupyter.org/en/latest/projects/kernels.html)
+* [Quarto](https://quarto.org/docs/tools/text-editors.html)
+  - [q1] [Quarto Markdown extensions](https://quarto.org/docs/computations/execution-options.html)
+  - [q2] Quarto uses the slightly modified Jupyter kernel protocol. See
+    [Jupyter kernel support](https://quarto.org/docs/advanced/jupyter/kernel-execution.html)
+    [Qurto echo kernel](https://github.com/quarto-dev/quarto_echo_kernel/blob/b77fde70c25a869175cc225a3676eee2df5a1733/README.rst)
+* [Codebraid](https://codebraid.org/)
+  - [c1] Codebraid Markdown extensions are described as
+    [code chunks formatting](https://codebraid.org/code_chunks/)
+  - [c2] Codebraid supports Jupyter kernels [link](https://github.com/gpoore/codebraid/blob/3f85800bd58c2a1587778a1fe0f24c46dc1c3a69/README.md?plain=1#L13-L16)
+  - [c3] Codebraid supports interactive editing via Jupyter kernels.
+* [R markdown](https://rmarkdown.rstudio.com/)
+  - [r1] The [R Markdown language](https://bookdown.org/yihui/rmarkdown/)
+  - [r2] In RMarkdown most languages do not share a session between code sections, the exceptions
+    are R, Python and Julia
+    [link](https://github.com/rstudio/rmarkdown-book/blob/521044173f39aee2c2f646f0712dfcdd6c22e214/02-basics.Rmd#L589)
+  - [r3] For Python, RMarkdown relies on [Reticulate](https://github.com/rstudio/rmarkdown-book/blob/521044173f39aee2c2f646f0712dfcdd6c22e214/02-basics.Rmd#L603) to run 
+    which uses low-level Python features to organize the communication [link](https://github.com/rstudio/reticulate/blob/9f50ca05d3f0d478241944d925f8f931c8661817/src/event_loop.cpp#L15).
+
+
 # How it works
 
 The operation of Litrepl is best illustrated through the example below. Consider
