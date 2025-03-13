@@ -76,53 +76,44 @@ highlighted in the table below.
 
 \begin{footnotesize}
 \begin{table}[!th]
-    \centering
-    \begin{tabular}{b{1.8cm}b{1.8cm}b{1.8cm}b{1.8cm}b{2cm}b{1.8cm}}
+    \begin{tabular}{p{1.6cm}p{1.8cm}p{1.8cm}p{1.8cm}p{1.8cm}p{1.8cm}}
         \hline
         \hline
         Name & Document format & Data format & Interpreter & Backend & Frontend \\
         \hline
         Jupyter & Jupyter$^{j1}$ & Rich & Many$^{j2}$ & Client-server via ZeroMQ$^{j3}$ & Web, Editor \\
         \hline
-        Quarto & Markdown+$^{q1}$ & Rich & Few & Modified Jupyter$^{q2}$ & Web, Editor \\
+        Quarto & Markdown$^{q1}$ & Rich & Few & Modified Jupyter$^{q2}$ & Web, Editor \\
         \hline
-        Codebraid & Markdown+$^{c1}$ & Rich & Many$^{c2}$ & Same as Jupyter$^{c3}$ & Editor \\
+        Codebraid & Markdown$^{c1}$ & Rich & Many$^{c2}$ & Same as Jupyter$^{c3}$ & Editor \\
         \hline
-        R markdown & Markdown+$^{r1}$ & Rich & Few$^{r2}$ & Linked libraries$^{r3}$ & Editor \\
+        R markdown & Markdown$^{r1}$ & Rich & Few$^{r2}$ & Linked libraries$^{r3}$ & Editor \\
         \hline
         Litrepl & Markdown, LaTeX & Text-only & Few & POSIX Pipes & Command line, Editor \\
         \hline
         \hline
     \end{tabular} \\
-
-\begin{itemize}
-  \item \href{https://jupyter.org/}{Jupyter} \\
-      $^{j1}$ \href{https://nbformat.readthedocs.io/en/latest/}{Jupyter Notebook Format} \\
-      $^{j2}$ \href{https://github.com/jupyter/jupyter/wiki/Jupyter-kernels}{Available kernels} \\
-      $^{j3}$ Details on Jupyter backend communication \href{https://docs.jupyter.org/en/latest/projects/kernels.html}{link} \\
-  \item \href{https://quarto.org/docs/tools/text-editors.html}{Quarto} \\
-      $^{q1}$ \href{https://quarto.org/docs/computations/execution-options.html}{Quarto Markdown extensions} \\
-      $^{q2}$ Quarto uses the slightly modified Jupyter kernel protocol.
-          See \href{https://quarto.org/docs/advanced/jupyter/kernel-execution.html}{Jupyter kernel support}
-          and
-          \href{https://github.com/quarto-dev/quarto_echo_kernel/blob/b77fde70c25a869175cc225a3676eee2df5a1733/README.rst}{Quarto echo kernel}
-  \item \href{https://codebraid.org/}{Codebraid} \\
-      $^{c1}$ Codebraid Markdown extensions are described as
-              \href{https://codebraid.org/code_chunks/}{code chunks formatting} \\
-      $^{c2}$ Codebraid supports Jupyter kernels
-          \href{https://github.com/gpoore/codebraid/blob/3f85800bd58c2a1587778a1fe0f24c46dc1c3a69/README.md?plain=1#L13-L16}{link} \\
-      $^{c3}$ Codebraid supports interactive editing via Jupyter kernels.
-  \item \href{https://rmarkdown.rstudio.com/}{R markdown} \\
-      $^{r1}$ \href{https://bookdown.org/yihui/rmarkdown/}{The R Markdown language} \\
-      $^{r2}$ In RMarkdown most languages do not share a session between code sections,
-        the exceptions are R, Python, and Julia
-        \href{https://github.com/rstudio/rmarkdown-book/blob/521044173f39aee2c2f646f0712dfcdd6c22e214/02-basics.Rmd#L589}{link} \\
-      $^{r3}$ For Python, RMarkdown relies on
-        \href{https://github.com/rstudio/rmarkdown-book/blob/521044173f39aee2c2f646f0712dfcdd6c22e214/02-basics.Rmd#L603}{Reticulate}
-        to run, which uses low-level Python features to organize the communication
-        \href{https://github.com/rstudio/reticulate/blob/9f50ca05d3f0d478241944d925f8f931c8661817/src/event_loop.cpp#L15}{link}.
-\end{itemize}
-
+    $^{j1}$ \href{https://nbformat.readthedocs.io/en/latest/}{Jupyter Notebook Format} \\
+    $^{j2}$ \href{https://github.com/jupyter/jupyter/wiki/Jupyter-kernels}{Available kernels} \\
+    $^{j3}$ Details on Jupyter backend communication \href{https://docs.jupyter.org/en/latest/projects/kernels.html}{link} \\
+    $^{q1}$ \href{https://quarto.org/docs/computations/execution-options.html}{Quarto Markdown extensions} \\
+    $^{q2}$ Quarto uses the slightly modified Jupyter kernel protocol.
+      See \href{https://quarto.org/docs/advanced/jupyter/kernel-execution.html}{Jupyter kernel support}
+      and
+      \href{https://github.com/quarto-dev/quarto_echo_kernel/blob/b77fde70c25a869175cc225a3676eee2df5a1733/README.rst}{Quarto echo kernel} \\
+    $^{c1}$ Codebraid Markdown extensions are described as
+      \href{https://codebraid.org/code_chunks/}{code chunks formatting} \\
+    $^{c2}$ Codebraid supports Jupyter kernels
+      \href{https://github.com/gpoore/codebraid/blob/3f85800bd58c2a1587778a1fe0f24c46dc1c3a69/README.md?plain=1#L13-L16}{link} \\
+    $^{c3}$ Codebraid supports interactive editing via Jupyter kernels. \\
+    $^{r1}$ \href{https://bookdown.org/yihui/rmarkdown/}{The R Markdown language} \\
+    $^{r2}$ In RMarkdown most languages do not share a session between code sections,
+      the exceptions are R, Python, and Julia
+      \href{https://github.com/rstudio/rmarkdown-book/blob/521044173f39aee2c2f646f0712dfcdd6c22e214/02-basics.Rmd#L589}{link} \\
+    $^{r3}$ For Python, RMarkdown relies on
+      \href{https://github.com/rstudio/rmarkdown-book/blob/521044173f39aee2c2f646f0712dfcdd6c22e214/02-basics.Rmd#L603}{Reticulate}
+      to run, which uses low-level Python features to organize the communication
+      \href{https://github.com/rstudio/reticulate/blob/9f50ca05d3f0d478241944d925f8f931c8661817/src/event_loop.cpp#L15}{link}.
 \end{table}
 \end{footnotesize}
 
