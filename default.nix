@@ -54,6 +54,25 @@ let
 
     lark-current = lark-latest;
 
+    python-test = python: python.withPackages (
+      pp: let
+      in with pp; [
+        setuptools
+        # setuptools_scm
+        pytest
+        # pytest-mypy
+        wheel
+        (lark-current pp)
+        tqdm
+        matplotlib
+        # numpy
+        # bpython
+        psutil
+      ] ++ (if pp.pythonAtLeast "3.10" then [
+        ipython
+      ] else [])
+    );
+
     python-dev = python.withPackages (
       pp: let
         pylsp = pp.python-lsp-server;
@@ -168,6 +187,24 @@ let
         pkgs.inkscape
         (aicli.aicli python-dev.pkgs)
         sloc
+      ];
+      shellHook = with pkgs; ''
+        if test -f ./env.sh ; then
+          . ./env.sh
+          export QT_QPA_PLATFORM_PLUGIN_PATH=`echo ${pkgs.qt5.qtbase.bin}/lib/qt-*/plugins/platforms/`
+        fi
+      '';
+    };
+
+    shell-test = pkgs.mkShell {
+      name = "shell-test";
+      buildInputs = [
+        gnumake
+        socat
+        (python-test pkgs.python39)
+        (python-test pkgs.python310)
+        (python-test pkgs.python312)
+        # (aicli.aicli python-dev.pkgs)
       ];
       shellHook = with pkgs; ''
         if test -f ./env.sh ; then
@@ -458,9 +495,10 @@ let
 
     collection = rec {
       inherit aicli;
-      inherit pkgs shell shell-dev shell-screencast vim-litrepl-release vim-test
-      vim-demo vim-plug-test grechanik-st vimtex-local litrepl-release litrepl-dev
-      litrepl-release-pypi vim-litrepl-release-pypi python-release;
+      inherit pkgs shell shell-dev shell-screencast shell-test
+      vim-litrepl-release vim-test vim-demo vim-plug-test grechanik-st
+      vimtex-local litrepl-release litrepl-dev litrepl-release-pypi
+      vim-litrepl-release-pypi python-release;
     };
   };
 

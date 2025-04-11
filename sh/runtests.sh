@@ -1350,53 +1350,48 @@ not() {(
   fi
 )}
 
+add_ipython() {
+  while read python ; do
+    echo "$python"
+    if test -x `dirname $python`/ipython ; then
+      echo `dirname $python`/ipython
+    fi
+  done
+}
+
 tests() {
-  echo test_parse_print $(which python) - -
-  echo test_parse_print $(which ipython) - -
-  echo test_eval_md $(which python) - $(which sh)
-  echo test_eval_md $(which ipython) - $(which sh)
-  echo test_tqdm $(which python) - -
-  echo test_tqdm $(which ipython) - -
-  echo test_eval_tex $(which python) - $(which sh)
-  echo test_eval_tex $(which ipython) - $(which sh)
-  echo test_async $(which python) - -
-  echo test_async $(which ipython) - -
-  echo test_eval_code $(which python) - -
-  echo test_eval_code $(which ipython) - -
-  echo test_eval_with_empty_lines $(which python) - -
-  echo test_eval_with_empty_lines $(which ipython) - -
-  echo test_print_system_order $(which python) - -
-  echo test_print_system_order $(which ipython) - -
-  echo test_exit_errcode $(which python) - -
-  echo test_exit_errcode $(which ipython) - -
-  echo test_exception_errcode $(which python) - -
-  echo test_exception_errcode $(which ipython) - -
-  echo test_vim_leval_cursor $(which python) - -
-  echo test_vim_leval_cursor $(which ipython) - -
-  echo test_vim_textwidth $(which ipython) - -
-  echo test_vim_leval_explicit $(which python) - -
-  echo test_vim_leval_explicit $(which ipython) - -
-  echo test_vim_lmon $(which python) - -
-  echo test_vim_lmon $(which ipython) - -
-  echo test_vim_lstatus $(which python) - -
-  echo test_vim_lstatus $(which ipython) - -
-  echo test_foreground $(which python) - -
-  echo test_foreground $(which ipython) - -
-  echo test_status $(which python) - -
-  echo test_status $(which ipython) - -
-  echo test_interrupt $(which python) - -
-  echo test_interrupt $(which ipython) - -
-  echo test_invalid_interpreter $(which python) - -
-  echo test_failing_interpreter $(which python) - -
-  echo test_aicli - $(which aicli) -
+  sh=$(which sh)
+  aicli=$(which aicli 2>/dev/null || echo '-')
+  for python in $(which -a python | add_ipython ); do
+    echo test_parse_print $python - -
+    echo test_eval_md $python - $sh
+    echo test_tqdm $python - -
+    echo test_eval_tex $python - $sh
+    echo test_async $python - -
+    echo test_eval_code $python - -
+    echo test_eval_with_empty_lines $python - -
+    echo test_print_system_order $python - -
+    echo test_exit_errcode $python - -
+    echo test_exception_errcode $python - -
+    echo test_vim_leval_cursor $python - -
+    echo test_vim_textwidth $python - -  # was only called for `ipython`
+    echo test_vim_leval_explicit $python - -
+    echo test_vim_lmon $python - -
+    echo test_vim_lstatus $python - -
+    echo test_foreground $python - -
+    echo test_status $python - -
+    echo test_interrupt $python - -
+    echo test_invalid_interpreter $python - -
+    echo test_vim_eval_code $python - -  # was called only for `python`
+    echo test_vim_eval_selection $python - -
+    echo test_interp_disabled $python - $sh
+    echo test_irreproducible $python - -  # was only called for `ipython`
+    echo test_invalid_markers $python $aicli $sh
+    echo test_print_auxdir $python $aicli $sh
+  done
+  echo test_aicli - $aicli -
+  echo test_vim_ai_query - $aicli -
   echo test_bash - - $(which bash)
-  echo test_vim_eval_code $(which python) - -
-  echo test_vim_eval_selection $(which python) - -
-  echo test_vim_ai_query - $(which aicli) -
-  echo test_interp_disabled $(which python) - $(which sh)
-  echo test_irreproducible $(which ipython) - -
-  echo test_invalid_markers $(which python) $(which aicli) $(which sh)
-  echo test_print_auxdir $(which python) $(which aicli) $(which sh)
 }
 
 runlitrepl() {
