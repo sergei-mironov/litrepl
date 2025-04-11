@@ -428,7 +428,7 @@ print("AB")
 \begin{result}
 \end{result}
 %python
-print('\end{python}')
+print(r'\end{python}')
 %nopython
 %result
 %noresult
@@ -500,7 +500,7 @@ print("AB")
 AB
 \end{result}
 %python
-print('\end{python}')
+print(r'\end{python}')
 %nopython
 %result
 \end{python}
