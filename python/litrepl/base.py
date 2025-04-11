@@ -5,7 +5,8 @@ import re
 
 from re import search, match as re_match, compile as re_compile
 from copy import copy, deepcopy
-from typing import List, Optional, Tuple, Set, Dict, Callable, Any, Iterable
+from typing import (List, Optional, Tuple, Set, Dict, Callable, Any, Iterable,
+                    Union)
 from select import select
 from os import (environ, system, isatty, getpid, unlink, getpgid, setpgid,
                 mkfifo, kill)
@@ -114,7 +115,7 @@ def pipenames(a:LitreplArgs, st:SType)->FileNames:
                    join(auxdir,"in.pipe"),join(auxdir,"out.pipe"),
                    join(auxdir,"pid.txt"),join(auxdir,"ecode.txt"),join(auxdir,"emsg.txt"))
 
-def attach(fns:FileNames, st:SType|None=None)->Optional[Interpreter]:
+def attach(fns:FileNames, st:Optional[SType]=None)->Optional[Interpreter]:
   """ Attach to the interpreter associated with the given pipe filenames. """
   try:
     pid=readipid(fns)
@@ -401,7 +402,7 @@ def grammar_(a:LitreplArgs, filetype:str)->Tuple[LarkGrammar,Symbols]:
 def readinput(tty_ok=True)->str:
   return sys.stdin.read() if (not isatty(sys.stdin.fileno()) or tty_ok) else ""
 
-def parse_as(a,inp,filetype)->ParseResult|LarkError:
+def parse_as(a,inp,filetype)->Union[ParseResult,LarkError]:
   try:
     g,s=grammar_(a,filetype)
     parser=Lark(g,propagate_positions=True)
@@ -677,7 +678,7 @@ def solve_sloc(s:str, tree:LarkTree)->SecRec:
                 else _safeset(lambda:[_get(q[0])]) for q in qs]),
     ppi)
 
-def status(a:LitreplArgs, t:LarkTree|None, sts:List[SType], version):
+def status(a:LitreplArgs, t:Optional[LarkTree], sts:List[SType], version):
   if a.verbose:
     return status_verbose(a,t,sts,version)
   else:
@@ -700,7 +701,7 @@ def status_oneline(a:LitreplArgs,sts:List[SType])->int:
       ecode = '-'
     print(f"{st2name(st):6s} {pid:10s} {ecode:3s} {cmd}")
 
-def status_verbose(a:LitreplArgs, t:LarkTree|None, sts:List[SType], version:str)->int:
+def status_verbose(a:LitreplArgs, t:Optional[LarkTree], sts:List[SType], version:str)->int:
   sr=solve_sloc('0..$',t) if t is not None else None
   print(f"version: {version}")
   print(f"workdir: {getcwd()}")
