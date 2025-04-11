@@ -12,7 +12,7 @@
     # nixpkgs.url = "github:grwlf/nixpkgs/local14";
     nixpkgs = {
       # url = "github:grwlf/nixpkgs/local15";
-      url = "github:grwlf/nixpkgs/local17";
+      url = "github:grwlf/nixpkgs/local17.2";
     };
 
     aicli = {

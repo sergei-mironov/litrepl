@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1735289279,
-        "narHash": "sha256-18jkAcM3/l7sZ3UYu4NQ7PASBMfdpvz4/bIO7Hab90M=",
+        "lastModified": 1738852744,
+        "narHash": "sha256-gqaea//Re1SqqnQubrGUTy4rrcQOWY1P4qUtrsK0VhQ=",
         "owner": "sergei-mironov",
         "repo": "aicli",
-        "rev": "5fb1308b67792da372228e0ca94cb1787dea9b69",
+        "rev": "1065404dffc282105c32a94ebf1dc86d5710a034",
         "type": "github"
       },
       "original": {
@@ -36,16 +36,16 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1727010948,
-        "narHash": "sha256-06KoptpoVoyIgJ4DNKRvPY3KAbjfrLHWxvWX4fK/GLc=",
+        "lastModified": 1742218846,
+        "narHash": "sha256-uVO7Uquz+noiOGNxEoRQheH/TjNFTNVEVgEspQViwBE=",
         "owner": "grwlf",
         "repo": "nixpkgs",
-        "rev": "54f38dc1f7ec68dee4f8ffce670e45cb8fa150bf",
+        "rev": "a545cb348c64af8989ce61260b5e2edcfcfa6185",
         "type": "github"
       },
       "original": {
         "owner": "grwlf",
-        "ref": "local17",
+        "ref": "local17.2",
         "repo": "nixpkgs",
         "type": "github"
       }
