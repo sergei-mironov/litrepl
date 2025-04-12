@@ -68,6 +68,7 @@ let
         # numpy
         # bpython
         psutil
+        coverage
       ] ++ (if pp.pythonAtLeast "3.10" then [
         ipython
       ] else [])
@@ -95,6 +96,7 @@ let
         numpy
         bpython
         psutil
+        coverage
       ]
     );
 

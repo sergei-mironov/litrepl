@@ -1437,6 +1437,7 @@ Arguments:
                             Run -t '?' to list all available tests
   -p P, --python=P          Use this Python interpreter to run Litrepl
                             Run -p '?' to list available python interpreters
+  -c FILE, --coverage=FILE  Collect coverage results into the FILE
 
 Examples:
   runtests.sh -t '?' -i '?'
@@ -1448,6 +1449,7 @@ EOF
 set -e
 
 export AICLI_RC=none
+export LITREPL_COVERAGE
 unset AICLI_HISTORY
 INTERPS='.*'
 TESTS='.*'
@@ -1460,11 +1462,18 @@ while test -n "$1" ; do
     -t|--tests) TESTS="$2"; shift ;;
     --python=*) LITREPL_TEST_PYTHON=$(echo "$1" | sed 's/.*=//g') ;;
     -p|--python) LITREPL_TEST_PYTHON="$2"; shift ;;
+    --coverage=*) LITREPL_COVERAGE=$(echo "$1" | sed 's/.*=//g') ;;
+    -c|--coverage) LITREPL_COVERAGE=$2; shift ;;
     -d|-V|--verbose) set -x; LITREPL_DEBUG=1 ;;
     -h|--help) usage ; exit 1 ;;
   esac
   shift
 done
+
+case "$LITREPL_COVERAGE" in
+  ""|/*) ;;
+  *) LITREPL_COVERAGE="$(pwd)/$LITREPL_COVERAGE" ;;
+esac
 
 if test "$LITREPL_TEST_PYTHON" = "?" ; then
   which --all python
