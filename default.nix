@@ -68,7 +68,6 @@ let
         # numpy
         # bpython
         psutil
-        coverage
       ] ++ (if pp.pythonAtLeast "3.10" then [
         ipython
       ] else [])
@@ -115,6 +114,27 @@ let
         tqdm
       ]
     );
+
+    coverage-badge = (pp: with pp; buildPythonApplication rec {
+      pname = "coverage_badge";
+      version = "1.1.2";
+
+      format = "setuptools";
+      build-system = [
+        setuptools
+        wheel
+      ];
+      dependencies = [
+        setuptools
+        coverage
+      ];
+      src = fetchPypi {
+        inherit pname version;
+        sha256 = "sha256-/n7Vijty2thaVTtkqZ6WPeo4R9zQuN3Ss4oAMzYYZCw=";
+      };
+    });
+
+    coverage-badge-release = (coverage-badge python-release.pkgs);
 
     litrepl = (py : py.pkgs.buildPythonApplication {
       pname = "litrepl";
@@ -207,6 +227,7 @@ let
         (python-test pkgs.python310)
         (python-test pkgs.python312)
         # (aicli.aicli python-dev.pkgs)
+        (coverage-badge python-release.pkgs)
       ];
       shellHook = with pkgs; ''
         if test -f ./env.sh ; then
@@ -500,7 +521,7 @@ let
       inherit pkgs shell shell-dev shell-screencast shell-test
       vim-litrepl-release vim-test vim-demo vim-plug-test grechanik-st
       vimtex-local litrepl-release litrepl-dev litrepl-release-pypi
-      vim-litrepl-release-pypi python-release;
+      vim-litrepl-release-pypi python-release coverage-badge-release;
     };
   };
 
