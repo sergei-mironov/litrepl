@@ -4,6 +4,8 @@
 </h1>
 
 [Changelog](./CHANGELOG.md) | [Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-gallery)
+
+![](./img/coverage.svg)
 </div>
 
 **Litrepl** is a command-line processor for *Markdown* or *LaTeX* documents with

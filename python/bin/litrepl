@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from os import environ, getpid
 LITREPL_COVERAGE=environ.get("LITREPL_COVERAGE")
-if LITREPL_COVERAGE is not None:
+if LITREPL_COVERAGE is not None and len(LITREPL_COVERAGE)>0:
   from coverage import Coverage
   COV = Coverage(
     auto_data=True,
@@ -10,6 +10,8 @@ if LITREPL_COVERAGE is not None:
     source=['litrepl']
   )
   COV.start()
+else:
+  COV = None
 
 from litrepl.main import main
 
@@ -19,5 +21,5 @@ if __name__ == "__main__":
     main()
   finally:
     if pid==getpid():
-      if LITREPL_COVERAGE is not None:
+      if COV is not None:
         COV.stop()

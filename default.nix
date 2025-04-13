@@ -96,6 +96,8 @@ let
         bpython
         psutil
         coverage
+        (aicli.aicli pp)
+        (coverage-badge pp)
       ]
     );
 
@@ -115,7 +117,7 @@ let
       ]
     );
 
-    coverage-badge = (pp: with pp; buildPythonApplication rec {
+    coverage-badge = (pp: with pp; buildPythonPackage rec {
       pname = "coverage_badge";
       version = "1.1.2";
 
@@ -207,7 +209,6 @@ let
         mytexlive
         pkgs.pandoc
         pkgs.inkscape
-        (aicli.aicli python-dev.pkgs)
         sloc
       ];
       shellHook = with pkgs; ''
@@ -226,8 +227,6 @@ let
         (python-test pkgs.python39)
         (python-test pkgs.python310)
         (python-test pkgs.python312)
-        # (aicli.aicli python-dev.pkgs)
-        (coverage-badge python-release.pkgs)
       ];
       shellHook = with pkgs; ''
         if test -f ./env.sh ; then
@@ -515,13 +514,15 @@ let
     litrepl-release-pypi = litrepl-pypi python-release;
     vim-litrepl-release = vim-litrepl python-release;
     vim-litrepl-release-pypi = vim-litrepl-pypi python-release;
+    aicli-release = aicli.aicli python-release.pkgs;
 
     collection = rec {
       inherit aicli;
       inherit pkgs shell shell-dev shell-screencast shell-test
       vim-litrepl-release vim-test vim-demo vim-plug-test grechanik-st
       vimtex-local litrepl-release litrepl-dev litrepl-release-pypi
-      vim-litrepl-release-pypi python-release coverage-badge-release;
+      vim-litrepl-release-pypi python-release coverage-badge-release
+      aicli-release;
     };
   };
 
