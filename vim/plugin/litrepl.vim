@@ -116,7 +116,8 @@ fun! LitReplCmd()
   endif
   let cmd = LitReplExe()
   if LitReplGet('litrepl_workdir') != ''
-    let cmd  = cmd . ' --workdir="'.expand(LitReplGet('litrepl_workdir')).'"'
+    " let cmd  = cmd . ' --workdir="'.expand(LitReplGet('litrepl_workdir')).'"'
+    let cmd  = "cd \"".expand(LitReplGet('litrepl_workdir'))."\"; ".cmd
   endif
   if LitReplGet('litrepl_python_auxdir') != ''
     let cmd = cmd . ' --python-auxdir="'.expand(LitReplGet('litrepl_python_auxdir')).'"'
