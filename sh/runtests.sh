@@ -1406,7 +1406,7 @@ runlitrepl() {
   test -n "$LITREPL_TEST_AI_INTERPRETER"
   test -n "$LITREPL_TEST_SH_INTERPRETER"
   test -n "$LITREPL_BIN"
-  test -n "$LITREPL_TEST_PYTHON"
+  # If litrepl is a shell script then LITREPL_TEST_PYTHON should be an empty string
   $LITREPL_TEST_PYTHON $LITREPL_BIN/litrepl --debug="$LITREPL_DEBUG" \
     --python-interpreter="$LITREPL_TEST_PYTHON_INTERPRETER" \
     --ai-interpreter="$LITREPL_TEST_AI_INTERPRETER" \
@@ -1504,8 +1504,20 @@ fi
 if test -z "$LITREPL_BIN"; then
   LITREPL_BIN=$LITREPL_ROOT/python/bin
 fi
-if test -z "$LITREPL_TEST_PYTHON" ; then
-  LITREPL_TEST_PYTHON=python
+if file --mime-type $LITREPL_BIN/litrepl | grep -q 'script.python' ; then
+  if test -z "$LITREPL_TEST_PYTHON" ; then
+    LITREPL_TEST_PYTHON=python
+  fi
+else
+  if test -n "$LITREPL_TEST_PYTHON" ; then
+    {
+    echo "$LITREPL_BIN/litrepl is not a Python script so we can't apply specific" \
+         "Python interpreter any more. Is it a shell-script wrapper?"
+    echo "Note:"
+    file $LITREPL_BIN/litrepl
+    } >&2
+    exit 1
+  fi
 fi
 
 trap "echo FAIL\(\$?\)" EXIT

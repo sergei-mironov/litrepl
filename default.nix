@@ -147,7 +147,7 @@ let
       propagatedBuildInputs = [(lark-current py.pkgs) py.pkgs.psutil pkgs.socat];
       nativeCheckInputs = with pkgs; [
         socat py.pkgs.ipython py.pkgs.tqdm which git vim
-        aicli.python-aicli
+        aicli.python-aicli py.pkgs.coverage (coverage-badge py.pkgs)
       ];
       # We cut off the python PATH to allow users to use litrepl in custom
       # Python environments
