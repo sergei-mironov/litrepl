@@ -6,6 +6,7 @@ from subprocess import check_output, DEVNULL, CalledProcessError
 from argparse import ArgumentParser, HelpFormatter
 from tempfile import mkdtemp
 from functools import partial
+from typing import Optional
 
 LOCSHELP='(N|$|N..N)[,(...)] where N is either: number,$,ROW:COL'
 
@@ -31,6 +32,9 @@ def _with_type(p, default=None, allow_all=False):
   )
   return p
 
+def _ensure_nonepty(var:Optional[str])->Optional[str]:
+  return var if (var is not None and len(var)>0) else None
+
 def make_parser():
   ap=ArgumentParser(prog='litrepl',
                     formatter_class=make_wide(HelpFormatter))
@@ -48,30 +52,30 @@ def make_parser():
     default=environ.get('LITREPL_SH_MARERS','sh,bash'),
     help=dedent('''TODO'''))
   ap.add_argument('--python-interpreter',metavar='EXE',
-    default=environ.get('LITREPL_PYTHON_INTERPRETER','auto'),
+    default=_ensure_nonepty(environ.get('LITREPL_PYTHON_INTERPRETER','auto')),
     help=dedent('''Python interpreter command line, or `auto`. Defaults to the
     LITREPL_PYTHON_INTERPRETER environment variable if set, otherwise "auto".
     Litrepl determines "python" or "ipython" type according to the value.'''))
   ap.add_argument('--ai-interpreter',metavar='EXE',
-    default=environ.get('LITREPL_AI_INTERPRETER','auto'),
+    default=_ensure_nonepty(environ.get('LITREPL_AI_INTERPRETER','auto')),
     help=dedent('''`aicli` interpreter command line or `auto`. Defaults to the
     LITREPL_AI_INTERPRETER environment variable if set, otherwise "auto".'''))
   ap.add_argument('--sh-interpreter',metavar='EXE',
-    default=environ.get('LITREPL_SH_INTERPRETER','auto'),
+    default=_ensure_nonepty(environ.get('LITREPL_SH_INTERPRETER','auto')),
     help=dedent('''Shell interpreter command line or `auto`. Defaults to the
     LITREPL_SH_INTERPRETER environment variable if set, otherwise "auto".'''))
   ap.add_argument('--python-auxdir',type=str,metavar='DIR',
-    default=environ.get('LITREPL_PYTHON_AUXDIR'),
+    default=_ensure_nonepty(environ.get('LITREPL_PYTHON_AUXDIR')),
     help=dedent('''This directory stores Python interpreter pipes. It defaults
     to LITREPL_PYTHON_AUXDIR if set; otherwise, it's created in the system's
     temporary directory, named after the current working directory.'''))
   ap.add_argument('--ai-auxdir',type=str,metavar='DIR',
-    default=environ.get('LITREPL_AI_AUXDIR'),
+    default=_ensure_nonepty(environ.get('LITREPL_AI_AUXDIR')),
     help=dedent('''This directory stores AI interpreter pipes. It defaults to
     LITREPL_AI_AUXDIR if set; otherwise, it's created in the system's temporary
     directory, named after the current working directory.'''))
   ap.add_argument('--sh-auxdir',type=str,metavar='DIR',
-    default=environ.get('LITREPL_SH_AUXDIR'),
+    default=_ensure_nonepty(environ.get('LITREPL_SH_AUXDIR')),
     help=dedent('''This directory stores AI interpreter pipes. It defaults to
     LITREPL_SH_AUXDIR if set; otherwise, it's created in the system's temporary
     directory, named after the current working directory.'''))
@@ -88,7 +92,7 @@ def make_parser():
   ap.add_argument('--verbose',action='store_true',
     help='Be more verbose (used in status).')
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',
-    default=environ.get('LITREPL_WORKDIR',None),
+    default=_ensure_nonepty(environ.get('LITREPL_WORKDIR',None)),
     help=dedent('''Set the working directory before execution. By default, it
     uses LITREPL_WORKDIR if set, otherwise remains the current directory. This
     affects the directory of a new interpreter and the --<interpreter>-auxdir
