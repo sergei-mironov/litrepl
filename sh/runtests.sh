@@ -1543,6 +1543,6 @@ echo OK
 
 if test -n "$LITREPL_COVERAGE" ; then
   coverage combine ${LITREPL_COVERAGE}.*
-  coverage-badge -o img/coverage.svg
+  coverage-badge -f -o img/coverage.svg
 fi
 
