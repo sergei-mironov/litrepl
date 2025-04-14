@@ -12,6 +12,8 @@ export MYPYPATH=\
 $CWD/python:\
 alias ipython="sh $CWD/ipython.sh"
 
+export ONDIRRC=`pwd`/.ondirrc
+
 unset vim
 unset VIMRUNTIME
 
