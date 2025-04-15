@@ -368,7 +368,7 @@ fun! LitReplVersion()
 endfun
 
 fun! LitReplTerm(what)
-  execute "terminal ".LitReplCmd()." repl ".a:what
+  execute "terminal ++shell ".LitReplCmd()." repl ".a:what
 endfun
 
 if !exists(":LStart")
