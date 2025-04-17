@@ -1,6 +1,6 @@
 #!/bin/sh
 
-git log --oneline | grep 'Version [0-9]\+\.[0-9]\+\.[0-9]\+' >_versions.txt
+git log HEAD^ --oneline | grep 'Version [0-9]\+\.[0-9]\+\.[0-9]\+' >_versions.txt
 HASH_LAST=`git rev-parse HEAD`
 HASH_PREV=`head -n 1 _versions.txt | awk '{print $1}' `
 
