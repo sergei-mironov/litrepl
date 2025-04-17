@@ -284,7 +284,8 @@ def main(args=None):
       ecode=interpExitCode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='status':
-    t=parse_(a).tree
+    p=parse_maybe(a)
+    t=p.tree if p is not None else None
     if a.foreground:
       st=name2st(a.type)
       with with_parent_finally(partial(_foreground_stop,st)):

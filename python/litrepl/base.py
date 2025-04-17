@@ -423,7 +423,7 @@ def numcodesec(tree:LarkTree)->int:
   c.visit(tree)
   return c.n
 
-def parse_(a:LitreplArgs)->ParseResult:
+def parse_maybe(a:LitreplArgs)->Optional[ParseResult]:
   pdebug(f"parsing start")
   inp=readinput(a.tty)
   rs=[]
@@ -435,11 +435,18 @@ def parse_(a:LitreplArgs)->ParseResult:
   if len(prs)==0:
     ers=[r for r in rs if isinstance(r,LarkError)]
     if len(ers)==0:
-      raise ValueError(f"Unsupported filetype \"{a.filetype}\"")
+      pdebug(f"parsing finish (None)")
+      return None
     else:
       raise ers[0]
   res=sorted(prs,key=lambda pr:numcodesec(pr.tree))[-1]
   pdebug(f"parsing finish")
+  return res
+
+def parse_(a:LitreplArgs)->ParseResult:
+  res=parse_maybe(a)
+  if res is None:
+    raise ValueError(f"Unsupported filetype \"{a.filetype}\"")
   return res
 
 def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)->ECode:
@@ -687,7 +694,6 @@ def status(a:LitreplArgs, t:Optional[LarkTree], sts:List[SType], version):
 def status_oneline(a:LitreplArgs,sts:List[SType])->int:
   for st in sts:
     fns = pipenames(a, st)
-    pdebug(f"status auxdir: {fns.wd}")
     try:
       pid = open(fns.pidf).read().strip()
       cmd = ' '.join(Process(int(pid)).cmdline())
@@ -699,7 +705,7 @@ def status_oneline(a:LitreplArgs,sts:List[SType])->int:
       ecode = open(fns.ecodef).read().strip()
     except Exception:
       ecode = '-'
-    print(f"{st2name(st):6s} {pid:10s} {ecode:3s} {cmd}")
+    print(f"{st2name(st):6s} {pid:10s} {ecode:3s} {fns.wd} {cmd}")
 
 def status_verbose(a:LitreplArgs, t:Optional[LarkTree], sts:List[SType], version:str)->int:
   sr=solve_sloc('0..$',t) if t is not None else None
