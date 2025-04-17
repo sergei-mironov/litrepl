@@ -1033,8 +1033,8 @@ coverage report --format=markdown -m
 | python/litrepl/revision.py                  |        1 |        1 |      0% |         2 |
 | python/litrepl/semver.py                    |        1 |        1 |      0% |         2 |
 | python/litrepl/types.py                     |       94 |        6 |     94% |124, 129, 135, 138, 141, 144 |
-| python/litrepl/utils.py                     |       97 |        2 |     98% |   129-130 |
-|                                   **TOTAL** | **1453** |  **169** | **88%** |           |
+| python/litrepl/utils.py                     |       97 |        6 |     94% |37, 55, 129-132 |
+|                                   **TOTAL** | **1453** |  **173** | **88%** |           |
 <!--noresult-->
 
 💡 Technical Insights
