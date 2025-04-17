@@ -170,6 +170,12 @@ The below part demonstrates 1) result indentation 2) ignored sections
   EVAL
   ```
   -->
+* Litrepl preserves empty lines while indenting
+  ``` python
+  print("1\n\n2\n\n",end='')
+  ```
+  ```result
+  ```
 
 Commented code section
 ----------------------
@@ -298,6 +304,16 @@ The below part demonstrates 1) result indentation 2) ignored sections
   ABCDEF
   ```
   -->
+* Litrepl preserves empty lines while indenting
+  ``` python
+  print("1\n\n2\n\n",end='')
+  ```
+  ```result
+  1
+
+  2
+
+  ```
 
 Commented code section
 ----------------------

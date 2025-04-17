@@ -13,7 +13,10 @@ def unindent(col:int, lines:str)->str:
   return '\n'.join(map(_rmspaces,lines.split('\n')))
 
 def indent(col:int, lines:str)->str:
-  return '\n'.join([' '*col+l for l in lines.split('\n')])
+  """ Indent `lines` by addint `col` spaces to all non-empty line. The very last line is always
+  indented. """
+  ls=lines.split('\n')
+  return '\n'.join([((' '*col+l) if (len(l)>0 or i==len(ls)-1) else '') for i,l in enumerate(ls)])
 
 def escape(text, pat:str):
   """ Escapes every letter of a pattern with (\) """
