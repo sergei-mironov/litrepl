@@ -4,6 +4,25 @@ vim: tw=80
 Changelog
 =========
 
+Version 3.13.0
+--------------
+
+1. **Python**
+   - Improved backward compatibility by fixing issues related to spurious
+     newlines on empty inputs.
+   - Accept `codeai` code section for AI interpreters, in addition to `ai`.
+   - Introduced a new command `print-auxdir`.
+
+2. **Environment**
+   - Added support for generating coverage reports with updates to the Makefile.
+   - Added dependency on coverage-badge, enhancing reporting capabilities.
+   - Modified settings to ignore empty `LITREPL_` environment variables.
+
+3. **Vim**
+   - Enhanced the indentation feature in Litrepl to preserve empty lines.
+   - Updated the status command to print the auxiliary directory and fixed an
+     unwanted exception.
+
 Version 3.12.0
 --------------
 
