@@ -5,7 +5,7 @@
 
 [Changelog](./CHANGELOG.md) | [Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-gallery)
 
-![](./img/coverage.svg)
+[![](./img/coverage.svg)](#-coverage-report)
 </div>
 
 **Litrepl** is a command-line processor for *Markdown* or *LaTeX* documents with
@@ -99,6 +99,7 @@ _Notes:_
     * [Tools for Screencast Recording](#tools-for-screencast-recording)
     * [Common Development Scenarios](#common-development-scenarios)
 * [🎥 Gallery](#-gallery)
+* [🖼️ Coverage report](#-coverage-report)
 * [💡 Technical Insights](#-technical-insights)
 * [🚫 Known Limitations](#-known-limitations)
 * [Related Tools and Projects](#related-tools-and-projects)
@@ -754,12 +755,12 @@ usage: litrepl [-h] [-v] [--filetype STR] [--python-markers STR[,STR]]
                [--foreground] [--map-cursor LINE:COL:FILE]
                [--result-textwidth NUM]
               
-{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar}
+{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir}
                ...
 
 positional arguments:
  
-{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar}
+{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir}
                               Commands to execute
     start                     Start the background interpreter.
     stop                      Stop the background interpreters.
@@ -780,6 +781,7 @@ positional arguments:
                               the given file type.
     print-grammar             Print the resulting grammar for the given
                               filetype.
+    print-auxdir              Print the auxdir for the given interpreter type.
 
 options:
   -h, --help                  show this help message and exit
@@ -964,9 +966,15 @@ Usage: runtest.sh [-d] [-i I(,I)*] [-t T(,T)*]
 Arguments:
   -d                        Be very verbose
   -i I, --interpreters=I    Run tests requiring interpreters matching the grep expression I
-                            Run -i '?' to list all available interpreters.
+                            Run -i '?' to list all available interpreters
   -t T, --tests=T           Run tests whose names match the grep expression T
-                            Run -t '?' to list all available tests.
+                            Run -t '?' to list all available tests
+  -p P, --python=P          Use this Python interpreter to run Litrepl
+                            Run -p '?' to list available python interpreters
+  -c FILE, --coverage=FILE  Collect coverage results into the FILE. Defaults to
+                            `.coverage` if no tests or interpreters are
+                            selected, otherwize disabled.
+  -c -,    --coverage=-     Disable coverage.
 
 Examples:
   runtests.sh -t '?' -i '?'
@@ -1002,6 +1010,32 @@ preview LaTeX documents instantly.
 <video controls src="https://user-images.githubusercontent.com/4477729/187065835-3302e93e-6fec-48a0-841d-97986636a347.mp4" muted="true"></video>
 
 </details>
+
+📊 Coverage report
+------------------
+
+``` sh
+coverage report --format=markdown -m
+```
+
+<!--result-->
+| Name                                        |    Stmts |     Miss |   Cover |   Missing |
+|-------------------------------------------- | -------: | -------: | ------: | --------: |
+| python/litrepl/\_\_init\_\_.py              |       34 |       12 |     65% |24-29, 35-40 |
+| python/litrepl/base.py                      |      558 |       46 |     92% |48, 60, 78, 88, 137, 167, 206-212, 222, 228, 400, 411-412, 436-441, 449, 472, 498-499, 557, 614-615, 680-682, 726-735, 753-758 |
+| python/litrepl/eval.py                      |      336 |       32 |     90% |36, 39-40, 77-78, 91, 122, 148-149, 173-175, 190, 199, 274-280, 299-300, 318, 327, 352, 364-367, 380-381 |
+| python/litrepl/interpreters/\_\_init\_\_.py |        0 |        0 |    100% |           |
+| python/litrepl/interpreters/aicli.py        |       50 |       19 |     62% |15-17, 37, 41-51, 60-66 |
+| python/litrepl/interpreters/ipython.py      |       32 |        1 |     97% |        70 |
+| python/litrepl/interpreters/python.py       |       22 |        1 |     95% |        38 |
+| python/litrepl/interpreters/shell.py        |       22 |        1 |     95% |        26 |
+| python/litrepl/main.py                      |      206 |       47 |     77% |22-24, 163, 166-169, 212, 221, 238-243, 245-247, 258-267, 280, 290-294, 303-311, 313-314, 320-321 |
+| python/litrepl/revision.py                  |        1 |        1 |      0% |         2 |
+| python/litrepl/semver.py                    |        1 |        1 |      0% |         2 |
+| python/litrepl/types.py                     |       94 |        6 |     94% |124, 129, 135, 138, 141, 144 |
+| python/litrepl/utils.py                     |       97 |        2 |     98% |   129-130 |
+|                                   **TOTAL** | **1453** |  **169** | **88%** |           |
+<!--noresult-->
 
 💡 Technical Insights
 ---------------------
