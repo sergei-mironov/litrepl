@@ -211,11 +211,11 @@ def start(a:LitreplArgs, st:SType)->int:
     else:
       raise ValueError(f"Unsupported python interpreter: {a.python_interpreter}")
   elif st is SType.SAI:
-    assert not a.exception_exitcode, "Not supported"
+    assert not a.exception_exitcode, "--exception-exitcode is not compatible with `ai`"
     interpreter='aicli' if a.ai_interpreter=='auto' else a.ai_interpreter
     return start_(a,interpreter,AicliInterpreter(fns))
   elif st is SType.SShell:
-    assert not a.exception_exitcode, "Not supported"
+    assert not a.exception_exitcode, "--exception-exitcode is not compatible with `sh`"
     interpreter='/bin/sh' if a.sh_interpreter=='auto' else a.sh_interpreter
     return start_(a,interpreter,ShellInterpreter(fns))
   else:

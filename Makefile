@@ -25,10 +25,17 @@ test: .stamp_test
 
 .stamp_readme: $(PY)
 	cp README.md _README.md.in
-	cat _README.md.in | \
-		litrepl --foreground --exception-exitcode=100 \
-  	        --result-textwidth=100 --sh-interpreter=- \
-		eval-sections >README.md
+	cat _README.md.in \
+	|litrepl --foreground --exception-exitcode=100 --result-textwidth=100 \
+			--ai-interpreter=- \
+			--sh-interpreter=- \
+			eval-sections \
+	|litrepl --foreground \
+			--ai-interpreter=- \
+			--python-interpreter=- \
+			--sh-interpreter=/bin/sh \
+			eval-sections '$$' \
+	>README.md
 	touch $@
 
 .PHONY: readme # Update code sections in the README.md
