@@ -181,7 +181,7 @@ fun! LitReplTaskNew(scope, prompt, reindent_selection) range " -> [int, string]
   if errcode == 0
     if scope == 3
       " Show response in the terminal
-      execute "terminal ++shell ".LitReplCmd()." repl ai"
+      call LitReplTerminal(LitReplCmd()." repl ai")
       call feedkeys("/cat out\n")
     else
       if nindent != 0

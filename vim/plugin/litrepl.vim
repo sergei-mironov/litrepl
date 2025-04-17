@@ -63,6 +63,9 @@ endif
 if ! exists("g:litrepl_dump_mon")
   let g:litrepl_dump_mon = 0
 endif
+if ! exists("g:litrepl_use_interactive_shell")
+  let g:litrepl_use_interactive_shell = 1
+endif
 
 fun! LitReplGet(name)
   if exists('b:'.a:name)
@@ -84,10 +87,52 @@ fun! LitReplExe()
   endtry
 endfun
 
+fun! LitReplSystem(line, input)
+  let ret = ''
+  let old = &shellcmdflag
+  try
+    if LitReplGet('litrepl_use_interactive_shell') == 1
+      let &shellcmdflag = '-i '.&shellcmdflag
+    endif
+    let ret = system(a:line, a:input)
+  finally
+    let &shellcmdflag = old
+  endtry
+  return ret
+endfun
+
+fun! LitReplExecute(line)
+  let old = &shellcmdflag
+  try
+    if LitReplGet('litrepl_use_interactive_shell') == 1
+      let &shellcmdflag = '-i '.&shellcmdflag
+    endif
+    silent execute a:line
+  finally
+    let &shellcmdflag = old
+  endtry
+endfun
+
+fun! LitReplTerminal(line)
+  let old = &shellcmdflag
+  let shell = ""
+  try
+    if LitReplGet('litrepl_use_interactive_shell') == 1
+      let &shellcmdflag = '-i '.&shellcmdflag
+      let shell = "++shell"
+    endif
+    execute 'terminal '.shell.' '.a:line
+  finally
+    let &shellcmdflag = old
+  endtry
+endfun
+
 if ! exists("g:litrepl_version")
   let devroot = getenv('LITREPL_ROOT')
   if ! empty(devroot)
-    let g:litrepl_plugin_version = substitute(system(LitReplExe().' --version'),"\n","",'g')
+    let g:litrepl_plugin_version = substitute(
+      \ LitReplSystem(LitReplExe().' --version',''),"\n",
+      \ "",'g')
   else
     let g:litrepl_plugin_version = 'version-to-be-filled-by-the-packager'
   endif
@@ -98,7 +143,7 @@ endif
 
 fun! LitReplCmd()
   if LitReplGet('litrepl_check_versions') == 1
-    let g:litrepl_tool_version = substitute(system(LitReplExe().' --version'),"\n","",'g')
+    let g:litrepl_tool_version = substitute(LitReplSystem(LitReplExe().' --version', ''),"\n","",'g')
     if v:shell_error != 0
       echohl ErrorMsg
       echom "Error: `litrepl` system tool failed to report its version!"
@@ -232,7 +277,7 @@ fun! LitReplRun(command, input) range
   let errfile = LitReplGet('litrepl_errfile')
   let cmd = LitReplCmdTimeout('inf').' '.a:command.' 2>>'.errfile
   call LitReplLogInput(errfile, cmd, a:input)
-  let result = system(cmd, a:input)
+  let result = LitReplSystem(cmd, a:input)
   call writefile(['<end-of-stderr>'],errfile,'a')
   let errcode = v:shell_error
   return [errcode, result]
@@ -249,7 +294,7 @@ fun! LitReplRunBuffer(command, timeout) range
   let errfile = LitReplGet('litrepl_errfile')
   let cmd = '%!'.LitReplCmdTimeout(a:timeout).' '.a:command.' 2>>'.errfile
   call LitReplLogInput(errfile, cmd, "<vim-buffer>")
-  silent execute cmd
+  call LitReplExecute(cmd)
   call writefile(['<end-of-stderr>'],errfile,'a')
   let errcode = v:shell_error
   return errcode
@@ -337,7 +382,8 @@ fun! LitReplStatus()
   let cur = getcharpos('.')
   execute "normal! I "
   execute "normal! x"
-  silent execute '%!'.LitReplCmd().' '.flag.' status 2>'.LitReplGet('litrepl_errfile').' >&2'
+  let cmd = '%!'.LitReplCmd().' '.flag.' status 2>'.LitReplGet('litrepl_errfile').' >&2'
+  call LitReplExecute(cmd)
   call setcharpos('.', cur)
   execute "u"
   call LitReplOpenErrS('',splitcmd)
