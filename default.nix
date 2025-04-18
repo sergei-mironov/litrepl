@@ -98,6 +98,7 @@ let
         coverage
         (aicli.aicli pp)
         (coverage-badge pp)
+        argparse-manpage
       ]
     );
 
