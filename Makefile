@@ -8,12 +8,23 @@ VIM = $(shell find vim -name '*\.vim')
 VIMB_REV = _dist/vim-litrepl-$(VERSION)-$(REVISION).tar.gz
 PAPER_TAR_GZ = paper/tex/paper-$(VERSION)-$(REVISION).tar.gz
 TESTS = ./sh/runtests.sh
+MAN = man/litrepl.5
 
 .stamp_test: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
 	LITREPL_BIN="`pwd`/python/bin" \
 	LITREPL_ROOT=`pwd` \
 	sh $(TESTS)
 	touch $@
+
+.PHONY: man # Build a manpage
+man: $(MAN)
+$(MAN): $(PY) Makefile python/bin/litrepl
+	argparse-manpage --module litrepl.main \
+		--author 'Sergei Mironov' \
+ 	  --author-email 'sergei.v.mironov@proton.me' \
+		--url 'https://github.com/sergei-mironov/litrepl' \
+		--project-name 'litrepl' \
+		--object=AP >$@
 
 .PHONY: help # Print help
 help:
