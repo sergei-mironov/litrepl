@@ -282,9 +282,10 @@ fun! LitReplAIFile(prompt) range " -> [int, string]
     \ "\n---\n/F\n---\n" .
     \ "You need to do the following: " .
     \ prompt . "\n".
-    \ "Please arrange the output so the resulting program appears as-is " .
-    \ "without any text formatting, especially without markdown \"```\" formatting! ".
-    \ "Put your own comments in the header code comment of the resulting program.",
+    \ "Please format this particular response as a pastable code, " .
+    \ "without any additional text formatting, especially without the ".
+    \ "\"```\" formatting of Markdown! Put your own comments in the header ".
+    \ "code comment of the resulting program.",
     \ 0)
   let &textwidth = tw_old
   return result
@@ -310,21 +311,21 @@ fun! LitReplAICode(scope, prompt) range " -> [int, string]
   if scope == 1
     let task = "Your task is to change the following code snippet: \n---\n/S\n---\n"
   else
-    let task = ""
+    let task = "You need to do the following: "
   endif
   let footer = ''.
-    \ "Please print the resulting code snippet as-is " .
-    \ "without any markdown formatting, especially avoid the \"```\" ".
-    \ "formatting!"
+    \ "Please format this particular response as a pastable code fragment. " .
+    \ "Do not wrap it in any text document formatting, especially omit ".
+    \ "the \"```\" formatting of Markdown!"
   let vm = visualmode()
   if (scope == 1 && vm == 'V') || (scope == 0 && getpos('.')[2] == 1)
     let footer = footer .
-      \ "Wrap your own comments, if any, into the appropriate comment blocks or " .
-      \ "line-comments suitable for the main programming language of the sinppet " .
+      \ "Mark your own comments, if any, into the appropriate comment blocks or " .
+      \ "line-comments suitable for the programming language of your choice " .
       \ "e.g. by using hash-comment or \\/\\/ symbols. "
   else
     let footer = footer .
-      \ "Please generate no comments, just output the code snippet! "
+      \ "Please omit any comments, just output the required code fragment! "
   endif
   if &textwidth > 0
     let footer = footer . "Please avoid generating lines longer than ".
@@ -332,7 +333,6 @@ fun! LitReplAICode(scope, prompt) range " -> [int, string]
   endif
   return LitReplTaskNew(scope,
     \ task .
-    \ "You need to do the following: " .
     \ prompt . "\n".
     \ footer,
     \ 1)
