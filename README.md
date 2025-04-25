@@ -937,6 +937,7 @@ print("~~~~")
 make[1]: Entering directory '/home/grwlf/proj/litrepl.vim'
 LitREPL is a macroprocessing Python library for Litrate programming and code execution
 Build targets:
+man:        Build a manpage
 help:       Print help
 test:       Run the test script (./sh/runtests.sh)
 readme:     Update code sections in the README.md
