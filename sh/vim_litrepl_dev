@@ -8,9 +8,6 @@ if ! test -f "$LITREPL_ROOT/vim/plugin/litrepl.vim" ; then
   exit 1
 fi
 exec vim -c "
-if exists('g:litrepl_bin')
-  unlet g:litrepl_bin
-endif
 if exists('g:litrepl_loaded')
   unlet g:litrepl_loaded
 endif

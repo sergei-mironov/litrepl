@@ -15,13 +15,6 @@ fun! LitReplGetTempDir()
   endif
 endfun
 
-if ! exists("g:litrepl_bin")
-  " TODO: Delay the expansion until the LitReplExe or alike.
-  let g:litrepl_bin = expand('<sfile>:p:h:h').'/bin/'
-endif
-if ! exists("g:litrepl_exe")
-  let g:litrepl_exe = 'litrepl'
-endif
 if ! exists("g:litrepl_always_show_stderr")
   let g:litrepl_always_show_stderr = 0
 endif
@@ -78,13 +71,12 @@ fun! LitReplGet(name)
 endfun
 
 fun! LitReplExe()
-  let oldpath = getenv('PATH')
-  try
-    call setenv('PATH', LitReplGet('litrepl_bin').':'.oldpath)
-    return exepath(LitReplGet('litrepl_exe'))
-  finally
-    call setenv('PATH', oldpath)
-  endtry
+  if exists('$LITREPL')
+    let litrepl = $LITREPL
+  else
+    let litrepl = exepath('litrepl')
+  endif
+  return litrepl
 endfun
 
 fun! LitReplSystem(line, input)
@@ -94,9 +86,11 @@ fun! LitReplSystem(line, input)
     if LitReplGet('litrepl_use_interactive_shell') == 1
       let &shellcmdflag = '-i '.&shellcmdflag
     endif
+    let $VIM_LITREPL_FILE = expand('%:p')
     let ret = system(a:line, a:input)
   finally
     let &shellcmdflag = old
+    unlet $VIM_LITREPL_FILE
   endtry
   return ret
 endfun
@@ -107,9 +101,11 @@ fun! LitReplExecute(line)
     if LitReplGet('litrepl_use_interactive_shell') == 1
       let &shellcmdflag = '-i '.&shellcmdflag
     endif
+    let $VIM_LITREPL_FILE = expand('%:p')
     silent execute a:line
   finally
     let &shellcmdflag = old
+    unlet $VIM_LITREPL_FILE
   endtry
 endfun
 
@@ -121,9 +117,11 @@ fun! LitReplTerminal(line)
       let &shellcmdflag = '-i '.&shellcmdflag
       let shell = "++shell"
     endif
+    let $VIM_LITREPL_FILE = expand('%:p')
     execute 'terminal '.shell.' '.a:line
   finally
     let &shellcmdflag = old
+    unlet $VIM_LITREPL_FILE
   endtry
 endfun
 

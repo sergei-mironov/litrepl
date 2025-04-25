@@ -1421,9 +1421,9 @@ runlitrepl() {
   test -n "$LITREPL_TEST_PYTHON_INTERPRETER"
   test -n "$LITREPL_TEST_AI_INTERPRETER"
   test -n "$LITREPL_TEST_SH_INTERPRETER"
-  test -n "$LITREPL_BIN"
+  test -x "$LITREPL"
   # If litrepl is a shell script then LITREPL_TEST_PYTHON should be an empty string
-  $LITREPL_TEST_PYTHON $LITREPL_BIN/litrepl --debug="$LITREPL_DEBUG" \
+  $LITREPL_TEST_PYTHON $LITREPL --debug="$LITREPL_DEBUG" \
     --python-interpreter="$LITREPL_TEST_PYTHON_INTERPRETER" \
     --ai-interpreter="$LITREPL_TEST_AI_INTERPRETER" \
     --sh-interpreter="$LITREPL_TEST_SH_INTERPRETER" \
@@ -1433,7 +1433,6 @@ runlitrepl() {
 runvim() {
   {
     echo ":redir > _vim_messages.log"
-    echo ":let g:litrepl_bin=\"$LITREPL_BIN\""
     echo ":let g:litrepl_python_interpreter=\"$LITREPL_TEST_PYTHON_INTERPRETER\""
     echo ":let g:litrepl_errfile='_litrepl.err'"
     cat
@@ -1521,20 +1520,20 @@ if test -n "$LITREPL_COVERAGE" ; then
 fi
 
 # "Binary" setup
-if test -z "$LITREPL_BIN"; then
-  LITREPL_BIN=$LITREPL_ROOT/python/bin
+if test -z "$LITREPL"; then
+  LITREPL=$LITREPL_ROOT/python/bin/litrepl
 fi
-if file --mime-type $LITREPL_BIN/litrepl | grep -q 'script.python' ; then
+if file --mime-type $LITREPL | grep -q 'script.python' ; then
   if test -z "$LITREPL_TEST_PYTHON" ; then
     LITREPL_TEST_PYTHON=python
   fi
 else
   if test -n "$LITREPL_TEST_PYTHON" ; then
     {
-    echo "$LITREPL_BIN/litrepl is not a Python script so we can't apply specific" \
+    echo "$LITREPL is not a Python script so we can't apply specific" \
          "Python interpreter any more. Is it a shell-script wrapper?"
     echo "Note:"
-    file $LITREPL_BIN/litrepl
+    file $LITREPL
     } >&2
     exit 1
   fi

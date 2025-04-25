@@ -156,7 +156,7 @@ let
         sed -i '/PATH.*python/d' $out/bin/litrepl
       '';
       checkPhase = ''
-        LITREPL_BIN="$out/bin" \
+        LITREPL="$out/bin/litrepl" \
         LITREPL_ROOT=`pwd` \
         ${./sh/runtests.sh}
       '';
