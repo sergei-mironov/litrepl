@@ -35,3 +35,4 @@ revision.py
 *.dvi
 *_latexmk
 *.pyg
+site/
