@@ -91,7 +91,12 @@ _Notes:_
 🚀 Documentation
 ----------------
 
-TODO: Link to the mkdoc
+For documentation, visit the
+[Github pages site](https://sergei-mironov.github.io/litrepl/).
+
+* [Installation](https://sergei-mironov.github.io/litrepl/installation/)
+* [Basic usage](https://sergei-mironov.github.io/litrepl/usage/general-concepts/)
+* [Formatting documents](https://sergei-mironov.github.io/litrepl/usage/formatting/)
 
 🎥 Gallery
 ----------
