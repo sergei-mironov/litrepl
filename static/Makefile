@@ -30,7 +30,7 @@ $(MAN): $(PY) Makefile python/bin/litrepl doc/description.md
 		--object=AP >$@
 
 .PHONY: docs # Build the MkDocs documentation
-docs: .stamp_docs
+docs: .stamp_docs_deploy
 .stamp_docs: $(PY) $(DOCS) $(TOP) python/bin/litrepl
 	cp $(TOP) docs/static
 	set -e; \
@@ -46,6 +46,9 @@ docs: .stamp_docs
 		mv $$d.new $$d ; \
 	done
 	mkdocs build
+	touch $@
+.stamp_docs_deploy: .stamp_docs
+	mkdocs gh-deploy
 	touch $@
 
 .PHONY: help # Print help
