@@ -22,6 +22,6 @@ python3 -c 'import dataclasses' || echo "Warning: 'dataclasses' python library n
 litrepl --version >/dev/null || echo "litrepl is not in PATH" >&2
 socat -V >/dev/null || echo "GNU socat not found" >&2
 
-export LITREPL_PYTHON_AUXDIR=_litrepl/python
-export LITREPL_AI_AUXDIR=_litrepl/ai
-export LITREPL_SH_AUXDIR=_litrepl/sh
+export LITREPL_PYTHON_AUXDIR=$PROJECT_ROOT/_litrepl/python
+export LITREPL_AI_AUXDIR=$PROJECT_ROOT/_litrepl/ai
+export LITREPL_SH_AUXDIR=$PROJECT_ROOT/_litrepl/sh
