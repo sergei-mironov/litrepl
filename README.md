@@ -86,7 +86,7 @@ For documentation, visit the
 🎥 Gallery
 ----------
 
-<details open>
+<details>
 <summary>Basic usage (Show GIF)</summary>
 
 ![Peek 2024-07-18 20-50-2](https://github.com/user-attachments/assets/8e2b2c8c-3412-4bf6-b75d-d5bd1adaf7ea)
