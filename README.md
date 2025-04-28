@@ -76,12 +76,13 @@ _Notes:_
 🚀 Documentation
 ----------------
 
-For documentation, visit the
-[Github pages site](https://sergei-mironov.github.io/litrepl/).
-
 * [Installation](https://sergei-mironov.github.io/litrepl/installation/)
 * [Basic usage](https://sergei-mironov.github.io/litrepl/usage/general-concepts/)
 * [Formatting documents](https://sergei-mironov.github.io/litrepl/usage/formatting/)
+
+
+For complete documentation, visit the project's
+[Github pages site](https://sergei-mironov.github.io/litrepl/).
 
 🎥 Gallery
 ----------
