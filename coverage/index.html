@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Coverage - Litrepl Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Coverage";
+        var mkdocs_page_input_path = "coverage.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Litrepl Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Usage</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/general-concepts/">General concepts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/formatting/">Formatting</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/application-scenarios/">Application Scenarios</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../reference/">Reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../development/">Development</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../related/">Related</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Litrepl Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Coverage</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="coverage-report">Coverage report</h2>
+<pre><code class="language-python">!coverage report --format=markdown -m
+</code></pre>
+<!--result-->
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th style="text-align: right;">Stmts</th>
+<th style="text-align: right;">Miss</th>
+<th style="text-align: right;">Cover</th>
+<th style="text-align: right;">Missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>python/litrepl/__init__.py</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">65%</td>
+<td style="text-align: right;">24-29, 35-40</td>
+</tr>
+<tr>
+<td>python/litrepl/base.py</td>
+<td style="text-align: right;">558</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">92%</td>
+<td style="text-align: right;">48, 60, 78, 88, 137, 167, 207-213, 223, 229, 401, 412-413, 437-442, 450, 473, 499-500, 558, 615-616, 681-683, 727-736, 754-759</td>
+</tr>
+<tr>
+<td>python/litrepl/eval.py</td>
+<td style="text-align: right;">336</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">36, 39-40, 49, 63, 67, 73, 77-78, 90-91, 93, 96-97, 101, 116, 118, 121-123, 126, 148-149, 151-152, 154, 156-159, 173-176, 179-183, 199, 205, 207, 212-223, 236, 249, 265-266, 277-280, 299-301, 317-319, 321, 326, 330, 335-339, 352, 364-370, 374-375, 381-382, 414, 420-423, 438, 442, 450, 454, 458, 465-471, 490-505</td>
+</tr>
+<tr>
+<td>python/litrepl/interpreters/__init__.py</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>python/litrepl/interpreters/aicli.py</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">62%</td>
+<td style="text-align: right;">15-17, 37, 41-51, 60-66</td>
+</tr>
+<tr>
+<td>python/litrepl/interpreters/ipython.py</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">97%</td>
+<td style="text-align: right;">70</td>
+</tr>
+<tr>
+<td>python/litrepl/interpreters/python.py</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">95%</td>
+<td style="text-align: right;">38</td>
+</tr>
+<tr>
+<td>python/litrepl/interpreters/shell.py</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">95%</td>
+<td style="text-align: right;">26</td>
+</tr>
+<tr>
+<td>python/litrepl/main.py</td>
+<td style="text-align: right;">206</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">77%</td>
+<td style="text-align: right;">22-24, 194, 197-200, 243, 252, 269-274, 276-278, 289-298, 311, 321-325, 334-342, 344-345, 351-352</td>
+</tr>
+<tr>
+<td>python/litrepl/revision.py</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0%</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td>python/litrepl/semver.py</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0%</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td>python/litrepl/types.py</td>
+<td style="text-align: right;">94</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">94%</td>
+<td style="text-align: right;">137, 142, 148, 152, 156, 159</td>
+</tr>
+<tr>
+<td>python/litrepl/utils.py</td>
+<td style="text-align: right;">97</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">94%</td>
+<td style="text-align: right;">37, 55, 129-132</td>
+</tr>
+<tr>
+<td><strong>TOTAL</strong></td>
+<td style="text-align: right;"><strong>1453</strong></td>
+<td style="text-align: right;"><strong>241</strong></td>
+<td style="text-align: right;"><strong>83%</strong></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<!--noresult-->
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
