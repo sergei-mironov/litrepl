@@ -17,12 +17,14 @@ MAN = man/litrepl.1
 
 .PHONY: man # Build a manpage
 man: $(MAN)
-$(MAN): $(PY) Makefile python/bin/litrepl
+$(MAN): $(PY) Makefile python/bin/litrepl doc/description.md
 	argparse-manpage --module litrepl.main \
 		--author 'Sergei Mironov' \
  	  --author-email 'sergei.v.mironov@proton.me' \
 		--url 'https://github.com/sergei-mironov/litrepl' \
 		--project-name 'litrepl' \
+		--description "$$(cat doc/description.md)" \
+		--version $(VERSION) \
 		--object=AP >$@
 
 .PHONY: help # Print help
