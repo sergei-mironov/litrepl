@@ -195,6 +195,7 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter)->int:
       return 1
 
 def start(a:LitreplArgs, st:SType)->int:
+  """ Start Litrepl session of type `st`. """
   if isdisabled(a,st):
     raise ValueError(f"Interpreter class {st2name(st)} is disabled by the user")
   fns=pipenames(a,st)
