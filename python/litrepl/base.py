@@ -107,9 +107,9 @@ def bmarker2st(a:LitreplArgs, bmarker:str)->Optional[SType]:
       )
 
 def pipenames(a:LitreplArgs, st:SType)->FileNames:
-  """ Return the interpreter state: input and output pipe names, pid, etc. If
-  not explicitly specified in the config, the state is shared for all files in
-  the current directory. """
+  """ Return the background interpreter session state: input and output pipe
+  names, pid, etc. If not explicitly specified in the config, the state is
+  shared for all files in the current directory. """
   auxdir=st2auxdir(a,st)
   return FileNames(auxdir,
                    join(auxdir,"in.pipe"),join(auxdir,"out.pipe"),
