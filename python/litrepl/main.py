@@ -44,52 +44,63 @@ def make_parser():
     help='Specify the type of input formatting (markdown|[la]tex|auto).')
   ap.add_argument('--python-markers',metavar='STR[,STR]',
     default=environ.get('LITREPL_PYTHON_MARKERS','python'),
-    help=dedent('''Specify section markers recognized as `python` sections.
+    help=dedent('''
+    Specify section markers recognized as `python` sections.
     Defaults to the value of LITREPL_PYTHON_MARERS if set, otherwize
     "python".'''))
   ap.add_argument('--ai-markers',metavar='STR[,STR]',
     default=environ.get('LITREPL_AI_MARKERS','codeai,ai'),
-    help=dedent('''Specify section markers recognized as `ai` sections.
+    help=dedent('''
+    Specify section markers recognized as `ai` sections.
     Defaults to the value of LITREPL_AI_MARERS if set, otherwize
     "codeai,ai".'''))
   ap.add_argument('--sh-markers',metavar='STR[,STR]',
     default=environ.get('LITREPL_SH_MARERS','sh,bash'),
-    help=dedent('''Specify section markers recognized as `shell` sections.
+    help=dedent('''
+    Specify section markers recognized as `shell` sections.
     Defaults to the value of LITREPL_SH_MARERS if set, otherwize "shell". '''))
   ap.add_argument('--python-interpreter',metavar='EXE',
     default=_ensure_nonepty(environ.get('LITREPL_PYTHON_INTERPRETER','auto')),
-    help=dedent('''Python interpreter command line, or `auto`. Defaults to the
+    help=dedent('''
+    Python interpreter command line, or `auto`. Defaults to the
     LITREPL_PYTHON_INTERPRETER environment variable if set, otherwise "auto".
     Litrepl determines "python" or "ipython" type according to the value.'''))
   ap.add_argument('--ai-interpreter',metavar='EXE',
     default=_ensure_nonepty(environ.get('LITREPL_AI_INTERPRETER','auto')),
-    help=dedent('''`aicli` interpreter command line or `auto`. Defaults to the
+    help=dedent('''
+    `aicli` interpreter command line or `auto`. Defaults to the
     LITREPL_AI_INTERPRETER environment variable if set, otherwise "auto".'''))
   ap.add_argument('--sh-interpreter',metavar='EXE',
     default=_ensure_nonepty(environ.get('LITREPL_SH_INTERPRETER','auto')),
-    help=dedent('''Shell interpreter command line or `auto`. Defaults to the
+    help=dedent('''
+    Shell interpreter command line or `auto`. Defaults to the
     LITREPL_SH_INTERPRETER environment variable if set, otherwise "auto".'''))
   ap.add_argument('--python-auxdir',type=str,metavar='DIR',
     default=_ensure_nonepty(environ.get('LITREPL_PYTHON_AUXDIR')),
-    help=dedent('''This directory stores Python interpreter pipes. It defaults
+    help=dedent('''
+    This directory stores Python interpreter pipes. It defaults
     to LITREPL_PYTHON_AUXDIR if set; otherwise, it's created in the system's
     temporary directory, named after the current working directory.'''))
   ap.add_argument('--ai-auxdir',type=str,metavar='DIR',
     default=_ensure_nonepty(environ.get('LITREPL_AI_AUXDIR')),
-    help=dedent('''This directory stores AI interpreter pipes. It defaults to
+    help=dedent('''
+    This directory stores AI interpreter pipes. It defaults to
     LITREPL_AI_AUXDIR if set; otherwise, it's created in the system's temporary
     directory, named after the current working directory.'''))
   ap.add_argument('--sh-auxdir',type=str,metavar='DIR',
     default=_ensure_nonepty(environ.get('LITREPL_SH_AUXDIR')),
-    help=dedent('''This directory stores AI interpreter pipes. It defaults to
+    help=dedent('''
+    This directory stores AI interpreter pipes. It defaults to
     LITREPL_SH_AUXDIR if set; otherwise, it's created in the system's temporary
     directory, named after the current working directory.'''))
   ap.add_argument('--timeout',type=str,metavar='F[,F]',default='inf',
-    help=dedent('''Timeouts for initial evaluation and for pending checks, in
+    help=dedent('''
+    Timeouts for initial evaluation and for pending checks, in
     seconds. If the latter is omitted, it is considered to be equal to the
     former one.'''))
   ap.add_argument('--propagate-sigint',action='store_true',
-    help=dedent('''If set, litrepl will catch and resend SIGINT signals to the
+    help=dedent('''
+    If set, litrepl will catch and resend SIGINT signals to the
     running interpreter. Otherwise it will just terminate itself leaving the
     interpreter as-is.'''))
   ap.add_argument('-d','--debug',type=int,metavar='INT',default=0,
@@ -98,30 +109,40 @@ def make_parser():
     help='Be more verbose (used in status).')
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',
     default=_ensure_nonepty(environ.get('LITREPL_WORKDIR',None)),
-    help=dedent('''Set the working directory before execution. By default, it
-    uses LITREPL_WORKDIR if set, otherwise remains the current directory. This
+    help=dedent('''
+    Set the working directory before execution. By default, it uses
+    LITREPL_WORKDIR if set, otherwise remains the current directory. This
     affects the directory of a new interpreter and the --<interpreter>-auxdir
     option.'''))
   ap.add_argument('--pending-exitcode',type=str,metavar='INT',default=None,
-    help=dedent('''Return this error code if whenever a section hits timeout.'''))
+    help=dedent('''
+    Return this error code if whenever a section hits timeout.'''))
   ap.add_argument('--irreproducible-exitcode',type=str,metavar='INT',default=None,
-    help=dedent('''Return this error code if a section outputs a different
-    result than the one that is already present in the document.'''))
+    help=dedent('''
+    Return this error code if a section outputs a different result than the one
+    that is already present in the document.'''))
   ap.add_argument('--exception-exitcode',type=str,metavar='INT',default=None,
-    help=dedent('''Return this error code at exception, if any. Note: this
-    option might not be defined for some interpreters. It takes affect only for
-    newly-started interpreters.'''))
+    help=dedent('''
+    Return this error code at exception, if any. Note: this option might not be
+    defined for some interpreters. It takes affect only for newly-started
+    interpreters.'''))
   ap.add_argument('--foreground',action='store_true',
-    help=dedent('''Start a separate session and stop it when the evaluation is
+    help=dedent('''
+    Start a separate session and stop it when the evaluation is
     done. All --*-auxdir settings are ignored in this mode.'''))
   ap.add_argument('--map-cursor',type=str,metavar='LINE:COL:FILE',default=None,
-    help=dedent('''Calculate the new position of a cursor at LINE:COL and write
+    help=dedent('''
+    Calculate the new position of a cursor at LINE:COL and write
     it to FILE.'''))
   ap.add_argument('--result-textwidth',type=str,metavar='NUM',default=None,
-    help=dedent('''Wrap result lines longer than NUM symbols.'''))
+    help=dedent('''
+    Wrap result lines longer than NUM symbols.'''))
   sps=ap.add_subparsers(dest='command',help='Commands to execute')
   sstart=_with_type(sps.add_parser('start',
-    help='Start the background interpreter.'))
+    help=dedent('''
+    Start a background interpreter. The CLASS of an interpreter
+    should be specified. --<CLASS>-interpreter, --<CLASS>-auxdir etc. are
+    applied.''')))
   _with_type(sps.add_parser('stop',
     help='Stop the background interpreters.'),allow_all=True,default='all')
   _with_type(sps.add_parser('restart',
@@ -133,9 +154,11 @@ def make_parser():
   sps.add_parser('parse',
     help='Parse the input file without futher processing (diagnostics).')
   sps.add_parser('parse-print',
-    help=dedent('''Parse and print the input file back (diagnostics).'''))
+    help=dedent('''
+    Parse and print the input file back (diagnostics).'''))
   evalsec=sps.add_parser('eval-sections',
-    help=dedent('''Parse stdin, evaluate the specified sections (by default -
+    help=dedent('''
+    Parse stdin, evaluate the specified sections (by default -
     all available sections), print the resulting file to stdout.'''))
   evalsec.add_argument('locs',type=str,metavar='LOCS',default='0..$',
     help=LOCSHELP,nargs='?')
@@ -148,15 +171,18 @@ def make_parser():
   regexp=sps.add_parser('print-regexp',
     help='Print regexp matching start of code sections for the given file type.')
   regexp.add_argument('format',metavar='STR',default='vim',nargs='?',
-    help=dedent('''Regexp format to print: 'vim' or 'lark'. Defaults to 'vim'.'''))
+    help=dedent('''
+    Regexp format to print: 'vim' or 'lark'. Defaults to 'vim'.'''))
   regexp.add_argument('--tty',action='store_true',
     help='Read intput document from stdin (required to get per-section status).')
   grammar=sps.add_parser('print-grammar',
-    help=dedent('''Print the resulting grammar for the given filetype.'''))
+    help=dedent('''
+    Print the resulting grammar for the given filetype.'''))
   grammar.add_argument('--tty',action='store_true',
     help='Read intput document from stdin (required to get per-section status).')
   _with_type(sps.add_parser('print-auxdir',
-    help=dedent('''Print the auxdir for the given interpreter type.''')))
+    help=dedent('''
+    Print the auxdir for the given interpreter type.''')))
   return ap
 
 AP=make_parser()
