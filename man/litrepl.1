@@ -1,6 +1,10 @@
-.TH LITREPL "1" "1980\-01\-01" "litrepl" "Generated Python Manual"
+.TH LITREPL "1" "1980\-01\-01" "litrepl 3.13.0" "Generated Python Manual"
 .SH NAME
-litrepl
+litrepl \- **Litrepl** is a command\-line processor for *Markdown* or *LaTeX* documents with
+**literate programming** code sections. Instructed by its arguments, it
+evaluates and updates sections via background interpreters. Interpreters can
+stay active for a **read\-eval\-paste\-loop** style. The repository includes a Vim
+plugin to demonstrate editor integration.
 .SH SYNOPSIS
 .B litrepl
 [-h] [-v] [--filetype STR] [--python-markers STR[,STR]] [--ai-markers STR[,STR]] [--sh-markers STR[,STR]] [--python-interpreter EXE] [--ai-interpreter EXE] [--sh-interpreter EXE] [--python-auxdir DIR] [--ai-auxdir DIR] [--sh-auxdir DIR] [--timeout F[,F]] [--propagate-sigint] [-d INT] [--verbose] [-C DIR] [--pending-exitcode INT] [--irreproducible-exitcode INT] [--exception-exitcode INT] [--foreground] [--map-cursor LINE:COL:FILE] [--result-textwidth NUM] {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir} ...
@@ -9,7 +13,9 @@ litrepl
 POSITIONAL ARGUMENTS
 .TP
 \fBlitrepl\fR \fI\,start\/\fR
-Start the background interpreter.
+Start a background interpreter. The CLASS of an interpreter
+should be specified. \-\-<CLASS>\-interpreter, \-\-<CLASS>\-auxdir etc. are
+applied.
 .TP
 \fBlitrepl\fR \fI\,stop\/\fR
 Stop the background interpreters.
@@ -28,7 +34,7 @@ Parse and print the input file back (diagnostics).
 .TP
 \fBlitrepl\fR \fI\,eval\-sections\/\fR
 Parse stdin, evaluate the specified sections (by default \-
-    all available sections), print the resulting file to stdout.
+all available sections), print the resulting file to stdout.
 .TP
 \fBlitrepl\fR \fI\,eval\-code\/\fR
 Evaluate the code snippet.
@@ -153,15 +159,18 @@ Specify the type of input formatting (markdown|[la]tex|auto).
 
 .TP
 \fB\-\-python\-markers\fR \fI\,STR[,STR]\/\fR
-TODO
+Specify section markers recognized as `python` sections. Defaults to the value
+of LITREPL_PYTHON_MARERS if set, otherwize "python".
 
 .TP
 \fB\-\-ai\-markers\fR \fI\,STR[,STR]\/\fR
-TODO
+Specify section markers recognized as `ai` sections. Defaults to the value of
+LITREPL_AI_MARERS if set, otherwize "codeai,ai".
 
 .TP
 \fB\-\-sh\-markers\fR \fI\,STR[,STR]\/\fR
-TODO
+Specify section markers recognized as `shell` sections. Defaults to the value
+of LITREPL_SH_MARERS if set, otherwize "shell".
 
 .TP
 \fB\-\-python\-interpreter\fR \fI\,EXE\/\fR
