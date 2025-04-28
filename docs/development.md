@@ -83,6 +83,12 @@ Examples:
 ~~~~
 <!-- noresult -->
 
+### Coverage
+
+Coverage is performed after the full testing cycle.
+
+The latest coverage report is [available](./coverage.md).
+
 ### Tools for Screencast Recording
 
 Another shell which might be useful is `shell-screencast`. This would build the

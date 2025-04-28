@@ -38,7 +38,7 @@ docs: .stamp_docs_deploy
 		echo "Evaluating $$d" ; \
 		cat $$d | litrepl --foreground \
 				--exception-exitcode=100 \
-				--result-textwidth=100 \
+				--result-textwidth=0 \
 				--ai-interpreter=- \
 				--sh-interpreter=- \
 				eval-sections \
@@ -67,11 +67,6 @@ test: .stamp_test
 			--ai-interpreter=- \
 			--sh-interpreter=- \
 			eval-sections \
-	|litrepl --foreground \
-			--ai-interpreter=- \
-			--python-interpreter=- \
-			--sh-interpreter=/bin/sh \
-			eval-sections '$$' \
 	>README.md
 	touch $@
 

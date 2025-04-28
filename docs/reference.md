@@ -69,13 +69,11 @@ usage: litrepl [-h] [-v] [--filetype STR] [--python-markers STR[,STR]]
                [--irreproducible-exitcode INT] [--exception-exitcode INT]
                [--foreground] [--map-cursor LINE:COL:FILE]
                [--result-textwidth NUM]
-              
-{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir}
+               {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir}
                ...
 
 positional arguments:
- 
-{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir}
+  {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir}
                               Commands to execute
     start                     Start a background interpreter. The CLASS of an
                               interpreter should be specified.
