@@ -10,7 +10,7 @@
 
 <!--
 ``` python
-!cat doc/description.md
+!cat docs/index.md | sed '/^\#/d;/^$/d'
 ```
 -->
 <!--result-->
