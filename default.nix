@@ -170,7 +170,8 @@ let
       propagatedBuildInputs = [(lark-current python.pkgs) pkgs.socat python.pkgs.psutil];
       src = python.pkgs.fetchPypi {
         inherit pname version;
-        sha256 = "sha256-JA/CW8mfRqRQWc35qQx4JgZ/iLmopPTJDO8rIqtBB/U=";
+        sha256 = "sha256-njpV8OZYPLLSk4P9s9TGrf2HwPHGG7jYuKyhW6z47yo=";
+        # sha256 = "sha256-JA/CW8mfRqRQWc35qQx4JgZ/iLmopPTJDO8rIqtBB/U=";
         # sha256 = "sha256-+ass/WI8dfA+a5fBGcCYCr5xswC7uWVfd2oCsp1Zt48=";
         # sha256 = "sha256-LI4k6anvK9MMqz0n8M8l5W5v3qM0i5TN9ho2QWwIGjQ=";
         # sha256 = "sha256-yrnqBSH+idosum/97Gwz4cB36hsggrMfOtoGspiPHb8=";

@@ -7,7 +7,7 @@ PY = $(shell find -name '*\.py' | grep -v semver.py | grep -v revision.py)
 VIM = $(shell find vim -name '*\.vim')
 VIMB_REV = _dist/vim-litrepl-$(VERSION)-$(REVISION).tar.gz
 TESTS = ./sh/runtests.sh
-MAN = man/litrepl.5
+MAN = man/litrepl.1
 
 .stamp_test: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
 	LITREPL_BIN="`pwd`/python/bin" \
@@ -52,7 +52,7 @@ test: .stamp_test
 .PHONY: readme # Update code sections in the README.md
 readme: .stamp_readme
 
-$(WHEEL_REV): $(PY) Makefile .stamp_test .stamp_readme
+$(WHEEL_REV): $(PY) Makefile .stamp_test .stamp_readme $(MAN)
 	mkdir -p $$(dirname $@) || true
 	test -n "$(VERSION)"
 	rm -rf build dist || true

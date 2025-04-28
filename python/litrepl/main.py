@@ -44,13 +44,18 @@ def make_parser():
     help='Specify the type of input formatting (markdown|[la]tex|auto).')
   ap.add_argument('--python-markers',metavar='STR[,STR]',
     default=environ.get('LITREPL_PYTHON_MARKERS','python'),
-    help=dedent('''TODO'''))
+    help=dedent('''Specify section markers recognized as `python` sections.
+    Defaults to the value of LITREPL_PYTHON_MARERS if set, otherwize
+    "python".'''))
   ap.add_argument('--ai-markers',metavar='STR[,STR]',
     default=environ.get('LITREPL_AI_MARKERS','codeai,ai'),
-    help=dedent('''TODO'''))
+    help=dedent('''Specify section markers recognized as `ai` sections.
+    Defaults to the value of LITREPL_AI_MARERS if set, otherwize
+    "codeai,ai".'''))
   ap.add_argument('--sh-markers',metavar='STR[,STR]',
     default=environ.get('LITREPL_SH_MARERS','sh,bash'),
-    help=dedent('''TODO'''))
+    help=dedent('''Specify section markers recognized as `shell` sections.
+    Defaults to the value of LITREPL_SH_MARERS if set, otherwize "shell". '''))
   ap.add_argument('--python-interpreter',metavar='EXE',
     default=_ensure_nonepty(environ.get('LITREPL_PYTHON_INTERPRETER','auto')),
     help=dedent('''Python interpreter command line, or `auto`. Defaults to the

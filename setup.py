@@ -59,7 +59,7 @@ setup(
   long_description=long_description,
   long_description_content_type="text/markdown",
   install_requires=['lark', 'psutil'],
-  data_files = [('man/man5', ['man/litrepl.5'])],
+  data_files = [('man/man1', ['man/litrepl.1'])],
   scripts=['./python/bin/litrepl'],
   python_requires='>=3.6',
   author="Sergei Mironov",

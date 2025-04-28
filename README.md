@@ -788,9 +788,16 @@ options:
   -v, --version               Print version.
   --filetype STR              Specify the type of input formatting
                               (markdown|[la]tex|auto).
-  --python-markers STR[,STR]  TODO
-  --ai-markers STR[,STR]      TODO
-  --sh-markers STR[,STR]      TODO
+  --python-markers STR[,STR]  Specify section markers recognized as `python`
+                              sections. Defaults to the value of
+                              LITREPL_PYTHON_MARERS if set, otherwize
+                              "python".
+  --ai-markers STR[,STR]      Specify section markers recognized as `ai`
+                              sections. Defaults to the value of
+                              LITREPL_AI_MARERS if set, otherwize "codeai,ai".
+  --sh-markers STR[,STR]      Specify section markers recognized as `shell`
+                              sections. Defaults to the value of
+                              LITREPL_SH_MARERS if set, otherwize "shell".
   --python-interpreter EXE    Python interpreter command line, or `auto`.
                               Defaults to the LITREPL_PYTHON_INTERPRETER
                               environment variable if set, otherwise "auto".
@@ -1023,17 +1030,17 @@ coverage report --format=markdown -m
 | Name                                        |    Stmts |     Miss |   Cover |   Missing |
 |-------------------------------------------- | -------: | -------: | ------: | --------: |
 | python/litrepl/\_\_init\_\_.py              |       34 |       12 |     65% |24-29, 35-40 |
-| python/litrepl/base.py                      |      558 |       46 |     92% |48, 60, 78, 88, 137, 167, 206-212, 222, 228, 400, 411-412, 436-441, 449, 472, 498-499, 557, 614-615, 680-682, 726-735, 753-758 |
+| python/litrepl/base.py                      |      558 |       46 |     92% |48, 60, 78, 88, 137, 167, 207-213, 223, 229, 401, 412-413, 437-442, 450, 473, 499-500, 558, 615-616, 681-683, 727-736, 754-759 |
 | python/litrepl/eval.py                      |      336 |       32 |     90% |36, 39-40, 77-78, 91, 122, 148-149, 173-175, 190, 199, 274-280, 299-300, 318, 327, 352, 364-367, 380-381 |
 | python/litrepl/interpreters/\_\_init\_\_.py |        0 |        0 |    100% |           |
 | python/litrepl/interpreters/aicli.py        |       50 |       19 |     62% |15-17, 37, 41-51, 60-66 |
 | python/litrepl/interpreters/ipython.py      |       32 |        1 |     97% |        70 |
 | python/litrepl/interpreters/python.py       |       22 |        1 |     95% |        38 |
 | python/litrepl/interpreters/shell.py        |       22 |        1 |     95% |        26 |
-| python/litrepl/main.py                      |      206 |       47 |     77% |22-24, 163, 166-169, 212, 221, 238-243, 245-247, 258-267, 280, 290-294, 303-311, 313-314, 320-321 |
+| python/litrepl/main.py                      |      206 |       47 |     77% |22-24, 168, 171-174, 217, 226, 243-248, 250-252, 263-272, 285, 295-299, 308-316, 318-319, 325-326 |
 | python/litrepl/revision.py                  |        1 |        1 |      0% |         2 |
 | python/litrepl/semver.py                    |        1 |        1 |      0% |         2 |
-| python/litrepl/types.py                     |       94 |        6 |     94% |124, 129, 135, 138, 141, 144 |
+| python/litrepl/types.py                     |       94 |        6 |     94% |137, 142, 148, 152, 156, 159 |
 | python/litrepl/utils.py                     |       97 |        6 |     94% |37, 55, 129-132 |
 |                                   **TOTAL** | **1453** |  **173** | **88%** |           |
 <!--noresult-->
