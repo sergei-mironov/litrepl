@@ -8,4 +8,5 @@ nav:
     - Application Scenarios: usage/application-scenarios.md
   - Reference: reference.md
   - Development: development.md
+  - Related: related.md
 theme: readthedocs
