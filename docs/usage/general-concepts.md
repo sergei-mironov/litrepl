@@ -34,7 +34,6 @@ print("~~~~")
 print('Hello Markdown!')
 ```
 ``` result
-Hello Markdown!
 ```
 ~~~~
 <!-- noresult -->
