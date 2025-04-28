@@ -73,21 +73,6 @@ _Notes:_
 * **[Socat](http://www.dest-unreach.org/socat/)** (Optional) Needed for
   `litrepl repl` and Vim's `LTerm` commands to work.
 
-📚 Contents
------------
-
-<!-- vim-markdown-toc GFM -->
-
-* [🚀 Documentation](#-documentation)
-* [🎥 Gallery](#-gallery)
-* [📊 Coverage report](#-coverage-report)
-* [💡 Technical Insights](#-technical-insights)
-* [🚫 Known Limitations](#-known-limitations)
-* [Related Tools and Projects](#related-tools-and-projects)
-* [Considerations for Third-Party Tools](#considerations-for-third-party-tools)
-
-<!-- vim-markdown-toc -->
-
 🚀 Documentation
 ----------------
 
