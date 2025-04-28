@@ -1040,12 +1040,12 @@ coverage report --format=markdown -m
 | python/litrepl/interpreters/ipython.py      |       32 |        1 |     97% |        70 |
 | python/litrepl/interpreters/python.py       |       22 |        1 |     95% |        38 |
 | python/litrepl/interpreters/shell.py        |       22 |        1 |     95% |        26 |
-| python/litrepl/main.py                      |      206 |       78 |     62% |22-24, 168, 171-173, 191, 194, 197, 203, 205, 215, 218, 221, 230, 234, 243-252, 263-272, 285, 295-300, 308-316, 318-319, 324-352 |
+| python/litrepl/main.py                      |      206 |       47 |     77% |22-24, 194, 197-200, 243, 252, 269-274, 276-278, 289-298, 311, 321-325, 334-342, 344-345, 351-352 |
 | python/litrepl/revision.py                  |        1 |        1 |      0% |         2 |
 | python/litrepl/semver.py                    |        1 |        1 |      0% |         2 |
 | python/litrepl/types.py                     |       94 |        6 |     94% |137, 142, 148, 152, 156, 159 |
 | python/litrepl/utils.py                     |       97 |        6 |     94% |37, 55, 129-132 |
-|                                   **TOTAL** | **1453** |  **204** | **86%** |           |
+|                                   **TOTAL** | **1453** |  **173** | **88%** |           |
 <!--noresult-->
 
 💡 Technical Insights

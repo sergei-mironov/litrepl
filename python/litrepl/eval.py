@@ -43,15 +43,20 @@ SIGMASK_NESTED=False
 
 @contextmanager
 def with_parent_finally(_handler):
+  """ `fork`-safe try-finally context-manager. Executes the `_handler` function
+  in a `finally` block, making sure is it executed exactly once, in the process
+  that calls the function."""
   pid:int=getpid()
   try:
-    yield # Might for a child process
+    yield # Might trigger for a child process
   finally:
     if pid==getpid():
       _handler()
 
 @contextmanager
 def with_sigmask(signals=None):
+  """ Runs a context code with Posix SIGMASK enabled, preventing `signals` to
+  happen. By default disables all valid signals. """
   global SIGMASK_NESTED
   assert not SIGMASK_NESTED
   signals=valid_signals() if signals is None else signals
@@ -66,6 +71,8 @@ def with_sigmask(signals=None):
       pthread_sigmask(SIG_SETMASK,old)
 
 def readipid(fns:FileNames)->Optional[int]:
+  """ Reads a PID of the background interpeter session process from the
+  auxiliary directory. """
   try:
     return int(open(fns.pidf).read())
   except (ValueError,FileNotFoundError):
@@ -73,10 +80,12 @@ def readipid(fns:FileNames)->Optional[int]:
 
 @contextmanager
 def with_sigint(propagate_sigint:bool, fns:FileNames):
+  """ Runs a context code with a SIGINT handler which kills the background
+  interpreter rahter than the LitRepl itself. """
+  ipid=readipid(fns)
   def _handler(signum,frame):
     pdebug(f"Sending SIGINT to {ipid}")
     os.kill(ipid,SIGINT)
-  ipid=readipid(fns)
   prev=None
   def _finally():
     with with_sigmask():
@@ -248,6 +257,7 @@ def process(a:LitreplArgs,fns:FileNames, ss:Interpreter, lines:str)->Tuple[str,R
   return res,runr
 
 def interpIsRunning(fns:FileNames)->bool:
+  """ Is the background interpreter session running?"""
   try:
     ipid=readipid(fns)
     if ipid is None:
@@ -428,10 +438,13 @@ def processAdapt(fns:FileNames,
   rr=processCont(fns,ss,runr,timeout=timeout,propagate_sigint=propagate_sigint)
   return rr,runr
 
+# LitRepl pending evaluation tag regexp
 PRESULT_RE=re_compile(r"(.*)\[LR:([a-zA-Z0-9_\/\.-]+)\]\s*$",
                       re.A|re.DOTALL)
 
 def rresultLoad(text:str)->Tuple[str,Optional[RunResult]]:
+  """ Loads the contents of a result section from the input document. Parse
+  LitrRepl tags, if any. Return the result text along with the RunResult."""
   m=re_match(PRESULT_RE,text)
   if m:
     return (m[1],RunResult(m[2]))
@@ -444,7 +457,6 @@ def rresultSave(text:str, presult:RunResult)->str:
   sep='\n' if text and text[-1]!='\n' else ''
   return (text+f"{sep}[LR:{presult.fname}]\n")
 
-
 def interp_code_preprocess(a:LitreplArgs, ss:Interpreter, es:EvalState, code:str) -> str:
   return ss.code_preprocess(a,es,code)
 
@@ -453,6 +465,8 @@ def interp_result_postprocess(a:LitreplArgs, ss:Interpreter, text:str) -> str:
   return wraplong(s,a.result_textwidth) if a.result_textwidth else s
 
 def eval_code(*args, **kwargs) -> str:
+  """ Start or complete the code section evaluation, return a response to be
+  printed to the output document. See `eval_code_` for details. """
   res,_=eval_code_(*args, **kwargs)
   return res
 
@@ -462,7 +476,7 @@ def eval_code_(a:LitreplArgs,
                es:EvalState,
                code:str,
                runr:Optional[RunResult]=None) -> Tuple[str,ReadResult]:
-  """ Start or complete the snippet evaluation process. `runr`
+  """ Start or complete the code section evaluation. `runr`
   contains the already existing runner's context, if any.
 
   The function returns either the evaluation result or the running context
@@ -481,6 +495,8 @@ def eval_code_raw(ss:Interpreter,
                   timeout_continue,
                   propagate_sigint,
                   runr:Optional[RunResult]=None) -> Tuple[ReadResult,RunResult]:
+  """ Start or complete the code section evaluation without pre- and
+  post-processing. See also `eval_code_`. """
   fns=ss.fns
   if runr is None:
     rr,runr=processAdapt(fns,ss,code,timeout_initial,propagate_sigint)
