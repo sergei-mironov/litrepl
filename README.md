@@ -3,7 +3,7 @@
 ⌨️ LitRepl ⌨️
 </h1>
 
-[Changelog](./CHANGELOG.md) | [Installation](#-installation) | [Usage](#basic-execution) | [Gallery](#-gallery)
+[Changelog](./CHANGELOG.md) | [Installation](https://sergei-mironov.github.io/litrepl/installation) | [Usage](https://sergei-mironov.github.io/litrepl/usage/general-concepts/) | [Gallery](#-gallery)
 
 [![](./img/coverage.svg)](#-coverage-report)
 </div>
