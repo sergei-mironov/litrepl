@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>General concepts - Litrepl Docs</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "General concepts";
+        var mkdocs_page_input_path = "usage/general-concepts.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Litrepl Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Usage</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">General concepts</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#basic-execution">Basic Execution</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#selecting-sections-for-execution">Selecting Sections for Execution</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#managing-interpreter-sessions">Managing Interpreter Sessions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#asynchronous-processing">Asynchronous Processing</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#attaching-interpreter-sessions">Attaching Interpreter Sessions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#experimental-ai-features">Experimental AI Features</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../formatting/">Formatting</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../application-scenarios/">Application Scenarios</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../reference/">Reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../development/">Development</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Litrepl Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Usage</li>
+      <li class="breadcrumb-item active">General concepts</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="general-concepts">General concepts</h2>
+<p>The Litrepl tool identifies code and result sections within a text document. It
+processes the code by sending it to the appropriate interpreters and populates
+the result sections with their responses. The interpreters remain active in the
+background, ready to handle new inputs.</p>
+<p>Litrepl supports subsets of <strong>Markdown</strong> and <strong>LaTeX</strong> formatting in order to
+recognize the sections. Some aspects of the recognized grammars, such as section
+labels, could be configured.</p>
+<h4 id="basic-execution">Basic Execution</h4>
+<p>Litrepl searches for verbatim code sections followed by zero or more result
+sections. In Markdown documents, the Python code is any triple-quoted section
+with a pre-configured label such as <code>python</code>. The result is any triple-quoted
+<code>result</code> section.  In LaTeX documents, sections are marked with
+<code>\begin{...}\end{...}</code> environments correspondingly.</p>
+<p>The primary command for evaluating formatted documents is <code>litrepl
+eval-sections</code>. Consider a <a href="../../static/hello/">hello.md</a> document:</p>
+<!--
+
+<pre><code class="language-python">print(&quot;~~~~ markdown&quot;)
+!cat docs/static/hello.md
+print(&quot;~~~~&quot;)
+</code></pre>
+
+-->
+
+<!-- result -->
+
+<pre><code class="language-markdown">``` python
+print('Hello Markdown!')
+```
+``` result
+Hello Markdown!
+```
+</code></pre>
+<!-- noresult -->
+
+<p>You pass it to Litrepl using:</p>
+<pre><code class="language-shell">$ cat hello.md | litrepl eval-sections &gt; result.md
+</code></pre>
+<p>The <code>result.md</code> will have all sections filled in correctly.</p>
+<!--
+
+<pre><code class="language-python">print(&quot;~~~~ markdown&quot;)
+!cat docs/static/hello.md | litrepl --foreground eval-sections
+print(&quot;~~~~&quot;)
+</code></pre>
+
+-->
+
+<!-- result -->
+
+<pre><code class="language-markdown">``` python
+print('Hello Markdown!')
+```
+``` result
+Hello Markdown!
+```
+</code></pre>
+<!-- noresult -->
+
+<ul>
+<li>For additional details on Markdown formatting, refer to <a href="../formatting/#markdown">Formatting Markdown
+  documents</a></li>
+</ul>
+<p>Similarly, in a LaTeX document, we format code and result sections as follows:</p>
+<pre><code class="language-tex">\begin{python}
+print('Hello LaTeX!')
+\end{python}
+
+\begin{result}
+Hello LaTeX!
+\end{result}
+</code></pre>
+<ul>
+<li>LaTeX documents require a preamble introducing python/result environments to
+  the TeX processor. For more information, see <a href="../formatting/#latex">Formatting LaTeX
+  documents</a>.</li>
+</ul>
+<p>By default, Litrepl tried to guess the format of the input document. Use the
+<code>--filetype=(latex|markdown)</code> option to set the format explicitly:</p>
+<pre><code class="language-sh">$ cat doc.md | litrepl --filetype=markdown eval-sections
+$ cat doc.tex | litrepl --filetype=latex eval-sections
+</code></pre>
+<ul>
+<li>The main Vim command for code section evaluation is <code>:LEval</code>. By default, it
+  executes the section at the cursor. To execute all sections in a document, use
+  <code>:LEval all</code>.</li>
+</ul>
+<h4 id="selecting-sections-for-execution">Selecting Sections for Execution</h4>
+<p>By default, <code>litrepl eval-sections</code> evaluates all sections in a document. To
+evaluate only specific sections, the range argument should be specified. The
+overall syntax is <code>litrepl eval-sections [RANGE]</code>, where <code>RANGE</code> can be:</p>
+<ul>
+<li><code>N</code>: Represents a specific code section to evaluate, with the following
+  possible formats:</li>
+<li>A number starting from <code>0</code>.</li>
+<li><code>$</code> symbol, indicating the last section.</li>
+<li><code>L:C</code>, referring to the line and column position. Litrepl calculates the
+    section number based on this position.</li>
+<li><code>N..N</code>: Represents a range of sections, determined using the rules mentioned
+  above.</li>
+</ul>
+<p>Some examples:</p>
+<pre><code class="language-sh">$ litrepl eval-sections '0'       # First section in a document
+$ litrepl eval-sections '3..$'    # Sections from fourth section (zero based) to the last one
+$ litrepl eval-sections '34:1..$' # Sections starting from line 34 column 1
+</code></pre>
+<ul>
+<li>The Vim command <code>:LEval</code> accepts similar syntax and also recognizes specific
+  keywords <code>all</code>, <code>above</code>, and <code>below</code>. These keywords allow you to evaluate all
+  sections, only those above the cursor, or just the ones below the cursor,
+  respectively.</li>
+</ul>
+<h4 id="managing-interpreter-sessions">Managing Interpreter Sessions</h4>
+<p>Each interpreter session uses an auxiliary directory where Litrepl stores
+filesystem pipes and other runtime data.</p>
+<p>By default, the auxiliary directory path is derived from the working directory
+name (for Vim, this defaults to the directory of the current file).</p>
+<p>This behavior can be configured by:
+* Setting the working directory with <code>LITREPL_WORKDIR</code> environment
+  variable or <code>--workdir=DIR</code> command-line argument (this may also affect the
+  current directory of the interpreters), or
+* Explicitly setting the auxiliary directory with <code>LITREPL_&lt;CLASS&gt;_AUXDIR</code>
+  environment variable or <code>--&lt;class&gt;-auxdir=DIR</code> command-line argument, where
+  <code>&lt;class&gt;</code> stands for either <code>python</code>, <code>ai</code> or <code>sh</code>.</p>
+<p>The commands <code>litrepl start CLASS</code>, <code>litrepl stop [CLASS]</code>, and <code>litrepl restart
+[CLASS]</code> are used to manage interpreter sessions. They accept the interpreter
+type to operate on or (for some commands) the keyword <code>all</code> to apply the command
+to all interpreters. Add the <code>--&lt;class&gt;-interpteter=CMDLINE</code> to adjust the
+command line to run, but be careful - Litrepl adds more arguments to configure
+prompts and verbosity to some interpreters, notably to the pythons.</p>
+<pre><code class="language-sh">$ litrepl --python-interpreter=ipython start python
+$ litrepl --sh-interpreter=/opt/bin/mybash start sh
+$ litrepl restart all
+$ litrepl stop
+</code></pre>
+<ul>
+<li>The equivalent Vim commands are <code>:LStart CLASS</code>, <code>:LStop [CLASS]</code>, and
+  <code>:LRestart [CLASS]</code>. For the corresponding Vim configuration variables, see
+  the reference section below.</li>
+</ul>
+<p>The <code>litrepl status [CLASS]</code> command queries the information about the currently
+running interpreters. The command reveals the process PID and the command-line
+arguments. For stopped interpreters, the last exit codes are also listed.
+Specifying <code>CLASS</code> prints the status for this class of interpreters only.</p>
+<pre><code class="language-sh">$ litrepl status
+# Format:
+# CLASS  PID      EXITCODE  CMD
+python   3900919  -         python3 -m IPython --config=/tmp/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
+ai       3904696  -         aicli --readline-prompt=
+</code></pre>
+<ul>
+<li>The corresponding Vim command is <code>:LStatus</code>. No <code>CLASS</code> argument is currently
+  supported.</li>
+</ul>
+<h4 id="asynchronous-processing">Asynchronous Processing</h4>
+<p>Litrepl can generate an output document before the interpreter has finished
+processing. If the evaluation takes longer than a timeout, Litrepl leaves a
+marker, enabling it to continue from where it was stopped during future runs.
+The <code>--timeout=SEC[,SEC]</code> option allows you to set timeouts. The first number
+specifies the initial execution timeout in seconds, while the optional second
+number sets the timeout for subsequent attempts. By default, both timeouts are
+set to infinity.</p>
+<p>For instance, executing <code>litrepl --timeout=3.5 eval-sections</code> on the
+corresponding program yields:</p>
+<!--lignore-->
+
+<pre><code class="language-markdown">``` python
+from tqdm import tqdm
+from time import sleep
+for i in tqdm(range(10)):
+  sleep(1)
+```
+
+``` result
+ 30%|███       | 3/10 [00:03&lt;00:07,  1.00s/it]
+[BG:/tmp/nix-shell.vijcH0/litrepl_1000_a2732d/python/litrepl_eval_5503542553591491252.txt]
+```
+</code></pre>
+<!--lnoignore-->
+
+<p>Upon re-executing the document, Litrepl resumes processing from the marker. Once
+evaluation concludes, it removes the marker from the output section.</p>
+<p>The command <code>litrepl interrupt</code> sends an interrupt signal to the interpreter,
+prompting it to return control sooner (with an exception).</p>
+<ul>
+<li>The equivalent Vim commands are <code>:LEvalAsync</code> (defaulting to a 0.5-second
+  timeout) and <code>:LInterrupt</code>.</li>
+<li>The Vim plugin also provides the <code>:LEvalMon</code> command, which facilitates
+  continuous code evaluation with no delay. Interrupting this with Ctrl+C will
+  make Litrepl return control to the editor, leaving the evaluation ongoing in
+  the background.</li>
+</ul>
+<h4 id="attaching-interpreter-sessions">Attaching Interpreter Sessions</h4>
+<p>The command <code>litrepl repl [CLASS]</code> where <code>CLASS</code> specifies interpreter class:
+<code>python</code> (the default) <code>ai</code> or <code>sh</code>, attaches to interpreter sessions.  For this
+command to work, <a href="https://linux.die.net/man/1/socat">socat</a> tool needs to be
+installed on your system. Litrepl blocks the pipes for the time of interaction
+so no evaluation is possible while the repl session is active.  For Python and
+Shell interpreters, the command prompt is disabled which is a current technical
+limitation. Use <code>Ctrl+D</code> to safely detach the session. For example:</p>
+<pre><code class="language-sh">$ litrepl repl python
+Opening the interpreter terminal (NO PROMPTS, USE `Ctrl+D` TO DETACH)
+W = 'Hello from repl'
+^D
+$
+</code></pre>
+<p>Use <code>litrepl eval-code [CLASS]</code> to direct code straight to the interpreter,
+bypassing any section formatting steps. In contrast to the <code>repl</code> command,
+<code>eval-code</code> mode features prompt detection, allowing the tool to display the
+interpreter's response and detach while keeping the session open.</p>
+<p>For example, after manually defining the <code>W</code> variable in the example above, it
+can be queried as in a typical IPython session.</p>
+<pre><code class="language-sh">$ echo 'W' | litrepl eval-code
+'Hello from repl'
+</code></pre>
+<p>The <code>eval-code</code> command can be utilized for batch processing and managing
+sessions, in a manner similar to how the <code>expect</code> tool is used.</p>
+<ul>
+<li>The equivalent Vim commands are <code>:LRepl [CLASS]</code> or <code>:LTerm [CLASS]</code>. Both
+  commands open Vim terminal window.</li>
+</ul>
+<h4 id="experimental-ai-features">Experimental AI Features</h4>
+<p>Litrepl experimentally supports <a href="https://github.com/sergei-mironov/aicli">Aicli</a>
+terminal allowing users to query external language models. In order to try it,
+install the interpreter and use <code>ai</code> as the name for code sections. For
+low-speed models it might be convenient to use <code>:LEvalMon</code> command to monitor
+the text generation in real time.</p>
+<!--lignore-->
+
+<pre><code class="language-markdown">``` ai
+/model gpt4all:&quot;./_models/Meta-Llama-3-8B-Instruct.Q4_0.gguf&quot;
+Hi chat! What is your name?
+```
+
+``` result
+I'm LLaMA, a large language model trained by Meta AI. I'm here to help answer
+any questions you might have and provide information on a wide range of topics.
+How can I assist you today?
+```
+</code></pre>
+<!--lnoignore-->
+
+<p>All Aicli <code>/</code>-commands like the <code>/model</code> command above are passed as-is to the
+interpreter. The <code>/ask</code> command is added automatically at the of each section,
+so make sure that <code>ai</code> secions have self-contained questions.</p>
+<p>As a pre-processing step, Litrepl can paste text from other sections of the
+document in place of special reference markers. The markers have the following
+format:</p>
+<ul>
+<li><code>&gt;&gt;RX&lt;&lt;</code>, where <code>X</code> is a number - references a section number <code>X</code> (starting
+  from zero).</li>
+<li><code>^^RX^^</code>, where <code>X</code> is a number - references the section <code>X</code> times above the
+  current one.</li>
+<li><code>vvRXvv</code>, where <code>X</code> is a number - references the section <code>X</code> times below the
+  current one.</li>
+</ul>
+<!--lignore-->
+
+<pre><code class="language-markdown">``` ai
+AI, what do you think the following text means?
+
+^^R1^^
+```
+
+``` result
+Another interesting piece of text!
+This is an example of a chatbot introduction or &quot;hello message.&quot; It appears to
+be written in a friendly, approachable tone, with the goal of establishing a
+connection with users.
+```
+</code></pre>
+<!--lnoignore-->
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../installation/" class="btn btn-neutral float-left" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../formatting/" class="btn btn-neutral float-right" title="Formatting">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../installation/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../formatting/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

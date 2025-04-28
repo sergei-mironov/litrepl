@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Development - Litrepl Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Development";
+        var mkdocs_page_input_path = "development.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Litrepl Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Usage</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/general-concepts/">General concepts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/formatting/">Formatting</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/application-scenarios/">Application Scenarios</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../reference/">Reference</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Development</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#building-targets">Building Targets</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#development-environments-and-setup">Development Environments and Setup</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tools-for-screencast-recording">Tools for Screencast Recording</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#other-development-scenarios">Other Development Scenarios</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../about/">About</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Litrepl Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Development</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="development">Development</h2>
+<p>Litrepl uses <a href="https://nixos.org/nix">Nix</a> as its main development
+framework. The file <a href="../static/flake.nix">flake.nix</a> manages the source-level
+dependencies required by Nix, whereas <a href="../static/default.nix">default.nix</a> specifies
+common build targets, including PyPI and Vim packages, demo Vim configurations,
+development shells, and more.</p>
+<h3 id="building-targets">Building Targets</h3>
+<p>To build individual Nix expressions, execute the command <code>nix build '.#NAME'</code>,
+replacing <code>NAME</code> with the actual name of the Nix expression you want to build.
+If the build is successful, Nix places the results of the last build in a
+symbolic link located at <code>./result</code>.</p>
+<p>For example, to build a version of Vim pre-configured for demo, run</p>
+<pre><code class="language-sh">$ nix build '.#vim-demo'
+$ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
+</code></pre>
+<p>The list of Nix build targets includes:</p>
+<ul>
+<li><code>litrepl-release</code> - Litrepl script and Python lib</li>
+<li><code>litrepl-release-pypi</code> - Litrepl script and Python lib</li>
+<li><code>vim-litrepl-release</code> - Vim with locally built litrepl plugin</li>
+<li><code>vim-litrepl-release-pypi</code> - Vim with litrepl plugin built from PYPI</li>
+<li><code>vim-test</code> - A minimalistic Vim with a single litrepl plugin</li>
+<li><code>vim-demo</code> - Vim configured to use litrepl suitable for recording screencasts</li>
+<li><code>vim-plug</code> - Vim configured to use litrepl via the Plug manager</li>
+<li><code>shell-dev</code> - The development shell</li>
+<li><code>shell-screencast</code> - The shell for recording demonstrations, includes <code>vim-demo</code>.</li>
+</ul>
+<p>See <code>local.collection</code> attribute-set in the <a href="../static/default.nix">default.nix</a> for the
+full list of defined targetr.</p>
+<h3 id="development-environments-and-setup">Development Environments and Setup</h3>
+<p>The default development shell is defined in the <code>./default.nix</code> as a Nix
+expression named <code>shell</code> which is the default name for development shells.
+Running</p>
+<pre><code class="language-sh">$ nix develop
+</code></pre>
+<p>will ask Nix to install the development dependencies and open shell.</p>
+<h3 id="testing">Testing</h3>
+<p>The <code>runtests.sh</code> script runs all tests by default, but accepts command-line
+arguments for running specific tests.</p>
+<!--
+
+<pre><code class="language-python">print(&quot;~~~~ shell\n[ LitREPL-DEV ] $ runtests.sh --help&quot;)
+!runtests.sh --help
+print(&quot;~~~~&quot;)
+</code></pre>
+
+-->
+<!-- result -->
+
+<pre><code class="language-shell">[ LitREPL-DEV ] $ runtests.sh --help
+Usage: runtest.sh [-d] [-i I(,I)*] [-t T(,T)*]
+Arguments:
+  -d                        Be very verbose
+  -i I, --interpreters=I    Run tests requiring interpreters matching the grep expression I
+                            Run -i '?' to list all available interpreters
+  -t T, --tests=T           Run tests whose names match the grep expression T
+                            Run -t '?' to list all available tests
+  -p P, --python=P          Use this Python interpreter to run Litrepl
+                            Run -p '?' to list available python interpreters
+  -c FILE, --coverage=FILE  Collect coverage results into the FILE. Defaults to
+                            `.coverage` if no tests or interpreters are
+                            selected, otherwize disabled.
+  -c -,    --coverage=-     Disable coverage.
+
+Examples:
+  runtests.sh -t '?' -i '?'
+  runtests.sh -i ipython
+  runtests.sh -t 'test_eval_code|test_status' -i python
+</code></pre>
+<!-- noresult -->
+
+<h3 id="tools-for-screencast-recording">Tools for Screencast Recording</h3>
+<p>Another shell which might be useful is <code>shell-screencast</code>. This would build the
+full set of Litrepl tools and makes sure that the screencasting software is
+available. To enter it, specify its Nix-flake path as follows:</p>
+<pre><code class="language-sh">$ nix develop '.#shell-screencast'
+</code></pre>
+<p>In the opened shell, run the <code>screencast.sh</code> and wait a second, until the script
+arranges demo and recorder wondows.</p>
+<pre><code class="language-sh">$ screencast.sh
+</code></pre>
+<p><code>screencast.sh</code> accepts an optional parameter specifying the template file to
+open for the recording session.</p>
+<h3 id="other-development-scenarios">Other Development Scenarios</h3>
+<p>The top-level <a href="../static/Makefile">Makefile</a> encodes common development scenarios:</p>
+<!--
+
+<pre><code class="language-python">print(&quot;~~~~ shell\n[ LitREPL-DEV ] $ make help&quot;)
+!make help
+print(&quot;~~~~&quot;)
+</code></pre>
+
+-->
+<!-- result -->
+
+<pre><code class="language-shell">[ LitREPL-DEV ] $ make help
+make[1]: Entering directory '/home/grwlf/proj/litrepl.vim'
+LitREPL is a macroprocessing Python library for Litrate programming and code execution
+Build targets:
+man:        Build a manpage
+docs:       Build the MkDocs documentation
+help:       Print help
+test:       Run the test script (./sh/runtests.sh)
+readme:     Update code sections in the README.md
+wheel:      Build Python wheel (the DEFAULT target)
+vimbundle:  Build Vim bundle
+version:    Print the version
+dist:       Build Python and Vim packages
+upload:     Upload Python wheel to Pypi.org (./_token.pypi is required)
+make[1]: Leaving directory '/home/grwlf/proj/litrepl.vim'
+</code></pre>
+<!-- noresult -->
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../reference/" class="btn btn-neutral float-left" title="Reference"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../about/" class="btn btn-neutral float-right" title="About">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../reference/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../about/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

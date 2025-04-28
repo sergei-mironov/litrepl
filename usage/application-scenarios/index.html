@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Application Scenarios - Litrepl Docs</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Application Scenarios";
+        var mkdocs_page_input_path = "usage/application-scenarios.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Litrepl Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Usage</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../general-concepts/">General concepts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../formatting/">Formatting</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Application Scenarios</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#command-line-foreground-evaluation">Command Line, Foreground Evaluation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command-line-detecting-python-exceptions">Command Line, Detecting Python Exceptions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#gnu-make-evaluating-code-sections-in-project-documentation">GNU Make, Evaluating Code Sections in Project Documentation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#vim-setting-up-keybindings">Vim, Setting Up Keybindings</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#vim-inserting-new-sections">Vim, Inserting New Sections</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#vim-running-the-initial-section-after-interpreter-restart">Vim, Running the Initial Section After Interpreter Restart</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#vim-evaluating-selected-text">Vim, Evaluating Selected Text</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#vim-calling-for-ai-on-a-visual-selection">Vim, Calling for AI on a visual selection</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../reference/">Reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../development/">Development</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../about/">About</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Litrepl Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Usage</li>
+      <li class="breadcrumb-item active">Application Scenarios</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h3 id="application-scenarios">Application Scenarios</h3>
+<h4 id="command-line-foreground-evaluation">Command Line, Foreground Evaluation</h4>
+<p>When performing batch processing of documents, it might be necessary to initiate
+a new interpreter session solely for the evaluation's duration rather than
+re-using the currently running session. The <code>--foreground</code> option can be used to
+activate this mode.</p>
+<!--lignore-->
+
+<pre><code class="language-shell">$ cat document.md.in | litrepl --foreground eval-sections &gt; document.md
+</code></pre>
+<!--lnoignore-->
+
+<h4 id="command-line-detecting-python-exceptions">Command Line, Detecting Python Exceptions</h4>
+<p>Another frequently requested feature is the ability to report unhandled
+exceptions. Litrepl can be configured to return a non-zero exit code in such
+scenarios.</p>
+<!--lignore-->
+
+<pre><code class="language-shell">$ cat document.md
+``` python
+raise Exception(&quot;D'oh!&quot;)
+```
+$ cat document.md | litrepl --foreground --exception-exit=200 eval-sections
+$ echo $?
+200
+</code></pre>
+<!--lnoignore-->
+
+<p>In this example, the <code>--foreground</code> option instructs Litrepl to start a new
+interpreter session, stopping it upon completion. The <code>--exception-exit=200</code>
+option specifies the exit code to be returned in the event of unhandled
+exceptions.</p>
+<h4 id="gnu-make-evaluating-code-sections-in-project-documentation">GNU Make, Evaluating Code Sections in Project Documentation</h4>
+<p>A typical Makefile recipe for updating documentation is structured as follows:</p>
+<pre><code class="language-Makefile">SRC = $(shell find -name '*\.py')
+
+.stamp_readme: $(SRC) Makefile
+    cp README.md _README.md.in
+    cat _README.md.in | \
+        litrepl --foreground --exception-exit=100 \
+                --python-interpreter=ipython \
+                --sh-interpreter=- \
+        eval-sections &gt;README.md
+    touch $@
+
+.PHONY: readme
+readme: .stamp_readme
+</code></pre>
+<p>Here, <code>$(SRC)</code> is expected to include the filenames of dependencies. With this
+recipe, we can run <code>make readme</code> to evaluate the python sections. By passing <code>-</code>
+wealso tell Litrepl to ignore shell sections.</p>
+<h4 id="vim-setting-up-keybindings">Vim, Setting Up Keybindings</h4>
+<p>The <code>litrepl.vim</code> plugin does not define any keybindings, but users could do it
+by themselves, for example:</p>
+<pre><code class="language-vim">nnoremap &lt;F5&gt; :LEval&lt;CR&gt;
+nnoremap &lt;F6&gt; :LEvalAsync&lt;CR&gt;
+</code></pre>
+<h4 id="vim-inserting-new-sections">Vim, Inserting New Sections</h4>
+<p>The <code>litrepl.vim</code> plugin doesn't include tools for creating section formatting,
+however they can be added easily if required. Below, we demonstrate how to
+define the <code>:C</code> command inserting new <code>python</code> sections.</p>
+<!--lignore-->
+
+<pre><code class="language-vim">command! -buffer -nargs=0 C normal 0i``` python&lt;CR&gt;```&lt;CR&gt;&lt;CR&gt;``` result&lt;CR&gt;```&lt;Esc&gt;4k
+</code></pre>
+<!--lnoignore-->
+<!---``` <- to make TokOpen() happy -->
+
+<h4 id="vim-running-the-initial-section-after-interpreter-restart">Vim, Running the Initial Section After Interpreter Restart</h4>
+<p>Below we demonstrate how to define the <code>:LR</code> command for running first section
+after the restart.</p>
+<pre><code class="language-vim">command! -nargs=0 LR LRestart | LEval 0
+</code></pre>
+<h4 id="vim-evaluating-selected-text">Vim, Evaluating Selected Text</h4>
+<p>Litrepl vim plugin defines <code>LitReplEvalSelection</code> function which runs the
+selection as a virtual code section. The section type is passed as the function
+argument.  For example, calling <code>LitReplEvalSelection('ai')</code> will execute the
+selection as if it is an <code>ai</code> code section. The execution result is pasted right
+after the selection as a plain text. <code>LitReplEvalSelection('python')</code> would pipe
+the selection through the current Python interpreter.</p>
+<p>To use the feature, define a suitable key binding (<code>Ctrl+K</code> in this example),</p>
+<!--lignore-->
+
+<pre><code class="language-vim">vnoremap &lt;C-k&gt; :call LitReplEvalSelection('ai')&lt;CR&gt;
+</code></pre>
+<!--lnoignore-->
+
+<p>Now write a question to the AI in any document, select it and hit Ctrl+K.</p>
+<pre><code>Hi model. What is the capital of New Zealand?
+</code></pre>
+<p>Upon the keypress, Litrepl pipes the selection through the AI interpreter - the
+<code>aicli</code> at the time of this writing - and paste the response right after the
+last line of the original selection.</p>
+<pre><code>Hi model. What is the capital of New Zealand?
+The capital of New Zealand is Wellington.
+</code></pre>
+<p>Internally, the plugin just uses <code>eval-code</code> Litrepl command.</p>
+<h4 id="vim-calling-for-ai-on-a-visual-selection">Vim, Calling for AI on a visual selection</h4>
+<p>The repository includes <code>litrepl_extras.vim</code>, which defines extra tools for
+interacting with AI. These tools are based on the single low-level
+<code>LitReplAIQuery()</code> function.</p>
+<p>The function enables the creation of an AI chat query possibly incorporating the
+current file and any selected text. The AI model's response then returned
+alongside with the Litrepl error code.</p>
+<p>Based on this function, the following two middle-level functions are defined:
+- <code>LitReplTaskNew(scope, prompt)</code>
+- <code>LitReplTaskContinue(scope, prompt)</code></p>
+<p>Both functions take the prompt, produce the AI model response and decide where
+to insert it. However, the key difference is that the first function determines
+the target location based on user input (like cursor position or selection),
+while the second function re-applies the previously used position, allowing
+users to make changes easilly.</p>
+<p>Finally, a number of high-level commands have been established. Each of these
+commands receives an input string that directs the model on what action to take.
+The user input can contain <code>/S</code> or <code>/F</code> tokens, which are replaced with the
+values of the visual selection and the current file, respectively.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+<th>Incorporates</th>
+<th>Updates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LAI</code></td>
+<td>Passes the prompt as-is</td>
+<td>Input, Selection</td>
+<td>Cursor, Selection</td>
+</tr>
+<tr>
+<td><code>LAICont</code></td>
+<td>Passes the prompt as-is</td>
+<td>Input, Selection</td>
+<td>Last</td>
+</tr>
+<tr>
+<td><code>LAIStyle</code></td>
+<td>Asks to improve language style</td>
+<td>Input, Selection</td>
+<td>Selection</td>
+</tr>
+<tr>
+<td><code>LAICode</code></td>
+<td>Asks to modify a code snippet</td>
+<td>Input, Selection</td>
+<td>Cursor, Selection</td>
+</tr>
+<tr>
+<td><code>LAITell</code></td>
+<td>Asks to describe a code snippet</td>
+<td>Input, Selection</td>
+<td>Terminal*</td>
+</tr>
+<tr>
+<td><code>LAIFile</code></td>
+<td>Asks to change a whole file</td>
+<td>Input, Selection, File</td>
+<td>File</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>LAITell</code> shows the response in the AI terminal instead of inserting it into
+  the document.</li>
+</ul>
+<p>As with the selection evaluation mode, the <code>aicli</code> interpreter stays
+active in the background, maintaining the log of the conversation.</p>
+<p>Direct interaction with the interpreter functions as expected. The <code>LTerm ai</code>
+command opens the Vim terminal as usual, enabling communication with a model
+through <code>aicli</code> text commands.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../formatting/" class="btn btn-neutral float-left" title="Formatting"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../reference/" class="btn btn-neutral float-right" title="Reference">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../formatting/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../reference/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Reference - Litrepl Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Reference";
+        var mkdocs_page_input_path = "reference.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Litrepl Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Usage</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/general-concepts/">General concepts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/formatting/">Formatting</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/application-scenarios/">Application Scenarios</a>
+                  </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Reference</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#vim-commands-and-command-line-attributes">Vim Commands and Command-Line Attributes</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command-line-arguments-and-vim-variables">Command Line Arguments and Vim Variables</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command-line-arguments-summary">Command Line Arguments Summary</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../development/">Development</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../about/">About</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Litrepl Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Reference</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h3 id="command-reference">Command Reference</h3>
+<h4 id="vim-commands-and-command-line-attributes">Vim Commands and Command-Line Attributes</h4>
+<table>
+<thead>
+<tr>
+<th>Vim <img width=200/></th>
+<th>Command line <img width=200/></th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:LStart [T]</code></td>
+<td><code>litrepl start [T]</code></td>
+<td>Start the background interpreter</td>
+</tr>
+<tr>
+<td><code>:LStop [T]</code></td>
+<td><code>litrepl stop [T]</code></td>
+<td>Stop the background interpreter</td>
+</tr>
+<tr>
+<td><code>:LRestart [T]</code></td>
+<td><code>litrepl restart [T]</code></td>
+<td>Restart the background interpreter</td>
+</tr>
+<tr>
+<td><code>:LStatus [T]</code></td>
+<td><code>litrepl status [T] &lt;F</code></td>
+<td>Print the background interpreter status</td>
+</tr>
+<tr>
+<td><code>:LEval [N]</code></td>
+<td><code>lirtepl eval-sections L:C &lt;F</code></td>
+<td>Evaluate the section under the cursor synchronously</td>
+</tr>
+<tr>
+<td><code>:LEval above</code></td>
+<td><code>lirtepl eval-sections '0..N' &lt;F</code></td>
+<td>Evaluate sections above and under the cursor synchronously</td>
+</tr>
+<tr>
+<td><code>:LEval below</code></td>
+<td><code>lirtepl eval-sections 'N..$' &lt;F</code></td>
+<td>Evaluate sections below and under the cursor synchronously</td>
+</tr>
+<tr>
+<td><code>:LEval all</code></td>
+<td><code>lirtepl eval-sections &lt;F</code></td>
+<td>Evaluate all code sections in a document</td>
+</tr>
+<tr>
+<td><code>:LEvalAsync N</code></td>
+<td><code>lirtepl --timeout=0.5,0 eval-sections N &lt;F</code></td>
+<td>Start or continue asynchronous evaluation of the section under the cursor</td>
+</tr>
+<tr>
+<td><code>:LInterrupt N</code></td>
+<td><code>lirtepl interrupt N &lt;F</code></td>
+<td>Send SIGINT to the interpreter evaluating the section under the cursor and update</td>
+</tr>
+<tr>
+<td><code>:LEvalMon N</code></td>
+<td><code>while .. do .. done</code></td>
+<td>Start or continue monitoring asynchronous code evaluation</td>
+</tr>
+<tr>
+<td>N/A</td>
+<td><code>lirtepl eval-code &lt;P</code></td>
+<td>Evaluate the given code verbatim</td>
+</tr>
+<tr>
+<td><code>:LTerm [T]</code></td>
+<td><code>lirtepl repl [T]</code></td>
+<td>Connect to the interpreter using GNU socat</td>
+</tr>
+<tr>
+<td><code>:LOpenErr</code></td>
+<td><code>litrepl ...  2&gt;F</code></td>
+<td>View errors</td>
+</tr>
+<tr>
+<td><code>:LVersion</code></td>
+<td><code>litrepl --version</code></td>
+<td>Show version</td>
+</tr>
+</tbody>
+</table>
+<p>Where</p>
+<ul>
+<li><code>T</code> Type of the interpreter: <code>python</code>, <code>ai</code> or <code>sh</code> (some commands also accept <code>all</code>)</li>
+<li><code>F</code> Path to a Markdown or LaTeX file</li>
+<li><code>P</code> Path to a Python script</li>
+<li><code>N</code> Number of code section to evaluate, starting from 0.</li>
+<li><code>L:C</code> denotes line:column of the cursor.</li>
+</ul>
+<h4 id="command-line-arguments-and-vim-variables">Command Line Arguments and Vim Variables</h4>
+<table>
+<thead>
+<tr>
+<th>Vim setting  <img width=200/></th>
+<th>CLI argument  <img width=200/></th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>set filetype</code></td>
+<td><code>--filetype=T</code></td>
+<td>Input file type: <code>latex</code>|<code>markdown</code></td>
+</tr>
+<tr>
+<td><code>let g:litrepl_python_interpreter=B</code></td>
+<td><code>--python-interpreter=B</code></td>
+<td>The Python interpreter to use</td>
+</tr>
+<tr>
+<td><code>let g:litrepl_ai_interpreter=B</code></td>
+<td><code>--ai-interpreter=B</code></td>
+<td>The AI interpreter to use</td>
+</tr>
+<tr>
+<td><code>let g:litrepl_sh_interpreter=B</code></td>
+<td><code>--sh-interpreter=B</code></td>
+<td>The shell interpreter to use</td>
+</tr>
+<tr>
+<td><code>let g:litrepl_python_auxdir=D</code></td>
+<td><code>--python-auxdir=D</code></td>
+<td>The auxiliary files directory used by Python interpreter</td>
+</tr>
+<tr>
+<td><code>let g:litrepl_ai_auxdir=D</code></td>
+<td><code>--ai-auxdir=D</code></td>
+<td>The auxiliary files directory used by AI interpreter</td>
+</tr>
+<tr>
+<td><code>let g:litrepl_sh_auxdir=D</code></td>
+<td><code>--sh-auxdir=D</code></td>
+<td>The auxiliary files directory used by a shell interpreter</td>
+</tr>
+<tr>
+<td><code>let g:litrepl_workdir=D</code></td>
+<td><code>--workdir=D</code></td>
+<td>The auxiliary files directory used by AI interpreter</td>
+</tr>
+<tr>
+<td><code>let g:litrepl_debug=0/1</code></td>
+<td><code>--debug=0/1</code></td>
+<td>Print debug messages to the stderr</td>
+</tr>
+<tr>
+<td><code>let g:litrepl_timeout=FLOAT</code></td>
+<td><code>--timeout=FLOAT</code></td>
+<td>Timeout to wait for the new executions, in seconds, defaults to inf</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>T</code> Type of the document: <code>tex</code> or <code>markdown</code> (the default).</li>
+<li><code>B</code> Interpreter command to use, <code>-</code> or <code>auto</code> (the default). <code>-</code> value
+  disabled this type of interpreters; <code>auto</code> asks litrep to guess the best
+  available interpreter.</li>
+<li><code>D</code> Filesystem directory</li>
+<li><code>FLOAT</code> Should be formatted as <code>1</code> or <code>1.1</code> or <code>inf</code>. Note: command line
+  argument also accepts a pair of timeouts.</li>
+</ul>
+<h4 id="command-line-arguments-summary">Command Line Arguments Summary</h4>
+<!--
+
+<pre><code class="language-python">!./python/bin/litrepl --help
+</code></pre>
+
+-->
+
+<pre><code class="language-result">usage: litrepl [-h] [-v] [--filetype STR] [--python-markers STR[,STR]]
+               [--ai-markers STR[,STR]] [--sh-markers STR[,STR]]
+               [--python-interpreter EXE] [--ai-interpreter EXE]
+               [--sh-interpreter EXE] [--python-auxdir DIR] [--ai-auxdir DIR]
+               [--sh-auxdir DIR] [--timeout F[,F]] [--propagate-sigint]
+               [-d INT] [--verbose] [-C DIR] [--pending-exitcode INT]
+               [--irreproducible-exitcode INT] [--exception-exitcode INT]
+               [--foreground] [--map-cursor LINE:COL:FILE]
+               [--result-textwidth NUM]
+
+{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir}
+               ...
+
+positional arguments:
+
+{start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir}
+                              Commands to execute
+    start                     Start a background interpreter. The CLASS of an
+                              interpreter should be specified.
+                              --&lt;CLASS&gt;-interpreter, --&lt;CLASS&gt;-auxdir etc. are
+                              applied.
+    stop                      Stop the background interpreters.
+    restart                   Restart the background interpreters.
+    status                    Print background interpreter's status.
+    parse                     Parse the input file without futher processing
+                              (diagnostics).
+    parse-print               Parse and print the input file back
+                              (diagnostics).
+    eval-sections             Parse stdin, evaluate the specified sections (by
+                              default - all available sections), print the
+                              resulting file to stdout.
+    eval-code                 Evaluate the code snippet.
+    repl                      Connect to the background terminal using GNU
+                              socat.
+    interrupt                 Send SIGINT to the background interpreter.
+    print-regexp              Print regexp matching start of code sections for
+                              the given file type.
+    print-grammar             Print the resulting grammar for the given
+                              filetype.
+    print-auxdir              Print the auxdir for the given interpreter type.
+
+options:
+  -h, --help                  show this help message and exit
+  -v, --version               Print version.
+  --filetype STR              Specify the type of input formatting
+                              (markdown|[la]tex|auto).
+  --python-markers STR[,STR]  Specify section markers recognized as `python`
+                              sections. Defaults to the value of
+                              LITREPL_PYTHON_MARERS if set, otherwize
+                              &quot;python&quot;.
+  --ai-markers STR[,STR]      Specify section markers recognized as `ai`
+                              sections. Defaults to the value of
+                              LITREPL_AI_MARERS if set, otherwize &quot;codeai,ai&quot;.
+  --sh-markers STR[,STR]      Specify section markers recognized as `shell`
+                              sections. Defaults to the value of
+                              LITREPL_SH_MARERS if set, otherwize &quot;shell&quot;.
+  --python-interpreter EXE    Python interpreter command line, or `auto`.
+                              Defaults to the LITREPL_PYTHON_INTERPRETER
+                              environment variable if set, otherwise &quot;auto&quot;.
+                              Litrepl determines &quot;python&quot; or &quot;ipython&quot; type
+                              according to the value.
+  --ai-interpreter EXE        `aicli` interpreter command line or `auto`.
+                              Defaults to the LITREPL_AI_INTERPRETER
+                              environment variable if set, otherwise &quot;auto&quot;.
+  --sh-interpreter EXE        Shell interpreter command line or `auto`.
+                              Defaults to the LITREPL_SH_INTERPRETER
+                              environment variable if set, otherwise &quot;auto&quot;.
+  --python-auxdir DIR         This directory stores Python interpreter pipes.
+                              It defaults to LITREPL_PYTHON_AUXDIR if set;
+                              otherwise, it's created in the system's
+                              temporary directory, named after the current
+                              working directory.
+  --ai-auxdir DIR             This directory stores AI interpreter pipes. It
+                              defaults to LITREPL_AI_AUXDIR if set; otherwise,
+                              it's created in the system's temporary
+                              directory, named after the current working
+                              directory.
+  --sh-auxdir DIR             This directory stores AI interpreter pipes. It
+                              defaults to LITREPL_SH_AUXDIR if set; otherwise,
+                              it's created in the system's temporary
+                              directory, named after the current working
+                              directory.
+  --timeout F[,F]             Timeouts for initial evaluation and for pending
+                              checks, in seconds. If the latter is omitted, it
+                              is considered to be equal to the former one.
+  --propagate-sigint          If set, litrepl will catch and resend SIGINT
+                              signals to the running interpreter. Otherwise it
+                              will just terminate itself leaving the
+                              interpreter as-is.
+  -d INT, --debug INT         Enable (a lot of) debug messages.
+  --verbose                   Be more verbose (used in status).
+  -C DIR, --workdir DIR       Set the working directory before execution. By
+                              default, it uses LITREPL_WORKDIR if set,
+                              otherwise remains the current directory. This
+                              affects the directory of a new interpreter and
+                              the --&lt;interpreter&gt;-auxdir option.
+  --pending-exitcode INT      Return this error code if whenever a section
+                              hits timeout.
+  --irreproducible-exitcode INT
+                              Return this error code if a section outputs a
+                              different result than the one that is already
+                              present in the document.
+  --exception-exitcode INT    Return this error code at exception, if any.
+                              Note: this option might not be defined for some
+                              interpreters. It takes affect only for newly-
+                              started interpreters.
+  --foreground                Start a separate session and stop it when the
+                              evaluation is done. All --*-auxdir settings are
+                              ignored in this mode.
+  --map-cursor LINE:COL:FILE  Calculate the new position of a cursor at
+                              LINE:COL and write it to FILE.
+  --result-textwidth NUM      Wrap result lines longer than NUM symbols.
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../usage/application-scenarios/" class="btn btn-neutral float-left" title="Application Scenarios"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../development/" class="btn btn-neutral float-right" title="Development">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../usage/application-scenarios/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../development/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
