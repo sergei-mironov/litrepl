@@ -81,8 +81,8 @@ Documentation
 * [Formatting documents](https://sergei-mironov.github.io/litrepl/usage/formatting/)
 
 
-For complete documentation, visit the project's
-[Github pages site](https://sergei-mironov.github.io/litrepl/).
+For full documentation, check out the project's [GitHub Pages
+site](https://sergei-mironov.github.io/litrepl/).
 
 Gallery
 -------
