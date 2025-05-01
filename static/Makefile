@@ -25,7 +25,7 @@ $(MAN): $(PY) Makefile python/bin/litrepl doc/description.md
  	  --author-email 'sergei.v.mironov@proton.me' \
 		--url 'https://github.com/sergei-mironov/litrepl' \
 		--project-name 'litrepl' \
-		--description "$$(cat doc/description.md)" \
+		--description "$$(pandoc --to=plain docs/static/description.md -o -)" \
 		--version $(VERSION) \
 		--object=AP >$@
 
