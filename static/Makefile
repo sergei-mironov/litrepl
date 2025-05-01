@@ -8,7 +8,7 @@ VIM = $(shell find vim -name '*\.vim')
 VIMB_REV = _dist/vim-litrepl-$(VERSION)-$(REVISION).tar.gz
 TESTS = ./sh/runtests.sh
 MAN = man/litrepl.1
-DOCS = $(shell find docs -name '*\.md' | grep -v static)
+DOCS = $(shell find docs -name '*\.md' | grep -v static | grep -v examples)
 TOP = flake.nix default.nix Makefile
 
 .stamp_test: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl

@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Hello - Litrepl Docs</title>
+    <title>Example - Litrepl Docs</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Hello";
-        var mkdocs_page_input_path = "static/hello.md";
+        var mkdocs_page_name = "Example";
+        var mkdocs_page_input_path = "examples/example.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -82,7 +82,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">Hello</li>
+      <li class="breadcrumb-item active">Example</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -91,9 +91,29 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <pre><code class="language-python">print('Hello Markdown!')
+                <p>Executable sections are marked with the "python" tag. Putting the cursor on one
+of the typing the :LitEval1 command executes its code in a background Python
+interpreter.</p>
+<pre><code class="language-python">W='Hello, World!'
+print(W)
 </code></pre>
-<pre><code class="language-result"></code></pre>
+<p>Verbatim sections next to the executable section are result sections. Litrepl
+pastes the result here during the evaluation. The original content of this
+section is replaced.</p>
+<pre><code class="language-result">Hello, World!
+</code></pre>
+<p>Markdown comment-looking tags <code>result</code>/<code>noresult</code> also mark executable and
+result sections. They allow to generate the Markdown document markup.</p>
+<!--
+
+<pre><code class="language-python">print(&quot;Hello, LitREPL&quot;)
+</code></pre>
+
+-->
+
+<!--result-->
+<p>Hello, LitREPL</p>
+<!--noresult-->
               
             </div>
           </div><footer>

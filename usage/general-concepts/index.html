@@ -121,11 +121,11 @@ with a pre-configured label such as <code>python</code>. The result is any tripl
 <code>result</code> section.  In LaTeX documents, sections are marked with
 <code>\begin{...}\end{...}</code> environments correspondingly.</p>
 <p>The primary command for evaluating formatted documents is <code>litrepl
-eval-sections</code>. Consider a <a href="../../static/hello/">hello.md</a> document:</p>
+eval-sections</code>. Consider a markdown document <a href="../../examples/basic/">file.md</a>:</p>
 <!--
 
 <pre><code class="language-python">print(&quot;~~~~ markdown&quot;)
-!cat docs/static/hello.md
+!cat docs/examples/basic.md
 print(&quot;~~~~&quot;)
 </code></pre>
 
@@ -142,13 +142,13 @@ print('Hello Markdown!')
 <!-- noresult -->
 
 <p>You pass it to Litrepl using:</p>
-<pre><code class="language-shell">$ cat hello.md | litrepl eval-sections &gt; result.md
+<pre><code class="language-shell">$ cat file.md | litrepl eval-sections &gt; result.md
 </code></pre>
 <p>The <code>result.md</code> will have all sections filled in correctly.</p>
 <!--
 
 <pre><code class="language-python">print(&quot;~~~~ markdown&quot;)
-!cat docs/static/hello.md | litrepl --foreground eval-sections
+!cat docs/examples/basic.md | litrepl --foreground eval-sections
 print(&quot;~~~~&quot;)
 </code></pre>
 

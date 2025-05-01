@@ -1,0 +1,112 @@
+\documentclass{article}
+\usepackage{verbatim}
+\usepackage{mdframed}
+\usepackage{minted}
+\renewcommand{\MintedPygmentize}{pygmentize}
+\usepackage[utf8]{inputenc}
+
+% LitREPL-compatible environment for code snippets
+\newenvironment{python}
+  {\VerbatimEnvironment
+   \begin{minted}[breaklines,fontsize=\footnotesize]{python}}
+  {\end{minted}}
+\BeforeBeginEnvironment{python}{
+  \begin{mdframed}[nobreak=true,frametitle=\tiny{Python}]}
+\AfterEndEnvironment{python}{\end{mdframed}}
+
+% LitREPL-compatible environment for code results
+\newenvironment{result}{\verbatim}{\endverbatim}
+\BeforeBeginEnvironment{result}{
+  \begin{mdframed}[frametitle=\tiny{Result}]\footnotesize}
+\AfterEndEnvironment{result}{\end{mdframed}}
+
+% LitREPL-compatible command for inline code results
+\newcommand{\linline}[2]{#2}
+
+\begin{document}
+
+\section{Preamble}
+
+Literpl employs its own internal parser to identify LaTeX-like tags that define
+code and result sections. One option is to use the \texttt{python} environment
+to mark code and wrap results with \texttt{result}. Both environments need to be
+defined in LaTeX so it doesn't get confused. The following preamble sets up both
+environments to render as framed boxes of fixed-width text with proper
+highlighting:
+
+\begin{verbatim}
+\newenvironment{python}
+  {\VerbatimEnvironment
+   \begin{minted}[breaklines,fontsize=\footnotesize]{python}}
+  {\end{minted}}
+\BeforeBeginEnvironment{python}{
+  \begin{mdframed}[nobreak=true,frametitle=\tiny{Python}]}
+\AfterEndEnvironment{python}{\end{mdframed}}
+
+\newenvironment{result}{\verbatim}{\endverbatim}
+\BeforeBeginEnvironment{result}{
+  \begin{mdframed}[frametitle=\tiny{Result}]\footnotesize}
+\AfterEndEnvironment{result}{\end{mdframed}}
+\end{verbatim}
+
+
+\section{Basic evaluation}
+
+Here is how we can use the environments we just introduced.
+
+\begin{verbatim}
+\begin{python}
+W='Hello, World!'
+print(W)
+\end{python}
+\end{verbatim}
+
+\begin{python}
+W='Hello, World!'
+print(W)
+\end{python}
+
+\begin{verbatim}
+\begin{result}
+Hello, World!
+\end{result}
+\end{verbatim}
+
+\begin{result}
+Hello, World!
+\end{result}
+
+\section{Producing LaTeX}
+
+Literpl also recognizes \texttt{result} and \texttt{noresult} comments, which
+serve as markers for result sections. By using these comments, we can generate
+LaTeX markup directly as output.
+
+\begin{verbatim}
+\begin{python}
+print("\\textbf{Hi!}")
+\end{python}
+
+%result
+\textbf{Hi!}
+%noresult
+\end{verbatim}
+
+
+\begin{python}
+print("\\textbf{Hi!}")
+\end{python}
+
+%result
+\textbf{Hi!}
+%noresult
+
+\section{Inline output}
+
+Furthermore, Literpl recognizes \texttt{linline} tags with two arguments. The
+first argument is treated as a Python printable expression, while the second
+argument will be replaced with its evaluated value.
+
+The value of \texttt{W} happens to be: \linline{W}{Hello, World!}
+
+\end{document}
