@@ -100,6 +100,7 @@ let
         (coverage-badge pp)
         argparse-manpage
         mkdocs
+        markdown-include
       ]
     );
 

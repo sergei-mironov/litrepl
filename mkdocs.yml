@@ -10,3 +10,6 @@ nav:
   - Development: development.md
   - Related: related.md
 theme: readthedocs
+markdown_extensions:
+  - markdown_include.include:
+      base_path: docs

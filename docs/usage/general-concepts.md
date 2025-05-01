@@ -18,12 +18,12 @@ with a pre-configured label such as `python`. The result is any triple-quoted
 `\begin{...}\end{...}` environments correspondingly.
 
 The primary command for evaluating formatted documents is `litrepl
-eval-sections`. Consider a [hello.md](../static/hello.md) document:
+eval-sections`. Consider a markdown document `file.md`.
 
 <!--
 ``` python
 print("~~~~ markdown")
-!cat docs/static/hello.md
+!cat docs/examples/basic.md
 print("~~~~")
 ```
 -->
@@ -38,17 +38,17 @@ print('Hello Markdown!')
 ~~~~
 <!-- noresult -->
 
-You pass it to Litrepl using:
+We pass it to Litrepl using:
 
 ~~~~ shell
-$ cat hello.md | litrepl eval-sections > result.md
+$ cat file.md | litrepl eval-sections > result.md
 ~~~~
 
 The `result.md` will have all sections filled in correctly.
 <!--
 ``` python
 print("~~~~ markdown")
-!cat docs/static/hello.md | litrepl --foreground eval-sections
+!cat docs/examples/basic.md | litrepl --foreground eval-sections
 print("~~~~")
 ```
 -->
@@ -67,7 +67,8 @@ Hello Markdown!
 * For additional details on Markdown formatting, refer to [Formatting Markdown
   documents](./formatting.md#markdown)
 
-Similarly, in a LaTeX document, we format code and result sections as follows:
+
+In a similar LaTeX document, the code and result sections would be:
 
 ~~~~ tex
 \begin{python}

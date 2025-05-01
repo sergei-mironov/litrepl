@@ -10,15 +10,15 @@
 
 <!--
 ``` python
-!cat docs/index.md | sed '/^\#/d;/^$/d'
+!echo -n Litrepl is a
+!cat docs/static/description.md | sed '/^\#/d;/^$/d'
 ```
 -->
 <!--result-->
-**Litrepl** is a command-line processor for *Markdown* or *LaTeX* documents with
+Litrepl is acommand-line processor for *Markdown* or *LaTeX* documents with
 **literate programming** code sections. Instructed by its arguments, it
 evaluates and updates sections via background interpreters. Interpreters can
-stay active for a **read-eval-paste-loop** style. The repository includes a Vim
-plugin to demonstrate editor integration.
+stay active for a **read-eval-paste-loop** style.
 <!--noresult-->
 
 <div align="center">
@@ -48,13 +48,13 @@ _Notes:_
   </tr>
 </table>
 
-🔥 Features
------------
+Features
+--------
 
 * **Document formats** <br/>
-  Markdown _(Example [[MD]](./doc/example.md))_ **|**
+  Markdown _(Example [[MD]](./docs/examples/example.md))_ **|**
   [LaTeX](https://www.latex-project.org/)
-  _(Examples [[TEX]](./doc/example.tex)[[PDF]](./doc/example.pdf))_
+  _(Examples [[TEX]](./docs/examples/example.tex)[[PDF]](./docs/examples/example.pdf))_
 * **Interpreters** <br/>
   [Sh](https://en.wikipedia.org/wiki/Bourne_shell) **|**
   [Bash](https://www.gnu.org/software/bash/) **|**
@@ -64,8 +64,8 @@ _Notes:_
 * **Editor integration** <br/>
   [Vim](https://www.vim.org/scripts/script.php?script_id=6117) _(plugin source included)_
 
-✅ Requirements
----------------
+Requirements
+------------
 
 * **POSIX-compatible OS**, typically a Linux. The tool relies on POSIX
   operations, notably pipes, and depends on certain Shell commands.
@@ -73,8 +73,8 @@ _Notes:_
 * **[Socat](http://www.dest-unreach.org/socat/)** (Optional) Needed for
   `litrepl repl` and Vim's `LTerm` commands to work.
 
-🚀 Documentation
-----------------
+Documentation
+-------------
 
 * [Installation](https://sergei-mironov.github.io/litrepl/installation/)
 * [Basic usage](https://sergei-mironov.github.io/litrepl/usage/general-concepts/)
@@ -84,8 +84,8 @@ _Notes:_
 For complete documentation, visit the project's
 [Github pages site](https://sergei-mironov.github.io/litrepl/).
 
-🎥 Gallery
-----------
+Gallery
+-------
 
 <details>
 <summary>Basic usage (Show GIF)</summary>

@@ -1,0 +1,85 @@
+\documentclass{article}
+
+% Preamble {{{
+\usepackage[a4paper, total={4in, 10in}]{geometry}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{mdframed}
+\usepackage{hyperref}
+\usepackage{minted}
+\renewcommand{\MintedPygmentize}{pygmentize}
+\usepackage{verbatim}
+\usepackage{amsmath,amssymb}
+\usepackage{svg}
+
+\newenvironment{myverbatim}
+  {\VerbatimEnvironment
+   \begin{minted}[breaklines,fontsize=\footnotesize]{latex}}
+  {\end{minted}}
+\BeforeBeginEnvironment{myverbatim}{\begin{mdframed}[nobreak=true,frametitle=\tiny{Source}]}
+\AfterEndEnvironment{myverbatim}{\end{mdframed}}
+
+\newenvironment{lcode}
+  {\VerbatimEnvironment
+   \begin{minted}[breaklines,fontsize=\footnotesize]{python}}
+  {\end{minted}}
+\BeforeBeginEnvironment{lcode}{\begin{mdframed}[nobreak=true,frametitle=\tiny{Code}]}
+\AfterEndEnvironment{lcode}{\end{mdframed}}
+
+\newenvironment{lresult}{\verbatim}{\endverbatim}
+\BeforeBeginEnvironment{lresult}{\begin{mdframed}[frametitle=\tiny{Result}]\footnotesize}
+\AfterEndEnvironment{lresult}{\end{mdframed}}
+\newcommand{\linline}[2]{#2}
+
+\graphicspath{ {./.} }
+
+% }}}
+
+\begin{document}
+
+\section{LitREPL Demo}
+
+\url{https://github.com/grwlf/litrepl.vim}
+
+\subsection{Basics}
+
+\begin{lcode}
+def hello(name):
+  print(f"Hello, {name}!")
+
+hello("LitREPL")
+\end{lcode}
+
+\begin{lresult}
+Hello, LitREPL!
+\end{lresult}
+
+\subsection{Inlines}
+
+\begin{lcode}
+X = 42
+\end{lcode}
+
+Value of X is \linline{X}{42}.
+
+\subsection{Graphics}
+
+\begin{lcode}
+import matplotlib.pyplot as plt
+import numpy as np
+from os import getcwd
+X=np.array(range(100))
+plt.figure()
+plt.plot(X,np.sin(X/10))
+P='_img/img.svg'
+plt.savefig(P)
+\end{lcode}
+
+\begin{center}
+\includesvg[width=0.6\textwidth]{
+  \linline{P}{_img/img.svg}}
+\end{center}
+
+\end{document}
+
+

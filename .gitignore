@@ -35,4 +35,9 @@ revision.py
 *.dvi
 *_latexmk
 *.pyg
+
+# Other
 site/
+paper/
+modules/
+c/

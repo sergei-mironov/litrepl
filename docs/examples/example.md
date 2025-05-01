@@ -15,8 +15,8 @@ section is replaced.
 Hello, World!
 ```
 
-Markdown comment-looking tags `lresult`/`lnoresult` also mark executable and
-result sections. This way we can produce the Markdown document markup directly.
+Markdown comment-looking tags `result`/`noresult` also mark executable and
+result sections. They allow to generate the Markdown document markup.
 
 <!--
 ``` python
@@ -27,4 +27,5 @@ print("Hello, LitREPL")
 <!--result-->
 Hello, LitREPL
 <!--noresult-->
+
 

@@ -8,30 +8,43 @@ VIM = $(shell find vim -name '*\.vim')
 VIMB_REV = _dist/vim-litrepl-$(VERSION)-$(REVISION).tar.gz
 TESTS = ./sh/runtests.sh
 MAN = man/litrepl.1
-DOCS = $(shell find docs -name '*\.md' | grep -v static)
+DOCS = $(shell find docs -name '*\.md' | grep -v static | grep -v examples)
 TOP = flake.nix default.nix Makefile
+EXAMPLES = docs/examples/example.md docs/examples/example.tex
 
-.stamp_test: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
-	LITREPL_BIN="`pwd`/python/bin" \
-	LITREPL_ROOT=`pwd` \
-	sh $(TESTS)
-	touch $@
+.PHONY: examples # Build examples
+examples: .stamp_examples
+.stamp_examples: $(PY) $(TOP) $(EXAMPLES)
+	set -e ; \
+	for e in $(EXAMPLES) ; do \
+		cat $$e | litrepl --foreground \
+											--exception-exitcode=100 \
+											--result-textwidth=0 \
+											eval-sections \
+											>$$e.new ; \
+		mv $$e.new $$e ; \
+	done
+	( cd docs/examples && latexmk \
+		-shell-escape -pdf -interaction=nonstopmode \
+	  -latex=pdflatex --halt-on-error -outdir=_build  example.tex \
+		&& cp _build/example.pdf . ; )
+
 
 .PHONY: man # Build a manpage
 man: $(MAN)
-$(MAN): $(PY) Makefile python/bin/litrepl doc/description.md
+$(MAN): $(PY) Makefile python/bin/litrepl docs/static/description.md
 	argparse-manpage --module litrepl.main \
 		--author 'Sergei Mironov' \
  	  --author-email 'sergei.v.mironov@proton.me' \
 		--url 'https://github.com/sergei-mironov/litrepl' \
 		--project-name 'litrepl' \
-		--description "$$(cat doc/description.md)" \
+		--description "$$(pandoc --to=plain docs/static/description.md -o -)" \
 		--version $(VERSION) \
 		--object=AP >$@
 
 .PHONY: docs # Build the MkDocs documentation
 docs: .stamp_docs_deploy
-.stamp_docs: $(PY) $(DOCS) $(TOP) python/bin/litrepl
+.stamp_docs: $(PY) $(DOCS) $(TOP) .stamp_examples python/bin/litrepl
 	cp $(TOP) docs/static
 	set -e; \
 	for d in $(DOCS) ; do \
@@ -60,18 +73,23 @@ help:
 .PHONY: test # Run the test script (./sh/runtests.sh)
 test: .stamp_test
 
-.stamp_readme: $(PY)
-	cp README.md _README.md.in
-	cat _README.md.in \
-	|litrepl --foreground --exception-exitcode=100 --result-textwidth=100 \
-			--ai-interpreter=- \
-			--sh-interpreter=- \
-			eval-sections \
-	>README.md
+.stamp_test: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
+	LITREPL_BIN="`pwd`/python/bin" \
+	LITREPL_ROOT=`pwd` \
+	sh $(TESTS)
 	touch $@
 
 .PHONY: readme # Update code sections in the README.md
 readme: .stamp_readme
+
+.stamp_readme: $(PY) $(TOP) .stamp_examples
+	cat README.md | litrepl --foreground --exception-exitcode=100 --result-textwidth=100 \
+										 		--ai-interpreter=- \
+												--sh-interpreter=- \
+												eval-sections \
+	>README.md.new
+	mv README.md.new README.md
+	touch $@
 
 $(WHEEL_REV): $(PY) Makefile .stamp_test .stamp_readme $(MAN)
 	mkdir -p $$(dirname $@) || true
