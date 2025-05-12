@@ -47,24 +47,32 @@ def pdebug(*args,**kwargs):
   if DEBUG:
     print(f"[{time():14.3f},{getpid()}]", *args, file=sys.stderr, **kwargs, flush=True)
 
-def st2auxdir(a:LitreplArgs, st:SType, default=None)->str:
+def st2auxdir(a:LitreplArgs, st:SType)->str:
   """ Return the aux.dir name for this section type """
-  d=None
+  d,interp=None,None
   if st==SType.SPython:
-    d=a.python_auxdir
+    d,interp=a.python_auxdir,a.python_interpreter
   elif st==SType.SAI:
-    d=a.ai_auxdir
+    d,interp=a.ai_auxdir,a.ai_interpreter
   elif st==SType.SShell:
-    d=a.sh_auxdir
+    d,interp=a.sh_auxdir,a.sh_interpreter
   else:
     raise ValueError(f"Invalid section type {st}")
-  return d or (default(st) if default else defauxdir(st))
+  if d is None:
+    d = defauxdir(st)
+  for p,v in {
+    '%%': '%',
+    '%TD': gettempdir(),
+    '%UI': str(getuid()),
+    '%CH': hashdigest(getcwd()),
+    '%IH': hashdigest(interp),
+  }.items():
+    d = d.replace(p,v)
+  return d
 
-def defauxdir(st:SType, suffix:Optional[str]=None)->str:
+def defauxdir(st:SType)->str:
   """ Calculate the default aux. directory name. """
-  suffix_=f"{suffix}_" if suffix is not None else ""
-  return join(gettempdir(),
-              f"litrepl_{getuid()}_{suffix_}{hashdigest(getcwd())}", st2name(st))
+  return join('%TD','litrepl_%UI_%CH',st2name(st))
 
 def st2name(st:SType)->str:
   """ Return string representation of the code section type """
