@@ -1346,6 +1346,13 @@ runlitrepl --python-auxdir=baar print-auxdir python >auxdir.txt
 grep -q "baar" auxdir.txt
 )} #}}}
 
+test_doublestart() {( #{{{
+mktest "_test_doublestart"
+runlitrepl start sh
+not runlitrepl start sh
+runlitrepl stop sh
+)} #}}}
+
 die() {
   echo "$@" >&2
   exit 1
@@ -1408,6 +1415,7 @@ tests() {
   echo test_aicli - $aicli -
   echo test_vim_ai_query - $aicli -
   echo test_bash - - $(which bash)
+  echo test_doublestart - - $(which bash)
 }
 
 runlitrepl() {

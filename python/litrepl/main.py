@@ -259,7 +259,7 @@ def main(args=None):
               mkdtemp(prefix=f"litrepl-{st2name(st)}-foreground"))
 
   if a.command=='start':
-    ecode=start(a,name2st(a.type))
+    ecode=start(a,name2st(a.type),restart=False)
     exit(ecode)
   elif a.command=='stop':
     for st in SType:
@@ -290,7 +290,7 @@ def main(args=None):
     with with_parent_finally(partial(_foreground_stop,st)):
       fns=pipenames(a,st)
       if not running(a,st) or a.foreground:
-        start(a,st)
+        start(a,st,restart=True)
       ss=attach(fns,st)
       assert ss is not None, f"Failed to attach to {st2name(st)} interpreter"
       ss.run_repl(a)
@@ -308,7 +308,7 @@ def main(args=None):
     with with_parent_finally(partial(_foreground_stop,st)):
       fns=pipenames(a,st)
       if not running(a,st) or a.foreground:
-        start(a,st)
+        start(a,st,restart=True)
       ss=attach(fns,st)
       assert ss is not None, f"Failed to attach to {st2name(st)} interpreter"
       print(eval_code(a,fns,ss,es,sys.stdin.read()),end='',flush=True)
@@ -320,7 +320,7 @@ def main(args=None):
     if a.foreground:
       st=name2st(a.type)
       with with_parent_finally(partial(_foreground_stop,st)):
-        start(a,st)
+        start(a,st,restart=True)
         ecode=status(a,t,[st],__version__)
       exit(0 if ecode is None else ecode)
     else:

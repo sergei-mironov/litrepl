@@ -32,7 +32,7 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
                     Interpreter, LarkGrammar, Symbols, LarkTree, ParseResult)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally,
-                   with_fd, read_nonblock, eval_code, eval_code_)
+                   with_fd, read_nonblock, eval_code, eval_code_, interpIsRunning)
 from .utils import(unindent, indent, escape, fillspaces, fmterror,
                    cursor_within, nlines, wraplong, remove_silent, hashdigest)
 
@@ -165,10 +165,13 @@ def write_child_pid(pidf,pid):
         sleep(0.1)
   return False
 
-def start_(a:LitreplArgs, interpreter:str, i:Interpreter)->int:
+def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
   """ Starts the background Python interpreter. Kill an existing interpreter if
   any. Creates files `inp.pipe`, `out.pipe`, `pid.txt`, etc."""
   fns=i.fns
+  if not restart and interpIsRunning(fns):
+    pdebug(f"Not restarting an already running interpreter")
+    return 2
   makedirs(fns.wd, exist_ok=True)
   try:
     with open(fns.pidf,'r') as pid_file:
@@ -202,31 +205,31 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter)->int:
     else:
       return 1
 
-def start(a:LitreplArgs, st:SType)->int:
+def start(a:LitreplArgs, st:SType, restart:bool=False)->int:
   """ Start Litrepl session of type `st`. """
   if isdisabled(a,st):
     raise ValueError(f"Interpreter class {st2name(st)} is disabled by the user")
   fns=pipenames(a,st)
   if st is SType.SPython:
     if 'ipython' in a.python_interpreter.lower():
-      return start_(a,a.python_interpreter,IPythonInterpreter(fns))
+      return start_(a,a.python_interpreter,IPythonInterpreter(fns),restart)
     elif 'python' in a.python_interpreter:
-      return start_(a,a.python_interpreter,PythonInterpreter(fns))
+      return start_(a,a.python_interpreter,PythonInterpreter(fns),restart)
     elif a.python_interpreter=='auto':
       if system('python3 -m IPython -c \'print("OK")\' >/dev/null 2>&1')==0:
-        return start_(a,'python3 -m IPython',IPythonInterpreter(fns))
+        return start_(a,'python3 -m IPython',IPythonInterpreter(fns),restart)
       else:
-        return start_(a,'python3',PythonInterpreter(fns))
+        return start_(a,'python3',PythonInterpreter(fns),restart)
     else:
       raise ValueError(f"Unsupported python interpreter: {a.python_interpreter}")
   elif st is SType.SAI:
     assert not a.exception_exitcode, "--exception-exitcode is not compatible with `ai`"
     interpreter='aicli' if a.ai_interpreter=='auto' else a.ai_interpreter
-    return start_(a,interpreter,AicliInterpreter(fns))
+    return start_(a,interpreter,AicliInterpreter(fns),restart)
   elif st is SType.SShell:
     assert not a.exception_exitcode, "--exception-exitcode is not compatible with `sh`"
     interpreter='/bin/sh' if a.sh_interpreter=='auto' else a.sh_interpreter
-    return start_(a,interpreter,ShellInterpreter(fns))
+    return start_(a,interpreter,ShellInterpreter(fns),restart)
   else:
     raise ValueError(f"Unsupported section type: {st}")
 
@@ -234,7 +237,7 @@ def isdisabled(a:LitreplArgs, st:SType)->bool:
   return getattr(a,f"{st2name(st)}_interpreter",None)=='-'
 
 def restart(a:LitreplArgs,st:SType):
-  stop(a,st); start(a,st)
+  start(a,st,restart=True)
 
 def running(a:LitreplArgs,st:SType)->bool:
   """ Checks if the background session was run or not. """
