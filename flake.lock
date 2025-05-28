@@ -1,40 +1,6 @@
 {
   "nodes": {
-    "aicli": {
-      "inputs": {
-        "nixpkgs": "nixpkgs"
-      },
-      "locked": {
-        "lastModified": 1738852744,
-        "narHash": "sha256-gqaea//Re1SqqnQubrGUTy4rrcQOWY1P4qUtrsK0VhQ=",
-        "owner": "sergei-mironov",
-        "repo": "aicli",
-        "rev": "1065404dffc282105c32a94ebf1dc86d5710a034",
-        "type": "github"
-      },
-      "original": {
-        "owner": "sergei-mironov",
-        "repo": "aicli",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
-      "locked": {
-        "lastModified": 1727010948,
-        "narHash": "sha256-06KoptpoVoyIgJ4DNKRvPY3KAbjfrLHWxvWX4fK/GLc=",
-        "owner": "grwlf",
-        "repo": "nixpkgs",
-        "rev": "54f38dc1f7ec68dee4f8ffce670e45cb8fa150bf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "grwlf",
-        "ref": "local17",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_2": {
       "locked": {
         "lastModified": 1742218846,
         "narHash": "sha256-uVO7Uquz+noiOGNxEoRQheH/TjNFTNVEVgEspQViwBE=",
@@ -52,8 +18,7 @@
     },
     "root": {
       "inputs": {
-        "aicli": "aicli",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs"
       }
     }
   },

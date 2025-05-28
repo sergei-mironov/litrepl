@@ -1047,23 +1047,6 @@ grep -q '7' file.md
 )}
 #}}}
 
-test_vim_ai_query() {( #{{{
-mktest "_test_vim_ai_query"
-runlitrepl start ai
-
-cat >file.md <<"EOF"
-Dummy contents
-EOF
-
-runvim file.md >_vim.log 2>&1 <<"EOF"
-V
-:LAI /model dummy:\"dummy\"
-:wq!
-EOF
-grep -q -i 'dummy:dummy' file.md
-)}
-#}}}
-
 test_foreground() {( #{{{
 mktest "_test_foreground"
 runlitrepl start python
@@ -1384,36 +1367,39 @@ add_ipython() {
 
 tests() {
   sh=$(which sh)
-  aicli=$(which aicli 2>/dev/null || echo '-')
-  for python in $(which -a python | add_ipython ); do
-    echo test_parse_print $python - -
-    echo test_eval_md $python - $sh
-    echo test_tqdm $python - -
-    echo test_eval_tex $python - $sh
-    echo test_async $python - -
-    echo test_eval_code $python - -
-    echo test_eval_with_empty_lines $python - -
-    echo test_print_system_order $python - -
-    echo test_exit_errcode $python - -
-    echo test_exception_errcode $python - -
-    echo test_vim_leval_cursor $python - -
-    echo test_vim_textwidth $python - -  # was only called for `ipython`
-    echo test_vim_leval_explicit $python - -
-    echo test_vim_lmon $python - -
-    echo test_vim_lstatus $python - -
-    echo test_foreground $python - -
-    echo test_status $python - -
-    echo test_interrupt $python - -
-    echo test_invalid_interpreter $python - -
-    echo test_vim_eval_code $python - -  # was called only for `python`
-    echo test_vim_eval_selection $python - -
-    echo test_interp_disabled $python - $sh
-    echo test_irreproducible $python - -  # was only called for `ipython`
-    echo test_invalid_markers $python $aicli $sh
-    echo test_print_auxdir $python $aicli $sh
+  # aicli=$(which aicli 2>/dev/null || echo '-')
+  for aicli in $(which -a aicli || echo '-'); do
+    for python in $(which -a python | add_ipython ); do
+      echo test_parse_print $python - -
+      echo test_eval_md $python - $sh
+      echo test_tqdm $python - -
+      echo test_eval_tex $python - $sh
+      echo test_async $python - -
+      echo test_eval_code $python - -
+      echo test_eval_with_empty_lines $python - -
+      echo test_print_system_order $python - -
+      echo test_exit_errcode $python - -
+      echo test_exception_errcode $python - -
+      echo test_vim_leval_cursor $python - -
+      echo test_vim_textwidth $python - -  # was only called for `ipython`
+      echo test_vim_leval_explicit $python - -
+      echo test_vim_lmon $python - -
+      echo test_vim_lstatus $python - -
+      echo test_foreground $python - -
+      echo test_status $python - -
+      echo test_interrupt $python - -
+      echo test_invalid_interpreter $python - -
+      echo test_vim_eval_code $python - -  # was called only for `python`
+      echo test_vim_eval_selection $python - -
+      echo test_interp_disabled $python - $sh
+      echo test_irreproducible $python - -  # was only called for `ipython`
+      echo test_invalid_markers $python $aicli $sh
+      echo test_print_auxdir $python $aicli $sh
+      if test "$aicli" != "-" ; then
+        echo test_aicli - $aicli -
+      fi
+    done
   done
-  echo test_aicli - $aicli -
-  echo test_vim_ai_query - $aicli -
   echo test_bash - - $(which bash)
   echo test_doublestart - - $(which bash)
 }
