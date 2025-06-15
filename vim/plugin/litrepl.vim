@@ -86,11 +86,11 @@ fun! LitReplSystem(line, input)
     if LitReplGet('litrepl_use_interactive_shell') == 1
       let &shellcmdflag = '-i '.&shellcmdflag
     endif
-    let $VIM_LITREPL_FILE = expand('%:p')
+    let $LITREPL_FILE = expand('%:p')
     let ret = system(a:line, a:input)
   finally
     let &shellcmdflag = old
-    unlet $VIM_LITREPL_FILE
+    unlet $LITREPL_FILE
   endtry
   return ret
 endfun
@@ -101,11 +101,11 @@ fun! LitReplExecute(line)
     if LitReplGet('litrepl_use_interactive_shell') == 1
       let &shellcmdflag = '-i '.&shellcmdflag
     endif
-    let $VIM_LITREPL_FILE = expand('%:p')
+    let $LITREPL_FILE = expand('%:p')
     silent execute a:line
   finally
     let &shellcmdflag = old
-    unlet $VIM_LITREPL_FILE
+    unlet $LITREPL_FILE
   endtry
 endfun
 
@@ -117,15 +117,15 @@ fun! LitReplTerminal(line)
       let &shellcmdflag = '-i '.&shellcmdflag
       let shell = "++shell"
     endif
-    let $VIM_LITREPL_FILE = expand('%:p')
+    let $LITREPL_FILE = expand('%:p')
     execute 'terminal '.shell.' '.a:line
   finally
     let &shellcmdflag = old
-    unlet $VIM_LITREPL_FILE
+    unlet $LITREPL_FILE
   endtry
 endfun
 
-if ! exists("g:litrepl_version")
+if ! exists("g:litrepl_plugin_version")
   let devroot = getenv('LITREPL_ROOT')
   if ! empty(devroot)
     let g:litrepl_plugin_version = substitute(

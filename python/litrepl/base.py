@@ -12,7 +12,7 @@ from os import (environ, system, isatty, getpid, unlink, getpgid, setpgid,
                 mkfifo, kill)
 from lark import Lark, Visitor, Transformer, Token, Tree, LarkError
 from lark.visitors import Interpreter as LarkInterpreter
-from os.path import isfile, join, exists
+from os.path import isfile, join, exists, basename, splitext
 from signal import signal, SIGINT, SIGKILL, SIGTERM
 from time import sleep, time
 from dataclasses import dataclass
@@ -60,12 +60,17 @@ def st2auxdir(a:LitreplArgs, st:SType)->str:
     raise ValueError(f"Invalid section type {st}")
   if d is None:
     d = defauxdir(st)
+  def _dotted(s):
+    return f".{s}" if len(s)>0 else s
   for p,v in {
     '%%': '%',
     '%TD': gettempdir(),
     '%UI': str(getuid()),
     '%CH': hashdigest(getcwd()),
     '%IH': hashdigest(interp),
+    '%FN': splitext(basename(environ.get('LITREPL_FILE','')))[0],
+    '%FE': _dotted(splitext(basename(environ.get('LITREPL_FILE','')))[1]),
+    '%FD': dirname(environ.get('LITREPL_FILE','')),
   }.items():
     d = d.replace(p,v)
   return d
