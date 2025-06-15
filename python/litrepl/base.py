@@ -12,7 +12,7 @@ from os import (environ, system, isatty, getpid, unlink, getpgid, setpgid,
                 mkfifo, kill)
 from lark import Lark, Visitor, Transformer, Token, Tree, LarkError
 from lark.visitors import Interpreter as LarkInterpreter
-from os.path import isfile, join, exists, basename, splitext
+from os.path import isfile, join, exists, basename, splitext, dirname
 from signal import signal, SIGINT, SIGKILL, SIGTERM
 from time import sleep, time
 from dataclasses import dataclass
