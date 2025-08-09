@@ -415,6 +415,33 @@ fun! LitReplTerm(what)
   execute "terminal ++shell ".LitReplCmd()." repl ".a:what
 endfun
 
+fun! LitReplGetVisualSelection() range
+  " Get visual selection
+  let [line_start, column_start] = getpos("'<")[1:2]
+  let [line_end, column_end] = getpos("'>")[1:2]
+  let lines = getline(line_start, line_end)
+  if len(lines) == 0
+    return ""
+  endif
+  let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
+  let lines[0] = lines[0][column_start - 1:]
+  return join(lines, "\n")
+endfun
+
+fun! LitReplEvalSelection(type) range " -> [int, string]
+  " Evaluate the selection and pastes the result next after it.
+  let selection = LitReplGetVisualSelection()
+  let [line_end, column_end] = getpos("'>")[1:2]
+  let [errcode, result] = LitReplRunV('eval-code '.a:type, selection)
+  if errcode == 0
+    let result = split(result, '\n')
+    call append(line_end, result)
+  else
+    call LitReplOpenErr("Failed (".string(errcode).")")
+  endif
+  return [errcode, result]
+endfun
+
 if !exists(":LStart")
   command! -bar -nargs=1 LStart call LitReplRunV('start '.<q-args>, '')
 endif

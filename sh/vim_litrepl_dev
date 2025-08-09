@@ -71,9 +71,17 @@ if exists(':LStatus')
   delcommand LStatus
 endif
 
+if exists(':LPush')
+  delcommand LPush
+endif
+if exists(':LPipe')
+  delcommand LPipe
+endif
+if exists(':LPipeFile')
+  delcommand LPipeFile
+endif
+
 let &runtimepath = '$LITREPL_ROOT/vim,'.&runtimepath
 runtime plugin/litrepl.vim
 runtime plugin/litrepl_extras.vim
-delcommand LAI
-runtime plugin/litrepl_extras2.vim
 " "$@"

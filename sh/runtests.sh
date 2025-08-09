@@ -1336,6 +1336,108 @@ not runlitrepl start sh
 runlitrepl stop sh
 )} #}}}
 
+test_vim_extras() {( #{{{
+mktest "_test_vim_extras"
+
+cat >file.md <<"EOF"
+header
+selection
+footer
+EOF
+
+# Pipe the selection through the script
+runvim file.md >_vim.log 2>&1 <<EOF
+2GV\
+:LPipe dummy input
+:w output.md
+:q!
+EOF
+diff -u output.md - <<"EOF"
+header
+litrepl-dummy.sh --prompt input --selection-paste - --output-format markdown --reindent
+selection
+END
+footer
+EOF
+
+# Pipe the selection through the script (no input)
+runvim file.md >_vim.log 2>&1 <<EOF
+2GV\
+:LPipe dummy
+:w output2.md
+:q!
+EOF
+diff -u output2.md - <<"EOF"
+header
+litrepl-dummy.sh --selection-paste - --output-format markdown --reindent
+selection
+END
+footer
+EOF
+
+# Pipe the selection through the script along with the whole file
+runvim file.md >_vim.log 2>&1 <<EOF
+2GV\
+:LPipeFile dummy input
+:w output3.md
+:q!
+EOF
+diff -u output3.md - <<EOF
+header
+selection
+footer
+EOF
+grep -q ":LPipeFile does not accept selections" _vim.log
+
+# Push the selection to the script
+runvim file.md >_vim.log 2>&1 <<EOF
+2GV\
+:LPush dummy input
+:w output4.md
+:q!
+EOF
+diff -u output4.md - <<EOF
+header
+selection
+footer
+EOF
+diff -u _last_dummy_output.txt - <<EOF
+litrepl-dummy.sh --prompt input --selection-paste - --output-format markdown
+selection
+END
+EOF
+
+# Pull something from a script
+runvim file.md >_vim.log 2>&1 <<EOF
+2G\
+:LPipe dummy input
+:w output5.md
+:q!
+EOF
+diff -u output5.md - <<"EOF"
+header
+selection
+litrepl-dummy.sh --prompt input --output-format markdown
+END
+footer
+EOF
+
+# Pull something from a script
+runvim file.md >_vim.log 2>&1 <<"EOF"
+:LPipeFile dummy input
+:w output6.md
+:q!
+EOF
+diff -u output6.md - <<EOF
+litrepl-dummy.sh --prompt input --output-format markdown `pwd`/file.md
+header
+selection
+footer
+END
+EOF
+
+)} #}}}
+
 die() {
   echo "$@" >&2
   exit 1
@@ -1402,6 +1504,7 @@ tests() {
   done
   echo test_bash - - $(which bash)
   echo test_doublestart - - $(which bash)
+  echo test_vim_extras - - -
 }
 
 runlitrepl() {
@@ -1534,7 +1637,7 @@ else
 fi
 
 trap "echo FAIL\(\$?\)" EXIT
-tests | (
+tests | awk '!seen[$0]++' | (
 NRUN=0
 while read t ipy iai ish ; do
   if echo "$t" | grep -q -E "$TESTS" && \
