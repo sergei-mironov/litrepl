@@ -10,12 +10,13 @@ class PythonInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
     ret=system(
-      f"exec {interpreter} -uic 'import sys; sys.ps1=\"\"; sys.ps2=\"\";' "
+      f"exec {interpreter} -ui"
       f"<'{fns.inp}' >'{fns.outp}' 2>&1"
     )
     return ret
   def setup_child(self, a, finp, foutp)->None:
     finp.write(
+      '\nimport sys; sys.ps1=""; sys.ps2=""\n'
       '\nimport signal\n'
       'def _handler(signum,frame):\n'
       '  raise KeyboardInterrupt()\n\n'
