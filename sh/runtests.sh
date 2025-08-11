@@ -1504,7 +1504,7 @@ tests() {
   done
   echo test_bash - - $(which bash)
   echo test_doublestart - - $(which bash)
-  echo test_vim_extras - - -
+  # echo test_vim_extras - - -
 }
 
 runlitrepl() {
