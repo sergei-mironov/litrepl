@@ -14,33 +14,31 @@ class IPythonInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
     assert 'ipython' in interpreter.lower()
-    cfg=join(abspath(fns.wd), 'litrepl_ipython_config.py')
-    log=f"--logfile={join(fns.wd, '_ipython.log')}" if DEBUG else ""
-    with open(cfg,'w') as f:
-      f.write(
-        'import sys\n'
-        # See https://github.com/ipython/ipython/issues/14246
-        'sys.stdout.reconfigure(line_buffering=True)\n'
-        'from IPython.terminal.prompts import Prompts, Token\n'
-        'class EmptyPrompts(Prompts):\n'
-        '  def in_prompt_tokens(self):\n'
-        '    return [(Token.Prompt, "")]\n'
-        '  def continuation_prompt_tokens(self, width=None):\n'
-        '    return [(Token.Prompt, "") ]\n'
-        '  def rewrite_prompt_tokens(self):\n'
-        '    return []\n'
-        '  def out_prompt_tokens(self):\n'
-        '    return []\n'
-        'c.TerminalInteractiveShell.prompts_class = EmptyPrompts\n'
-        'c.TerminalInteractiveShell.separate_in = ""\n'
-        'c.TerminalInteractiveShell.separate_out = ""\n'
-      )
     ret=system(
-      f"exec {interpreter} --config={cfg} --colors=NoColor {log} -i "
+      f"exec {interpreter} --colors=NoColor -i "
       f"<'{fns.inp}' >'{fns.outp}' 2>&1"
     )
     return ret
   def setup_child(self, a, finp, foutp)->None:
+    finp.write(
+      'import sys\n'
+      # See https://github.com/ipython/ipython/issues/14246
+      'sys.stdout.reconfigure(line_buffering=True)\n'
+      'from IPython.terminal.prompts import Prompts, Token\n'
+      'class EmptyPrompts(Prompts):\n'
+      '  def in_prompt_tokens(self):\n'
+      '    return [(Token.Prompt, "")]\n'
+      '  def continuation_prompt_tokens(self, width=None):\n'
+      '    return [(Token.Prompt, "") ]\n'
+      '  def rewrite_prompt_tokens(self):\n'
+      '    return []\n'
+      '  def out_prompt_tokens(self):\n'
+      '    return []\n'
+      'ip = get_ipython()\n'
+      'ip.prompts = EmptyPrompts(ip)\n'
+      'ip.separate_in = ""\n'
+      'ip.separate_out = ""\n'
+    )
     finp.write(
       '\nimport signal\n'
       'def _handler(signum,frame):\n'
