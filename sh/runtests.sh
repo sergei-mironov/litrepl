@@ -1447,11 +1447,6 @@ die() {
   exit 1
 }
 
-interpreters() {
-  echo "$(which python)"
-  echo "$(which ipython)"
-}
-
 not() {(
   set +e
   $@
