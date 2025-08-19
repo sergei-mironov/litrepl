@@ -442,23 +442,34 @@ fun! LitReplEvalSelection(type) range " -> [int, string]
   return [errcode, result]
 endfun
 
+fun! LitReplTypeCompletion(ArgLead, CmdLine, CursorPos)
+  let l:completions = ['python', 'ai', 'sh']
+  let l:matches = []
+  for e in l:completions
+    if e =~ '^' . a:ArgLead
+      call add(l:matches, e)
+    endif
+  endfor
+  return l:matches
+endfun
+
 if !exists(":LStart")
-  command! -bar -nargs=1 LStart call LitReplRunV('start '.<q-args>, '')
+  command! -bar -nargs=1 -complete=customlist,LitReplTypeCompletion LStart call LitReplRunV('start '.<q-args>, '')
 endif
 if !exists(":LStop")
-  command! -bar -nargs=? LStop call LitReplRunV('stop '.<q-args>, '')
+  command! -bar -nargs=? -complete=customlist,LitReplTypeCompletion LStop call LitReplRunV('stop '.<q-args>, '')
 endif
 if !exists(":LRestart")
-  command! -bar -nargs=? LRestart call LitReplRunV('restart '.<q-args>, '')
+  command! -bar -nargs=? -complete=customlist,LitReplTypeCompletion LRestart call LitReplRunV('restart '.<q-args>, '')
 endif
 if !exists(":LPP")
   command! -bar -nargs=0 LPP call LitRepRunV('parse-print', '')
 endif
 if !exists(":LRepl")
-  command! -bar -nargs=1 LRepl call LitReplTerm(<q-args>)
+  command! -bar -nargs=1 -complete=customlist,LitReplTypeCompletion LRepl call LitReplTerm(<q-args>)
 endif
 if !exists(":LTerm")
-  command! -bar -nargs=1 LTerm call LitReplTerm(<q-args>)
+  command! -bar -nargs=1 -complete=customlist,LitReplTypeCompletion LTerm call LitReplTerm(<q-args>)
 endif
 if !exists(":LOpenErr")
   command! -bar -nargs=0 LOpenErr call LitReplOpenErr('')
