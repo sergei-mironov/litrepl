@@ -1339,6 +1339,9 @@ runlitrepl stop sh
 test_vim_extras() {( #{{{
 mktest "_test_vim_extras"
 
+export PATH="$LITREPL_ROOT/sh:$PATH"
+which litrepl-dummy.sh >/dev/null
+
 cat >file.md <<"EOF"
 header
 selection
@@ -1364,6 +1367,7 @@ EOF
 runvim file.md >_vim.log 2>&1 <<EOF
 2GV\
 :LPipe dummy
+
 :w output2.md
 :q!
 EOF
@@ -1504,7 +1508,7 @@ tests() {
   done
   echo test_bash - - $(which bash)
   echo test_doublestart - - $(which bash)
-  # echo test_vim_extras - - -
+  echo test_vim_extras - - -
 }
 
 runlitrepl() {
