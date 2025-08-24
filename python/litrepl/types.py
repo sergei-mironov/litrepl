@@ -14,6 +14,9 @@ LitreplArgs=Any
 # Lark parser grammar.
 LarkGrammar=str
 
+# Error message
+ErrorMsg=str
+
 # Process exit code or None which means that the process is still running.
 ECode=Optional[int]
 ECODE_RUNNING=None

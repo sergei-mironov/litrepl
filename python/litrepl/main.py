@@ -292,7 +292,9 @@ def main(args=None):
       if not running(a,st) or a.foreground:
         start(a,st,restart=True)
       ss=attach(fns,st)
-      assert ss is not None, f"Failed to attach to {st2name(st)} interpreter"
+      if not isinstance(ss,Interpreter):
+        ec=interpExitCode(fns)
+        raise RuntimeError(failmsg(fns,ss,ec))
       ss.run_repl(a)
       ecode=interpExitCode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
@@ -310,7 +312,9 @@ def main(args=None):
       if not running(a,st) or a.foreground:
         start(a,st,restart=True)
       ss=attach(fns,st)
-      assert ss is not None, f"Failed to attach to {st2name(st)} interpreter"
+      if not isinstance(ss,Interpreter):
+        ec=interpExitCode(fns)
+        raise RuntimeError(failmsg(fns,ss,ec))
       print(eval_code(a,fns,ss,es,sys.stdin.read()),end='',flush=True)
       ecode=interpExitCode(fns,undefined=200)
     exit(0 if ecode is None else ecode)

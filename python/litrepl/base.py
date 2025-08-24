@@ -27,9 +27,9 @@ from subprocess import check_output, DEVNULL, CalledProcessError
 from contextlib import contextmanager
 
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
-                    CursorPos, ReadResult, SType, LitreplArgs,
-                    EvalState, ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE,
-                    Interpreter, LarkGrammar, Symbols, LarkTree, ParseResult)
+                    CursorPos, ReadResult, SType, LitreplArgs, EvalState,
+                    ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE, Interpreter,
+                    LarkGrammar, Symbols, LarkTree, ParseResult, ErrorMsg)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally,
                    with_fd, read_nonblock, eval_code, eval_code_, interpIsRunning)
@@ -128,13 +128,12 @@ def pipenames(a:LitreplArgs, st:SType)->FileNames:
                    join(auxdir,"in.pipe"),join(auxdir,"out.pipe"),
                    join(auxdir,"pid.txt"),join(auxdir,"ecode.txt"),join(auxdir,"emsg.txt"))
 
-def attach(fns:FileNames, st:Optional[SType]=None)->Optional[Interpreter]:
+def attach(fns:FileNames, st:Optional[SType]=None)->Union[Interpreter,ErrorMsg]:
   """ Attach to the interpreter associated with the given pipe filenames. """
+  pid=readipid(fns)
+  if pid is None:
+    return f"Could not determine pid of an interpreter"
   try:
-    pid=readipid(fns)
-    if pid is None:
-      pdebug(f"Could not determine pid of an interpreter")
-      return None
     p=Process(pid)
     cmd=p.cmdline()
     cls=None
@@ -147,12 +146,11 @@ def attach(fns:FileNames, st:Optional[SType]=None)->Optional[Interpreter]:
     elif (st is None or st==SType.SShell) and any('sh' in w for w in cmd):
       cls=ShellInterpreter
     else:
-      assert False, f"Unknown or undefined interpreter {cmd} (among {st})"
+      return f"Unknown or undefined interpreter pid {pid} cmd '{cmd}' (among {st})"
     pdebug(f"Interpreter pid {pid} cmd '{cmd}' was resolved into '{cls}'")
     return cls(fns)
   except NoSuchProcess as err:
-    pdebug(f"Could not determine the interpreter classs ({err})")
-    return None
+    return f"Could resolve pid {pid} into interpreter class: ({err})"
 
 def open_child_pipes(inp,outp):
   return os.open(inp,os.O_RDWR|os.O_SYNC),os.open(outp,os.O_RDWR|os.O_SYNC);
@@ -161,6 +159,9 @@ def open_parent_pipes(inp,outp):
 
 
 def write_child_pid(pidf,pid):
+  """ Writes first children of a fork-child process as the main interpreter
+  pid. This works as long as `Interpreter.run_child` calls real interpreter
+  using system() call."""
   with open(pidf,'w') as f:
     for attempt in range(20):
       try:
@@ -466,20 +467,37 @@ def parse_(a:LitreplArgs)->ParseResult:
     raise ValueError(f"Unsupported filetype \"{a.filetype}\"")
   return res
 
+def failmsg(fns:FileNames,ss:Union[Interpreter,str],ec:ECode)->str:
+  """ Format error message to report to user in place of the result. """
+  msg=''
+  try:
+    with open(fns.emsgf) as f:
+      msg+=f.read().rstrip()+"\n"
+  except FileNotFoundError:
+    pass
+  if isinstance(ss,str):
+    msg+=ss.rstrip()+"\n"
+  else:
+    if ec is not ECODE_RUNNING:
+      msg+=f"<Interpreter process terminated with OS exitcode: {ec}>\n"
+  msg+=f"While accessing auxiliary dir '{fns.wd}'\n"
+  return msg
+
 def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)->ECode:
   """ Evaluate code sections of the parsed `tree`, as specified in the `sr`
   request.  """
   nsecs=sr.nsecs
   es=EvalState(sr)
 
-  def _st2interp(st)->Tuple[Optional[FileNames],Optional[Interpreter]]:
+  def _st2interp(st:SType)->Tuple[FileNames,Union[Interpreter,ErrorMsg]]:
+    """ Resolve pipe filenames for the interpreter class `st`. """
     es.stypes.add(st)
     fns=pipenames(a,st)
     if not running(a,st):
       start(a,st)
     ss=attach(fns,st)
-    if not ss:
-      return (fns,None)
+    if not isinstance(ss,Interpreter):
+      return (fns,ss)
     if interrupt:
       ipid=readipid(fns)
       if ipid is not None:
@@ -489,15 +507,17 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
         pdebug("Failed to determine interpreter pid, not sending SIGINT")
     return fns,ss
 
-  def _bm2interp(bmarker:str)->Tuple[Optional[FileNames],Optional[Interpreter]]:
+  def _bm2interp(bmarker:str)->Tuple[Optional[FileNames],Union[Interpreter,ErrorMsg]]:
+    """ Map code marker into FileName (None if the code marker is disabled by
+    options) and resolve the interpreter. """
     st=bmarker2st(a,bmarker)
     if st is None:
-      return (None, None)
+      return (None, f"Failed to attach to interpreter.")
     return _st2interp(st)
 
   def _checkecode(fns,nsec,pending:bool)->ECode:
     ec=interpExitCode(fns)
-    pdebug(f"interpreter exit code: {ec}")
+    pdebug(f"Interpreter exit code: {ec}")
     if ec is ECODE_RUNNING:
       if pending and a.pending_exitcode:
         es.ecodes[nsec]=a.pending_exitcode
@@ -506,17 +526,6 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
     else:
       es.ecodes[nsec]=ec
     return ec
-
-  def _failmsg(fns,ec):
-    msg=''
-    try:
-      with open(fns.emsgf) as f:
-        msg=f.read()
-    except FileNotFoundError:
-      pass
-    if not msg.endswith('\n'):
-      msg+='\n'
-    return msg+f"<Interpreter exited with code: {ec}>\n"
 
   class C(LarkInterpreter):
     def _print(self, s:str):
@@ -534,16 +543,21 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       bm,em=tree.children[0].meta,tree.children[2].meta
       code=unindent(bm.column-1,t)
       if es.nsec in nsecs:
+        ok,sres,ec=False,'',ECODE_RUNNING
         fns,ss=_bm2interp(bmarker)
-        if fns:
+        if isinstance(fns,FileNames):
           rr=None
-          if ss:
-            es.sres[es.nsec],rr=eval_code_(a,fns,ss,es,code,sr.preproc.pending.get(es.nsec))
-          ec=_checkecode(fns,es.nsec,rr.timeout if rr else False)
-          if ec is not None:
-            msg=_failmsg(fns,ec)
+          if isinstance(ss,Interpreter):
+            sres,rr=eval_code_(a,fns,ss,es,code,sr.preproc.pending.get(es.nsec))
+          ec=_checkecode(fns,es.nsec,(rr.timeout if rr else False))
+          if (ec is not ECODE_RUNNING) or isinstance(ss,str):
+            msg=failmsg(fns,ss,ec)
             pstderr(msg)
-            es.sres[es.nsec]=es.sres.get(es.nsec,'')+msg
+            sres+=msg
+          es.sres[es.nsec]=sres
+        else:
+          pass # The interpreter is disabled
+
     def resultsec(self,tree):
       bmarker=tree.children[0].children[0].value
       t=tree.children[1].children[0].value
@@ -566,12 +580,11 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       im=tree.children[0].children[0].value
       if es.nsec in nsecs:
         fns,ss=_st2interp(SType.SPython)
-        if fns:
-          if ss:
-            result=process(a,fns,ss,'print('+code+');\n')[0].rstrip('\n')
-          ec=_checkecode(fns,es.nsec,False)
-          if ec is not None:
-            pusererror(_failmsg(fns,ec))
+        if isinstance(ss,Interpreter):
+          result=process(a,fns,ss,'print('+code+');\n')[0].rstrip('\n')
+        ec=_checkecode(fns,es.nsec,False)
+        if ec is not ECODE_RUNNING:
+          pusererror(failmsg(fns,ss,ec))
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
       self._print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}")
@@ -710,18 +723,18 @@ def status(a:LitreplArgs, t:Optional[LarkTree], sts:List[SType], version):
 
 def status_oneline(a:LitreplArgs,sts:List[SType])->int:
   for st in sts:
-    fns = pipenames(a, st)
+    fns=pipenames(a,st)
     try:
-      pid = open(fns.pidf).read().strip()
-      cmd = ' '.join(Process(int(pid)).cmdline())
+      pid=open(fns.pidf).read().strip()
+      cmd=' '.join(Process(int(pid)).cmdline())
     except Exception as ex:
       pdebug(f"exception: {ex}")
-      pid = '-'
-      cmd = '-'
+      pid='-'
+      cmd='-'
     try:
-      ecode = open(fns.ecodef).read().strip()
+      ecode=open(fns.ecodef).read().strip()
     except Exception:
-      ecode = '-'
+      ecode='-'
     print(f"{st2name(st):6s} {pid:10s} {ecode:3s} {fns.wd} {cmd}")
 
 def status_verbose(a:LitreplArgs, t:Optional[LarkTree], sts:List[SType], version:str)->int:
@@ -754,14 +767,14 @@ def status_verbose(a:LitreplArgs, t:Optional[LarkTree], sts:List[SType], version
       ss=attach(fns,st)
       es=EvalState(SecRec.empty())
       try:
-        assert ss is not None
+        assert isinstance(ss,Interpreter)
         interpreter_path=eval_code(a,fns,ss,es,
           '\n'.join(["import os","print(os.environ.get('PATH',''))"]))
         print(f"{st2name(st)} interpreter PATH: {interpreter_path.strip()}")
       except Exception:
         print(f"{st2name(st)} interpreter PATH: ?")
       try:
-        assert ss is not None
+        assert isinstance(ss,Interpreter)
         interpreter_pythonpath=eval_code(a,fns,ss,es,
           '\n'.join(["import sys","print(':'.join(sys.path))"]))
         print(f"{st2name(st)} interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")
