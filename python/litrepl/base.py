@@ -468,7 +468,8 @@ def parse_(a:LitreplArgs)->ParseResult:
   return res
 
 def failmsg(fns:FileNames,ss:Union[Interpreter,str],ec:ECode)->str:
-  """ Format error message to report to user in place of the result. """
+  """ Retrieve information about the failed interpreter: attempt to access its
+  last error message, format the syscall diagnostic, print OS exitcode. """
   msg=''
   try:
     with open(fns.emsgf) as f:
@@ -479,8 +480,8 @@ def failmsg(fns:FileNames,ss:Union[Interpreter,str],ec:ECode)->str:
     msg+=ss.rstrip()+"\n"
   else:
     if ec is not ECODE_RUNNING:
-      msg+=f"<Interpreter process terminated with OS exitcode: {ec}>\n"
-  msg+=f"While accessing auxiliary dir '{fns.wd}'\n"
+      msg+=f"Interpreter process terminated with OS exitcode: {ec}\n"
+  msg+=f"Note: auxiliary directory is set to \"{fns.wd}\"\n"
   return msg
 
 def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)->ECode:

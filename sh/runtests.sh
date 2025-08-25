@@ -1142,8 +1142,8 @@ cat >source.md <<"EOF"
 EOF
 cat source.md | runlitrepl --python-interpreter=non-existent-ipython \
   eval-sections >out1.md 2>err.txt || true
-grep -q 'Could not determine pid of an interpreter' out1.md
-grep -q 'Could not determine pid of an interpreter' err.txt
+grep -q 'non-existent-ipython: not found' out1.md
+grep -q 'non-existent-ipython: not found' err.txt
 )} #}}}
 
 test_failing_interpreter() {( #{{{
