@@ -1,14 +1,10 @@
+from typing import List, Dict, Tuple
 from textwrap import dedent
 from dataclasses import dataclass
 from enum import Enum
 
-from enum import Enum
+from .types import SectionType, SectionGrammar, FileGrammar
 
-class SectionType(Enum):
-  """ Sections types. `Ignore` are section-level block comments. """
-  Code=0
-  Result=1
-  Ignore=2
 
 def st2rule(st:SectionType)->str:
   rule_mapping = {
@@ -20,14 +16,6 @@ def st2rule(st:SectionType)->str:
   if rule is None:
     raise ValueError(f"Unknown section type {st}")
   return rule
-
-@dataclass
-class SectionGrammar:
-  """ Section grammar parameters. """
-  name:str
-  bmarker:str
-  emarker:str
-  sectype:SectionType
 
 def markdown_sec(tag:str, st:SectionType=SectionType.Code)->SectionGrammar:
   return SectionGrammar(tag, r'```[ ]*l?%s|```[ ]*{[^}]*%s[^}]*}'%(tag,tag), '```', st)
@@ -51,7 +39,8 @@ def secbody(sg:SectionGrammar)->str:
   {sg.name.upper()}END.2: /{sg.emarker}/
   ''')
 
-def mkgrammar(sgs:list[SectionGrammar], others:dict[str,tuple[str,str]]={}) -> str:
+def mkgrammar(fgr:FileGrammar) -> str:
+  sgs,others=(fgr.code_sections+fgr.result_sections+fgr.other_sections),fgr.extras
   bmarkers='|'.join([sg.bmarker for sg in sgs]+[str(v[0]) for v in others.values()])
   return '\n'.join([dedent(f'''
     start: (topleveltext)? (({'|'.join([sg.name for sg in sgs]+[str(k) for k in others.keys()])}) (topleveltext)?)*
@@ -61,31 +50,34 @@ def mkgrammar(sgs:list[SectionGrammar], others:dict[str,tuple[str,str]]={}) -> s
     *[str(v[1]) for v in others.values()],
   ])
 
-def mk_markdown_grammar(tags:list[str]|None=None)->str:
+def mk_markdown_grammar(tags:list[str]|None=None)->FileGrammar:
   tags=tags or []
   code_sections=[
     *[markdown_sec(tag, SectionType.Code) for tag in tags],
     *[markdown_com_sec(tag, SectionType.Code) for tag in tags]
   ]
-  other_sections=[
+  result_sections=[
     markdown_sec('result', SectionType.Result),
     markdown_com_sec('result', SectionType.Result),
+  ]
+  other_sections=[
     markdown_com_sec('ignore', SectionType.Ignore),
   ]
-  return mkgrammar([*code_sections,*other_sections])
+  return FileGrammar(code_sections,result_sections,other_sections,{})
 
-def mk_latex_grammar(tags:list[str]|None=None)->str:
+def mk_latex_grammar(tags:list[str]|None=None)->FileGrammar:
   tags=tags or []
   code_sections=[
     *[latex_sec(tag, SectionType.Code) for tag in tags],
     *[latex_com_sec(tag, SectionType.Code) for tag in tags]
   ]
-  other_sections=[
+  result_sections=[
     latex_sec('result', SectionType.Result),
     latex_com_sec('result', SectionType.Result),
+  ]
+  other_sections=[
     latex_com_sec('ignore', SectionType.Ignore),
   ]
-
   OBR="{"
   CBR="}"
   inlinemarker=r'\\l?[a-zA-Z0-9]*inline'
@@ -97,6 +89,6 @@ def mk_latex_grammar(tags:list[str]|None=None)->str:
   obr: "{OBR}"
   cbr: "{CBR}"
   '''))}
-  return mkgrammar([*code_sections,*other_sections], others)
+  return FileGrammar(code_sections,result_sections,other_sections,others)
 
 

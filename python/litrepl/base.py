@@ -29,7 +29,8 @@ from contextlib import contextmanager
 from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
                     CursorPos, ReadResult, SType, LitreplArgs, EvalState,
                     ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE, Interpreter,
-                    LarkGrammar, Symbols, LarkTree, ParseResult, ErrorMsg)
+                    LarkGrammar, Symbols, LarkTree, ParseResult, ErrorMsg,
+                    FileGrammar)
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally,
                    with_fd, read_nonblock, eval_code, eval_code_, interpIsRunning)
@@ -422,25 +423,22 @@ BOBR="\\{"
 #     raise ValueError(f"Unsupported filetype \"{filetype}\"")
 
 
-def grammar_(a:LitreplArgs, filetype:str)->Tuple[LarkGrammar,Symbols]:
+def grammar_(a:LitreplArgs, filetype:str)->FileGrammar:
   symbols=None
   grammar=None
   markers=[]
   for st in SType:
     markers.extend(a.markers[st])
   if filetype in ["md","markdown"]:
-    symbols=SymbolsMarkdown(a)
     grammar=mk_markdown_grammar(markers)
     pass
   elif filetype in ["tex","latex"]:
-    symbols=SymbolsLatex(a)
     grammar=mk_latex_grammar(markers)
     pass
   else:
     raise ValueError(f"Unsupported filetype \"{filetype}\"")
-  assert symbols is not None
   assert grammar is not None
-  return (grammar,symbols)
+  return grammar
 
 
 def readinput(tty_ok=True)->str:
@@ -448,11 +446,11 @@ def readinput(tty_ok=True)->str:
 
 def parse_as(a,inp,filetype)->Union[ParseResult,LarkError]:
   try:
-    g,s=grammar_(a,filetype)
-    parser=Lark(g,propagate_positions=True)
+    g=grammar_(a,filetype)
+    parser=Lark(mkgrammar(g),propagate_positions=True)
     tree=parser.parse(inp)
     pdebug(tree.pretty())
-    return ParseResult(g,s,tree,filetype)
+    return ParseResult(g,tree,filetype)
   except LarkError as e:
     return e
 

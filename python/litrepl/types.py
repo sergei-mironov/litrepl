@@ -60,12 +60,33 @@ class Symbols:
   ignorebegin:str
   ignoreend:str
 
+class SectionType(Enum):
+  """ Sections types. `Ignore` are section-level block comments. """
+  Code=0
+  Result=1
+  Ignore=2
+
+@dataclass
+class SectionGrammar:
+  """ Section grammar parameters. """
+  name:str
+  bmarker:str
+  emarker:str
+  sectype:SectionType
+
+@dataclass
+class FileGrammar:
+  """ File grammar definitions """
+  code_sections: List[SectionGrammar]
+  result_sections: List[SectionGrammar]
+  other_sections: List[SectionGrammar]
+  extras: Dict[str,Tuple[str,str]]
+
 @dataclass
 class ParseResult:
-  grammar:LarkGrammar
-  symbols:Symbols
+  grammar:FileGrammar
   tree:LarkTree
-  filetype:str
+  filetype:str # Full-word: 'markdown' or 'latex'
 
 NSec=int
 CursorPos=Tuple[int,int]

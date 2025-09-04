@@ -9,6 +9,7 @@ from .types import *
 from .utils import *
 from .eval import *
 from .base import *
+from .grammar import *
 
 # Determine the package version using the following source priorities:
 # 1) semver.txt+git 2) semver.txt 3) version.py

@@ -134,3 +134,12 @@ def runsocat(fns, hint=None):
 def hashdigest(x)->str:
   return sha256(str(x).encode('utf-8')).hexdigest()[:7]
 
+def escape_vim(s:str)->str:
+    for ch in ['|', '?']:
+        s=s.replace(ch,f"\\{ch}")
+    return s
+
+def escape_sed(s:str)->str:
+    for ch in ['|','?']:
+        s=s.replace(ch,f"\\{ch}")
+    return s

@@ -170,9 +170,9 @@ def make_parser():
   interrupt.add_argument('locs',metavar='LOCS',default='0..$',help=LOCSHELP,nargs='?')
   regexp=sps.add_parser('print-regexp',
     help='Print regexp matching start of code sections for the given file type.')
-  regexp.add_argument('format',metavar='STR',default='vim',nargs='?',
+  regexp.add_argument('format',metavar='FORMAT',default='vim',nargs='?',
     help=dedent('''
-    Regexp format to print: 'vim' or 'lark'. Defaults to 'vim'.'''))
+    Regexp format to print: 'vim' or 'sed'. Defaults to 'vim'.'''))
   regexp.add_argument('--tty',action='store_true',
     help='Read intput document from stdin (required to get per-section status).')
   grammar=sps.add_parser('print-grammar',
@@ -335,15 +335,15 @@ def main(args=None):
       ecode=status(a,t,sts,__version__)
       exit(0 if ecode is None else ecode)
   elif a.command=='print-regexp':
-    s=parse_(a).symbols
-    rbegin=s.secbegin_dict.get(a.format)
-    if rbegin is None:
-      raise ValueError(f"Unsupported regexp format \"{a.format}\"")
-    rend=s.secend_dict.get(a.format)
-    if rend is None:
-      raise ValueError(f"Unsupported regexp format \"{a.format}\"")
-    print(rbegin)
-    print(rend)
+    pr=parse_(a)
+    if a.format == 'vim':
+        print(escape_vim('|'.join(cs.bmarker for cs in pr.grammar.code_sections)))
+        print(escape_vim('|'.join(cs.emarker for cs in pr.grammar.result_sections)))
+    elif a.format == 'sed':
+        print(escape_sed('|'.join(cs.bmarker for cs in pr.grammar.code_sections)))
+        print(escape_sed('|'.join(cs.emarker for cs in pr.grammar.result_sections)))
+    else:
+        raise ValueError(f"Unsupported regexp format {a.format}")
   elif a.command=='print-grammar':
     g=parse_(a).grammar
     print(g)
