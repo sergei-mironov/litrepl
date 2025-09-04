@@ -659,11 +659,13 @@ start: addr -> l_const
      | addr (","|";") start -> l_add
 addr : sloc ".." sloc -> a_range
      | sloc -> a_const
-sloc : num ":" num -> s_cursor
+sloc : NUM ":" NUM -> s_cursor
      | const -> s_const
-const : num -> s_const_num
+const : NUM -> s_const_num
       | "$" -> s_const_last
-num : /[0-9]+/
+      | SIGN NUM -> s_const_rel
+NUM : /[0-9]+/
+SIGN : /[+-]/
 """
 
 def solve_sloc(s:str, tree:LarkTree)->SecRec:
@@ -671,12 +673,13 @@ def solve_sloc(s:str, tree:LarkTree)->SecRec:
   given parsed document `tree`. """
   p=Lark(grammar_sloc)
   t=p.parse(s)
-  nknown:Dict[int,int]={}
+  nknown:Dict[int,Callable[[int],int]]={}
   nqueries:Dict[int,CursorPos]={}
   # print(t.pretty())
   lastq=0
+  last_cursor:Optional[CursorPos]=None
   class T(Transformer):
-    def __init__(self):
+    def __init__(self)->None:
       self.q=lastq
     def l_const(self,tree):
       return [tree[0]]
@@ -690,21 +693,32 @@ def solve_sloc(s:str, tree:LarkTree)->SecRec:
       return tree[0]
     def s_const_num(self,tree):
       self.q+=1
-      nknown[self.q]=int(tree[0].children[0].value)-1
+      nknown[self.q]=lambda _: int(tree[0].value)-1
+      return int(self.q)
+    def s_const_rel(self,tree):
+      self.q+=1
+      sign = 1 if tree[0].value == "+" else -1
+      def _rel(ref):
+        if ref is None:
+          raise ValueError("A valid cursor position is required for relative addressing")
+        return ref + sign * int(tree[1].value)
+      nknown[self.q]=_rel
       return int(self.q)
     def s_const_last(self,tree):
       return int(lastq)
     def s_cursor(self,tree):
+      nonlocal last_cursor
       self.q+=1
-      nqueries[self.q]=(int(tree[0].children[0].value),
-                        int(tree[1].children[0].value))
+      last_cursor=(int(tree[0].value), int(tree[1].value))
+      nqueries[self.q]=last_cursor
       return int(self.q)
   qs=T().transform(t)
   ppi=solve_cpos(tree,list(nqueries.values()))
   nsec,nsol=ppi.nsec,ppi.cursors
-  nknown[lastq]=nsec
+  nref:Optional[NSec]=nsol.get(last_cursor)
+  nknown[lastq]=lambda _:nsec
   def _get(q):
-    return nsol[nqueries[q]] if q in nqueries else nknown[q]
+    return nsol[nqueries[q]] if q in nqueries else nknown[q](nref)
   def _safeset(x):
     try:
       return set(x())

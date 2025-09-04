@@ -390,18 +390,15 @@ endfun
 let b:litrepl_lastpos = "0:0"
 
 fun! LitReplPos(arg)
-  let p = getcharpos('.')
-  let loc = p[1].":".p[2]
-  if a:arg == ""
+  let cursor = getcharpos('.')
+  let loc = cursor[1].":".cursor[2]
+  let pos = a:arg
+  let pos = substitute(pos,'all','1..$','g')
+  let pos = substitute(pos,'above','1..@','g')
+  let pos = substitute(pos,'below','@..$','g')
+  let pos = substitute(pos,'@',loc,'g')
+  if pos == ""
     let pos = loc
-  elseif tolower(a:arg) == "all"
-    let pos = "1..$"
-  elseif tolower(a:arg) == "above"
-    let pos = "1..".loc
-  elseif tolower(a:arg) == "below"
-    let pos = loc."..$"
-  else
-    let pos = a:arg
   endif
   let b:litrepl_lastpos = pos
   return pos

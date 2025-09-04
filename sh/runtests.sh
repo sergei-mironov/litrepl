@@ -949,6 +949,17 @@ runvim >_vim.log 2>&1 <<"EOF"
 9G
 :LEval below
 :w! file-below.md
+
+:e! source.md
+9G
+:LEval @,+1
+:w! file-above-p1.md
+
+:e! source.md
+9G
+:LEval @,-1
+:w! file-above-m1.md
+
 :qa!
 EOF
 
@@ -967,6 +978,14 @@ not grep -q '^result-3' file-above.md
 not grep -q '^result-1' file-below.md
 grep -q '^result-2' file-below.md
 grep -q '^result-3' file-below.md
+
+not grep -q '^result-1' file-above-p1.md
+grep -q '^result-2' file-above-p1.md
+grep -q '^result-3' file-above-p1.md
+
+grep -q '^result-1' file-above-m1.md
+grep -q '^result-2' file-above-m1.md
+not grep -q '^result-3' file-above-m1.md
 
 )}
 #}}}
