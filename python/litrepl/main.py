@@ -8,7 +8,7 @@ from tempfile import mkdtemp
 from functools import partial
 from typing import Optional
 
-LOCSHELP='(N|$|N..N)[,(...)] where N is either: number,$,ROW:COL'
+LOCSHELP='(N|$|N..N)[,(...)] where N is either: [+|-]number,$,ROW:COL'
 
 def make_wide(formatter, w=180, h=28):
   """Return a wider HelpFormatter, if possible.
