@@ -8,7 +8,7 @@ VIM = $(shell find vim -name '*\.vim')
 VIMB_REV = _dist/vim-litrepl-$(VERSION)-$(REVISION).tar.gz
 PAPER_TAR_GZ = paper/tex/paper-$(VERSION)-$(REVISION).tar.gz
 TESTS = ./sh/runtests.sh
-MAN = man/litrepl.5
+MAN = man/litrepl.1
 DOCS = $(shell find docs -name '*\.md' | grep -v static | grep -v examples)
 TOP = flake.nix default.nix Makefile
 EXAMPLES = docs/examples/example.md docs/examples/example.tex
@@ -64,16 +64,6 @@ docs: .stamp_docs_deploy
 .stamp_docs_deploy: .stamp_docs
 	mkdocs gh-deploy
 	touch $@
-
-.PHONY: man # Build a manpage
-man: $(MAN)
-$(MAN): $(PY) Makefile python/bin/litrepl
-	argparse-manpage --module litrepl.main \
-		--author 'Sergei Mironov' \
- 	  --author-email 'sergei.v.mironov@proton.me' \
-		--url 'https://github.com/sergei-mironov/litrepl' \
-		--project-name 'litrepl' \
-		--object=AP >$@
 
 .PHONY: help # Print help
 help:

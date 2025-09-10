@@ -1,4 +1,4 @@
-.TH LITREPL "1" "1980\-01\-01" "litrepl 3.13.0" "Generated Python Manual"
+.TH LITREPL "1" "1980\-01\-01" "litrepl 3.13.1" "Generated Python Manual"
 .SH NAME
 litrepl \- command\-line processor for Markdown or LaTeX documents with literate
 programming code sections. Instructed by its arguments, it evaluates and
@@ -97,7 +97,7 @@ usage: litrepl eval\-sections [\-h] [LOCS]
 
 .TP
 \fBLOCS\fR
-(N|$|N..N)[,(...)] where N is either: number,$,ROW:COL
+(N|$|N..N)[,(...)] where N is either: [+|\-]number,$,ROW:COL
 
 .SH COMMAND \fI\,'litrepl eval\-code'\/\fR
 usage: litrepl eval\-code [\-h] CLASS
@@ -118,7 +118,7 @@ usage: litrepl interrupt [\-h] [LOCS]
 
 .TP
 \fBLOCS\fR
-(N|$|N..N)[,(...)] where N is either: number,$,ROW:COL
+(N|$|N..N)[,(...)] where N is either: [+|\-]number,$,ROW:COL
 
 .SH COMMAND \fI\,'litrepl print\-regexp'\/\fR
 usage: litrepl print\-regexp [\-h] [\-\-tty] [STR]
