@@ -9,9 +9,10 @@ installation methods.
 ### Installing release versions from Pypi and Vim.org
 
 1. `pip install litrepl`
-2. Download the `litrepl.vim` from the vim.org
-   [script page](https://www.vim.org/scripts/script.php?script_id=6117) and put it into
-   your `~/.vim/plugin` folder.
+2. Download the latest `vim-litrepl-*.tar.gz` from the vim.org
+   [script page](https://www.vim.org/scripts/script.php?script_id=6117) and unpack it into
+   your `~/.vim` folder with  `tar -xf vim-litrepl-*.tar.gz  -C ~/.vim`
+3. Optionally, install the `socat` tool using your system package manager.
 
 
 ### Installing latest versions from Git using Pip and Vim-Plug
@@ -27,6 +28,7 @@ installation methods.
    Plug 'https://github.com/sergei-mironov/litrepl' , { 'rtp': 'vim' }
    ```
    Note: `rtp` sets the custom vim-plugin source directory of the plugin.
+3. Optionally, install the `socat` tool using your system package manager.
 
 
 ### Installing latest versions from source using Nix
@@ -65,13 +67,23 @@ config folder.
 
 ### Notes
 
+#### Optional Socat tool
+
 The Nix-powered installation methods install the Socat tool automatically. For
-other installation methods, use your system pacakge manager to install it. For
+other installation methods, use your system package manager to install it. For
 example, Ubuntu users might run `sudo apt-get install socat`.
 
+#### Python interpreters
+
 The Python interpreter is usually installed by default, along with the `pip`
-installer. To install `ipython`, you can use `pip install ipython`. For the
-[aicli](https://github.com/sergei-mironov/aicli) interpreter, you can run `pip
-install sm_aicli`, or refer to the project page for additional installation
-methods.
+installer. To install `ipython`, you can use `pip install ipython`.
+
+#### Aicli interpreter
+
+A GNU Readline-based application for interacting with chat-oriented AI models,
+which Litrep supports as the interpret for `ai` code sections.
+
+For the details, please check the
+[aicli](https://github.com/sergei-mironov/aicli) project page. Typically, you
+can install it with `pip install sm_aicli`.
 
