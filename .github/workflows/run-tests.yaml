@@ -22,5 +22,6 @@ jobs:
           python -c "import sys; print(sys.version)"
           sudo ./sh/install_deps_ubuntu.sh
           python setup.py install
+          make test
 
 
