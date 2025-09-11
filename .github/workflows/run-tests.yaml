@@ -22,6 +22,8 @@ jobs:
           python -c "import sys; print(sys.version)"
           ./sh/install_deps_ubuntu.sh
           python setup.py install
+          ./sh/runtests.sh -c - -i '?'
+          ./sh/runtests.sh -c - -p '?'
           LITREPL_COVERAGE=- make test
 
 
