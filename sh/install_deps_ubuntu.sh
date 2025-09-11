@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e -x
 
-apt-get update >/dev/null
-apt-get install -y python3-setuptools socat vim
+sudo apt-get update >/dev/null
+sudo apt-get install -y socat vim
+pip install setuptools
