@@ -24,6 +24,6 @@ jobs:
           python setup.py install
           ./sh/runtests.sh -c - -i '?'
           ./sh/runtests.sh -c - -p '?'
-          LITREPL_COVERAGE=- make test
+          ./sh/runtests.sh -c - -p $(which python3) -i $(which python3)
 
 
