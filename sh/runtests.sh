@@ -1620,7 +1620,11 @@ if test "$INTERPS" = "?" -o "$TESTS" = "?" -o "$LITREPL_TEST_PYTHON" = "?" ; the
 fi
 if test "$INTERPS" = ".*" -a "$TESTS" = ".*" ; then
   if test -z "$LITREPL_COVERAGE" ; then
-    LITREPL_COVERAGE=$(pwd)/.coverage
+    if which coverage; then
+      LITREPL_COVERAGE=$(pwd)/.coverage
+    else
+      LITREPL_COVERAGE=-
+    fi
   fi
 fi
 
@@ -1682,6 +1686,8 @@ echo OK
 if test -n "$LITREPL_COVERAGE" ; then
   coverage combine ${LITREPL_COVERAGE}.*
   coverage report
-  coverage-badge -f -o img/coverage.svg
+  if which coverage-badge ; then
+    coverage-badge -f -o img/coverage.svg
+  fi
 fi
 
