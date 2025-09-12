@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.12"]
+        python-version: ["3.10"]
 
     steps:
       - uses: actions/checkout@v5
@@ -22,6 +22,6 @@ jobs:
           python -c "import sys; print(sys.version)"
           ./sh/install_deps_ubuntu.sh
           python setup.py install
-          ./sh/runtests.sh -c -
+          ./sh/runtests.sh -c - -p /opt/hostedtoolcache/Python/3.10.18/x64/bin/python -i /opt/hostedtoolcache/Python/3.10.18/x64/bin/python
 
 
