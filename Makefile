@@ -76,7 +76,7 @@ test: .stamp_test
 
 .stamp_test: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
 	LITREPL_ROOT=`pwd` \
-	sh $(TESTS)
+	./sh/runtests.sh -p "$$(which python)" -i "$$(which python)"
 	touch $@
 
 .PHONY: readme # Update code sections in the README.md
