@@ -1645,8 +1645,9 @@ if file --mime-type $LITREPL | grep -q 'script.python' ; then
 else
   if test -n "$LITREPL_TEST_PYTHON" ; then
     {
-    echo "$LITREPL is not a Python script so we can't apply specific" \
-         "Python interpreter any more. Is it a shell-script wrapper?"
+    echo "$LITREPL is not a Python script so we can't set a specific " \
+         "Python interpreter any more. Is it a shell-script wrapper? " \
+         "Should you remove the --python|-p argument?"
     echo "Note:"
     file $LITREPL
     } >&2
