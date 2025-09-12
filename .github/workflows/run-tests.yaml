@@ -22,6 +22,6 @@ jobs:
           python -c "import sys; print(sys.version)"
           ./sh/install_deps_ubuntu.sh
           python setup.py install
-          ./sh/runtests.sh -c - -p /opt/hostedtoolcache/Python/3.10.18/x64/bin/python -i /opt/hostedtoolcache/Python/3.10.18/x64/bin/python
+          ./sh/runtests.sh -c -
 
 
