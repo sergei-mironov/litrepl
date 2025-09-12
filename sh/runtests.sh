@@ -1635,6 +1635,9 @@ if test -n "$LITREPL_COVERAGE" ; then
 fi
 
 # "Binary" setup
+if test -z "$LITREPL_ROOT" ; then
+  export LITREPL_ROOT=`pwd`
+fi
 if test -z "$LITREPL"; then
   LITREPL=$LITREPL_ROOT/python/bin/litrepl
 fi
