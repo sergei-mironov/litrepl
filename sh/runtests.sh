@@ -1634,7 +1634,7 @@ case "$LITREPL_COVERAGE" in
   -) unset LITREPL_COVERAGE ;;
   *) LITREPL_COVERAGE="$(pwd)/$LITREPL_COVERAGE" ;;
 esac
-if test -n "$LITREPL_COVERAGE" ; then
+if test -n "$LITREPL_COVERAGE" && which coverage ; then
   coverage erase
 fi
 
