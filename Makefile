@@ -75,7 +75,6 @@ help:
 test: .stamp_test
 
 .stamp_test: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
-	LITREPL_BIN="`pwd`/python/bin" \
 	LITREPL_ROOT=`pwd` \
 	sh $(TESTS)
 	touch $@
