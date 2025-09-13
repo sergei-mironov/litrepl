@@ -1587,6 +1587,7 @@ unset AICLI_HISTORY
 INTERPS='.*'
 TESTS='.*'
 LITREPL_DEBUG=0
+DRYRUN=n
 while test -n "$1" ; do
   case "$1" in
     --interpreters=*) INTERPS=$(echo "$1" | sed 's/.*=//g') ;;
@@ -1598,6 +1599,7 @@ while test -n "$1" ; do
     --coverage=*) LITREPL_COVERAGE=$(echo "$1" | sed 's/.*=//g') ;;
     -c|--coverage) LITREPL_COVERAGE=$2; shift ;;
     -d|-V|--verbose) set -x; LITREPL_DEBUG=1 ;;
+    --dry-run) DRYRUN=y ;;
     -h|--help) usage ; exit 1 ;;
   esac
   shift
@@ -1634,7 +1636,7 @@ case "$LITREPL_COVERAGE" in
   -) unset LITREPL_COVERAGE ;;
   *) LITREPL_COVERAGE="$(pwd)/$LITREPL_COVERAGE" ;;
 esac
-if test -n "$LITREPL_COVERAGE" && which coverage ; then
+if test -n "$LITREPL_COVERAGE" -a "$DRYRUN" = "n" && which coverage ; then
   coverage erase
 fi
 
@@ -1667,15 +1669,17 @@ tests | awk '!seen[$0]++' | (
 NRUN=0
 while read t ipy iai ish ; do
   if echo "$t" | grep -q -E "$TESTS" && \
-     ( echo "$ipy" | grep -q -E "$INTERPS" || \
-       echo "$iai" | grep -q -E "$INTERPS" ||
-       echo "$ish" | grep -q -E "$INTERPS" ; ) ; then
+     ( echo "$ipy" | grep -q -w -E "\-|$INTERPS" && \
+       echo "$iai" | grep -q -w -E "\-|$INTERPS" &&
+       echo "$ish" | grep -q -w -E "\-|$INTERPS" ; ) ; then
     echo "Running test \"$t\" python \"$ipy\" ai \"$iai\" sh \"$ish\""
     NRUN=$(expr $NRUN '+' 1)
-    LITREPL_TEST_PYTHON_INTERPRETER="$ipy" \
-    LITREPL_TEST_AI_INTERPRETER="$iai" \
-    LITREPL_TEST_SH_INTERPRETER="$ish" \
-    $t
+    if test "$DRYRUN" = "n" ; then
+      LITREPL_TEST_PYTHON_INTERPRETER="$ipy" \
+      LITREPL_TEST_AI_INTERPRETER="$iai" \
+      LITREPL_TEST_SH_INTERPRETER="$ish" \
+      $t
+    fi
   fi
 done
 test "$NRUN" = "0" && die "No tests were run" || true
@@ -1683,7 +1687,7 @@ test "$NRUN" = "0" && die "No tests were run" || true
 trap "" EXIT
 echo OK
 
-if test -n "$LITREPL_COVERAGE" ; then
+if test -n "$LITREPL_COVERAGE" -a "$DRYRUN" = "n"; then
   coverage combine ${LITREPL_COVERAGE}.*
   coverage report
   if which coverage-badge ; then
