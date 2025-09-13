@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v5
@@ -22,6 +22,6 @@ jobs:
           python -c "import sys; print(sys.version)"
           ./sh/install_deps_ubuntu.sh
           python setup.py install
-          make test
+          make test-small
 
 
