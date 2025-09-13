@@ -71,12 +71,16 @@ help:
 	@echo Build targets:
 	@cat Makefile | sed -n 's@^.PHONY: \([a-z_-]\+\) # \(.*\)@    \1:   \2@p' | sort | column -t -l2
 
-.PHONY: test # Run the test script (./sh/runtests.sh)
-test: .stamp_test
+.PHONY: test-small # Run tests script using just the current Python and Shell interpreters
+test-small: .stamp_test_small
+.stamp_test_small: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
+	./sh/runtests.sh -p "$$(which python)" -i "$$(which python)|$$(which sh)"
+	touch $@
 
+.PHONY: test # Run tests script using all available interpreters
+test: .stamp_test
 .stamp_test: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
-	LITREPL_ROOT=`pwd` \
-	./sh/runtests.sh -p "$$(which python)" -i "$$(which python)"
+	./sh/runtests.sh
 	touch $@
 
 .PHONY: readme # Update code sections in the README.md
