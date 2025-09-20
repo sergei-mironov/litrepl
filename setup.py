@@ -61,7 +61,7 @@ setup(
   install_requires=['lark', 'psutil'],
   data_files = [('man/man1', ['man/litrepl.1'])],
   scripts=['./python/bin/litrepl'],
-  python_requires='>=3.6',
+  python_requires='>=3.9',
   author="Sergei Mironov",
   author_email="sergei.v.mironov@proton.me",
   url='https://github.com/sergei-mironov/litrepl',
