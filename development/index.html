@@ -147,7 +147,12 @@ Running</p>
 <p>will ask Nix to install the development dependencies and open shell.</p>
 <h3 id="testing">Testing</h3>
 <p>The <code>runtests.sh</code> script runs all tests by default, but accepts command-line
-arguments for running specific tests.</p>
+arguments for running specific tests. Note, that Litrepl separates the Python
+interpreter use to run the <code>litrepl</code> script (<code>-p</code> argument) and the Python
+interpreter used to run the code sections (<code>-i</code> argument).  By default,
+<code>./runtest.sh</code> runs the litrepl script with the <code>python</code> interpreter (whatever
+it is) and iterates over all available Python interpreters for running code
+sections.</p>
 <!--
 
 <pre><code class="language-python">print(&quot;~~~~ shell\n[ LitREPL-DEV ] $ runtests.sh --help&quot;)
@@ -211,20 +216,27 @@ print(&quot;~~~~&quot;)
 make[1]: Entering directory '/home/grwlf/proj/litrepl.vim'
 LitREPL is a macroprocessing Python library for Litrate programming and code execution
 Build targets:
-man:        Build a manpage
-docs:       Build the MkDocs documentation
-help:       Print help
-test:       Run the test script (./sh/runtests.sh)
-readme:     Update code sections in the README.md
-wheel:      Build Python wheel (the DEFAULT target)
-vimbundle:  Build Vim bundle
-version:    Print the version
-dist:       Build Python and Vim packages
-upload:     Upload Python wheel to Pypi.org (./_token.pypi is required)
+dist:         Build Python and Vim packages
+docs:         Build the MkDocs documentation
+examples:     Build examples
+help:         Print help
+man:          Build a manpage
+paper-quick:  Compile the paper PDF out of its LaTeX source without re-evaluation
+paper:        Check and compile the paper PDF out of its LaTeX source
+readme:       Update code sections in the README.md
+test-small:   Run tests script using just the current Python and Shell interpreters
+test:         Run tests script using all available interpreters
+upload:       Upload Python wheel to Pypi.org (./_token.pypi is required)
+version:      Print the version
+vimbundle:    Build Vim bundle
+wheel:        Build Python wheel (the DEFAULT target)
 make[1]: Leaving directory '/home/grwlf/proj/litrepl.vim'
 </code></pre>
 <!-- noresult -->
 
+<p>The <a href=".github/workflows/testing.yaml">.github/workflows/testing.yaml</a> rule set
+instructs Github CI to run the set of <code>test-small</code> tests for some versions of
+Python interpreter. The badge on the main page highlightes the CI status.</p>
 <h3 id="technical-insights">Technical Insights</h3>
 <p>The following events should normally happen after users type the <code>:LitEval1</code>
 command:</p>

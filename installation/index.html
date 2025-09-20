@@ -55,6 +55,14 @@
     <li class="toctree-l2"><a class="reference internal" href="#installing-latest-versions-from-source-using-pip">Installing latest versions from source using Pip</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#notes">Notes</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#optional-socat-tool">Optional Socat tool</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#python-interpreters">Python interpreters</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#aicli-interpreter">Aicli interpreter</a>
+    </li>
+        </ul>
     </li>
     </ul>
                 </li>
@@ -112,9 +120,10 @@ installation methods.</p>
 <h3 id="installing-release-versions-from-pypi-and-vimorg">Installing release versions from Pypi and Vim.org</h3>
 <ol>
 <li><code>pip install litrepl</code></li>
-<li>Download the <code>litrepl.vim</code> from the vim.org
-   <a href="https://www.vim.org/scripts/script.php?script_id=6117">script page</a> and put it into
-   your <code>~/.vim/plugin</code> folder.</li>
+<li>Download the latest <code>vim-litrepl-*.tar.gz</code> from the vim.org
+   <a href="https://www.vim.org/scripts/script.php?script_id=6117">script page</a> and unpack it into
+   your <code>~/.vim</code> folder with  <code>tar -xf vim-litrepl-*.tar.gz  -C ~/.vim</code></li>
+<li>Optionally, install the <code>socat</code> tool using your system package manager.</li>
 </ol>
 <h3 id="installing-latest-versions-from-git-using-pip-and-vim-plug">Installing latest versions from Git using Pip and Vim-Plug</h3>
 <ol>
@@ -127,6 +136,7 @@ installation methods.</p>
    <code>vim
    Plug 'https://github.com/sergei-mironov/litrepl' , { 'rtp': 'vim' }</code>
    Note: <code>rtp</code> sets the custom vim-plugin source directory of the plugin.</li>
+<li>Optionally, install the <code>socat</code> tool using your system package manager.</li>
 </ol>
 <h3 id="installing-latest-versions-from-source-using-nix">Installing latest versions from source using Nix</h3>
 <p>The repository offers a suite of Nix expressions designed to optimize
@@ -153,14 +163,19 @@ project root folder. The Vim plugin part requires hand-copying
 <code>./vim/plugin/litrepl.vim</code> and <code>./vim/plugin/litrepl_extras.vim</code> to the <code>~/.vim</code>
 config folder.</p>
 <h3 id="notes">Notes</h3>
+<h4 id="optional-socat-tool">Optional Socat tool</h4>
 <p>The Nix-powered installation methods install the Socat tool automatically. For
-other installation methods, use your system pacakge manager to install it. For
+other installation methods, use your system package manager to install it. For
 example, Ubuntu users might run <code>sudo apt-get install socat</code>.</p>
+<h4 id="python-interpreters">Python interpreters</h4>
 <p>The Python interpreter is usually installed by default, along with the <code>pip</code>
-installer. To install <code>ipython</code>, you can use <code>pip install ipython</code>. For the
-<a href="https://github.com/sergei-mironov/aicli">aicli</a> interpreter, you can run <code>pip
-install sm_aicli</code>, or refer to the project page for additional installation
-methods.</p>
+installer. To install <code>ipython</code>, you can use <code>pip install ipython</code>.</p>
+<h4 id="aicli-interpreter">Aicli interpreter</h4>
+<p>A GNU Readline-based application for interacting with chat-oriented AI models,
+which Litrep supports as the interpret for <code>ai</code> code sections.</p>
+<p>For the details, please check the
+<a href="https://github.com/sergei-mironov/aicli">aicli</a> project page. Typically, you
+can install it with <code>pip install sm_aicli</code>.</p>
               
             </div>
           </div><footer>
