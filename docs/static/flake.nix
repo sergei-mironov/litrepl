@@ -15,12 +15,19 @@
       url = "github:grwlf/nixpkgs/local17.2";
     };
 
-    aicli = {
-      url = "github:sergei-mironov/aicli";
-    };
+    # aicli = {
+    #   url = "github:sergei-mironov/aicli";
+    #   inputs = {
+    #     nixpkgs.follows = "nixpkgs";
+    #   };
+    # };
   };
 
-  outputs = { self, nixpkgs, aicli }:
+  outputs = {
+    self,
+    nixpkgs
+    # , aicli
+    }:
     let
       # Generate a user-friendly version number.
       version = builtins.substring 0 8 self.lastModifiedDate;
@@ -38,7 +45,7 @@
         pkgs = nixpkgsFor.${system};
         src = self;
         revision = if self ? rev then self.rev else null;
-        aicli = aicli.outputs.packages.${system};
+        aicli = null; # aicli.outputs.packages.${system};
       };
     in {
       packages = forAllSystems defaultsFor;

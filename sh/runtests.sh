@@ -1461,6 +1461,14 @@ EOF
 
 )} #}}}
 
+test_debug() {( #{{{
+mktest "_test_debug"
+
+runlitrepl --debug=1 2>&1 | grep -q 'eval_code'
+
+)} #}}}
+
+
 die() {
   echo "$@" >&2
   exit 1
@@ -1523,6 +1531,7 @@ tests() {
   echo test_bash - - $(which bash)
   echo test_doublestart - - $(which bash)
   echo test_vim_extras - - -
+  echo test_debug - - -
 }
 
 runlitrepl() {
@@ -1587,6 +1596,7 @@ unset AICLI_HISTORY
 INTERPS='.*'
 TESTS='.*'
 LITREPL_DEBUG=0
+DRYRUN=n
 while test -n "$1" ; do
   case "$1" in
     --interpreters=*) INTERPS=$(echo "$1" | sed 's/.*=//g') ;;
@@ -1598,6 +1608,7 @@ while test -n "$1" ; do
     --coverage=*) LITREPL_COVERAGE=$(echo "$1" | sed 's/.*=//g') ;;
     -c|--coverage) LITREPL_COVERAGE=$2; shift ;;
     -d|-V|--verbose) set -x; LITREPL_DEBUG=1 ;;
+    --dry-run) DRYRUN=y ;;
     -h|--help) usage ; exit 1 ;;
   esac
   shift
@@ -1620,7 +1631,11 @@ if test "$INTERPS" = "?" -o "$TESTS" = "?" -o "$LITREPL_TEST_PYTHON" = "?" ; the
 fi
 if test "$INTERPS" = ".*" -a "$TESTS" = ".*" ; then
   if test -z "$LITREPL_COVERAGE" ; then
-    LITREPL_COVERAGE=$(pwd)/.coverage
+    if which coverage >/dev/null 2>&1; then
+      LITREPL_COVERAGE=$(pwd)/.coverage
+    else
+      LITREPL_COVERAGE=-
+    fi
   fi
 fi
 
@@ -1630,11 +1645,14 @@ case "$LITREPL_COVERAGE" in
   -) unset LITREPL_COVERAGE ;;
   *) LITREPL_COVERAGE="$(pwd)/$LITREPL_COVERAGE" ;;
 esac
-if test -n "$LITREPL_COVERAGE" ; then
+if test -n "$LITREPL_COVERAGE" -a "$DRYRUN" = "n" && which coverage >/dev/null 2>&1 ; then
   coverage erase
 fi
 
 # "Binary" setup
+if test -z "$LITREPL_ROOT" ; then
+  export LITREPL_ROOT=`pwd`
+fi
 if test -z "$LITREPL"; then
   LITREPL=$LITREPL_ROOT/python/bin/litrepl
 fi
@@ -1645,8 +1663,9 @@ if file --mime-type $LITREPL | grep -q 'script.python' ; then
 else
   if test -n "$LITREPL_TEST_PYTHON" ; then
     {
-    echo "$LITREPL is not a Python script so we can't apply specific" \
-         "Python interpreter any more. Is it a shell-script wrapper?"
+    echo "$LITREPL is not a Python script so we can't set a specific " \
+         "Python interpreter any more. Is it a shell-script wrapper? " \
+         "Should you remove the --python|-p argument?"
     echo "Note:"
     file $LITREPL
     } >&2
@@ -1659,15 +1678,17 @@ tests | awk '!seen[$0]++' | (
 NRUN=0
 while read t ipy iai ish ; do
   if echo "$t" | grep -q -E "$TESTS" && \
-     ( echo "$ipy" | grep -q -E "$INTERPS" || \
-       echo "$iai" | grep -q -E "$INTERPS" ||
-       echo "$ish" | grep -q -E "$INTERPS" ; ) ; then
+     ( echo "$ipy" | grep -q -w -E "\-|$INTERPS" && \
+       echo "$iai" | grep -q -w -E "\-|$INTERPS" &&
+       echo "$ish" | grep -q -w -E "\-|$INTERPS" ; ) ; then
     echo "Running test \"$t\" python \"$ipy\" ai \"$iai\" sh \"$ish\""
     NRUN=$(expr $NRUN '+' 1)
-    LITREPL_TEST_PYTHON_INTERPRETER="$ipy" \
-    LITREPL_TEST_AI_INTERPRETER="$iai" \
-    LITREPL_TEST_SH_INTERPRETER="$ish" \
-    $t
+    if test "$DRYRUN" = "n" ; then
+      LITREPL_TEST_PYTHON_INTERPRETER="$ipy" \
+      LITREPL_TEST_AI_INTERPRETER="$iai" \
+      LITREPL_TEST_SH_INTERPRETER="$ish" \
+      $t
+    fi
   fi
 done
 test "$NRUN" = "0" && die "No tests were run" || true
@@ -1675,9 +1696,11 @@ test "$NRUN" = "0" && die "No tests were run" || true
 trap "" EXIT
 echo OK
 
-if test -n "$LITREPL_COVERAGE" ; then
+if test -n "$LITREPL_COVERAGE" -a "$DRYRUN" = "n"; then
   coverage combine ${LITREPL_COVERAGE}.*
-  coverage report
-  coverage-badge -f -o img/coverage.svg
+  coverage report -m
+  if which coverage-badge >/dev/null 2>&1 ; then
+    coverage-badge -f -o img/coverage.svg
+  fi
 fi
 

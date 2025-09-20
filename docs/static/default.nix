@@ -96,7 +96,7 @@ let
         bpython
         psutil
         coverage
-        (aicli.aicli pp)
+        # (aicli.aicli pp) # FIXME: this does not work for some reason.
         (coverage-badge pp)
         argparse-manpage
         mkdocs
@@ -150,7 +150,8 @@ let
       propagatedBuildInputs = [(lark-current py.pkgs) py.pkgs.psutil pkgs.socat];
       nativeCheckInputs = with pkgs; [
         socat py.pkgs.ipython py.pkgs.tqdm which git vim
-        aicli.python-aicli py.pkgs.coverage (coverage-badge py.pkgs)
+        # aicli.python-aicli
+        py.pkgs.coverage (coverage-badge py.pkgs)
       ];
       # We cut off the python PATH to allow users to use litrepl in custom
       # Python environments
@@ -198,7 +199,7 @@ let
           pdflscape environ trimspaces mdframed zref needspace import
           beamerposter qcircuit xypic standalone preview amsmath thmtools
           tocloft tocbibind varwidth beamer tabulary ifoddpage relsize svg
-          transparent;
+          transparent biber biblatex comment placeins footmisc;
         }
       );
 
@@ -214,6 +215,7 @@ let
         pkgs.pandoc
         pkgs.inkscape
         sloc
+        # (aicli.aicli python-release.pkgs) # FIXME: this is required
       ];
       shellHook = with pkgs; ''
         if test -f ./env.sh ; then
@@ -500,7 +502,7 @@ let
         tmux
         xdotool
         xorg.xwininfo
-        (aicli.aicli python-release.pkgs)
+        # (aicli.aicli python-release.pkgs)
       ]);
       shellHook = with pkgs; ''
         export PS1="\n[DEMO] \[\033[1;32m\][nix-shell:\w]\$\[\033[0m\] "
@@ -518,15 +520,16 @@ let
     litrepl-release-pypi = litrepl-pypi python-release;
     vim-litrepl-release = vim-litrepl python-release;
     vim-litrepl-release-pypi = vim-litrepl-pypi python-release;
-    aicli-release = aicli.aicli python-release.pkgs;
+    # aicli-release = aicli.aicli python-release.pkgs;
 
     collection = rec {
-      inherit aicli;
+      # inherit aicli;
       inherit pkgs shell shell-dev shell-screencast shell-test
       vim-litrepl-release vim-test vim-demo vim-plug-test grechanik-st
       vimtex-local litrepl-release litrepl-dev litrepl-release-pypi
       vim-litrepl-release-pypi python-release coverage-badge-release
-      aicli-release;
+      # aicli-release
+      ;
     };
   };
 
