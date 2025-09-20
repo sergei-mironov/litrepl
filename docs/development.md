@@ -50,7 +50,13 @@ will ask Nix to install the development dependencies and open shell.
 ### Testing
 
 The `runtests.sh` script runs all tests by default, but accepts command-line
-arguments for running specific tests.
+arguments for running specific tests. Note, that Litrepl separates the Python
+interpreter use to run the `litrepl` script (`-p` argument) and the Python
+interpreter used to run the code sections (`-i` argument).  By default,
+`./runtest.sh` runs the litrepl script with the `python` interpreter (whatever
+it is) and iterates over all available Python interpreters for running code
+sections.
+
 
 <!--
 ``` python
@@ -123,22 +129,29 @@ print("~~~~")
 <!-- result -->
 ~~~~ shell
 [ LitREPL-DEV ] $ make help
-make[1]: Entering directory '/home/grwlf/proj/litrepl.vim'
 LitREPL is a macroprocessing Python library for Litrate programming and code execution
 Build targets:
-man:        Build a manpage
-docs:       Build the MkDocs documentation
-help:       Print help
-test:       Run the test script (./sh/runtests.sh)
-readme:     Update code sections in the README.md
-wheel:      Build Python wheel (the DEFAULT target)
-vimbundle:  Build Vim bundle
-version:    Print the version
-dist:       Build Python and Vim packages
-upload:     Upload Python wheel to Pypi.org (./_token.pypi is required)
-make[1]: Leaving directory '/home/grwlf/proj/litrepl.vim'
+dist:         Build Python and Vim packages
+docs:         Build the MkDocs documentation
+examples:     Build examples
+help:         Print help
+man:          Build a manpage
+paper-quick:  Compile the paper PDF out of its LaTeX source without re-evaluation
+paper:        Check and compile the paper PDF out of its LaTeX source
+readme:       Update code sections in the README.md
+test-small:   Run tests script using just the current Python and Shell interpreters
+test:         Run tests script using all available interpreters
+upload:       Upload Python wheel to Pypi.org (./_token.pypi is required)
+version:      Print the version
+vimbundle:    Build Vim bundle
+wheel:        Build Python wheel (the DEFAULT target)
 ~~~~
 <!-- noresult -->
+
+
+The [.github/workflows/testing.yaml](.github/workflows/testing.yaml) rule set
+instructs Github CI to run the set of `test-small` tests for some versions of
+Python interpreter. The badge on the main page highlightes the CI status.
 
 ### Technical Insights
 
