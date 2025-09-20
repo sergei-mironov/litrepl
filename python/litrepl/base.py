@@ -33,7 +33,7 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
 from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
                    processCont, interpExitCode, readipid, with_parent_finally,
                    with_fd, read_nonblock, eval_code, eval_code_, interpIsRunning)
-from .utils import(unindent, indent, escape, fillspaces, fmterror,
+from .utils import(unindent, indent, escape, fillspaces, fmterror, assert_,
                    cursor_within, nlines, wraplong, remove_silent, hashdigest)
 
 from .interpreters.python import PythonInterpreter
@@ -229,11 +229,11 @@ def start(a:LitreplArgs, st:SType, restart:bool=False)->int:
     else:
       raise ValueError(f"Unsupported python interpreter: {a.python_interpreter}")
   elif st is SType.SAI:
-    assert not a.exception_exitcode, "--exception-exitcode is not compatible with `ai`"
+    assert_(not a.exception_exitcode, "--exception-exitcode is not compatible with `ai`")
     interpreter='aicli' if a.ai_interpreter=='auto' else a.ai_interpreter
     return start_(a,interpreter,AicliInterpreter(fns),restart)
   elif st is SType.SShell:
-    assert not a.exception_exitcode, "--exception-exitcode is not compatible with `sh`"
+    assert_(not a.exception_exitcode, "--exception-exitcode is not compatible with `sh`")
     interpreter='/bin/sh' if a.sh_interpreter=='auto' else a.sh_interpreter
     return start_(a,interpreter,ShellInterpreter(fns),restart)
   else:
@@ -650,7 +650,7 @@ def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
   c.visit(tree)
   rres2:dict={}
   for k,v in rres.items():
-    assert len(v)==1, f"Results of codesec #{k} refer to different readout files: ({list(v)})"
+    assert_(len(v)==1, f"Results of codesec #{k} refer to different readout files: ({list(v)})")
     rres2[k]=list(v)[0]
   return PrepInfo(c.nsec,cursors,rres2,results)
 
@@ -782,14 +782,14 @@ def status_verbose(a:LitreplArgs, t:Optional[LarkTree], sts:List[SType], version
       ss=attach(fns,st)
       es=EvalState(SecRec.empty())
       try:
-        assert isinstance(ss,Interpreter)
+        assert_(isinstance(ss,Interpreter))
         interpreter_path=eval_code(a,fns,ss,es,
           '\n'.join(["import os","print(os.environ.get('PATH',''))"]))
         print(f"{st2name(st)} interpreter PATH: {interpreter_path.strip()}")
       except Exception:
         print(f"{st2name(st)} interpreter PATH: ?")
       try:
-        assert isinstance(ss,Interpreter)
+        assert_(isinstance(ss,Interpreter))
         interpreter_pythonpath=eval_code(a,fns,ss,es,
           '\n'.join(["import sys","print(':'.join(sys.path))"]))
         print(f"{st2name(st)} interpreter PYTHONPATH: {interpreter_pythonpath.strip()}")

@@ -5,6 +5,11 @@ from dataclasses import dataclass
 from enum import Enum
 from lark import ParseTree as LarkTree
 
+
+class LitreplException(Exception):
+  """ Class for Litrepl exceptions """
+  pass
+
 # String containing a file name.
 FileName=str
 

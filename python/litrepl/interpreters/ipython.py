@@ -2,7 +2,7 @@ import re
 from os import system
 from os.path import join, abspath
 
-from ..utils import fillspaces, runsocat
+from ..utils import fillspaces, runsocat, assert_
 from ..types import LitreplArgs, EvalState, Interpreter
 
 DEBUG:bool=False
@@ -13,7 +13,7 @@ PATTERN_PYTHON_2=('325674801010\n',)*2
 class IPythonInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
-    assert 'ipython' in interpreter.lower()
+    assert_('ipython' in interpreter.lower())
     ret=system(
       f"exec {interpreter} --colors=NoColor -i "
       f"<'{fns.inp}' >'{fns.outp}' 2>&1"

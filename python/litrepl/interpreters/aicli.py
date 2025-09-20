@@ -5,7 +5,7 @@ from copy import copy
 
 from ..types import Iterable, LitreplArgs, EvalState, Interpreter, SECVAR_RE
 from ..eval import eval_code_raw
-from ..utils import fillspaces, runsocat, SOCAT_HINT
+from ..utils import fillspaces, runsocat, SOCAT_HINT, assert_
 
 PATTERN_GPT4ALLCLI_1=('/echo 1121312\n', '1121312\n')
 PATTERN_GPT4ALLCLI_2=('/echo 8893223\n', '8893223\n')
@@ -38,10 +38,10 @@ class AicliInterpreter(Interpreter):
   def code_preprocess(self, a:LitreplArgs, es:EvalState, code:str) -> str:
     for secvar,ref in secvar_matches(copy(code)):
       if secvar[0]=='^':
-        assert ref>=1, "Above reference must be greater or equal one"
+        assert_(ref>=1, "Above reference must be greater or equal one")
         absref=es.nsec-ref
       elif secvar[0]=='v':
-        assert ref>=1, "Below reference must be greater or equal one"
+        assert_(ref>=1, "Below reference must be greater or equal one")
         absref=es.nsec+ref
       elif secvar[0]=='>':
         absref=ref
@@ -58,9 +58,9 @@ class AicliInterpreter(Interpreter):
   def run_repl(self, a:LitreplArgs):
     rr,_=eval_code_raw(self,f"/set terminal prompt \">>> \"\n\n",
                   float('inf'),float('inf'),True)
-    assert not rr.timeout, "Setting non-empty prompt did not happen fast"
+    assert_(not rr.timeout, "Setting non-empty prompt did not happen fast")
     runsocat(self.fns, hint=SOCAT_HINT.replace('NO PROMPTS, ','')+'>>> ')
     rr,_=eval_code_raw(self,f"/set terminal prompt \"\"\n",
                   float('inf'),float('inf'),True)
-    assert not rr.timeout, "Setting empty prompt did not happen fast"
+    assert_(not rr.timeout, "Setting empty prompt did not happen fast")
 

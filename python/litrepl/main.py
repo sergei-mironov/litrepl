@@ -200,7 +200,7 @@ def main(args=None):
     litrepl.interpreters.ipython.DEBUG=True
 
   timeouts=a.timeout.split(',')
-  assert len(timeouts) in {1,2}, f"invalid timeout value {timeouts}"
+  assert_(len(timeouts) in {1,2}, f"invalid timeout value {timeouts}")
   a.timeout_initial=float(timeouts[0])
   a.timeout_continue=float(timeouts[1] if len(timeouts)==2 else timeouts[0])
 
@@ -213,7 +213,7 @@ def main(args=None):
     for bm in a.markers[st]:
       st2=bmarker2st(a,bm)
       pdebug(st,bm, f"dis:{isdisabled(a,st)}", '======>',st2)
-      assert isdisabled(a,st) or (st2 is not None), (st,bm,st2)
+      assert_(isdisabled(a,st) or (st2 is not None), (st,bm,st2))
 
   if a.exception_exitcode:
     a.exception_exitcode=int(a.exception_exitcode)
@@ -252,8 +252,8 @@ def main(args=None):
       stop(a,st)
 
   if a.foreground:
-    assert a.command not in {'start','stop','restart','repl','interrupt'}, \
-      f"--foreground is not compatible with '{a.command}' command"
+    assert_(a.command not in {'start','stop','restart','repl','interrupt'},
+      f"--foreground is not compatible with '{a.command}' command")
     for st in [SType.SPython,SType.SAI,SType.SShell]:
       setattr(a,f"{st2name(st)}_auxdir",
               mkdtemp(prefix=f"litrepl-{st2name(st)}-foreground"))

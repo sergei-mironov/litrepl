@@ -1,9 +1,9 @@
 from textwrap import dedent, wrap
 from re import match as re_match, compile as re_compile
-from typing import Iterable,List
+from typing import Iterable, List, Optional
 from os import unlink, system
 from hashlib import sha256
-from .types import CursorPos
+from .types import CursorPos, LitreplException
 
 DEBUG:bool=False
 
@@ -133,4 +133,9 @@ def runsocat(fns, hint=None):
 
 def hashdigest(x)->str:
   return sha256(str(x).encode('utf-8')).hexdigest()[:7]
+
+def assert_(condition:bool, message:Optional[str]=None)->None:
+  """ Python's assert-style condition checker. """
+  if not condition:
+    raise LitreplException(message or "No message")
 
