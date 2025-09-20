@@ -13,7 +13,8 @@ installation methods.
    [script page](https://www.vim.org/scripts/script.php?script_id=6117) and unpack it into
    your `~/.vim` folder with  `tar -xf vim-litrepl-*.tar.gz  -C ~/.vim`
 3. Optionally, install the `socat` tool using your system package manager.
-
+4. Optionally, for the development dependencies, check the
+   `sh/install_deps_ubuntu.sh` in the source code repository.
 
 ### Installing latest versions from Git using Pip and Vim-Plug
 
@@ -29,6 +30,8 @@ installation methods.
    ```
    Note: `rtp` sets the custom vim-plugin source directory of the plugin.
 3. Optionally, install the `socat` tool using your system package manager.
+4. Optionally, for the development dependencies, check the
+   `sh/install_deps_ubuntu.sh` in the source code repository.
 
 
 ### Installing latest versions from source using Nix
