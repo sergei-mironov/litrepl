@@ -24,7 +24,7 @@ from signal import (pthread_sigmask, valid_signals, SIG_BLOCK, SIG_UNBLOCK,
 
 from .types import (LitreplArgs, RunResult, ReadResult, FileNames, EvalState,
                     ECode, ECODE_OK, ECODE_RUNNING, ECODE_UNDEFINED)
-from .utils import remove_silent, wraplong, hashdigest
+from .utils import remove_silent, wraplong, hashdigest, assert_
 
 def pstderr(*args,**kwargs):
   print(*args, file=sys.stderr, **kwargs, flush=True)
@@ -58,7 +58,7 @@ def with_sigmask(signals=None):
   """ Runs a context code with Posix SIGMASK enabled, preventing `signals` to
   happen. By default disables all valid signals. """
   global SIGMASK_NESTED
-  assert not SIGMASK_NESTED
+  assert_(not SIGMASK_NESTED)
   signals=valid_signals() if signals is None else signals
   old=None
   try:
@@ -152,10 +152,10 @@ def merge_rn2(buf_,r,i_n=-1)->Tuple[bytes,int]:
   buf+=r[start:]
   if i_n>=0:
     i_n-=start
-  assert b'\r' not in buf
+  assert_(b'\r' not in buf)
   if i_n>=0:
-    assert i_n<len(buf), f"{len(buf)}, {i_n}"
-    assert buf[i_n]==(b'\n'[0]), f"{buf}, {i_n}, {buf[i_n]}"
+    assert_(i_n<len(buf), f"{len(buf)}, {i_n}")
+    assert_(buf[i_n]==(b'\n'[0]), f"{buf}, {i_n}, {buf[i_n]}")
   return buf,sz+i_n if i_n<0 else sz+i_n
 
 
@@ -249,7 +249,7 @@ def process(a:LitreplArgs,fns:FileNames, ss:Interpreter, lines:str)->Tuple[str,R
   res=''
   with with_sigint(a.propagate_sigint,fns):
     with with_locked_fd(runr.fname,OPEN_RDONLY,LOCK_EX) as fdr:
-      assert fdr is not None
+      assert_(fdr is not None)
       pdebug("process readout")
       res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
       remove_silent(runr.fname)
@@ -303,7 +303,7 @@ def with_fd(name:str, flags:int, open_timeout_sec=float('inf')):
         with with_sigmask(valid_signals()-{SIGALRM}):
           fd=os.open(name,flags)
       pdebug(f"Opened {name}")
-      assert fd>0, f"Failed to open file '{name}', retcode: {fd}"
+      assert_(fd>0, f"Failed to open file '{name}', retcode: {fd}")
       yield fd
     except TimeoutError:
       pdebug(f"Unable to open {name}")
@@ -414,12 +414,12 @@ def processCont(fns:FileNames,
         pdebug(f"processCont unlinked {runr.fname}")
       else:
         with with_fd(runr.fname,os.O_RDONLY|os.O_SYNC) as fdr:
-          assert fdr is not None
+          assert_(fdr is not None)
           pdebug("processCont readout(nonblocking) start")
           res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
           pdebug(f"processCont readout(nonblocking) finish")
           rr=ReadResult(res,True) # Timeout ==> Return continuation
-  assert rr is not None
+  assert_(rr is not None)
   return rr
 
 def processAdapt(fns:FileNames,
