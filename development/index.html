@@ -205,7 +205,7 @@ open for the recording session.</p>
 <!--
 
 <pre><code class="language-python">print(&quot;~~~~ shell\n[ LitREPL-DEV ] $ make help&quot;)
-!make help
+!make help | grep -v -E 'Entering|Leaving'
 print(&quot;~~~~&quot;)
 </code></pre>
 
@@ -213,7 +213,6 @@ print(&quot;~~~~&quot;)
 <!-- result -->
 
 <pre><code class="language-shell">[ LitREPL-DEV ] $ make help
-make[1]: Entering directory '/home/grwlf/proj/litrepl.vim'
 LitREPL is a macroprocessing Python library for Litrate programming and code execution
 Build targets:
 dist:         Build Python and Vim packages
@@ -230,7 +229,6 @@ upload:       Upload Python wheel to Pypi.org (./_token.pypi is required)
 version:      Print the version
 vimbundle:    Build Vim bundle
 wheel:        Build Python wheel (the DEFAULT target)
-make[1]: Leaving directory '/home/grwlf/proj/litrepl.vim'
 </code></pre>
 <!-- noresult -->
 
