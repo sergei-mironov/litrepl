@@ -50,12 +50,12 @@ will ask Nix to install the development dependencies and open shell.
 ### Testing
 
 The `runtests.sh` script runs all tests by default, but accepts command-line
-arguments for running specific tests. Note, that Litrepl separates the Python
-interpreter use to run the `litrepl` script (`-p` argument) and the Python
-interpreter used to run the code sections (`-i` argument).  By default,
+arguments for running specific tests. Note, that Litrepl distinguishes the
+Python interpreter use to run the `litrepl` script (`-p` argument) from the
+Python interpreters used to run the code sections (`-i` argument).  By default,
 `./runtest.sh` runs the litrepl script with the `python` interpreter (whatever
-it is) and iterates over all available Python interpreters for running code
-sections.
+it is, leaving the OS to decide) and iterates over all visible Python
+interpreters for running code sections.
 
 
 <!--
