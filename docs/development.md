@@ -122,7 +122,7 @@ The top-level [Makefile](./static/Makefile) encodes common development scenarios
 <!--
 ``` python
 print("~~~~ shell\n[ LitREPL-DEV ] $ make help")
-!make help
+!make help | grep -v -E 'Entering|Leaving'
 print("~~~~")
 ```
 -->
@@ -148,8 +148,9 @@ wheel:        Build Python wheel (the DEFAULT target)
 ~~~~
 <!-- noresult -->
 
+### Github CI
 
-The [.github/workflows/testing.yaml](.github/workflows/testing.yaml) rule set
+The [.github/workflows/testing.yaml](../.github/workflows/testing.yaml) rule set
 instructs Github CI to run the set of `test-small` tests for some versions of
 Python interpreter. The badge on the main page highlightes the CI status.
 
