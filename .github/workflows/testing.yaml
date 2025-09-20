@@ -1,4 +1,4 @@
-name: Run Litrepl tests
+name: Litrepl tests
 
 on: [push]
 
