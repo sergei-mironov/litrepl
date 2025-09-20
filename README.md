@@ -6,6 +6,8 @@
 [Changelog](./CHANGELOG.md) | [Installation](https://sergei-mironov.github.io/litrepl/installation) | [Usage](https://sergei-mironov.github.io/litrepl/usage/general-concepts/) | [Gallery](#-gallery)
 
 [![](./img/coverage.svg)](./docs/coverage.md)
+![test status](https://github.com/sergei-mironov/litrepl/actions/workflows/testing.yaml/badge.svg)
+
 </div>
 
 <!--
