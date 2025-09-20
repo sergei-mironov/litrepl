@@ -293,10 +293,10 @@ def main(args=None):
         start(a,st,restart=True)
       ss=attach(fns,st)
       if not isinstance(ss,Interpreter):
-        ec=interpExitCode(fns)
+        ec=interp_exitcode(fns)
         raise RuntimeError(failmsg(fns,ss,ec))
       ss.run_repl(a)
-      ecode=interpExitCode(fns,undefined=200)
+      ecode=interp_exitcode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='interrupt':
     tree=parse_(a).tree
@@ -313,10 +313,10 @@ def main(args=None):
         start(a,st,restart=True)
       ss=attach(fns,st)
       if not isinstance(ss,Interpreter):
-        ec=interpExitCode(fns)
+        ec=interp_exitcode(fns)
         raise RuntimeError(failmsg(fns,ss,ec))
       print(eval_code(a,fns,ss,es,sys.stdin.read()),end='',flush=True)
-      ecode=interpExitCode(fns,undefined=200)
+      ecode=interp_exitcode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='status':
     p=parse_maybe(a)

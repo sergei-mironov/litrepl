@@ -30,9 +30,10 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
                     CursorPos, ReadResult, SType, LitreplArgs, EvalState,
                     ECode, ECODE_OK, ECODE_RUNNING, SECVAR_RE, Interpreter,
                     LarkGrammar, Symbols, LarkTree, ParseResult, ErrorMsg)
-from .eval import (process, pstderr, rresultLoad, rresultSave, processAdapt,
-                   processCont, interpExitCode, readipid, with_parent_finally,
-                   with_fd, read_nonblock, eval_code, eval_code_, interpIsRunning)
+from .eval import (process, pstderr, rresult_load, rresult_save, process_adapt,
+                   process_cont, interp_exitcode, readipid, with_parent_finally,
+                   with_fd, read_nonblock, eval_code, eval_code_,
+                   interp_is_running)
 from .utils import(unindent, indent, escape, fillspaces, fmterror, assert_,
                    cursor_within, nlines, wraplong, remove_silent, hashdigest)
 
@@ -175,7 +176,7 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
   """ Starts the background Python interpreter. Kill an existing interpreter if
   any. Creates files `inp.pipe`, `out.pipe`, `pid.txt`, etc."""
   fns=i.fns
-  if not restart and interpIsRunning(fns):
+  if not restart and interp_is_running(fns):
     pdebug(f"Not restarting an already running interpreter")
     return 2
   makedirs(fns.wd, exist_ok=True)
@@ -517,7 +518,7 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
     return _st2interp(st)
 
   def _checkecode(fns,nsec,pending:bool)->ECode:
-    ec=interpExitCode(fns)
+    ec=interp_exitcode(fns)
     pdebug(f"Interpreter exit code: {ec}")
     if ec is ECODE_RUNNING:
       if pending and a.pending_exitcode:
@@ -629,7 +630,7 @@ def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
                                     (em.end_line,em.end_column)):
           cursors[(line,col)]=self.nsec
     def _getrr(self,text,column):
-      text1,pend=rresultLoad(text)
+      text1,pend=rresult_load(text)
       results[self.nsec]=unindent(column,text1)
       if pend is not None:
         rres[self.nsec].add(pend)
@@ -801,6 +802,6 @@ def status_verbose(a:LitreplArgs, t:Optional[LarkTree], sts:List[SType], version
       pass
     else:
       raise NotImplementedError(f'Unsupported type {st}')
-    ecode=interpExitCode(fns)
+    ecode=interp_exitcode(fns)
     ecodes.add(0 if ecode is None else ecode)
   return max(ecodes)

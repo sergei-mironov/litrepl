@@ -245,7 +245,7 @@ def process(a:LitreplArgs,fns:FileNames, ss:Interpreter, lines:str)->Tuple[str,R
   """ Evaluate `lines` synchronously. """
   pdebug("process started")
   p1,p2=ss.patterns()
-  runr=processAsync(fns,ss,lines)
+  runr=process_async(fns,ss,lines)
   res=''
   with with_sigint(a.propagate_sigint,fns):
     with with_locked_fd(runr.fname,OPEN_RDONLY,LOCK_EX) as fdr:
@@ -256,7 +256,7 @@ def process(a:LitreplArgs,fns:FileNames, ss:Interpreter, lines:str)->Tuple[str,R
       pdebug("process readout complete")
   return res,runr
 
-def interpIsRunning(fns:FileNames)->bool:
+def interp_is_running(fns:FileNames)->bool:
   """ Is the background interpreter session running?"""
   try:
     ipid=readipid(fns)
@@ -268,15 +268,15 @@ def interpIsRunning(fns:FileNames)->bool:
       return False
   return True
 
-def interpExitCode(fns:FileNames,
-                   poll_sec=0.5,
-                   poll_attempts=4,
-                   undefined=ECODE_UNDEFINED)->ECode:
+def interp_exitcode(fns:FileNames,
+                    poll_sec=0.5,
+                    poll_attempts=4,
+                    undefined=ECODE_UNDEFINED)->ECode:
   """ Determines retcode of the interpreter. Polls it a little if it looks
   crashed."""
   ecode:int|None=None
   while ecode is None:
-    if interpIsRunning(fns):
+    if interp_is_running(fns):
       return ECODE_RUNNING
     else:
       try:
@@ -343,14 +343,14 @@ OPEN_RDONLY=os.O_RDONLY|os.O_SYNC
 LOCK_NONBLOCKING=LOCK_EX|LOCK_NB
 LOCK_BLOCKING=LOCK_EX
 
-def processAsync(fns:FileNames, ss:Interpreter, code:str)->RunResult:
+def process_async(fns:FileNames, ss:Interpreter, code:str)->RunResult:
   """ Send `code` to the interpreter and fork the response reader. The output
   file is locked and its name is saved into the resulting `RunResult` object.
   """
   wd,inp,outp,_,_,_=astuple(fns)
   codehash=hashdigest(code)
   fname=join(wd,f"partial_{codehash}.txt")
-  pdebug(f"processAsync starting via {fname}")
+  pdebug(f"process_async starting via {fname}")
   with with_locked_fd(fname,CREATE_WRONLY_EMPTY,LOCK_NONBLOCKING) as fo:
     if fo is not None:
       sys.stdout.flush(); sys.stderr.flush() # FIXME: crude
@@ -361,18 +361,18 @@ def processAsync(fns:FileNames, ss:Interpreter, code:str)->RunResult:
         def _handler(signum,frame):
           pass
         signal(SIGINT,_handler)
-        pdebug(f"processAsync reader opening pipes")
+        pdebug(f"process_async reader opening pipes")
         with with_locked_fd(inp, os.O_WRONLY|os.O_SYNC,
                             fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdw:
           with with_locked_fd(outp, os.O_RDONLY|os.O_SYNC,
                               fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdr:
             if fdw and fdr:
-              pdebug("processAsync reader interact start")
+              pdebug("process_async reader interact start")
               try:
                 interact(fdr,fdw,code,fo,ss)
-                pdebug("processAsync reader interact finish")
+                pdebug("process_async reader interact finish")
               except BrokenPipeError:
-                pdebug("processAsync catches Broken Pipe error")
+                pdebug("process_async catches Broken Pipe error")
                 os.write(fo,"<BrokenPipe>\n".encode())
                 raise
             else:
@@ -383,50 +383,50 @@ def processAsync(fns:FileNames, ss:Interpreter, code:str)->RunResult:
         exit(0)
       else:
         # Parent
-        pdebug(f"processAsync parent forked {pid}")
+        pdebug(f"process_async parent forked {pid}")
         return RunResult(fname)
     else:
       # The reader is already running, try to own it.
-      pdebug(f"processAsync re-uses already existing reader")
+      pdebug(f"process_async re-uses already existing reader")
       return RunResult(fname)
 
-def processCont(fns:FileNames,
-                ss:Interpreter,
-                runr:RunResult,
-                timeout:float,
-                propagate_sigint:bool)->ReadResult:
+def process_cont(fns:FileNames,
+                 ss:Interpreter,
+                 runr:RunResult,
+                 timeout:float,
+                 propagate_sigint:bool)->ReadResult:
   """ Read from the running readout process. """
   rr:Optional[ReadResult]=None
   p1,p2=ss.patterns()
   with with_sigint(propagate_sigint,fns):
-    pdebug(f"processCont starting via {runr.fname}")
+    pdebug(f"process_cont starting via {runr.fname}")
     with with_locked_fd(runr.fname,
                         os.O_RDONLY|os.O_SYNC,
                         LOCK_BLOCKING if timeout>0 else LOCK_NONBLOCKING,
                         lock_timeout_sec=timeout) as fdr:
 
       if fdr:
-        pdebug(f"processCont final readout start")
+        pdebug(f"process_cont final readout start")
         res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
-        pdebug(f"processCont final readout finish")
+        pdebug(f"process_cont final readout finish")
         rr=ReadResult(res,False) # Return final result
         remove_silent(runr.fname)
-        pdebug(f"processCont unlinked {runr.fname}")
+        pdebug(f"process_cont unlinked {runr.fname}")
       else:
         with with_fd(runr.fname,os.O_RDONLY|os.O_SYNC) as fdr:
           assert_(fdr is not None)
-          pdebug("processCont readout(nonblocking) start")
+          pdebug("process_cont readout(nonblocking) start")
           res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
-          pdebug(f"processCont readout(nonblocking) finish")
+          pdebug(f"process_cont readout(nonblocking) finish")
           rr=ReadResult(res,True) # Timeout ==> Return continuation
   assert_(rr is not None)
   return rr
 
-def processAdapt(fns:FileNames,
-                 ss:Interpreter,
-                 code:str,
-                 timeout:float=1.0,
-                 propagate_sigint:bool=True)->Tuple[ReadResult,RunResult]:
+def process_adapt(fns:FileNames,
+                  ss:Interpreter,
+                  code:str,
+                  timeout:float=1.0,
+                  propagate_sigint:bool=True)->Tuple[ReadResult,RunResult]:
   """ Push `code` to the interpreter and wait for `timeout` seconds for
   the immediate answer. In case of delay, return intermediate answer and
   the continuation context."""
@@ -434,15 +434,15 @@ def processAdapt(fns:FileNames,
   #   lines2,runr=process(fns,ss,code)
   #   return ReadResult(lines2,False),runr
   # else:
-  runr=processAsync(fns,ss,code)
-  rr=processCont(fns,ss,runr,timeout=timeout,propagate_sigint=propagate_sigint)
+  runr=process_async(fns,ss,code)
+  rr=process_cont(fns,ss,runr,timeout=timeout,propagate_sigint=propagate_sigint)
   return rr,runr
 
 # LitRepl pending evaluation tag regexp
 PRESULT_RE=re_compile(r"(.*)\[LR:([a-zA-Z0-9_\/\.-]+)\]\s*$",
                       re.A|re.DOTALL)
 
-def rresultLoad(text:str)->Tuple[str,Optional[RunResult]]:
+def rresult_load(text:str)->Tuple[str,Optional[RunResult]]:
   """ Loads the contents of a result section from the input document. Parse
   LitrRepl tags, if any. Return the result text along with the RunResult."""
   m=re_match(PRESULT_RE,text)
@@ -451,7 +451,7 @@ def rresultLoad(text:str)->Tuple[str,Optional[RunResult]]:
   else:
     return text,None
 
-def rresultSave(text:str, presult:RunResult)->str:
+def rresult_save(text:str, presult:RunResult)->str:
   """ Saves uncompleted RunRestult into the response text in order to load and
   check it later. """
   sep='\n' if text and text[-1]!='\n' else ''
@@ -486,7 +486,7 @@ def eval_code_(a:LitreplArgs,
   rr,runr=eval_code_raw(ss,interp_code_preprocess(a,ss,es,code),
                         a.timeout_initial,a.timeout_continue,a.propagate_sigint,runr)
   pptext=interp_result_postprocess(a,ss,rr.text)
-  res=rresultSave(pptext,runr) if rr.timeout else pptext
+  res=rresult_save(pptext,runr) if rr.timeout else pptext
   return res,rr
 
 def eval_code_raw(ss:Interpreter,
@@ -499,8 +499,8 @@ def eval_code_raw(ss:Interpreter,
   post-processing. See also `eval_code_`. """
   fns=ss.fns
   if runr is None:
-    rr,runr=processAdapt(fns,ss,code,timeout_initial,propagate_sigint)
+    rr,runr=process_adapt(fns,ss,code,timeout_initial,propagate_sigint)
   else:
-    rr=processCont(fns,ss,runr,timeout_continue,propagate_sigint)
+    rr=process_cont(fns,ss,runr,timeout_continue,propagate_sigint)
   return rr,runr
 
