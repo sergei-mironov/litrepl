@@ -6,6 +6,21 @@ dependencies required by Nix, whereas [default.nix](./static/default.nix) specif
 common build targets, including PyPI and Vim packages, demo Vim configurations,
 development shells, and more.
 
+### Contributing
+
+The original author used his favorite Python coding style for this project, the
+following guidelines are applied:
+
+* Use 2-space indentation for everything.
+* Use CamelCase for class names and snake_case for function names
+* Use explicit `from <module> import <function>` rather than `import <module>`
+  for importing.
+* Insert type annotations where possible, use old-style upper-case type names
+  from the `typing` module.
+* Avoid spaces where possible with the following exceptions:
+  - Import name lists
+  - Function argument declarations
+
 ### Building Targets
 
 To build individual Nix expressions, execute the command `nix build '.#NAME'`,
