@@ -74,7 +74,7 @@ help:
 .PHONY: test-small # Run tests script using just the current Python and Shell interpreters
 test-small: .stamp_test_small
 .stamp_test_small: $(PY) $(VIM) $(TESTS) Makefile python/bin/litrepl
-	./sh/runtests.sh -p "$$(which python)" -i "$$(which python)|$$(which sh)"
+	./sh/runtests.sh -p "$$(which python)" -i "$$(which python)|$$(which ipython)|$$(which sh)"
 	touch $@
 
 .PHONY: test # Run tests script using all available interpreters

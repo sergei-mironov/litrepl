@@ -170,7 +170,7 @@ wheel:        Build Python wheel (the DEFAULT target)
 
 ### Github CI
 
-The [.github/workflows/testing.yaml](../.github/workflows/testing.yaml) rule set
+The [.github/workflows/testing.yaml](./static/testing.yaml) rule set
 instructs Github CI to run the set of `test-small` tests for some versions of
 Python interpreter. The badge on the main page highlightes the CI status.
 
