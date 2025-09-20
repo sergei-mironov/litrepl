@@ -1461,6 +1461,14 @@ EOF
 
 )} #}}}
 
+test_debug() {( #{{{
+mktest "_test_debug"
+
+runlitrepl --debug=1 2>&1 | grep -q 'eval_code'
+
+)} #}}}
+
+
 die() {
   echo "$@" >&2
   exit 1
@@ -1523,6 +1531,7 @@ tests() {
   echo test_bash - - $(which bash)
   echo test_doublestart - - $(which bash)
   echo test_vim_extras - - -
+  echo test_debug - - -
 }
 
 runlitrepl() {
@@ -1689,7 +1698,7 @@ echo OK
 
 if test -n "$LITREPL_COVERAGE" -a "$DRYRUN" = "n"; then
   coverage combine ${LITREPL_COVERAGE}.*
-  coverage report
+  coverage report -m
   if which coverage-badge >/dev/null 2>&1 ; then
     coverage-badge -f -o img/coverage.svg
   fi
