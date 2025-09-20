@@ -60,7 +60,7 @@ Running
 $ nix develop
 ```
 
-will ask Nix to install the development dependencies and open shell.
+will ask Nix to install the development dependencies and open the shell.
 
 ### Testing
 
@@ -103,6 +103,11 @@ Examples:
   runtests.sh -t 'test_eval_code|test_status' -i python
 ~~~~
 <!-- noresult -->
+
+The project Makefile provides a couple of phony targets for testing:
+`make test` runs the testing with all default parameters (effectively checking
+all visible Python interpreters), while the `make test-small` makes a run with
+the default system Python and IPython interpreters only.
 
 ### Coverage
 
