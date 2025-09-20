@@ -63,6 +63,8 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="./">Development</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#contributing">Contributing</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#building-targets">Building Targets</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#development-environments-and-setup">Development Environments and Setup</a>
@@ -117,6 +119,20 @@ framework. The file <a href="../static/flake.nix">flake.nix</a> manages the sour
 dependencies required by Nix, whereas <a href="../static/default.nix">default.nix</a> specifies
 common build targets, including PyPI and Vim packages, demo Vim configurations,
 development shells, and more.</p>
+<h3 id="contributing">Contributing</h3>
+<p>The original author used his favorite Python coding style for this project, the
+following guidelines are applied:</p>
+<ul>
+<li>Use 2-space indentation for everything.</li>
+<li>Use CamelCase for class names and snake_case for function names</li>
+<li>Use explicit <code>from &lt;module&gt; import &lt;function&gt;</code> rather than <code>import &lt;module&gt;</code>
+  for importing.</li>
+<li>Insert type annotations where possible, use old-style upper-case type names
+  from the <code>typing</code> module.</li>
+<li>Avoid spaces where possible with the following exceptions:</li>
+<li>Import name lists</li>
+<li>Function argument declarations</li>
+</ul>
 <h3 id="building-targets">Building Targets</h3>
 <p>To build individual Nix expressions, execute the command <code>nix build '.#NAME'</code>,
 replacing <code>NAME</code> with the actual name of the Nix expression you want to build.
@@ -146,7 +162,7 @@ expression named <code>shell</code> which is the default name for development sh
 Running</p>
 <pre><code class="language-sh">$ nix develop
 </code></pre>
-<p>will ask Nix to install the development dependencies and open shell.</p>
+<p>will ask Nix to install the development dependencies and open the shell.</p>
 <h3 id="testing">Testing</h3>
 <p>The <code>runtests.sh</code> script runs all tests by default, but accepts command-line
 arguments for running specific tests. Note, that Litrepl distinguishes the
@@ -187,6 +203,10 @@ Examples:
 </code></pre>
 <!-- noresult -->
 
+<p>The project Makefile provides a couple of phony targets for testing:
+<code>make test</code> runs the testing with all default parameters (effectively checking
+all visible Python interpreters), while the <code>make test-small</code> makes a run with
+the default system Python and IPython interpreters only.</p>
 <h3 id="coverage">Coverage</h3>
 <p>Coverage is performed after the full testing cycle.</p>
 <p>The latest coverage report is <a href="../coverage/">available</a>.</p>
@@ -215,6 +235,8 @@ print(&quot;~~~~&quot;)
 <!-- result -->
 
 <pre><code class="language-shell">[ LitREPL-DEV ] $ make help
+make: TMPDIR value /tmp/nix-shell.67F1C4: No such file or directory
+make: using default temporary directory '/tmp'
 LitREPL is a macroprocessing Python library for Litrate programming and code execution
 Build targets:
 dist:         Build Python and Vim packages
