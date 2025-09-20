@@ -1622,7 +1622,7 @@ if test "$INTERPS" = "?" -o "$TESTS" = "?" -o "$LITREPL_TEST_PYTHON" = "?" ; the
 fi
 if test "$INTERPS" = ".*" -a "$TESTS" = ".*" ; then
   if test -z "$LITREPL_COVERAGE" ; then
-    if which coverage; then
+    if which coverage >/dev/null 2>&1; then
       LITREPL_COVERAGE=$(pwd)/.coverage
     else
       LITREPL_COVERAGE=-
@@ -1636,7 +1636,7 @@ case "$LITREPL_COVERAGE" in
   -) unset LITREPL_COVERAGE ;;
   *) LITREPL_COVERAGE="$(pwd)/$LITREPL_COVERAGE" ;;
 esac
-if test -n "$LITREPL_COVERAGE" -a "$DRYRUN" = "n" && which coverage ; then
+if test -n "$LITREPL_COVERAGE" -a "$DRYRUN" = "n" && which coverage >/dev/null 2>&1 ; then
   coverage erase
 fi
 
@@ -1690,7 +1690,7 @@ echo OK
 if test -n "$LITREPL_COVERAGE" -a "$DRYRUN" = "n"; then
   coverage combine ${LITREPL_COVERAGE}.*
   coverage report
-  if which coverage-badge ; then
+  if which coverage-badge >/dev/null 2>&1 ; then
     coverage-badge -f -o img/coverage.svg
   fi
 fi
