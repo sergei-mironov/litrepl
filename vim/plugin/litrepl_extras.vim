@@ -41,8 +41,9 @@ fun! LitReplExReplace(action, prompt, source, selmode, file, extras) range " -> 
   let [action, prompt, source] = [a:action, a:prompt, a:source]
   let command = LitReplExCmdline(action, prompt, a:selmode, a:file, a:extras)
   let vimcommand = "silent! ".source."! ".command
+  call LitReplExecute(vimcommand)
   " echomsg vimcommand
-  execute vimcommand
+  " execute vimcommand
   let errcode = v:shell_error
   call LitReplVisualize(errcode, "Failed with code (" . string(errcode) . ")")
   return errcode
