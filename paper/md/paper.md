@@ -23,8 +23,8 @@ code sections within Markdown or Latex documents. This functionality is useful
 for both batch document section evaluation and interactive coding within a text
 editor, provided a straightforward integration is established. Inspired by
 Project Jupyter, Litrepl aims to facilitate the creation of research documents.
-In the light of recent developments in software deployment, however, we have
-shifted our focus from informal reproducibility to enhancing transparency in
+Following recent developments in software deployment theory, however, we shift
+our focus from informal reproducibility to enhancing transparency in
 communication with programming language interpreters, by either eliminating or
 clearly exposing mutable states within the communication process. The tool is
 designed to ensure easy code editor integration, and the project repository
