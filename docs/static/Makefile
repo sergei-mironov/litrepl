@@ -132,7 +132,7 @@ upload: $(WHEEL_REV) $(VIMB_REV)
 		--password $(shell cat _token.pypi) \
 		dist/*
 
-.PHONY: paper-md
+.PHONY: paper-md # Check and compile the paper PDF out of its Markdown source using JOSS tools
 paper-md: paper/md/paper.pdf
 paper/md/paper.pdf: paper/md/paper.md ./paper/tex/pic.png ./paper/md/input.tex
 	docker run --rm --volume $$PWD/paper/md:/data --user $(id -u):$(id -g) --env JOURNAL=joss openjournals/inara
