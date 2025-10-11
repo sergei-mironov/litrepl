@@ -59,6 +59,8 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#command-line-detecting-python-exceptions">Command Line, Detecting Python Exceptions</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command-line-running-remote-interpreters-over-ssh">Command Line, Running Remote Interpreters Over SSH</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#gnu-make-evaluating-code-sections-in-project-documentation">GNU Make, Evaluating Code Sections in Project Documentation</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#vim-setting-up-keybindings">Vim, Setting Up Keybindings</a>
@@ -142,6 +144,25 @@ $ echo $?
 interpreter session, stopping it upon completion. The <code>--exception-exit=200</code>
 option specifies the exit code to be returned in the event of unhandled
 exceptions.</p>
+<h4 id="command-line-running-remote-interpreters-over-ssh">Command Line, Running Remote Interpreters Over SSH</h4>
+<p>Litrepl supports running interpreters over SSH on a remote machine. In order to
+do so, one needs to create a shell script establishing the communication and
+name it in a recognizable way.</p>
+<p>For example, consider the case where we edit a local document but all sections
+that we want to execute should be run on a remote machine named <code>testbed</code>.</p>
+<p>We prepare an executable script named <code>ipython-testbed.sh</code> and put it into a
+directory listed in the PATH environment variable. The contents of the script is
+the following:</p>
+<pre><code class="language-sh">#!/bin/sh
+exec ssh testbed -p 22 -- bash --login -c ipython &quot;$@&quot;
+</code></pre>
+<p>Now, we can process our document as usual, but add <code>ipython-testbed.sh</code> as a new
+IPython interpreter:</p>
+<pre><code class="language-sh"># Executes code sections on a remote machine.
+cat README.md | litrepl --python-interpreter=ipython-testbed.sh
+</code></pre>
+<p>Note that the string <code>ipython</code> must appear in the interpreter name, to let
+Litrepl exercise IPyhton-specific communication settings.</p>
 <h4 id="gnu-make-evaluating-code-sections-in-project-documentation">GNU Make, Evaluating Code Sections in Project Documentation</h4>
 <p>A typical Makefile recipe for updating documentation is structured as follows:</p>
 <pre><code class="language-Makefile">SRC = $(shell find -name '*\.py')
