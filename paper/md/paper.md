@@ -21,14 +21,15 @@ bibliography: paper.bib
 Litrepl is a lightweight text processing tool designed to recognize and evaluate
 code sections within Markdown or Latex documents. This functionality is useful
 for both batch document section evaluation and interactive coding within a text
-editor, provided a straightforward integration is established. Inspired by
+editor, provided a straightforward integration is established.  Inspired by
 Project Jupyter, Litrepl aims to facilitate the creation of research documents.
-Following recent developments in software deployment theory, however, we shift
-our focus from informal reproducibility to enhancing transparency in
-communication with programming language interpreters, by either eliminating or
-clearly exposing mutable states within the communication process. The tool is
-designed to ensure easy code editor integration, and the project repository
-offers a reference Vim plugin.
+Following developments in software deployment theory, however, we shift our
+focus from informal reproducibility to enhancing transparency in communication
+with interpreters by relying on POSIX interfaces: named pipes are accessible via
+the file system, asyncronous process identifiers are visible in status reports.
+The tool provides a comprehensive command-line interface, making it easier to
+integrate with code editors. The project repository includes a reference Vim
+plugin.
 
 # Statement of need
 
