@@ -37,6 +37,36 @@ option specifies the exit code to be returned in the event of unhandled
 exceptions.
 
 
+#### Command Line, Running Remote Interpreters Over SSH
+
+Litrepl supports running interpreters over SSH on a remote machine. In order to
+do so, one needs to create a shell script establishing the communication and
+name it in a recognizable way.
+
+For example, consider the case where we edit a local document but all sections
+that we want to execute should be run on a remote machine named `testbed`.
+
+We prepare an executable script named `ipython-testbed.sh` and put it into a
+directory listed in the PATH environment variable. The contents of the script is
+the following:
+
+```sh
+#!/bin/sh
+exec ssh testbed -p 22 -- bash --login -c ipython "$@"
+```
+
+Now, we can process our document as usual, but add `ipython-testbed.sh` as a new
+IPython interpreter:
+
+```sh
+# Executes code sections on a remote machine.
+cat README.md | litrepl --python-interpreter=ipython-testbed.sh
+```
+
+Note that the string `ipython` must appear in the interpreter name, to let
+Litrepl exercise IPyhton-specific communication settings.
+
+
 #### GNU Make, Evaluating Code Sections in Project Documentation
 
 A typical Makefile recipe for updating documentation is structured as follows:
