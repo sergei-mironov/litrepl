@@ -33,9 +33,6 @@ plugin.
 
 # Statement of need
 
-![\label{figure} Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](./pic.png)
-
-
 Literate Programming, formulated by Donald Knuth, shifts the focus from merely
 coding to explaining computational tasks to humans. This approach is seen in the
 WEB system [@Knuth1984lp] and its successor tools, which use a document format
@@ -167,14 +164,14 @@ I use LINUX btw!
 <!--noresult-->
 
 The side effect of this execution is the starting of a session with the Python
-interpreter, which now runs in the background. The resources that builds up this
-functionality are illustrated on the Figure \ref{figure}. The session is
-represented by a couple of pipes, the interpreter process identifier, and by a
-sink file for asyncronous response. Litrepl connects to a session by sending the
-contents of a code section to the input pipe and forking out a reader process
-receiving the interpreter response from the output pipe. POSIX file lock
-mechanism helps Litrepl to manage the concurrent access to the pipes.
-
+interpreter, which now runs in the background. Evaluation results are written
+back into the result sections, and the entire document is printed. At this
+stage, certain conditions can be optionally checked. First, adding
+`--pending-exitcode=INT` instructs Litrepl to report an error if a section takes
+longer than the timeout to evaluate. Second, setting `--exception-exitcode=INT`
+directs Litrepl to detect Python exceptions. Lastly,
+`--irreproducible-exitcode=INT` triggers an error if the evaluation result
+doesn't match the text initially present in the result section.
 
 ## Interfacing Interpreters
 
@@ -200,14 +197,19 @@ transfer organization.
 
 ## Session Management
 
-Litrepl maintains interpreter sessions in the background to support a REPL
-environment. Resources are stored in an auxiliary directory specified by
-command-line arguments, environment variables, or automatically derived paths.
-This directory contains pipe files for I/O and a file with the interpreter's
-process ID for session management. When evaluating code, Litrepl creates a
-response file named by hashing the code to store interpreter output. A response
-reader process with a soft lock runs until the interpreter finishes and responds
-to a probe, introducing the system's only hidden state.
+Litrepl maintains interpreter sessions in the background to support REPL
+experience. The components that builds up this functionality are illustrated on
+the Figure \ref{figure}.
+
+![\label{figure} Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](./pic.png)
+
+Resources are stored in an auxiliary directory specified by command-line
+arguments, environment variables, or the current directory.  The session is
+represented by a couple of pipes, the interpreter process identifier, and by a
+sink file for asyncronous response. Litrepl connects to a session by sending the
+contents of a code section to the input pipe and forking out a reader process
+receiving the interpreter response from the output pipe. POSIX file lock
+mechanism helps Litrepl to manage a possibly concurrent access to the pipes.
 
 # Conclusion
 
