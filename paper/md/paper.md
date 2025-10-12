@@ -70,10 +70,11 @@ Shell, and a custom large language model communication interpreter while
 leveraging POSIX [@POSIX2024] system features.
 
 The difference between Litrepl and other solutions, including Jupyter, is
-highlighted in the table below.
+highlighted in table \ref{table}.
 
 \begin{footnotesize}
 \begin{table}[!th]
+    \caption{Litrepl compared to outher literate programming tools \label{table}.}
     \begin{tabular}{p{1.6cm}p{1.8cm}p{1.8cm}p{1.8cm}p{1.8cm}p{1.8cm}}
         \hline
         \hline
@@ -83,7 +84,7 @@ highlighted in the table below.
         \hline
         Quarto & Markdown$^{q1}$ & Rich & Few & Modified Jupyter$^{q2}$ & Web, Editor \\
         \hline
-        Codebraid & Markdown$^{c1}$ & Rich & Many$^{c2}$ & Same as Jupyter$^{c3}$ & Editor \\
+        Codebraid & Markdown$^{c1}$ & Rich & Many$^{c2}$ & Similar to Jupyter$^{c3}$ & Editor \\
         \hline
         R markdown & Markdown$^{r1}$ & Rich & Few$^{r2}$ & Linked libraries$^{r3}$ & Editor \\
         \hline
