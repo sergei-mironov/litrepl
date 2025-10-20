@@ -52,25 +52,35 @@ A pivotal development in this field was the IPython interpreter
 [@Perez2007IPython], which led to the Jupyter Project and its Jupyter Notebook
 format [@Kluyver2016jupnb]. This format consists of logical sections like text
 and code that can interact with language interpreters, enabling REPL-like
-programming for well-structured, shareable documents. This is part of *Literate
-Computing* [@Perez2015blog], which aims to reach broad audiences, enhance
-reproducibility, and promote collaboration. Key technical aspects include
-bidirectional communication between the Jupyter Kernel and Notebook renderer,
-alongside client-server interactions between the web server and user browser.
+programming for well-structured, shareable documents. This concept became a part
+of *Literate Computing* [@Perez2015blog], which aims to reach broad audiences,
+enhance reproducibility, and promote collaboration. Key technical aspects
+include bidirectional communication between the Jupyter Kernel and Notebook
+renderer, alongside client-server interactions between the web server and user
+browser.
 
-We believe that reproducibility is crucial in the Literate Computing framework,
-enhancing communication among dispersed researchers. However, as illustrated by
-[@Dolstra2010], we argue that this challenge exceeds the capacity of a single
-system, needing operating system-level solutions. Following [@Vallet2022], we
-introduce *Litrepl*, which enables REPL-style editing by integrating with existing
-editors and formats, and reduces hidden state variables in a compact codebase.
-Litrepl uses bidirectional text streams for inter-process communication and
-supports Markdown and LaTeX formats with simplified parsers. It supports Python,
-Shell, and a custom large language model communication interpreter while
-leveraging POSIX [@POSIX2024] system features.
+We believe that reproducibility is indeed crucial in the Literate Computing
+framework, enhancing communication among dispersed researchers. However, as
+illustrated by [@Dolstra2010], we argue that this challenge exceeds the capacity
+of a single tool or library, needing a system-scale solutions. Such a solution
+would define a reproducible environment in a formal language and would include a
+closure of dependencies of every installed software component. The
+responsibility of tools writers remains minimizing the added dependcies and
+keeping the communication transparent to user [@Vallet2022].
 
-The difference between Litrepl and other solutions, including Jupyter, is
-highlighted in table \ref{table}.
+In Table \ref{table} we list popular literate programming tools together with a
+new **Litrepl** tool, developed by the author. We note that most existing tools
+depend on Juptyer kerenls technology adding Web client-server and the
+Xeus/ZeroMQ message passing library to the environment. Moreover, both Web and
+ZeroMQ protocols define non-trivial states aiming to support multi-user modes
+and various computer network conditions.
+
+Litrepl, in contrast, focuses on a simple single-user communication held via
+simple bi-directional text streams built into any modern operating systems. We
+reduce the internal communication state down to a few entities all visible via
+the file system by leveraging POSIX [@POSIX2024] system features. We hope that
+this design will better align with formally-reproducible frameworks by modestly
+reducing the number of supported use cases.
 
 \begin{footnotesize}
 \begin{table}[!th]
