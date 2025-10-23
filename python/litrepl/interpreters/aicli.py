@@ -54,7 +54,7 @@ class AicliInterpreter(Interpreter):
           es.sr.preproc.results.get(absref,f'<invalid reference to section {absref}>').strip()
         )
       )
-    return code + f"{self.endcmd}\n"
+    return code + f"{self.endcmd if a.command!='eval-code' else ''}\n"
   def run_repl(self, a:LitreplArgs):
     rr,_=eval_code_raw(self,f"/set terminal prompt \">>> \"\n\n",
                   float('inf'),float('inf'),True)
