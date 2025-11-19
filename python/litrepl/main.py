@@ -1,7 +1,8 @@
 import litrepl
+import sys
 from litrepl import *
 from litrepl import __version__, eval_section_
-from os import chdir, getcwd, environ
+from os import chdir, getcwd, environ, isatty
 from subprocess import check_output, DEVNULL, CalledProcessError
 from argparse import ArgumentParser, HelpFormatter
 from tempfile import mkdtemp
@@ -150,7 +151,7 @@ def make_parser():
   sstatus=_with_type(sps.add_parser('status',
     help='Print background interpreter\'s status.'),allow_all=True,default='all')
   sstatus.add_argument('--tty',action='store_true',
-    help='Read intput document from stdin (required to get per-section status).')
+    help='Block terminal by reading input (required to get per-section status).')
   sps.add_parser('parse',
     help='Parse the input file without futher processing (diagnostics).')
   sps.add_parser('parse-print',
@@ -174,12 +175,12 @@ def make_parser():
     help=dedent('''
     Regexp format to print: 'vim' or 'lark'. Defaults to 'vim'.'''))
   regexp.add_argument('--tty',action='store_true',
-    help='Read intput document from stdin (required to get per-section status).')
+    help='Block terminal by reading input (required to get per-section status).')
   grammar=sps.add_parser('print-grammar',
     help=dedent('''
     Print the resulting grammar for the given filetype.'''))
   grammar.add_argument('--tty',action='store_true',
-    help='Read intput document from stdin (required to get per-section status).')
+    help='Block terminal by reading input (required to get per-section status).')
   _with_type(sps.add_parser('print-auxdir',
     help=dedent('''
     Print the auxdir for the given interpreter type.''')))
@@ -191,7 +192,11 @@ def main(args=None):
   args=args or sys.argv[1:]
   a=AP.parse_args(args)
   if a.command is None:
-    a=AP.parse_args(args+['eval-sections'])
+    if isatty(sys.stdin.fileno()):
+      pstderr("Usage: litrepl [ARGS..] COMMAND [ARGS..]. See --help for details.")
+      exit(1)
+    else:
+      a=AP.parse_args(args+['eval-sections'])
 
   if a.debug>0:
     litrepl.eval.DEBUG=True

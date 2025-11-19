@@ -418,7 +418,9 @@ def grammar_(a:LitreplArgs, filetype:str)->Tuple[LarkGrammar,Symbols]:
   else:
     raise ValueError(f"Unsupported filetype \"{filetype}\"")
 
-def readinput(tty_ok=True)->str:
+def readinput(tty_ok:bool)->str:
+  """ Do a blocking input read if it looks like coming from a file or if the tty
+  permission is given."""
   return sys.stdin.read() if (not isatty(sys.stdin.fileno()) or tty_ok) else ""
 
 def parse_as(a,inp,filetype)->Union[ParseResult,LarkError]:
