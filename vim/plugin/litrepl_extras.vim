@@ -33,7 +33,7 @@ fun! LitReplExCmdline(action, prompt, selmode, file, extras)
     let command = command . ' ' . file
   endif
   let errfile = LitReplGet('litrepl_errfile')
-  let command = command . ' ' . extras . ' 2>>'.errfile
+  let command = command . ' ' . extras . ' 2>'.errfile
   return command
 endfun
 
