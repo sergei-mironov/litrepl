@@ -16,6 +16,7 @@ export ONDIRRC=`pwd`/.ondirrc
 
 unset vim
 unset VIMRUNTIME
+export VIM_PLUGINS_AFTER=$PROJECT_ROOT/vimrc
 
 python3 -c 'import lark' || echo "Warning: 'lark' python library not found" >&2
 python3 -c 'import dataclasses' || echo "Warning: 'dataclasses' python library not found" >&2

@@ -81,7 +81,8 @@ if exists(':LPipeFile')
   delcommand LPipeFile
 endif
 
-let &runtimepath = '$LITREPL_ROOT/vim,'.&runtimepath
+let &runtimepath = '$LITREPL_ROOT/vimrc,$LITREPL_ROOT/vim,'.&runtimepath
+runtime plugin/local.vim
 runtime plugin/litrepl.vim
 runtime plugin/litrepl_extras.vim
 " "$@"
