@@ -3,15 +3,38 @@ if exists("g:litrepl_extras_loaded")
 endif
 
 if ! exists("g:litrepl_extras_script_template")
-  let g:litrepl_extras_script_template = 'litrepl-*.sh'
+  let g:litrepl_extras_script_template = 'litrepl-*'
 endif
+
+fun! LitReplActionGlob(action)
+  let l:template = LitReplGet('litrepl_extras_script_template')
+  let l:pattern = substitute(l:template, '*', a:action, '')
+  let l:matches = globpath(substitute($PATH,':',',','g'), l:pattern . '*', 1, 1, 1)
+  if len(l:matches) == 0
+    throw "No matches found for: " . l:pattern
+  elseif len(l:matches) > 1
+    let msg = "Matches found"
+    let sep = ""
+    for match in l:matches
+      if len(sep) == 0
+        let sep = "; "
+      else
+        let sep = ", "
+      endif
+      let msg = msg . sep . match
+      throw msg
+    endfor
+    throw "Multiple matches found for: " . l:pattern
+  endif
+  return l:matches[0]
+endfun
 
 fun! LitReplExCmdline(action, prompt, selmode, file, extras)
   let [action, prompt, selmode, file, extras] = [a:action, a:prompt,
         \ a:selmode, a:file, a:extras]
 
   let command = "cd \"".expand(LitReplGet('litrepl_workdir'))."\"; "
-  let command = command . substitute(LitReplGet('litrepl_extras_script_template'), '*', action, '')
+  let command = command . LitReplActionGlob(action)
   if prompt != '-'
     if len(trim(prompt)) == 0
       let prompt = input("Script input: ")
