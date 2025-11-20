@@ -1359,7 +1359,7 @@ test_vim_extras() {( #{{{
 mktest "_test_vim_extras"
 
 export PATH="$LITREPL_ROOT/sh:$PATH"
-which litrepl-dummy.sh >/dev/null
+which -a litrepl-dummy.sh >/dev/null
 
 cat >file.md <<"EOF"
 header
