@@ -13,18 +13,15 @@ fun! LitReplActionGlob(action)
   if len(l:matches) == 0
     throw "No matches found for: " . l:pattern
   elseif len(l:matches) > 1
-    let msg = "Matches found"
+    let msg = ""
     let sep = ""
     for match in l:matches
+      let msg = msg . sep . match
       if len(sep) == 0
-        let sep = "; "
-      else
         let sep = ", "
       endif
-      let msg = msg . sep . match
-      throw msg
     endfor
-    throw "Multiple matches found for: " . l:pattern
+    throw "Multiple matches found for: " . l:pattern . "(" . msg . ")"
   endif
   return l:matches[0]
 endfun
