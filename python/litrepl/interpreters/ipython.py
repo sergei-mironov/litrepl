@@ -9,6 +9,7 @@ DEBUG:bool=False
 
 PATTERN_PYTHON_1=('3256748426384\n',)*2
 PATTERN_PYTHON_2=('325674801010\n',)*2
+CPASTE_PATTERN='12341234213423'
 
 class IPythonInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
@@ -62,7 +63,6 @@ class IPythonInterpreter(Interpreter):
   def code_preprocess(self, a:LitreplArgs, es:EvalState, code:str) -> str:
     # IPython seems to not echo the terminating cpaste pattern into the output
     # which is good.
-    paste_pattern='12341234213423'
-    return (f'\n%cpaste -q -s {paste_pattern}\n{code}\n{paste_pattern}\n')
+    return f'\n%cpaste -q -s {CPASTE_PATTERN}\n{code}\n{CPASTE_PATTERN}\n'
   def run_repl(self, a:LitreplArgs):
     runsocat(self.fns)

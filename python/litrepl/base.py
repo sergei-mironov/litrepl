@@ -140,9 +140,9 @@ def attach(fns:FileNames, st:Optional[SType]=None)->Union[Interpreter,ErrorMsg]:
     cls=None
     if (st is None or st==SType.SAI) and any('aicli' in w for w in cmd):
       cls=AicliInterpreter
-    elif (st is None or st==SType.SPython) and any('ipython' in w for w in cmd):
+    elif (st is None or st==SType.SPython) and any('ipython' in w.lower() for w in cmd):
       cls=IPythonInterpreter
-    elif (st is None or st==SType.SPython) and any('python' in w for w in cmd):
+    elif (st is None or st==SType.SPython) and any('python' in w.lower() for w in cmd):
       cls=PythonInterpreter
     elif (st is None or st==SType.SShell) and any('sh' in w for w in cmd):
       cls=ShellInterpreter

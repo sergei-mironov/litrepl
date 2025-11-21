@@ -1468,6 +1468,22 @@ runlitrepl --debug=1 2>&1 | grep -q 'eval_code'
 
 )} #}}}
 
+test_eval_ipython_bash_magic() {( #{{{
+mktest "_test_eval_ipython_bash_magic"
+runlitrepl start python
+cat >source.md <<"EOF"
+```python
+%%bash
+echo BASHMAGIC
+```
+```result
+```
+EOF
+cat source.md | runlitrepl eval-sections >out.md
+grep -q 'BASHMAGIC' out.md
+)}
+#}}}
+
 
 die() {
   echo "$@" >&2
@@ -1517,14 +1533,17 @@ tests() {
       echo test_status $python - -
       echo test_interrupt $python - -
       echo test_invalid_interpreter $python - -
-      echo test_vim_eval_code $python - -  # was called only for `python`
+      echo test_vim_eval_code $python - -
       echo test_vim_eval_selection $python - -
       echo test_interp_disabled $python - $sh
-      echo test_irreproducible $python - -  # was only called for `ipython`
+      echo test_irreproducible $python - -
       echo test_invalid_markers $python $aicli $sh
       echo test_print_auxdir $python $aicli $sh
       if test "$aicli" != "-" ; then
         echo test_aicli - $aicli -
+      fi
+      if echo "$python" | grep -q -i "ipython" ; then
+        echo test_eval_ipython_bash_magic $python - -
       fi
     done
   done
