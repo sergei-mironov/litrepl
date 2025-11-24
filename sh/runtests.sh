@@ -1376,7 +1376,7 @@ runvim file.md >_vim.log 2>&1 <<EOF
 EOF
 diff -u output.md - <<"EOF"
 header
-litrepl-dummy.sh --prompt input --selection-paste - --output-format markdown --reindent
+litrepl-dummy.sh --prompt input --selection-paste - --output-format markdown eval-code
 selection
 END
 footer
@@ -1392,7 +1392,7 @@ runvim file.md >_vim.log 2>&1 <<EOF
 EOF
 diff -u output2.md - <<"EOF"
 header
-litrepl-dummy.sh --selection-paste - --output-format markdown --reindent
+litrepl-dummy.sh --selection-paste - --output-format markdown eval-code
 selection
 END
 footer
@@ -1425,7 +1425,7 @@ selection
 footer
 EOF
 diff -u _last_dummy_output.txt - <<EOF
-litrepl-dummy.sh --prompt input --selection-paste - --output-format markdown
+litrepl-dummy.sh --prompt input --selection-paste - --output-format markdown eval-code
 selection
 END
 EOF
@@ -1440,7 +1440,7 @@ EOF
 diff -u output5.md - <<"EOF"
 header
 selection
-litrepl-dummy.sh --prompt input --output-format markdown
+litrepl-dummy.sh --prompt input --output-format markdown eval-code
 END
 footer
 EOF
@@ -1452,7 +1452,7 @@ runvim file.md >_vim.log 2>&1 <<"EOF"
 :q!
 EOF
 diff -u output6.md - <<EOF
-litrepl-dummy.sh --prompt input --output-format markdown `pwd`/file.md
+litrepl-dummy.sh --prompt input --output-format markdown eval-code `pwd`/file.md
 header
 selection
 footer

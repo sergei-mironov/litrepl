@@ -49,6 +49,7 @@ fun! LitReplExCmdline(action, prompt, selmode, file, extras)
   if &filetype != ''
     let command = command . ' --output-format '.&filetype
   endif
+  let command = command . ' eval-code '
   if len(file)>0
     let command = command . ' ' . file
   endif
@@ -109,7 +110,7 @@ endfun
 
 fun! LitReplExReplaceSelectionOrPull(action, prompt, selmode) range " -> int
   if len(a:selmode)>0
-    return LitReplExReplace(a:action, a:prompt, "'<,'>", a:selmode, "", "--reindent")
+    return LitReplExReplace(a:action, a:prompt, "'<,'>", a:selmode, "", "")
   else
     return LitReplExPull(a:action, a:prompt)
   endif
