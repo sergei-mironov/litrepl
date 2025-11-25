@@ -49,6 +49,10 @@ fun! LitReplExCmdline(action, prompt, selmode, file, extras)
   if &filetype != ''
     let command = command . ' --output-format '.&filetype
   endif
+  let debug = LitReplGet('litrepl_debug')
+  if debug>0
+    let command = command . ' --debug '
+  endif
   let command = command . ' eval-code '
   if len(file)>0
     let command = command . ' ' . file
