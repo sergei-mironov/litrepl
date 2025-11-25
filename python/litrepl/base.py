@@ -159,8 +159,8 @@ def open_parent_pipes(inp,outp):
   return open(inp,'w'),open(outp,'r')
 
 
-def write_child_pid(pidf,pid):
-  """ Writes first children of a fork-child process as the main interpreter
+def write_child_pid(pidf:str, pid:int)->bool:
+  """ Write first children of a fork-child process as the main interpreter
   pid. This works as long as `Interpreter.run_child` calls real interpreter
   using system() call."""
   with open(pidf,'w') as f:
@@ -192,7 +192,9 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
   sys.stdout.flush(); sys.stderr.flush() # FIXME: to avoid duplicated stdout
   npid=os.fork()
   if npid==0:
-    # sys.stdout.close(); sys.stderr.close(); sys.stdin.close()
+    os.close(sys.stdout.fileno())
+    os.close(sys.stderr.fileno())
+    os.close(sys.stdin.fileno())
     setpgid(getpid(),0)
     remove_silent(fns.ecodef)
     open_child_pipes(fns.inp,fns.outp)

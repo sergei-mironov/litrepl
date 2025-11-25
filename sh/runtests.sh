@@ -1484,6 +1484,14 @@ grep -q 'BASHMAGIC' out.md
 )}
 #}}}
 
+test_close_out_fd() {( #{{{
+# Stop any existing sh interpreters and make sure std streams do not leak.
+mktest "_test_close_out_fd"
+runlitrepl stop sh
+echo 'echo XXX' | runlitrepl eval-code sh | cat >out.md # SIC!
+grep -q 'XXX' out.md
+)}
+#}}}
 
 die() {
   echo "$@" >&2
@@ -1551,6 +1559,7 @@ tests() {
   echo test_doublestart - - $(which bash)
   echo test_vim_extras - - -
   echo test_debug - - -
+  echo test_close_out_fd - - $(which bash)
 }
 
 runlitrepl() {
