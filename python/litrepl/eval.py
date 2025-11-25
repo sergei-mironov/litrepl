@@ -185,10 +185,10 @@ def readout(fdr,
 
 def readout_asis(fdr:int, fdw:int, fo:int, pattern:str, prompt,
                  timeout:Optional[int]=None)->None:
-  """ Read everything from FD `fdr` and send to `fo` until `prompt` is found. If
-  the `propmt` is not found within the `timeout` seconds, re-send the `pattern`
-  and continue the interaction. This function is intended to be run from a
-  separate process, governing the interaction with intepreters.
+  """ Read everything from FD `fdr` and send to `fo` until `prompt` regexp is
+  matched. If the `propmt` is not found within the `timeout` seconds, re-send
+  the `pattern` and continue the interaction. This function is intended to be
+  run from a separate process, governing the interaction with intepreters.
   """
   acc:bytes=b''
   os.write(fdw,pattern.encode())
@@ -366,19 +366,22 @@ def process_async(fns:FileNames, ss:Interpreter, code:str)->RunResult:
                             fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdw:
           with with_locked_fd(outp, os.O_RDONLY|os.O_SYNC,
                               fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdr:
-            if fdw and fdr:
-              pdebug("process_async reader interact start")
-              try:
-                interact(fdr,fdw,code,fo,ss)
-                pdebug("process_async reader interact finish")
-              except BrokenPipeError:
-                pdebug("process_async catches Broken Pipe error")
-                os.write(fo,"<BrokenPipe>\n".encode())
-                raise
-            else:
-              # FIXME: We must transfer error back to the reader to be able to
-              # exit with an errorcode.
-              os.write(fo,"<Unable to access the interpreter>\n".encode())
+            try:
+              if fdw and fdr:
+                pdebug("process_async reader interact start")
+                try:
+                  interact(fdr,fdw,code,fo,ss)
+                  pdebug("process_async reader interact finish")
+                except BrokenPipeError:
+                  pdebug("process_async catches Broken Pipe error")
+                  os.write(fo,"<BrokenPipe>\n".encode())
+                  raise
+              else:
+                # FIXME: We must transfer error back to the reader to be able to
+                # exit with an errorcode.
+                os.write(fo,"<Unable to access the interpreter>\n".encode())
+            finally:
+              os.fsync(fo)
         pdebug("Exiting!")
         exit(0)
       else:
