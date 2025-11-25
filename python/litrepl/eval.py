@@ -397,7 +397,8 @@ def process_cont(fns:FileNames,
                  ss:Interpreter,
                  runr:RunResult,
                  timeout:float,
-                 propagate_sigint:bool)->ReadResult:
+                 propagate_sigint:bool,
+                 keep_readout_file:bool=False)->ReadResult:
   """ Read from the running readout process. """
   rr:Optional[ReadResult]=None
   p1,p2=ss.patterns()
@@ -413,8 +414,11 @@ def process_cont(fns:FileNames,
         res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
         pdebug(f"process_cont final readout finish")
         rr=ReadResult(res,False) # Return final result
-        remove_silent(runr.fname)
-        pdebug(f"process_cont unlinked {runr.fname}")
+        if keep_readout_file:
+          pdebug(f"process_cont keep {runr.fname}")
+        else:
+          remove_silent(runr.fname)
+          pdebug(f"process_cont unlinked {runr.fname}")
       else:
         with with_fd(runr.fname,os.O_RDONLY|os.O_SYNC) as fdr:
           assert_(fdr is not None)
@@ -429,7 +433,8 @@ def process_adapt(fns:FileNames,
                   ss:Interpreter,
                   code:str,
                   timeout:float=1.0,
-                  propagate_sigint:bool=True)->Tuple[ReadResult,RunResult]:
+                  propagate_sigint:bool=True,
+                  keep_readout_file:bool=False)->Tuple[ReadResult,RunResult]:
   """ Push `code` to the interpreter and wait for `timeout` seconds for
   the immediate answer. In case of delay, return intermediate answer and
   the continuation context."""
@@ -438,7 +443,8 @@ def process_adapt(fns:FileNames,
   #   return ReadResult(lines2,False),runr
   # else:
   runr=process_async(fns,ss,code)
-  rr=process_cont(fns,ss,runr,timeout=timeout,propagate_sigint=propagate_sigint)
+  rr=process_cont(fns,ss,runr,timeout=timeout,propagate_sigint=propagate_sigint,
+                  keep_readout_file=keep_readout_file)
   return rr,runr
 
 # LitRepl pending evaluation tag regexp
@@ -487,7 +493,8 @@ def eval_code_(a:LitreplArgs,
   """
   rr:ReadResult
   rr,runr=eval_code_raw(ss,interp_code_preprocess(a,ss,es,code),
-                        a.timeout_initial,a.timeout_continue,a.propagate_sigint,runr)
+                        a.timeout_initial,a.timeout_continue,a.propagate_sigint,runr,
+                        keep_readout_file=a.keep_readout)
   pptext=interp_result_postprocess(a,ss,rr.text)
   res=rresult_save(pptext,runr) if rr.timeout else pptext
   return res,rr
@@ -496,14 +503,15 @@ def eval_code_raw(ss:Interpreter,
                   code:str,
                   timeout_initial,
                   timeout_continue,
-                  propagate_sigint,
-                  runr:Optional[RunResult]=None) -> Tuple[ReadResult,RunResult]:
+                  propagate_sigint:bool,
+                  runr:Optional[RunResult]=None,
+                  keep_readout_file:bool=False) -> Tuple[ReadResult,RunResult]:
   """ Start or complete the code section evaluation without pre- and
   post-processing. See also `eval_code_`. """
   fns=ss.fns
   if runr is None:
-    rr,runr=process_adapt(fns,ss,code,timeout_initial,propagate_sigint)
+    rr,runr=process_adapt(fns,ss,code,timeout_initial,propagate_sigint,keep_readout_file)
   else:
-    rr=process_cont(fns,ss,runr,timeout_continue,propagate_sigint)
+    rr=process_cont(fns,ss,runr,timeout_continue,propagate_sigint,keep_readout_file)
   return rr,runr
 

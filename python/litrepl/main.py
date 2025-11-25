@@ -106,6 +106,8 @@ def make_parser():
     interpreter as-is.'''))
   ap.add_argument('-d','--debug',type=int,metavar='INT',default=0,
     help="Enable (a lot of) debug messages.")
+  ap.add_argument('-K','--keep-readout',action='store_true',
+    help='Do not delete temporary readout file (debugging).')
   ap.add_argument('--verbose',action='store_true',
     help='Be more verbose (used in status).')
   ap.add_argument('-C','--workdir',type=str,metavar='DIR',
