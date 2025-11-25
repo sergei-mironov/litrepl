@@ -60,11 +60,12 @@ endfun
 
 fun! LitReplExReplace(action, prompt, source, selmode, file, extras) range " -> int
   let [action, prompt, source] = [a:action, a:prompt, a:source]
+  let errfile = LitReplGet('litrepl_errfile')
   let command = LitReplExCmdline(action, prompt, a:selmode, a:file, a:extras)
   let vimcommand = "silent! ".source."! ".command
+  call LitReplLogInput(errfile, vimcommand, "<".source.">")
+  call writefile(['<end-of-stderr>'],errfile,'a')
   call LitReplExecute(vimcommand)
-  " echomsg vimcommand
-  " execute vimcommand
   let errcode = v:shell_error
   call LitReplVisualize(errcode, "Failed with code (" . string(errcode) . ")")
   return errcode
@@ -80,9 +81,12 @@ endfun
 
 fun! LitReplExPushSelection(action, prompt, selmode) range
   let [action, prompt] = [a:action, a:prompt]
+  let errfile = LitReplGet('litrepl_errfile')
   let command = LitReplExCmdline(action, prompt, a:selmode, "", "")
   let selection = LitReplGetVisualSelection() . "\n"
+  call LitReplLogInput(errfile, command, selection)
   let result = LitReplSystem(command, selection)
+  call writefile(['<end-of-stderr>'],errfile,'a')
   echo result
   let errcode = v:shell_error
   call LitReplVisualize(errcode, "Failed with code (" . string(errcode) . ")")
@@ -91,8 +95,11 @@ endfun
 
 fun! LitReplExPush(action, prompt, selmode) range
   let [action, prompt] = [a:action, a:prompt]
+  let errfile = LitReplGet('litrepl_errfile')
   let command = LitReplExCmdline(action, prompt, a:selmode, "", "")
+  call LitReplLogInput(errfile, command, "<empty>")
   let result = LitReplSystem(command,'')
+  call writefile(['<end-of-stderr>'],errfile,'a')
   echo result
   let errcode = v:shell_error
   call LitReplVisualize(errcode, "Failed with code (" . string(errcode) . ")")
@@ -101,8 +108,12 @@ endfun
 
 fun! LitReplExPull(action, prompt) range
   let [action, prompt] = [a:action, a:prompt]
+  let errfile = LitReplGet('litrepl_errfile')
   let command = LitReplExCmdline(action, prompt, "", "", "")
-  call LitReplExecute('r!'.command .'</dev/null')
+  let vimcommand = 'r!'.command .'</dev/null'
+  call LitReplLogInput(errfile, vimcommand, "</dev/null>")
+  call LitReplExecute(vimcommand)
+  call writefile(['<end-of-stderr>'],errfile,'a')
   let errcode = v:shell_error
   call LitReplVisualize(errcode, "Failed with code (" . string(errcode) . ")")
   return errcode
