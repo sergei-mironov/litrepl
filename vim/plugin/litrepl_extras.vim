@@ -26,9 +26,9 @@ fun! LitReplActionGlob(action)
   return l:matches[0]
 endfun
 
-fun! LitReplExCmdline(action, prompt, selmode, file, extras)
-  let [action, prompt, selmode, file, extras] = [a:action, a:prompt,
-        \ a:selmode, a:file, a:extras]
+fun! LitReplExCmdline(action, prompt, selmode, file, extras, errfile)
+  let [action, prompt, selmode, file, extras, errfile] = [a:action, a:prompt,
+        \ a:selmode, a:file, a:extras, a:errfile]
 
   let command = "cd \"".expand(LitReplGet('litrepl_workdir'))."\"; "
   let command = command . LitReplActionGlob(action)
@@ -57,15 +57,14 @@ fun! LitReplExCmdline(action, prompt, selmode, file, extras)
   if len(file)>0
     let command = command . ' ' . file
   endif
-  let errfile = LitReplGet('litrepl_errfile')
-  let command = command . ' ' . extras . ' 2>'.errfile
+  let command = command . ' ' . extras . ' 2>>'.errfile
   return command
 endfun
 
 fun! LitReplExReplace(action, prompt, source, selmode, file, extras) range " -> int
   let [action, prompt, source] = [a:action, a:prompt, a:source]
   let errfile = LitReplGet('litrepl_errfile')
-  let command = LitReplExCmdline(action, prompt, a:selmode, a:file, a:extras)
+  let command = LitReplExCmdline(action, prompt, a:selmode, a:file, a:extras, errfile)
   let vimcommand = "silent! ".source."! ".command
   call LitReplLogInput(errfile, vimcommand, "<".source.">")
   call writefile(['<end-of-stderr>'],errfile,'a')
@@ -86,7 +85,7 @@ endfun
 fun! LitReplExPushSelection(action, prompt, selmode) range
   let [action, prompt] = [a:action, a:prompt]
   let errfile = LitReplGet('litrepl_errfile')
-  let command = LitReplExCmdline(action, prompt, a:selmode, "", "")
+  let command = LitReplExCmdline(action, prompt, a:selmode, "", "", errfile)
   let selection = LitReplGetVisualSelection() . "\n"
   call LitReplLogInput(errfile, command, selection)
   let result = LitReplSystem(command, selection)
@@ -100,7 +99,7 @@ endfun
 fun! LitReplExPush(action, prompt, selmode) range
   let [action, prompt] = [a:action, a:prompt]
   let errfile = LitReplGet('litrepl_errfile')
-  let command = LitReplExCmdline(action, prompt, a:selmode, "", "")
+  let command = LitReplExCmdline(action, prompt, a:selmode, "", "", errfile)
   call LitReplLogInput(errfile, command, "<empty>")
   let result = LitReplSystem(command,'')
   call writefile(['<end-of-stderr>'],errfile,'a')
@@ -113,7 +112,7 @@ endfun
 fun! LitReplExPull(action, prompt) range
   let [action, prompt] = [a:action, a:prompt]
   let errfile = LitReplGet('litrepl_errfile')
-  let command = LitReplExCmdline(action, prompt, "", "", "")
+  let command = LitReplExCmdline(action, prompt, "", "", "", errfile)
   let vimcommand = 'r!'.command .'</dev/null'
   call LitReplLogInput(errfile, vimcommand, "</dev/null>")
   call LitReplExecute(vimcommand)
