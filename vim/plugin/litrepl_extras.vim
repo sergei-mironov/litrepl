@@ -27,6 +27,7 @@ fun! LitReplActionGlob(action)
 endfun
 
 fun! LitReplExCmdline(action, prompt, selmode, file, extras, errfile)
+  call LitReplCheckVersions()
   let [action, prompt, selmode, file, extras, errfile] = [a:action, a:prompt,
         \ a:selmode, a:file, a:extras, a:errfile]
 

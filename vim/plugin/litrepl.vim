@@ -139,7 +139,7 @@ if ! exists("g:litrepl_check_versions")
   let g:litrepl_check_versions = 1
 endif
 
-fun! LitReplCmd()
+fun! LitReplCheckVersions()
   if LitReplGet('litrepl_check_versions') == 1
     let g:litrepl_tool_version = substitute(LitReplSystem(LitReplExe().' --version', ''),"\n","",'g')
     if v:shell_error != 0
@@ -157,6 +157,10 @@ fun! LitReplCmd()
       let g:litrepl_check_versions = 0
     endif
   endif
+endfun
+
+fun! LitReplCmd()
+  call LitReplCheckVersions()
   let cmd = LitReplExe()
   if LitReplGet('litrepl_workdir') != ''
     " let cmd  = cmd . ' --workdir="'.expand(LitReplGet('litrepl_workdir')).'"'
