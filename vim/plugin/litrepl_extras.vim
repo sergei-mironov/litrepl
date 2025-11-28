@@ -35,16 +35,36 @@ fun! LitReplExCmdline(action, prompt, selmode, file, extras, errfile)
   if LitReplGet('litrepl_workdir') != ''
     let command = "cd \"".expand(LitReplGet('litrepl_workdir'))."\"; " . command
   endif
+  if len(selmode)>0 " 'raw' or 'paste'
+    let command = command . ' --selection-'.selmode.' - '
+  endif
   if prompt != '-'
     if len(trim(prompt)) == 0
       let prompt = input("Script input: ")
     endif
     if len(trim(prompt))>0
       let command = command . ' --prompt "'.prompt.'"'
+
+      " scan for @X patterns and add --location X FILE for each (a)
+      let l:locations = []
+      let l:idx = 0
+      while l:idx >= 0
+        let l:idx = match(prompt, '@\a', l:idx)
+        if l:idx < 0
+          break
+        endif
+        let l:reg = prompt[l:idx+1]
+        if index(l:locations, l:reg) < 0
+          call add(l:locations, l:reg)
+        endif
+        let l:idx = l:idx + 2
+      endwhile
+      for l:reg in l:locations
+        let l:locfile = LitReplGetTempDir() . '/litrepl-' . reg . '.tmp'
+        call writefile(split(getreg(l:reg), "\n"), l:locfile)
+        let command = command . ' --location '.reg.' '.locfile
+      endfor
     endif
-  endif
-  if len(selmode)>0 " 'raw' or 'paste'
-    let command = command . ' --selection-'.selmode.' - '
   endif
   if &textwidth > 0
     let command = command . ' --textwidth '.string(&textwidth)

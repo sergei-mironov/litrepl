@@ -1376,7 +1376,7 @@ runvim file.md >_vim.log 2>&1 <<EOF
 EOF
 diff -u output.md - <<"EOF"
 header
-litrepl-dummy.sh --prompt input --selection-paste - --output-format markdown eval-code
+litrepl-dummy.sh --selection-paste - --prompt input --output-format markdown eval-code
 selection
 END
 footer
@@ -1425,7 +1425,7 @@ selection
 footer
 EOF
 diff -u _last_dummy_output.txt - <<EOF
-litrepl-dummy.sh --prompt input --selection-paste - --output-format markdown eval-code
+litrepl-dummy.sh --selection-paste - --prompt input --output-format markdown eval-code
 selection
 END
 EOF
