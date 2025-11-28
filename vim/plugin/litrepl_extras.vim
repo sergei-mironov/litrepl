@@ -62,7 +62,7 @@ fun! LitReplExCmdline(action, prompt, selmode, file, extras, errfile)
       for l:reg in l:locations
         let l:locfile = LitReplGetTempDir() . '/litrepl-' . reg . '.tmp'
         call writefile(split(getreg(l:reg), "\n"), l:locfile)
-        let command = command . ' --location '.reg.' '.locfile
+        let command = command . ' --location "@'.toupper(reg).'" '.locfile
       endfor
     endif
   endif
