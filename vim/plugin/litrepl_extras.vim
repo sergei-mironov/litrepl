@@ -31,8 +31,10 @@ fun! LitReplExCmdline(action, prompt, selmode, file, extras, errfile)
   let [action, prompt, selmode, file, extras, errfile] = [a:action, a:prompt,
         \ a:selmode, a:file, a:extras, a:errfile]
 
-  let command = "cd \"".expand(LitReplGet('litrepl_workdir'))."\"; "
-  let command = command . LitReplActionGlob(action)
+  let command = LitReplActionGlob(action)
+  if LitReplGet('litrepl_workdir') != ''
+    let command = "cd \"".expand(LitReplGet('litrepl_workdir'))."\"; " . command
+  endif
   if prompt != '-'
     if len(trim(prompt)) == 0
       let prompt = input("Script input: ")
