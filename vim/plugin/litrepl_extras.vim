@@ -76,7 +76,7 @@ fun! LitReplExCmdline(action, prompt, selmode, file, extras, errfile)
   if debug>0
     let command = command . ' --debug '
   endif
-  let command = command . ' eval-code '
+  let command = command . ' --command eval-code '
   if len(file)>0
     let command = command . ' ' . file
   endif
