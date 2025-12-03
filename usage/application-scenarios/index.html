@@ -229,81 +229,60 @@ The capital of New Zealand is Wellington.
 </code></pre>
 <p>Internally, the plugin just uses <code>eval-code</code> Litrepl command.</p>
 <h4 id="vim-calling-for-ai-on-a-visual-selection">Vim, Calling for AI on a visual selection</h4>
-<p>The repository includes <code>litrepl_extras.vim</code>, which defines extra tools for
-interacting with AI. These tools are based on the single low-level
-<code>LitReplAIQuery()</code> function.</p>
-<p>The function enables the creation of an AI chat query possibly incorporating the
-current file and any selected text. The AI model's response then returned
-alongside with the Litrepl error code.</p>
-<p>Based on this function, the following two middle-level functions are defined:
-- <code>LitReplTaskNew(scope, prompt)</code>
-- <code>LitReplTaskContinue(scope, prompt)</code></p>
-<p>Both functions take the prompt, produce the AI model response and decide where
-to insert it. However, the key difference is that the first function determines
-the target location based on user input (like cursor position or selection),
-while the second function re-applies the previously used position, allowing
-users to make changes easilly.</p>
-<p>Finally, a number of high-level commands have been established. Each of these
-commands receives an input string that directs the model on what action to take.
-The user input can contain <code>/S</code> or <code>/F</code> tokens, which are replaced with the
-values of the visual selection and the current file, respectively.</p>
-<table>
-<thead>
-<tr>
-<th>Command</th>
-<th>Description</th>
-<th>Incorporates</th>
-<th>Updates</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>LAI</code></td>
-<td>Passes the prompt as-is</td>
-<td>Input, Selection</td>
-<td>Cursor, Selection</td>
-</tr>
-<tr>
-<td><code>LAICont</code></td>
-<td>Passes the prompt as-is</td>
-<td>Input, Selection</td>
-<td>Last</td>
-</tr>
-<tr>
-<td><code>LAIStyle</code></td>
-<td>Asks to improve language style</td>
-<td>Input, Selection</td>
-<td>Selection</td>
-</tr>
-<tr>
-<td><code>LAICode</code></td>
-<td>Asks to modify a code snippet</td>
-<td>Input, Selection</td>
-<td>Cursor, Selection</td>
-</tr>
-<tr>
-<td><code>LAITell</code></td>
-<td>Asks to describe a code snippet</td>
-<td>Input, Selection</td>
-<td>Terminal*</td>
-</tr>
-<tr>
-<td><code>LAIFile</code></td>
-<td>Asks to change a whole file</td>
-<td>Input, Selection, File</td>
-<td>File</td>
-</tr>
-</tbody>
-</table>
+<p><em>Note: <code>litrepl_extras.vim</code> has been reworked since 3.14.0.</em></p>
+<p><em>Note: this is not stable and a subject to change.</em></p>
+<p>The repository includes <code>litrepl_extras.vim</code>, which defines a generic
+interface for external text‑rewriting tools. While it can work with a variety
+of backends, it is primarily designed to integrate smoothly with
+<a href="https://github.com/sergei-mironov/aicli">Aicli</a> sessions powered by Litrepl.</p>
+<p>The <code>litrepl_extras.vim</code> defines the following Vim commands:</p>
 <ul>
-<li><code>LAITell</code> shows the response in the AI terminal instead of inserting it into
-  the document.</li>
+<li><code>:LPush[!] &lt;script&gt; &lt;prompt&gt;</code> Calls the <code>litrepl-&lt;script&gt;</code> executable and
+  echoes its output.</li>
+<li><code>:LPipe[!] &lt;script&gt; &lt;prompt&gt;</code> pipes the selection through the
+  <code>litrepl-&lt;script&gt;</code> executable (if there is a selection) or inserts the
+  executable's output at the cursor position.</li>
+<li><code>:LPipeFile[!] &lt;script&gt; &lt;prompt&gt;</code> pipes the current file through the
+  <code>litrepl-&lt;script&gt;</code> executable (if there is a selection) or inserts the
+  executable's output at the cursor position.</li>
 </ul>
-<p>As with the selection evaluation mode, the <code>aicli</code> interpreter stays
-active in the background, maintaining the log of the conversation.</p>
-<p>Direct interaction with the interpreter functions as expected. The <code>LTerm ai</code>
-command opens the Vim terminal as usual, enabling communication with a model
-through <code>aicli</code> text commands.</p>
+<p>All the above commands get translated into a command line matching
+the following convension (subject to change):</p>
+<pre><code class="language-sh">usage: litrepl-&lt;script&gt; [-h] [-P PROMPT_LIST] [-s SELECTION_PASTE]
+                        [-S SELECTION_RAW] [-f OUTPUT_FORMAT] [-w TEXTWIDTH]
+                        [-v] [--location NAME LOC]
+                        [--location-raw NAME LOC] [--command COMMAND]
+                        ...
+
+positional arguments:
+  files
+
+options:
+  -h, --help            show this help message and exit
+  -P PROMPT_LIST, --prompt PROMPT_LIST
+  -s SELECTION_PASTE, --selection-paste SELECTION_PASTE
+  -S SELECTION_RAW, --selection-raw SELECTION_RAW
+  -f OUTPUT_FORMAT, --output-format OUTPUT_FORMAT
+  -w TEXTWIDTH, --textwidth TEXTWIDTH
+  -v, -d, --debug, --verbose
+  --dry-run
+  --location NAME LOC
+  --location-raw NAME LOC
+  --command COMMAND
+</code></pre>
+<p>The <code>command</code> is currently set to the fixed <code>eval-code</code> string literal.</p>
+<p>The bang versions of the Vim commands cause <code>-S</code> (disable escaping commands
+within the selection) to be used instead of <code>-s</code> (escape the selection). For
+Aicli this means that the /commands would be executed rather than passed to an
+LLM model.</p>
+<p>Users are free to write their own scripts. The completion will try to match
+the <code>litrepl-*</code> pattern to a unique match. For example, below is the example
+of the <code>litrepl-grammar.sh</code> script, which asks AI to correct the grammar of
+the selected text:</p>
+<pre><code class="language-sh">#!/bin/sh
+
+exec litrepl-aicli.py -P &quot;Please correct English grammar within the 'selection'. Keep the choice of words, minimize the changes you make.&quot; &quot;$@&quot;
+</code></pre>
               
             </div>
           </div><footer>
