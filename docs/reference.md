@@ -65,7 +65,7 @@ usage: litrepl [-h] [-v] [--filetype STR] [--python-markers STR[,STR]]
                [--python-interpreter EXE] [--ai-interpreter EXE]
                [--sh-interpreter EXE] [--python-auxdir DIR] [--ai-auxdir DIR]
                [--sh-auxdir DIR] [--timeout F[,F]] [--propagate-sigint]
-               [-d INT] [--verbose] [-C DIR] [--pending-exitcode INT]
+               [-d INT] [-K] [--verbose] [-C DIR] [--pending-exitcode INT]
                [--irreproducible-exitcode INT] [--exception-exitcode INT]
                [--foreground] [--map-cursor LINE:COL:FILE]
                [--result-textwidth NUM]
@@ -148,6 +148,8 @@ options:
                               will just terminate itself leaving the
                               interpreter as-is.
   -d INT, --debug INT         Enable (a lot of) debug messages.
+  -K, --keep-readout          Do not delete temporary readout file
+                              (debugging).
   --verbose                   Be more verbose (used in status).
   -C DIR, --workdir DIR       Set the working directory before execution. By
                               default, it uses LITREPL_WORKDIR if set,

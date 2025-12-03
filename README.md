@@ -97,7 +97,7 @@ Gallery
 </details>
 
 <details>
-<summary>AI capabilities (Show GIF)</summary>
+<summary>(Outdated!) AI capabilities (Show GIF)</summary>
 
 ![Peek 2024-11-28 20-48](https://github.com/user-attachments/assets/c91e6ac5-4230-47ad-b1bd-12b3d4d5f7f6)
 
