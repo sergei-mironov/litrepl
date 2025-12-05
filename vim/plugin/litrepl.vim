@@ -413,7 +413,11 @@ fun! LitReplVersion()
 endfun
 
 fun! LitReplTerm(what)
-  execute "terminal ++shell ".LitReplCmd()." repl ".a:what
+  let errfile = LitReplGet('litrepl_errfile')
+  let cmd = LitReplCmd()." repl ".a:what
+  call LitReplLogInput(errfile, cmd, "<none>")
+  call writefile(['(stderr is not captured)'],errfile,'a')
+  call LitReplTerminal(cmd)
 endfun
 
 fun! LitReplGetVisualSelection() range
