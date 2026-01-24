@@ -6,31 +6,25 @@ installation method is using Nix, but if you choose not to use it, you'll need
 to install one or both components separately. Below, we outline several common
 installation methods.
 
-### Installing release versions from Pypi and Vim.org
+For the installation of Vim-plugin which is also a part of the project, check the
+[Vim plugin](./usage/vim-plugin.md) section.
+
+### Installing release versions from Pypi
 
 1. `pip install litrepl`
-2. Download the latest `vim-litrepl-*.tar.gz` from the vim.org
-   [script page](https://www.vim.org/scripts/script.php?script_id=6117) and unpack it into
-   your `~/.vim` folder with  `tar -xf vim-litrepl-*.tar.gz  -C ~/.vim`
-3. Optionally, install the `socat` tool using your system package manager.
-4. Optionally, for the development dependencies, check the
+2. Optionally, install the `socat` tool using your system package manager.
+3. Optionally, for the development dependencies, check the
    `sh/install_deps_ubuntu.sh` in the source code repository.
 
-### Installing latest versions from Git using Pip and Vim-Plug
+### Installing latest versions from Git using Pip
 
 1. Install the `litrepl` Python package with pip:
    ``` sh
    $ pip install --user git+https://github.com/sergei-mironov/litrepl
    $ litrepl --version
    ```
-2. Install the Vim plugin by adding the following line between the
-   `plug#begin` and `plug#end` lines of your `.vimrc` file:
-   ```vim
-   Plug 'https://github.com/sergei-mironov/litrepl' , { 'rtp': 'vim' }
-   ```
-   Note: `rtp` sets the custom vim-plugin source directory of the plugin.
-3. Optionally, install the `socat` tool using your system package manager.
-4. Optionally, for the development dependencies, check the
+2. Optionally, install the `socat` tool using your system package manager.
+3. Optionally, for the development dependencies, check the
    `sh/install_deps_ubuntu.sh` in the source code repository.
 
 
@@ -51,9 +45,6 @@ To add the Litrepl tool to your system profile, first include the Litrepl flake
 in your flake inputs. Then, add `litrepl-release` to
 `environment.systemPackages` or to your custom environment.
 
-To include the Litrepl Vim plugin, add `vim-litrepl-release` to the `vimPlugins`
-list within your `vim_configurable` expression.
-
 Regardless of the approach, Nix will manage all necessary dependencies
 automatically.
 
@@ -64,9 +55,7 @@ Nix are used to open the development shell, see the
 ### Installing latest versions from source using Pip
 
 The Litrepl application might be installed with `pip install .` run from the
-project root folder. The Vim plugin part requires hand-copying
-`./vim/plugin/litrepl.vim` and `./vim/plugin/litrepl_extras.vim` to the `~/.vim`
-config folder.
+project root folder.
 
 ### Notes
 

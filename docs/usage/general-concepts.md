@@ -9,9 +9,9 @@ Litrepl supports subsets of **Markdown** and **LaTeX** formatting in order to
 recognize the sections. Some aspects of the recognized grammars, such as section
 labels, could be configured.
 
-As an illustration, consider the combined usage of Litrepl and Vim with the
-[Vimtex](https://github.com/lervag/vimtex) plugin to edit and preview LaTeX
-documents instantly.
+As an illustration, consider the combined usage of Litrepl (via the [Vim
+plugin](./vim-plugin.md)) with the [Vimtex](https://github.com/lervag/vimtex) to
+edit and preview LaTeX documents instantly.
 
 <video controls src="https://user-images.githubusercontent.com/4477729/187065835-3302e93e-6fec-48a0-841d-97986636a347.mp4" muted="true"></video>
 (Note: some browsers might refuse to play the video)
@@ -99,24 +99,23 @@ $ cat doc.md | litrepl --filetype=markdown eval-sections
 $ cat doc.tex | litrepl --filetype=latex eval-sections
 ```
 
-* The main Vim command for code section evaluation is `:LEval`. By default, it
-  executes the section at the cursor. To execute all sections in a document, use
-  `:LEval all`.
-
 #### Selecting Sections for Execution
 
 By default, `litrepl eval-sections` evaluates all sections in a document. To
 evaluate only specific sections, the range argument should be specified. The
 overall syntax is `litrepl eval-sections [RANGE]`, where `RANGE` can be:
 
-* `N`: Represents a specific code section to evaluate, with the following
+* `x`: Represents a specific code section to evaluate, with the following
   possible formats:
-  - A number starting from `0`.
+  - `N`: absolute section number in the document starting from `1`.
   - `$` symbol, indicating the last section.
   - `L:C`, referring to the line and column position. Litrepl calculates the
     section number based on this position.
-* `N..N`: Represents a range of sections, determined using the rules mentioned
+  - `+N` or `-N`: section number relative to the section corresponding to the
+    last line-column position within the current query.
+* `X..X`: Represents a range of sections, determined using the rules mentioned
   above.
+* `X,X`: List of sections to execute
 
 Some examples:
 
@@ -124,12 +123,8 @@ Some examples:
 $ litrepl eval-sections '0'       # First section in a document
 $ litrepl eval-sections '3..$'    # Sections from fourth section (zero based) to the last one
 $ litrepl eval-sections '34:1..$' # Sections starting from line 34 column 1
+$ litrepl eval-sections '34:1,+1' # Section at line 34 column 1 and the next one
 ```
-
-* The Vim command `:LEval` accepts similar syntax and also recognizes specific
-  keywords `all`, `above`, and `below`. These keywords allow you to evaluate all
-  sections, only those above the cursor, or just the ones below the cursor,
-  respectively.
 
 #### Managing Interpreter Sessions
 
@@ -162,11 +157,6 @@ $ litrepl restart all
 $ litrepl stop
 ```
 
-* The equivalent Vim commands are `:LStart CLASS`, `:LStop [CLASS]`, and
-  `:LRestart [CLASS]`. For the corresponding Vim configuration variables, see
-  the reference section below.
-
-
 The `litrepl status [CLASS]` command queries the information about the currently
 running interpreters. The command reveals the process PID and the command-line
 arguments. For stopped interpreters, the last exit codes are also listed.
@@ -179,9 +169,6 @@ $ litrepl status
 python   3900919  -         python3 -m IPython --config=/tmp/litrepl_1000_a2732d/python/litrepl_ipython_config.py --colors=NoColor -i
 ai       3904696  -         aicli --readline-prompt=
 ```
-
-* The corresponding Vim command is `:LStatus`. No `CLASS` argument is currently
-  supported.
 
 #### Asynchronous Processing
 
@@ -218,13 +205,6 @@ evaluation concludes, it removes the marker from the output section.
 The command `litrepl interrupt` sends an interrupt signal to the interpreter,
 prompting it to return control sooner (with an exception).
 
-* The equivalent Vim commands are `:LEvalAsync` (defaulting to a 0.5-second
-  timeout) and `:LInterrupt`.
-* The Vim plugin also provides the `:LEvalMon` command, which facilitates
-  continuous code evaluation with no delay. Interrupting this with Ctrl+C will
-  make Litrepl return control to the editor, leaving the evaluation ongoing in
-  the background.
-
 
 #### Attaching Interpreter Sessions
 
@@ -260,8 +240,6 @@ $ echo 'W' | litrepl eval-code
 The `eval-code` command can be utilized for batch processing and managing
 sessions, in a manner similar to how the `expect` tool is used.
 
-* The equivalent Vim commands are `:LRepl [CLASS]` or `:LTerm [CLASS]`. Both
-  commands open Vim terminal window.
 
 #### Experimental AI Features
 
@@ -317,5 +295,3 @@ connection with users.
 ```
 ~~~~
 <!--lnoignore-->
-
-

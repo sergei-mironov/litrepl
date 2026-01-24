@@ -5,6 +5,7 @@ nav:
   - Usage:
     - General concepts: usage/general-concepts.md
     - Formatting: usage/formatting.md
+    - Vim plugin: usage/vim-plugin.md
     - Application Scenarios: usage/application-scenarios.md
   - Reference: reference.md
   - Development: development.md

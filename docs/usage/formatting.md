@@ -98,7 +98,7 @@ $ pandoc -f markdown+native_divs file.md -o test.ipynb
 
 ### Basic syntax
 
-LitREPL treats `\begin{python}\end{python}` environment as code sections and
+Litrepl treats `\begin{python}\end{python}` environment as code sections and
 `\begin{result}\end{result}` environment as result sections. The names are
 currently hardcoded into the simplified LitREPL parser. Wrapping it in other
 tags is not allowed.
@@ -194,7 +194,7 @@ the system.
 Hint: Use `\usepackage[outputdir=_build]{minted}` if you specify a separate
 build directory (here - `_build`). This workarounds a well-known Minted problem.
 
-### In-editor code highlighting with Vimtex
+### Vim In-editor code highlighting with Vimtex
 
 The following `.vimrc` Vimtex configuration enables highlighting of Python
 code sections in LaTeX documents. We typically need to call these functions from
