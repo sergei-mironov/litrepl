@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Vim plugin - Litrepl Docs</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Vim plugin";
+        var mkdocs_page_input_path = "usage/vim-plugin.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Litrepl Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Usage</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../general-concepts/">General concepts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../formatting/">Formatting</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../application-scenarios/">Application Scenarios</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../reference/">Reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../development/">Development</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../related/">Related</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Litrepl Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Vim plugin</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h3 id="vim-plugin">Vim plugin</h3>
+<p>Litrepl comes with a reference Vim plugin, which interfaces Litrepl using its
+command-line interface.</p>
+<p>As specified in the Reference section, the plugin mirrows most modes of
+operation by its commands, that typically starts from capital <code>L</code>. Many options
+are also mirrored by the vim variables.</p>
+<h4 id="basic-execution">Basic execution</h4>
+<p>The main Vim command for code section evaluation is <code>:LEval</code>. By default, it
+executes the section at the cursor. To execute all sections in a document, use
+<code>:LEval all</code>.</p>
+<h4 id="selecting-sections-for-execution">Selecting Sections for Execution</h4>
+<p>The Vim command <code>:LEval</code> accepts <code>eval-section</code> syntax with the following
+additions:</p>
+<ul>
+<li><code>@</code> symbol gets replaced with the <code>L:C</code> formatted cursor position</li>
+<li>Words <code>all</code>, <code>above</code>, and <code>below</code> get replaced by the corresponding ranges,
+  relative to the current cursor position.</li>
+</ul>
+<h4 id="managing-interpreter-sessions">Managing Interpreter Sessions</h4>
+<p>Interpreter sessions could be managed from Vim using the <code>:LStart CLASS</code>,
+<code>:LStop [CLASS]</code>, and <code>:LRestart [CLASS]</code> commands which gets directed to their
+<code>start</code>, <code>stop</code> and <code>restart</code> CLI versions.</p>
+<p>Vim command <code>:LStatus</code> corresponds to the <code>litrepl status</code> CLI command. The
+status message gets printed into the newly-opened Vim buffer. No <code>CLASS</code>
+argument is currently supported.</p>
+<h4 id="asynchronous-processing">Asynchronous Processing</h4>
+<p>The <code>:LEval</code> command aims at synchronous execution. For convenience, Vim plugin
+defines the <code>:LEvalAsync</code> that has 0.5-second initial execution timeout.</p>
+<p>The <code>:LInterrupt</code> command is equivalent to <code>litrepl interrupt</code> CLI command.</p>
+<p>Vim plugin also provides the <code>:LEvalMon</code> command, which facilitates continuous
+code evaluation with no delay. Interrupting this with Ctrl+C will make Litrepl
+return control to the editor, leaving the evaluation ongoing in the background.</p>
+<h4 id="attaching-interpreter-sessions">Attaching Interpreter Sessions</h4>
+<p>The equivalent Vim commands are <code>:LRepl [CLASS]</code> or <code>:LTerm [CLASS]</code>. Both
+commands open Vim terminal window.</p>
+<h4 id="experimental-ai-features">Experimental AI Features</h4>
+<p>Litrepl experimentally supports <a href="https://github.com/sergei-mironov/aicli">Aicli</a>
+terminal allowing users to query external language models. In order to try it,
+install the interpreter and use <code>ai</code> as the name for code sections. For
+low-speed models it might be convenient to use <code>:LEvalMon</code> command to monitor
+the text generation in real time.</p>
+<!--lignore-->
+
+<pre><code class="language-markdown">``` ai
+/model gpt4all:&quot;./_models/Meta-Llama-3-8B-Instruct.Q4_0.gguf&quot;
+Hi chat! What is your name?
+```
+
+``` result
+I'm LLaMA, a large language model trained by Meta AI. I'm here to help answer
+any questions you might have and provide information on a wide range of topics.
+How can I assist you today?
+```
+</code></pre>
+<!--lnoignore-->
+
+<p>All Aicli <code>/</code>-commands like the <code>/model</code> command above are passed as-is to the
+interpreter. The <code>/ask</code> command is added automatically at the of each section,
+so make sure that <code>ai</code> secions have self-contained questions.</p>
+<p>As a pre-processing step, Litrepl can paste text from other sections of the
+document in place of special reference markers. The markers have the following
+format:</p>
+<ul>
+<li><code>&gt;&gt;RX&lt;&lt;</code>, where <code>X</code> is a number - references a section number <code>X</code> (starting
+  from zero).</li>
+<li><code>^^RX^^</code>, where <code>X</code> is a number - references the section <code>X</code> times above the
+  current one.</li>
+<li><code>vvRXvv</code>, where <code>X</code> is a number - references the section <code>X</code> times below the
+  current one.</li>
+</ul>
+<!--lignore-->
+
+<pre><code class="language-markdown">``` ai
+AI, what do you think the following text means?
+
+^^R1^^
+```
+
+``` result
+Another interesting piece of text!
+This is an example of a chatbot introduction or &quot;hello message.&quot; It appears to
+be written in a friendly, approachable tone, with the goal of establishing a
+connection with users.
+```
+</code></pre>
+<!--lnoignore-->
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
