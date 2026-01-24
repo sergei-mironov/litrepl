@@ -25,7 +25,9 @@ with a pre-configured label such as `python`. The result is any triple-quoted
 `\begin{...}\end{...}` environments correspondingly.
 
 The primary command for evaluating formatted documents is `litrepl
-eval-sections`. Consider a markdown document `file.md`.
+eval-sections` which starts the background interactive session (unless
+`--foreground` is specified), and process the document. Consider a markdown
+document `file.md`.
 
 <!--
 ``` python

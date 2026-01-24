@@ -161,8 +161,8 @@ def make_parser():
     Parse and print the input file back (diagnostics).'''))
   evalsec=sps.add_parser('eval-sections',
     help=dedent('''
-    Parse stdin, evaluate the specified sections (by default -
-    all available sections), print the resulting file to stdout.'''))
+    Do `start` if needed, Parse stdin, evaluate the specified sections (by
+    default - all available sections), print the resulting file to stdout.'''))
   evalsec.add_argument('locs',type=str,metavar='LOCS',default='0..$',
     help=LOCSHELP,nargs='?')
   _with_type(sps.add_parser('eval-code', help='Evaluate the code snippet.'))
