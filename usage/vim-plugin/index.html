@@ -53,23 +53,37 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../formatting/">Formatting</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../application-scenarios/">Application Scenarios</a>
-                  </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">Vim plugin</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#installing-release-versions-from-vimorg">Installing release versions from Vim.org</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#installing-latest-versions-from-git-using-vim-plug">Installing latest versions from Git using Vim-Plug</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#installing-latest-versions-from-source-using-nix">Installing latest versions from source using Nix</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#installing-latest-versions-from-source-using-pip">Installing latest versions from source using Pip</a>
+    </li>
+        </ul>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#basic-execution">Basic execution</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#selecting-sections-for-execution">Selecting Sections for Execution</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#selecting-sections-for-execution">Selecting Sections for Execution</a>
+    <li class="toctree-l3"><a class="reference internal" href="#managing-interpreter-sessions">Managing Interpreter Sessions</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#managing-interpreter-sessions">Managing Interpreter Sessions</a>
+    <li class="toctree-l3"><a class="reference internal" href="#asynchronous-processing">Asynchronous Processing</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#asynchronous-processing">Asynchronous Processing</a>
+    <li class="toctree-l3"><a class="reference internal" href="#attaching-interpreter-sessions">Attaching Interpreter Sessions</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#attaching-interpreter-sessions">Attaching Interpreter Sessions</a>
+    <li class="toctree-l3"><a class="reference internal" href="#experimental-ai-features">Experimental AI Features</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#experimental-ai-features">Experimental AI Features</a>
+        </ul>
     </li>
     </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../application-scenarios/">Application Scenarios</a>
                   </li>
               </ul>
               <ul>
@@ -108,13 +122,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h3 id="vim-plugin">Vim plugin</h3>
+                <h2 id="vim-plugin">Vim plugin</h2>
 <p>Litrepl comes with a reference Vim plugin, which interfaces Litrepl using its
 command-line interface.</p>
 <p>As specified in the Reference section, the plugin mirrows most modes of
 operation by its commands, that typically starts from capital <code>L</code>. Many options
 are also mirrored by the vim variables.</p>
-<h4 id="basic-execution">Basic execution</h4>
+<h3 id="installation">Installation</h3>
+<h4 id="installing-release-versions-from-vimorg">Installing release versions from Vim.org</h4>
+<p>Download the latest <code>vim-litrepl-*.tar.gz</code> from the vim.org <a href="https://www.vim.org/scripts/script.php?script_id=6117">script
+page</a> and unpack it into
+your <code>~/.vim</code> folder with  <code>tar -xf vim-litrepl-*.tar.gz  -C ~/.vim</code></p>
+<h4 id="installing-latest-versions-from-git-using-vim-plug">Installing latest versions from Git using Vim-Plug</h4>
+<p>Install the Vim plugin by adding the following line between the
+<code>plug#begin</code> and <code>plug#end</code> lines of your <code>.vimrc</code> file:</p>
+<pre><code class="language-vim">Plug 'https://github.com/sergei-mironov/litrepl' , { 'rtp': 'vim' }
+</code></pre>
+<p>Note: <code>rtp</code> sets the custom vim-plugin source directory of the plugin.</p>
+<h4 id="installing-latest-versions-from-source-using-nix">Installing latest versions from source using Nix</h4>
+<p>To include the Litrepl Vim plugin to the Litrepl installation, add
+<code>vim-litrepl-release</code> to the <code>vimPlugins</code> list within your <code>vim_configurable</code>
+expression.</p>
+<h4 id="installing-latest-versions-from-source-using-pip">Installing latest versions from source using Pip</h4>
+<p>Installing Vim plugin requires hand-copying
+<code>./vim/plugin/litrepl.vim</code> and <code>./vim/plugin/litrepl_extras.vim</code> to the <code>~/.vim</code>
+config folder.</p>
+<h3 id="basic-execution">Basic execution</h3>
 <p>The main Vim command for code section evaluation is <code>:LEval</code>. By default, it
 executes the section at the cursor. To execute all sections in a document, use
 <code>:LEval all</code>.</p>
@@ -198,8 +231,8 @@ connection with users.
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../application-scenarios/" class="btn btn-neutral float-left" title="Application Scenarios"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../reference/" class="btn btn-neutral float-right" title="Reference">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../formatting/" class="btn btn-neutral float-left" title="Formatting"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../application-scenarios/" class="btn btn-neutral float-right" title="Application Scenarios">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -222,10 +255,10 @@ connection with users.
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../application-scenarios/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../formatting/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../reference/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../application-scenarios/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

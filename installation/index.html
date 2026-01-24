@@ -46,9 +46,9 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="./">Installation</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#installing-release-versions-from-pypi-and-vimorg">Installing release versions from Pypi and Vim.org</a>
+    <li class="toctree-l2"><a class="reference internal" href="#installing-release-versions-from-pypi">Installing release versions from Pypi</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#installing-latest-versions-from-git-using-pip-and-vim-plug">Installing latest versions from Git using Pip and Vim-Plug</a>
+    <li class="toctree-l2"><a class="reference internal" href="#installing-latest-versions-from-git-using-pip">Installing latest versions from Git using Pip</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#installing-latest-versions-from-source-using-nix">Installing latest versions from source using Nix</a>
     </li>
@@ -73,9 +73,9 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../usage/formatting/">Formatting</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../usage/application-scenarios/">Application Scenarios</a>
-                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../usage/vim-plugin/">Vim plugin</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/application-scenarios/">Application Scenarios</a>
                   </li>
               </ul>
               <ul>
@@ -119,27 +119,21 @@ application and an interface plugin for the Vim editor. The author's preferred
 installation method is using Nix, but if you choose not to use it, you'll need
 to install one or both components separately. Below, we outline several common
 installation methods.</p>
-<h3 id="installing-release-versions-from-pypi-and-vimorg">Installing release versions from Pypi and Vim.org</h3>
+<p>For the installation of Vim-plugin, check the
+<a href="../usage/vim-plugin/">Vim plugin</a> section.</p>
+<h3 id="installing-release-versions-from-pypi">Installing release versions from Pypi</h3>
 <ol>
 <li><code>pip install litrepl</code></li>
-<li>Download the latest <code>vim-litrepl-*.tar.gz</code> from the vim.org
-   <a href="https://www.vim.org/scripts/script.php?script_id=6117">script page</a> and unpack it into
-   your <code>~/.vim</code> folder with  <code>tar -xf vim-litrepl-*.tar.gz  -C ~/.vim</code></li>
 <li>Optionally, install the <code>socat</code> tool using your system package manager.</li>
 <li>Optionally, for the development dependencies, check the
    <code>sh/install_deps_ubuntu.sh</code> in the source code repository.</li>
 </ol>
-<h3 id="installing-latest-versions-from-git-using-pip-and-vim-plug">Installing latest versions from Git using Pip and Vim-Plug</h3>
+<h3 id="installing-latest-versions-from-git-using-pip">Installing latest versions from Git using Pip</h3>
 <ol>
 <li>Install the <code>litrepl</code> Python package with pip:
    <code>sh
    $ pip install --user git+https://github.com/sergei-mironov/litrepl
    $ litrepl --version</code></li>
-<li>Install the Vim plugin by adding the following line between the
-   <code>plug#begin</code> and <code>plug#end</code> lines of your <code>.vimrc</code> file:
-   <code>vim
-   Plug 'https://github.com/sergei-mironov/litrepl' , { 'rtp': 'vim' }</code>
-   Note: <code>rtp</code> sets the custom vim-plugin source directory of the plugin.</li>
 <li>Optionally, install the <code>socat</code> tool using your system package manager.</li>
 <li>Optionally, for the development dependencies, check the
    <code>sh/install_deps_ubuntu.sh</code> in the source code repository.</li>
@@ -157,17 +151,13 @@ complete, you can run the editor with <code>./result/bin/vim-demo</code>.</p>
 <p>To add the Litrepl tool to your system profile, first include the Litrepl flake
 in your flake inputs. Then, add <code>litrepl-release</code> to
 <code>environment.systemPackages</code> or to your custom environment.</p>
-<p>To include the Litrepl Vim plugin, add <code>vim-litrepl-release</code> to the <code>vimPlugins</code>
-list within your <code>vim_configurable</code> expression.</p>
 <p>Regardless of the approach, Nix will manage all necessary dependencies
 automatically.</p>
 <p>Nix are used to open the development shell, see the
 <a href="../development/">Development</a> section.</p>
 <h3 id="installing-latest-versions-from-source-using-pip">Installing latest versions from source using Pip</h3>
 <p>The Litrepl application might be installed with <code>pip install .</code> run from the
-project root folder. The Vim plugin part requires hand-copying
-<code>./vim/plugin/litrepl.vim</code> and <code>./vim/plugin/litrepl_extras.vim</code> to the <code>~/.vim</code>
-config folder.</p>
+project root folder.</p>
 <h3 id="notes">Notes</h3>
 <h4 id="optional-socat-tool">Optional Socat tool</h4>
 <p>The Nix-powered installation methods install the Socat tool automatically. For
