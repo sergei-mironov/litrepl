@@ -23,8 +23,10 @@ python3 -c 'import dataclasses' || echo "Warning: 'dataclasses' python library n
 litrepl --version >/dev/null || echo "litrepl is not in PATH" >&2
 socat -V >/dev/null || echo "GNU socat not found" >&2
 
-# litrepl-aicli.py resets python, so we reset it back artificially
-export LITREPL="`which python` $PROJECT_ROOT/python/bin/litrepl"
+# Aicli testing: The litrepl-aicli.py of the Aicli project is written in Python
+# so it resets the python interpreter. We reset it back artificially.
+#export LITREPL="`which python` $PROJECT_ROOT/python/bin/litrepl"
+
 export LITREPL_PYTHON_AUXDIR=$PROJECT_ROOT/_litrepl/python
 export LITREPL_AI_AUXDIR=$PROJECT_ROOT/_litrepl/ai
 export LITREPL_SH_AUXDIR=$PROJECT_ROOT/_litrepl/sh

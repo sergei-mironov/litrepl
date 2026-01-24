@@ -1573,8 +1573,8 @@ runlitrepl() {
   test -n "$LITREPL_TEST_PYTHON_INTERPRETER"
   test -n "$LITREPL_TEST_AI_INTERPRETER"
   test -n "$LITREPL_TEST_SH_INTERPRETER"
-  test -x "$LITREPL"
-  # If litrepl is a shell script then LITREPL_TEST_PYTHON should be an empty string
+  # If $LITREPL is a shell script or a Python interpreter with a script argument,
+  # then $LITREPL_TEST_PYTHON should be an empty string.
   $LITREPL_TEST_PYTHON $LITREPL --debug="$LITREPL_DEBUG" \
     --python-interpreter="$LITREPL_TEST_PYTHON_INTERPRETER" \
     --ai-interpreter="$LITREPL_TEST_AI_INTERPRETER" \
@@ -1684,7 +1684,7 @@ fi
 if test -z "$LITREPL"; then
   LITREPL=$LITREPL_ROOT/python/bin/litrepl
 fi
-if file --mime-type $LITREPL | grep -q 'script.python' ; then
+if file --mime-type "$LITREPL" | grep -q 'script.python' ; then
   if test -z "$LITREPL_TEST_PYTHON" ; then
     LITREPL_TEST_PYTHON=python
   fi
