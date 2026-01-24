@@ -208,12 +208,12 @@ prompting it to return control sooner (with an exception).
 
 #### Attaching Interpreter Sessions
 
-The command `litrepl repl [CLASS]` where `CLASS` specifies interpreter class:
-`python` (the default) `ai` or `sh`, attaches to interpreter sessions.  For this
-command to work, [socat](https://linux.die.net/man/1/socat) tool needs to be
-installed on your system. Litrepl blocks the pipes for the time of interaction
-so no evaluation is possible while the repl session is active.  For Python and
-Shell interpreters, the command prompt is disabled which is a current technical
+The command `litrepl repl CLASS` where `CLASS` specifies interpreter class:
+`python` `ai` or `sh`, attaches to interpreter sessions.  For this command to
+work, [socat](https://linux.die.net/man/1/socat) tool needs to be installed on
+your system. Litrepl blocks the pipes for the time of interaction so no
+evaluation is possible while the repl session is active.  For Python and Shell
+interpreters, the command prompt is disabled which is a current technical
 limitation. Use `Ctrl+D` to safely detach the session. For example:
 
 ``` sh
@@ -224,7 +224,7 @@ W = 'Hello from repl'
 $
 ```
 
-Use `litrepl eval-code [CLASS]` to direct code straight to the interpreter,
+Use `litrepl eval-code CLASS` to direct code straight to the interpreter,
 bypassing any section formatting steps. In contrast to the `repl` command,
 `eval-code` mode features prompt detection, allowing the tool to display the
 interpreter's response and detach while keeping the session open.
