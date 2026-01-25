@@ -151,13 +151,16 @@ $ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
 <li><code>vim-litrepl-release</code> - Vim with locally built litrepl plugin</li>
 <li><code>vim-litrepl-release-pypi</code> - Vim with litrepl plugin built from PYPI</li>
 <li><code>vim-test</code> - A minimalistic Vim with a single litrepl plugin</li>
-<li><code>vim-demo</code> - Vim configured to use litrepl suitable for recording screencasts</li>
+<li><code>vim-demo</code> - Vim configured to use litrepl suitable for recording screencasts.
+  Uses the latest released version of Litrepl rather than the current revision.</li>
 <li><code>vim-plug</code> - Vim configured to use litrepl via the Plug manager</li>
 <li><code>shell-dev</code> - The development shell</li>
 <li><code>shell-screencast</code> - The shell for recording demonstrations, includes <code>vim-demo</code>.</li>
 </ul>
-<p>See <code>local.collection</code> attribute-set in the <a href="../static/default.nix">default.nix</a> for the
-full list of defined targetr.</p>
+<p>See the <code>local.collection</code> attribute-set in the
+<a href="../static/default.nix">default.nix</a> for the full list of defined targets.</p>
+<p>Note: The default development shell <code>shell-dev</code> installs many dependencies,
+the users are encouraged to define their own shells when needed.</p>
 <h3 id="development-environments-and-setup">Development Environments and Setup</h3>
 <p>The default development shell is defined in the <code>./default.nix</code> as a Nix
 expression named <code>shell</code> which is the default name for development shells.

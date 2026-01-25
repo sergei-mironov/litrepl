@@ -144,8 +144,7 @@ check the <a href="../usage/vim-plugin/">Vim plugin</a> section.</p>
 <ol>
 <li>Install the <code>litrepl</code> Python package with pip:
    <code>sh
-   $ pip install --user git+https://github.com/sergei-mironov/litrepl
-   $ litrepl --version</code></li>
+   $ pip install --user git+https://github.com/sergei-mironov/litrepl</code></li>
 <li>Optionally, install the <code>socat</code> tool using your system package manager.</li>
 </ol>
 <p>For more development dependencies, check the <code>sh/install_deps_ubuntu.sh</code> in the
@@ -159,15 +158,17 @@ identifies the targets Nix expressions.</p>
 <p>For testing, the <code>vim-demo</code> expression is a practical choice. It includes a
 pre-configured Vim setup with several related plugins, including Litrepl. Once
 the build is complete, you can run the Vim editor using the
-<code>./result/bin/vim-demo</code> command. The overall procedure looks as follows:</p>
+<code>./result/bin/vim-demo</code> command. Note that vim-demo fetches the latest <em>released</em>
+version of Litrepl, not the current commit. The overall procedure looks as follows:</p>
 <pre><code class="language-sh">$ git clone https://github.com/sergei-mironov/litrepl
 $ cd litrepl
 $ nix build '.#vim-demo'
   # ... Nix builds Litrepl and a pre-configured Vim editor.
 $ ./result/bin/vim-demo
 </code></pre>
-<p>To build the release version of Litrepl, build the <code>litrepl-release</code> target. The
-<code>./result</code> will point to the resulting Litrepl tree.</p>
+<p>To build the current release version of Litrepl, build the <code>litrepl-release</code>
+target. The <code>./result</code> will point to the Litrepl tree ready to be merged into
+a Nix profile.</p>
 <pre><code class="language-sh">$ nix build '.#litrepl-release'
 $ ./result/bin/litrepl --version
 # ...
