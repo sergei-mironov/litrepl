@@ -50,20 +50,29 @@ identifies the targets Nix expressions.
 For testing, the `vim-demo` expression is a practical choice. It includes a
 pre-configured Vim setup with several related plugins, including Litrepl. Once
 the build is complete, you can run the Vim editor using the
-`./result/bin/vim-demo`. The overall procedure looks as follows:
+`./result/bin/vim-demo` command. The overall procedure looks as follows:
 
 ``` sh
 $ git clone https://github.com/sergei-mironov/litrepl
 $ cd litrepl
 $ nix build '.#vim-demo'
-# ... Nix builds Litrepl and a pre-configured Vim editor.
+  # ... Nix builds Litrepl and a pre-configured Vim editor.
 $ ./result/bin/vim-demo
 ```
 
-Wiring Litrepl to the system depends on your particular system's organisation.
-Typically, for updating system profile, first include the Litrepl flake in your
-flake inputs. Then, add the `litrepl-release` expression to
-`environment.systemPackages` or to your custom environment.
+To build the release version of Litrepl, build the `litrepl-release` target. The
+`./result` will point to the resulting Litrepl tree.
+
+``` sh
+$ nix build '.#litrepl-release'
+$ ./result/bin/litrepl --version
+# ...
+```
+
+Wiring Litrepl to your NixOS system depends on your particular system's
+organisation.  Typically, for updating system profile, first include the Litrepl
+flake in your system flake as an input. Then, add the `litrepl-release`
+expression to `environment.systemPackages` or to your custom environment.
 
 ``` nix
 # File: flake.nix
@@ -71,8 +80,8 @@ inputs = {
     # ...
     vim-litrepl = {
       url = "github:sergei-mironov/litrepl.vim";
-      # url = "git+https://github.com/grwlf/litrepl.vim";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # Also consider wiring your system "nixpkgs" input
+      # inputs.nixpkgs.follows = "nixpkgs";
     };
     # ...
 }
