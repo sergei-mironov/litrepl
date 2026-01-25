@@ -6,8 +6,18 @@ installation method is using Nix, but if you choose not to use it, you'll need
 to install one or both components separately. Below, we outline several common
 installation methods.
 
-For the installation of Vim-plugin which is also a part of the project, check the
-[Vim plugin](./usage/vim-plugin.md) section.
+For the installation of Litrepl Vim plugin, which is also a part of the project,
+check the [Vim plugin](./usage/vim-plugin.md) section.
+
+### Requirements
+
+* **POSIX-compatible OS**, typically a Linux. The tool relies on POSIX
+  operations, notably pipes, and depends on certain Shell commands.
+* **lark-parser** and **psutil** Python packages. These should be handled
+  automatically by the below installation methods.
+* **[Socat](http://www.dest-unreach.org/socat/)** (Optional) Needed for
+  `litrepl repl` and Vim's `LTerm` commands to work. In most operating systems
+  Socat should be installed separately.
 
 ### Installing release versions from Pypi
 
