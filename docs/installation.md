@@ -32,7 +32,6 @@ check the [Vim plugin](./usage/vim-plugin.md) section.
 1. Install the `litrepl` Python package with pip:
    ``` sh
    $ pip install --user git+https://github.com/sergei-mironov/litrepl
-   $ litrepl --version
    ```
 2. Optionally, install the `socat` tool using your system package manager.
 
@@ -50,7 +49,8 @@ identifies the targets Nix expressions.
 For testing, the `vim-demo` expression is a practical choice. It includes a
 pre-configured Vim setup with several related plugins, including Litrepl. Once
 the build is complete, you can run the Vim editor using the
-`./result/bin/vim-demo` command. The overall procedure looks as follows:
+`./result/bin/vim-demo` command. Note that vim-demo fetches the latest *released*
+version of Litrepl, not the current commit. The overall procedure looks as follows:
 
 ``` sh
 $ git clone https://github.com/sergei-mironov/litrepl
@@ -60,8 +60,9 @@ $ nix build '.#vim-demo'
 $ ./result/bin/vim-demo
 ```
 
-To build the release version of Litrepl, build the `litrepl-release` target. The
-`./result` will point to the resulting Litrepl tree.
+To build the current release version of Litrepl, build the `litrepl-release`
+target. The `./result` will point to the Litrepl tree ready to be merged into
+a Nix profile.
 
 ``` sh
 $ nix build '.#litrepl-release'
