@@ -42,13 +42,17 @@ The list of Nix build targets includes:
 * `vim-litrepl-release` - Vim with locally built litrepl plugin
 * `vim-litrepl-release-pypi` - Vim with litrepl plugin built from PYPI
 * `vim-test` - A minimalistic Vim with a single litrepl plugin
-* `vim-demo` - Vim configured to use litrepl suitable for recording screencasts
+* `vim-demo` - Vim configured to use litrepl suitable for recording screencasts.
+  Uses the latest released version of Litrepl rather than the current revision.
 * `vim-plug` - Vim configured to use litrepl via the Plug manager
 * `shell-dev` - The development shell
 * `shell-screencast` - The shell for recording demonstrations, includes `vim-demo`.
 
-See `local.collection` attribute-set in the [default.nix](./static/default.nix) for the
-full list of defined targetr.
+See the `local.collection` attribute-set in the
+[default.nix](./static/default.nix) for the full list of defined targets.
+
+Note: The default development shell `shell-dev` installs many dependencies,
+the users are encouraged to define their own shells when needed.
 
 ### Development Environments and Setup
 
