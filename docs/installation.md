@@ -2,8 +2,8 @@
 
 The Github repository hosts the Litrepl tool, a standalone command-line
 application and an interface plugin for the Vim editor. The author's preferred
-installation method is using Nix, but if you choose not to use it, you'll need
-to install one or both components separately. Below, we outline several common
+installation method is using Nix, if you choose not to use it, you'll need to
+install one or both components separately. Below, we outline several common
 installation methods.
 
 For the installation of Litrepl Vim plugin, which is also a part of the project,
@@ -21,10 +21,11 @@ check the [Vim plugin](./usage/vim-plugin.md) section.
 
 ### Installing release versions from Pypi
 
-1. `pip install litrepl`
+1. Install the latest Litrepl from Pypi repository
+   ``` sh
+   $ pip install litrepl
+   ```
 2. Optionally, install the `socat` tool using your system package manager.
-3. Optionally, for the development dependencies, check the
-   `sh/install_deps_ubuntu.sh` in the source code repository.
 
 ### Installing latest versions from Git using Pip
 
@@ -34,9 +35,9 @@ check the [Vim plugin](./usage/vim-plugin.md) section.
    $ litrepl --version
    ```
 2. Optionally, install the `socat` tool using your system package manager.
-3. Optionally, for the development dependencies, check the
-   `sh/install_deps_ubuntu.sh` in the source code repository.
 
+For more development dependencies, check the `sh/install_deps_ubuntu.sh` in the
+source code repository.
 
 ### Installing latest versions from source using Nix
 
@@ -44,21 +45,49 @@ The repository offers a suite of Nix expressions designed to optimize
 installation and development processes on systems that support Nix. Consistent
 with standard practices in Nix projects, the [flake.nix](./static/flake.nix) file
 defines the source dependencies, while the [default.nix](./static/default.nix) file
-identifies the build targets.
+identifies the targets Nix expressions.
 
 For testing, the `vim-demo` expression is a practical choice. It includes a
-pre-configured Vim setup with several related plugins, including Litrepl. To
-build this target, use the command `nix build '.#vim-demo'`. Once the build is
-complete, you can run the editor with `./result/bin/vim-demo`.
+pre-configured Vim setup with several related plugins, including Litrepl. Once
+the build is complete, you can run the Vim editor using the
+`./result/bin/vim-demo`. The overall procedure looks as follows:
 
-To add the Litrepl tool to your system profile, first include the Litrepl flake
-in your flake inputs. Then, add `litrepl-release` to
+``` sh
+$ git clone https://github.com/sergei-mironov/litrepl
+$ cd litrepl
+$ nix build '.#vim-demo'
+# ... Nix builds Litrepl and a pre-configured Vim editor.
+$ ./result/bin/vim-demo
+```
+
+Wiring Litrepl to the system depends on your particular system's organisation.
+Typically, for updating system profile, first include the Litrepl flake in your
+flake inputs. Then, add the `litrepl-release` expression to
 `environment.systemPackages` or to your custom environment.
 
-Regardless of the approach, Nix will manage all necessary dependencies
-automatically.
+``` nix
+# File: flake.nix
+inputs = {
+    # ...
+    vim-litrepl = {
+      url = "github:sergei-mironov/litrepl.vim";
+      # url = "git+https://github.com/grwlf/litrepl.vim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # ...
+}
 
-Nix are used to open the development shell, see the
+# File: configuration.nix
+environment.systemPackages = with pkgs; [
+    # ...
+    vim-litrepl.litrepl-release
+    # ...
+];
+```
+
+Nix will manage all necessary dependencies automatically.
+
+For the full list of expressions which includes developement shells, see the
 [Development](./development.md) section.
 
 
