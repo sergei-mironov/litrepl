@@ -16,6 +16,7 @@ let
     litrepl_root = src;
 
     version = lib.fileContents "${litrepl_root}/semver.txt";
+    version_released = lib.fileContents "${litrepl_root}/semver_released.txt";
     version_full = if revision != null then
       "${version}+g${builtins.substring 0 7 revision}" else
       version;
@@ -169,7 +170,7 @@ let
 
     litrepl-pypi = (python: python.pkgs.buildPythonPackage rec {
       pname = "litrepl";
-      inherit version;
+      version = version_released;
       propagatedBuildInputs = [(lark-current python.pkgs) pkgs.socat python.pkgs.psutil];
       src = python.pkgs.fetchPypi {
         inherit pname version;

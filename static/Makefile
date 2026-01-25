@@ -130,7 +130,8 @@ upload: $(WHEEL_REV) $(VIMB_REV)
 	twine upload \
 		--username __token__ \
 		--password $(shell cat _token.pypi) \
-		dist/*
+		dist/* && \
+	cp semver.txt semver_released.txt
 
 .PHONY: paper-md # Check and compile the paper PDF out of its Markdown source using JOSS tools
 paper-md: paper/md/paper.pdf
