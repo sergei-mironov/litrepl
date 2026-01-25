@@ -116,9 +116,9 @@ background, ready to handle new inputs.</p>
 <p>Litrepl supports subsets of <strong>Markdown</strong> and <strong>LaTeX</strong> formatting in order to
 recognize the sections. Some aspects of the recognized grammars, such as section
 labels, could be configured.</p>
-<p>As an illustration, consider the combined usage of Litrepl and Vim with the
-<a href="https://github.com/lervag/vimtex">Vimtex</a> plugin to edit and preview LaTeX
-documents instantly.</p>
+<p>As an illustration, consider the combined usage of Litrepl (via the <a href="../vim-plugin/">Vim
+plugin</a>) with the <a href="https://github.com/lervag/vimtex">Vimtex</a> to
+edit and preview LaTeX documents instantly.</p>
 <video controls src="https://user-images.githubusercontent.com/4477729/187065835-3302e93e-6fec-48a0-841d-97986636a347.mp4" muted="true"></video>
 <p>(Note: some browsers might refuse to play the video)</p>
 <h4 id="basic-execution">Basic Execution</h4>
@@ -128,7 +128,9 @@ with a pre-configured label such as <code>python</code>. The result is any tripl
 <code>result</code> section.  In LaTeX documents, sections are marked with
 <code>\begin{...}\end{...}</code> environments correspondingly.</p>
 <p>The primary command for evaluating formatted documents is <code>litrepl
-eval-sections</code>. Consider a markdown document <code>file.md</code>.</p>
+eval-sections</code> which starts the background interactive session (unless
+<code>--foreground</code> is specified), and process the document. Consider a markdown
+document <code>file.md</code>.</p>
 <!--
 
 <pre><code class="language-python">print(&quot;~~~~ markdown&quot;)
@@ -282,12 +284,12 @@ evaluation concludes, it removes the marker from the output section.</p>
 <p>The command <code>litrepl interrupt</code> sends an interrupt signal to the interpreter,
 prompting it to return control sooner (with an exception).</p>
 <h4 id="attaching-interpreter-sessions">Attaching Interpreter Sessions</h4>
-<p>The command <code>litrepl repl [CLASS]</code> where <code>CLASS</code> specifies interpreter class:
-<code>python</code> (the default) <code>ai</code> or <code>sh</code>, attaches to interpreter sessions.  For this
-command to work, <a href="https://linux.die.net/man/1/socat">socat</a> tool needs to be
-installed on your system. Litrepl blocks the pipes for the time of interaction
-so no evaluation is possible while the repl session is active.  For Python and
-Shell interpreters, the command prompt is disabled which is a current technical
+<p>The command <code>litrepl repl CLASS</code> where <code>CLASS</code> specifies interpreter class:
+<code>python</code> <code>ai</code> or <code>sh</code>, attaches to interpreter sessions.  For this command to
+work, <a href="https://linux.die.net/man/1/socat">socat</a> tool needs to be installed on
+your system. Litrepl blocks the pipes for the time of interaction so no
+evaluation is possible while the repl session is active.  For Python and Shell
+interpreters, the command prompt is disabled which is a current technical
 limitation. Use <code>Ctrl+D</code> to safely detach the session. For example:</p>
 <pre><code class="language-sh">$ litrepl repl python
 Opening the interpreter terminal (NO PROMPTS, USE `Ctrl+D` TO DETACH)
@@ -295,7 +297,7 @@ W = 'Hello from repl'
 ^D
 $
 </code></pre>
-<p>Use <code>litrepl eval-code [CLASS]</code> to direct code straight to the interpreter,
+<p>Use <code>litrepl eval-code CLASS</code> to direct code straight to the interpreter,
 bypassing any section formatting steps. In contrast to the <code>repl</code> command,
 <code>eval-code</code> mode features prompt detection, allowing the tool to display the
 interpreter's response and detach while keeping the session open.</p>

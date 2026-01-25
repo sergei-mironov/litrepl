@@ -46,6 +46,8 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="./">Installation</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#installing-release-versions-from-pypi">Installing release versions from Pypi</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#installing-latest-versions-from-git-using-pip">Installing latest versions from Git using Pip</a>
@@ -119,8 +121,18 @@ application and an interface plugin for the Vim editor. The author's preferred
 installation method is using Nix, but if you choose not to use it, you'll need
 to install one or both components separately. Below, we outline several common
 installation methods.</p>
-<p>For the installation of Vim-plugin which is also a part of the project, check the
-<a href="../usage/vim-plugin/">Vim plugin</a> section.</p>
+<p>For the installation of Litrepl Vim plugin, which is also a part of the project,
+check the <a href="../usage/vim-plugin/">Vim plugin</a> section.</p>
+<h3 id="requirements">Requirements</h3>
+<ul>
+<li><strong>POSIX-compatible OS</strong>, typically a Linux. The tool relies on POSIX
+  operations, notably pipes, and depends on certain Shell commands.</li>
+<li><strong>lark-parser</strong> and <strong>psutil</strong> Python packages. These should be handled
+  automatically by the below installation methods.</li>
+<li><strong><a href="http://www.dest-unreach.org/socat/">Socat</a></strong> (Optional) Needed for
+  <code>litrepl repl</code> and Vim's <code>LTerm</code> commands to work. In most operating systems
+  Socat should be installed separately.</li>
+</ul>
 <h3 id="installing-release-versions-from-pypi">Installing release versions from Pypi</h3>
 <ol>
 <li><code>pip install litrepl</code></li>
