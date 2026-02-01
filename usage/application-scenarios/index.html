@@ -63,6 +63,14 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#command-line-running-remote-interpreters-over-ssh">Command Line, Running Remote Interpreters Over SSH</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command-line-converting-formatted-markdown-to-jupyter-notebook">Command Line, Converting formatted Markdown to Jupyter Notebook</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#using-fenced-markdown-syntax-extension">Using fenced Markdown syntax extension</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#using-native-divs-syntax-extension">Using Native divs syntax extension</a>
+    </li>
+        </ul>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#gnu-make-evaluating-code-sections-in-project-documentation">GNU Make, Evaluating Code Sections in Project Documentation</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#vim-setting-up-keybindings">Vim, Setting Up Keybindings</a>
@@ -165,6 +173,53 @@ cat README.md | litrepl --python-interpreter=ipython-testbed.sh
 </code></pre>
 <p>Note that the string <code>ipython</code> must appear in the interpreter name, to let
 Litrepl exercise IPyhton-specific communication settings.</p>
+<h4 id="command-line-converting-formatted-markdown-to-jupyter-notebook">Command Line, Converting formatted Markdown to Jupyter Notebook</h4>
+<p><a href="https://pandoc.org">Pandoc</a> could be used to conver LitREPL-formatted markdown
+documents to the Jupyter Notebook format. In order to make it recognize the code
+and result fields, addtional formatting is required. Currently we aware of two
+options:</p>
+<h5 id="using-fenced-markdown-syntax-extension">Using fenced Markdown syntax extension</h5>
+<p>Mark Jupyter sections with fenced-div markup as described in the <a href="https://pandoc.org/MANUAL.html#jupyter-notebooks">Pandoc
+manual</a>. Consider the
+following <code>file.md</code>:</p>
+<pre><code class="language-markdown">:::::: {.cell .code execution_count=1}
+```python
+print(&quot;Hello Jupyter!&quot;)
+```
+::: {.output .stream .stdout}
+``` result
+Hello Jupyter!
+```
+:::
+::::::
+</code></pre>
+<p>The above format is recognized by both <code>Litrepl</code> and <code>Pandoc</code>, so to
+convert it to the Jupyter Notebook format one may run:</p>
+<pre><code class="language-sh">$ pandoc file.md -o file.ipynb
+</code></pre>
+<p>Unfortunately, other renderers may interpret fenced divs incorrectly.</p>
+<h5 id="using-native-divs-syntax-extension">Using Native divs syntax extension</h5>
+<p>Alternatively, native divs syntax extension could be used. Consider the
+following <code>file.md</code> file:</p>
+<pre><code>&lt;div class=&quot;cell code&quot;&gt;
+```python
+print(&quot;Hello Jupyter!&quot;)
+```
+
+&lt;div class=&quot;output stream stdout&quot;&gt;
+```result
+Hello Jupyter!
+```
+&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Both <code>Litrepl</code> and <code>Pandoc</code> will recognize this format, plus most third-party
+renderers will ignore <code>div</code> tags. The downside of this approach is the fact that
+pandoc now needs <a href="https://pandoc.org/MANUAL.html#extension-native_divs">native divs
+extension</a> to convert the
+document:</p>
+<pre><code class="language-sh">$ pandoc -f markdown+native_divs file.md -o test.ipynb
+</code></pre>
 <h4 id="gnu-make-evaluating-code-sections-in-project-documentation">GNU Make, Evaluating Code Sections in Project Documentation</h4>
 <p>A typical Makefile recipe for updating documentation is structured as follows:</p>
 <pre><code class="language-Makefile">SRC = $(shell find -name '*\.py')
