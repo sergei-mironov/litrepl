@@ -71,6 +71,8 @@
     </li>
         </ul>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command-line-latex-in-pdf-code-highliting-with-minted">Command Line, Latex In-PDF code highliting with Minted</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#gnu-make-evaluating-code-sections-in-project-documentation">GNU Make, Evaluating Code Sections in Project Documentation</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#vim-setting-up-keybindings">Vim, Setting Up Keybindings</a>
@@ -80,6 +82,8 @@
     <li class="toctree-l2"><a class="reference internal" href="#vim-running-the-initial-section-after-interpreter-restart">Vim, Running the Initial Section After Interpreter Restart</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#vim-evaluating-selected-text">Vim, Evaluating Selected Text</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#vim-in-editor-latex-code-highlighting-with-vimtex">Vim, In-Editor Latex code highlighting with Vimtex</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#vim-calling-for-ai-on-a-visual-selection">Vim, Calling for AI on a visual selection</a>
     </li>
@@ -220,6 +224,44 @@ extension</a> to convert the
 document:</p>
 <pre><code class="language-sh">$ pandoc -f markdown+native_divs file.md -o test.ipynb
 </code></pre>
+<h4 id="command-line-latex-in-pdf-code-highliting-with-minted">Command Line, Latex In-PDF code highliting with Minted</h4>
+<p>The following Latex instructions can be used to properly highlight the code and
+result sections. Note, that <code>pygmentize</code> system tool needs to be installed in
+the system.</p>
+<pre><code class="language-tex">\usepackage{minted}
+\renewcommand{\MintedPygmentize}{pygmentize}
+
+% LitREPL-compatible environment for Python code snippets
+\newenvironment{python}
+  {\VerbatimEnvironment
+   \begin{minted}[autogobble,breaklines,fontsize=\footnotesize]{python}}
+  {\end{minted}}
+\BeforeBeginEnvironment{python}{\begin{mdframed}[nobreak=false,everyline=true]}
+\AfterEndEnvironment{python}{\end{mdframed}}
+
+% LitREPL-compatible ai secitons
+\newenvironment{ai}
+  {\vsp\textbf{User:}\vsp}
+  {}
+\newenvironment{airesult}
+  {\vsp\textbf{AI:}\vsp}
+  {}
+
+% LitREPL-compatible environment for code results
+\newenvironment{result}
+  {\VerbatimEnvironment
+   \begin{minted}[autogobble,breaklines,fontsize=\footnotesize]{text}}
+  {\end{minted}}
+\BeforeBeginEnvironment{result}{\begin{mdframed}[nobreak=true,frametitle=\tiny{Result}]}
+\AfterEndEnvironment{result}{\end{mdframed}}
+
+% LitREPL-compatible command for inline code results
+\newcommand{\linline}[2]{#2}
+\newcommand{\st}[1]{\sout{#1}}
+\renewcommand{\t}[1]{\texttt{#1}}
+</code></pre>
+<p>Hint: Use <code>\usepackage[outputdir=_build]{minted}</code> if you specify a separate
+build directory (here - <code>_build</code>). This workarounds a well-known Minted problem.</p>
 <h4 id="gnu-make-evaluating-code-sections-in-project-documentation">GNU Make, Evaluating Code Sections in Project Documentation</h4>
 <p>A typical Makefile recipe for updating documentation is structured as follows:</p>
 <pre><code class="language-Makefile">SRC = $(shell find -name '*\.py')
@@ -285,6 +327,15 @@ last line of the original selection.</p>
 The capital of New Zealand is Wellington.
 </code></pre>
 <p>Internally, the plugin just uses <code>eval-code</code> Litrepl command.</p>
+<h4 id="vim-in-editor-latex-code-highlighting-with-vimtex">Vim, In-Editor Latex code highlighting with Vimtex</h4>
+<p>The following <code>.vimrc</code> Vimtex configuration enables highlighting of Python
+code sections in LaTeX documents. We typically need to call these functions from
+the <code>BufEnter</code> event handler.</p>
+<pre><code class="language-vim">&quot; .localvimrc
+call vimtex#syntax#nested#include('python')
+call vimtex#syntax#core#new_region_env('texLitreplZone', 'l[a-zA-Z0-9]*code',
+  \ {'contains': '@vimtex_nested_python'})
+</code></pre>
 <h4 id="vim-calling-for-ai-on-a-visual-selection">Vim, Calling for AI on a visual selection</h4>
 <p><em>Note: <code>litrepl_extras.vim</code> has been reworked since 3.14.0.</em></p>
 <p><em>Note: this is not stable and a subject to change.</em></p>

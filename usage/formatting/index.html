@@ -54,20 +54,8 @@
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">Formatting</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#markdown">Markdown</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#basic-syntax">Basic syntax</a>
-    </li>
-        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#latex">Latex</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#basic-syntax_1">Basic syntax</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#in-pdf-code-highliting-with-minted">In-PDF code highliting with Minted</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#vim-in-editor-code-highlighting-with-vimtex">Vim In-editor code highlighting with Vimtex</a>
-    </li>
-        </ul>
     </li>
     </ul>
                   </li>
@@ -114,7 +102,6 @@
               
                 <h1 id="formatting">Formatting</h1>
 <h2 id="markdown">Markdown</h2>
-<h3 id="basic-syntax">Basic syntax</h3>
 <p>Executable sections are verbatim sections marked with a number of tags,
 including "python" and "code".</p>
 <pre><code>``` python
@@ -134,7 +121,6 @@ Hello, World!
 &lt;!-- noresult --&gt;
 </code></pre>
 <h2 id="latex">Latex</h2>
-<h3 id="basic-syntax_1">Basic syntax</h3>
 <p>Litrepl treats <code>\begin{python}\end{python}</code> environment as code sections and
 <code>\begin{result}\end{result}</code> environment as result sections. The names are
 currently hardcoded into the simplified LitREPL parser. Wrapping it in other
@@ -174,53 +160,6 @@ Hello, World!
 is treated as a Python printable expression. The second arguemnt is an immediate
 result section where the value of expression will be placed.</p>
 <pre><code class="language-tex">\linline{W}{Hello, World!}
-</code></pre>
-<h3 id="in-pdf-code-highliting-with-minted">In-PDF code highliting with Minted</h3>
-<p>The following Latex instructions can be used to properly highlight the code and
-result sections. Note, that <code>pygmentize</code> system tool needs to be installed in
-the system.</p>
-<pre><code class="language-tex">\usepackage{minted}
-\renewcommand{\MintedPygmentize}{pygmentize}
-
-% LitREPL-compatible environment for Python code snippets
-\newenvironment{python}
-  {\VerbatimEnvironment
-   \begin{minted}[autogobble,breaklines,fontsize=\footnotesize]{python}}
-  {\end{minted}}
-\BeforeBeginEnvironment{python}{\begin{mdframed}[nobreak=false,everyline=true]}
-\AfterEndEnvironment{python}{\end{mdframed}}
-
-% LitREPL-compatible ai secitons
-\newenvironment{ai}
-  {\vsp\textbf{User:}\vsp}
-  {}
-\newenvironment{airesult}
-  {\vsp\textbf{AI:}\vsp}
-  {}
-
-% LitREPL-compatible environment for code results
-\newenvironment{result}
-  {\VerbatimEnvironment
-   \begin{minted}[autogobble,breaklines,fontsize=\footnotesize]{text}}
-  {\end{minted}}
-\BeforeBeginEnvironment{result}{\begin{mdframed}[nobreak=true,frametitle=\tiny{Result}]}
-\AfterEndEnvironment{result}{\end{mdframed}}
-
-% LitREPL-compatible command for inline code results
-\newcommand{\linline}[2]{#2}
-\newcommand{\st}[1]{\sout{#1}}
-\renewcommand{\t}[1]{\texttt{#1}}
-</code></pre>
-<p>Hint: Use <code>\usepackage[outputdir=_build]{minted}</code> if you specify a separate
-build directory (here - <code>_build</code>). This workarounds a well-known Minted problem.</p>
-<h3 id="vim-in-editor-code-highlighting-with-vimtex">Vim In-editor code highlighting with Vimtex</h3>
-<p>The following <code>.vimrc</code> Vimtex configuration enables highlighting of Python
-code sections in LaTeX documents. We typically need to call these functions from
-the <code>BufEnter</code> event handler.</p>
-<pre><code class="language-vim">&quot; .localvimrc
-call vimtex#syntax#nested#include('python')
-call vimtex#syntax#core#new_region_env('texLitreplZone', 'l[a-zA-Z0-9]*code',
-  \ {'contains': '@vimtex_nested_python'})
 </code></pre>
               
             </div>
