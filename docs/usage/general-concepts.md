@@ -9,12 +9,16 @@ Litrepl supports subsets of **Markdown** and **LaTeX** formatting in order to
 recognize the sections. Some aspects of the recognized grammars, such as section
 labels, could be configured.
 
-As an illustration, consider the combined usage of Litrepl (via the [Vim
-plugin](./vim-plugin.md)) with the [Vimtex](https://github.com/lervag/vimtex) to
-edit and preview LaTeX documents instantly.
+As an illustration, consider the usage of Litrepl for
+editing LaTeX documents where we combine
+[Litrepl](./vim-plugin.md) and [Vimtex](https://github.com/lervag/vimtex) Vim
+plugins and apply
+[Python highlighting in Vim](./application-scenarios.md#vim-in-editor-latex-code-highlighting-with-vimtex) with
+[Latex In-PDF code highliting](./application-scenarios.md#command-line-latex-in-pdf-code-highliting-with-minted)
 
 <video controls src="https://user-images.githubusercontent.com/4477729/187065835-3302e93e-6fec-48a0-841d-97986636a347.mp4" muted="true"></video>
-(Note: some browsers might refuse to play the video)
+Note: some browsers might refuse to play the video. Chromium/Chrome is known
+to work well.
 
 #### Basic Execution
 
