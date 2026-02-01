@@ -207,6 +207,7 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
       f.write(str(ret))
     exit(ret)
   else:
+    pdebug(f"starting in {fns.wd}")
     finp,foutp=open_parent_pipes(fns.inp,fns.outp)
     i.setup_child(a,finp,foutp)
     if write_child_pid(fns.pidf,npid):
@@ -251,7 +252,9 @@ def restart(a:LitreplArgs,st:SType):
 def running(a:LitreplArgs,st:SType)->bool:
   """ Checks if the background session was run or not. """
   fns = pipenames(a,st)
-  return (isfile(fns.pidf) and exists(fns.inp) and exists(fns.outp))
+  res=(isfile(fns.pidf) and exists(fns.inp) and exists(fns.outp))
+  pdebug(f"running? {res}")
+  return res
 
 def stop(a:LitreplArgs,st:SType)->None:
   """ Stops the background interpreter session. """
@@ -584,13 +587,16 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       code=tree.children[1].children[0].value
       spaces=tree.children[2].children[0].value if tree.children[2].children else ''
       im=tree.children[0].children[0].value
+      result=''
       if es.nsec in nsecs:
         fns,ss=_st2interp(SType.SPython)
         if isinstance(ss,Interpreter):
           result=process(a,fns,ss,'print('+code+');\n')[0].rstrip('\n')
         ec=_checkecode(fns,es.nsec,False)
         if ec is not ECODE_RUNNING:
-          pusererror(failmsg(fns,ss,ec))
+          msg=failmsg(fns,ss,ec)
+          pstderr(msg)
+          result=msg
       else:
         result=tree.children[4].children[0].value if tree.children[4].children else ''
       self._print(f"{im}{OBR}{code}{CBR}{spaces}{OBR}{result}{CBR}")

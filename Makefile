@@ -51,6 +51,7 @@ docs: .stamp_docs_deploy
 	for d in $(DOCS) ; do \
 		echo "Evaluating $$d" ; \
 		cat $$d | litrepl --foreground \
+				--filetype=markdown \
 				--exception-exitcode=100 \
 				--result-textwidth=0 \
 				--ai-interpreter=- \

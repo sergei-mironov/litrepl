@@ -21,7 +21,7 @@ following guidelines are applied:
   - Import name lists
   - Function argument declarations
 
-### Building Targets
+### Building Nix Targets
 
 To build individual Nix expressions, execute the command `nix build '.#NAME'`,
 replacing `NAME` with the actual name of the Nix expression you want to build.
