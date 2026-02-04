@@ -10,7 +10,7 @@ PAPER_TAR_GZ = paper/tex/paper-$(VERSION)-$(REVISION).tar.gz
 TESTS = ./sh/runtests.sh
 MAN = man/litrepl.1
 DOCS = $(shell find docs -name '*\.md' | grep -v static | grep -v examples)
-TOP = flake.nix default.nix Makefile .github/workflows/testing.yaml
+TOP = flake.nix default.nix Makefile .github/workflows/testing.yaml sh/runtests.sh
 EXAMPLES = docs/examples/example.md docs/examples/example.tex
 
 .PHONY: examples # Build examples

@@ -68,13 +68,13 @@ will ask Nix to install the development dependencies and open the shell.
 
 ### Testing
 
-The `runtests.sh` script runs all tests by default, but accepts command-line
-arguments for running specific tests. Note, that Litrepl distinguishes the
-Python interpreter use to run the `litrepl` script (`-p` argument) from the
-Python interpreters used to run the code sections (`-i` argument).  By default,
-`./runtest.sh` runs the litrepl script with the `python` interpreter (whatever
-it is, leaving the OS to decide) and iterates over all visible Python
-interpreters for running code sections.
+The [sh/runtests.sh](static/runtests.sh) script runs all tests by default, but
+accepts command-line arguments for running specific tests. Note, that Litrepl
+distinguishes the Python interpreter use to run the `litrepl` script (`-p`
+argument) from the Python interpreters used to run the code sections (`-i`
+argument).  By default, `runtest.sh` runs the litrepl script with the `python`
+interpreter (whatever it is, leaving the OS to decide) and iterates over all
+visible Python interpreters for running code sections.
 
 
 <!--
@@ -108,10 +108,10 @@ Examples:
 ~~~~
 <!-- noresult -->
 
-The project Makefile provides a couple of phony targets for testing:
-`make test` runs the testing with all default parameters (effectively checking
-all visible Python interpreters), while the `make test-small` makes a run with
-the default system Python and IPython interpreters only.
+The project Makefile provides a couple of phony targets for testing: `make test`
+runs the testing with all default parameters (effectively checking all Python
+interpreters available in PATH), while the `make test-small` makes a run with
+just the default system Python and IPython interpreters only.
 
 ### Coverage
 
