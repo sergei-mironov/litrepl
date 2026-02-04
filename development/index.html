@@ -169,13 +169,13 @@ Running</p>
 </code></pre>
 <p>will ask Nix to install the development dependencies and open the shell.</p>
 <h3 id="testing">Testing</h3>
-<p>The <code>runtests.sh</code> script runs all tests by default, but accepts command-line
-arguments for running specific tests. Note, that Litrepl distinguishes the
-Python interpreter use to run the <code>litrepl</code> script (<code>-p</code> argument) from the
-Python interpreters used to run the code sections (<code>-i</code> argument).  By default,
-<code>./runtest.sh</code> runs the litrepl script with the <code>python</code> interpreter (whatever
-it is, leaving the OS to decide) and iterates over all visible Python
-interpreters for running code sections.</p>
+<p>The <a href="static/runtests.sh">sh/runtests.sh</a> script runs all tests by default, but
+accepts command-line arguments for running specific tests. Note, that Litrepl
+distinguishes the Python interpreter use to run the <code>litrepl</code> script (<code>-p</code>
+argument) from the Python interpreters used to run the code sections (<code>-i</code>
+argument).  By default, <code>./runtest.sh</code> runs the litrepl script with the <code>python</code>
+interpreter (whatever it is, leaving the OS to decide) and iterates over all
+visible Python interpreters for running code sections.</p>
 <!--
 
 <pre><code class="language-python">print(&quot;~~~~ shell\n[ LitREPL-DEV ] $ runtests.sh --help&quot;)
@@ -208,10 +208,10 @@ Examples:
 </code></pre>
 <!-- noresult -->
 
-<p>The project Makefile provides a couple of phony targets for testing:
-<code>make test</code> runs the testing with all default parameters (effectively checking
-all visible Python interpreters), while the <code>make test-small</code> makes a run with
-the default system Python and IPython interpreters only.</p>
+<p>The project Makefile provides a couple of phony targets for testing: <code>make test</code>
+runs the testing with all default parameters (effectively checking all Python
+interpreters available in PATH), while the <code>make test-small</code> makes a run with
+just the default system Python and IPython interpreters only.</p>
 <h3 id="coverage">Coverage</h3>
 <p>Coverage is performed after the full testing cycle.</p>
 <p>The latest coverage report is <a href="../coverage/">available</a>.</p>
