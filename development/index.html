@@ -170,7 +170,7 @@ the following guidelines are applied:</p>
 <li>Function argument declarations</li>
 </ul>
 <h3 id="running-tests">Running tests</h3>
-<p>The <a href="../static/runtests.sh">sh/runtests.sh</a> script runs all or selected tests.
+<p>The <a href="../static/sh/runtests.sh">sh/runtests.sh</a> script runs all or selected tests.
 Note, that Litrepl distinguishes the Python interpreter used to run the <code>litrepl</code>
 script (<code>-p</code> argument) from the Python interpreters used to run the code
 sections (<code>-i</code> argument).  By default, <code>runtest.sh</code> runs the litrepl script with
@@ -218,9 +218,10 @@ just the default system Python and IPython interpreters only.</p>
 <p>Coverage is performed after the full testing cycle.</p>
 <p>The latest coverage report is <a href="../coverage/">available</a>.</p>
 <h3 id="github-ci">Github CI</h3>
-<p>The <a href="../static/testing.yaml">.github/workflows/testing.yaml</a> rule set
-instructs Github CI to run the set of <code>test-small</code> tests for some versions of
-Python interpreter. The badge on the main page highlightes the CI status.</p>
+<p>The <a href="../static/.github/workflows/testing.yaml">.github/workflows/testing.yaml</a>
+rule set instructs Github CI to run the set of <code>test-small</code> tests for some
+versions of Python interpreter. The badge on the main page highlightes the CI
+status.</p>
 <h3 id="other-development-scenatios">Other Development Scenatios</h3>
 <h4 id="screencast-recording">Screencast Recording</h4>
 <p>Another shell which might be useful is <code>shell-screencast</code>. This would build the
