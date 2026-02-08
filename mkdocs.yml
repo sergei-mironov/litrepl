@@ -4,12 +4,16 @@ nav:
   - Installation: installation.md
   - Usage:
     - General concepts: usage/general-concepts.md
-    - Formatting: usage/formatting.md
+    - Formatting documents: usage/formatting.md
     - Vim plugin: usage/vim-plugin.md
-    - Application Scenarios: usage/application-scenarios.md
-  - Reference: reference.md
-  - Development: development.md
-  - Related: related.md
+    - How-Tos: usage/application-scenarios.md
+  - Development:
+    - Common scenarios: development/common-scenarios.md
+    - Advanced: development/more-scenarios.md
+    - Insights and limitations: development/insights-limitations.md
+  - Reference:
+    - Command line and Vim: reference.md
+  - Related projects: related.md
 theme: readthedocs
 markdown_extensions:
   - markdown_include.include:
