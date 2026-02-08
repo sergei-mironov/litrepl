@@ -62,7 +62,7 @@ docs: .stamp_docs_deploy
 		>$$d.new ; \
 		mv $$d.new $$d ; \
 	done ; \
-	mkcontributing.sh
+	./sh/mkcontributing.sh
 	mkdocs build
 	touch $@
 
