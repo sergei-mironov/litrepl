@@ -65,25 +65,29 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="./">Development</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#contributing">Contributing</a>
+    <li class="toctree-l2"><a class="reference internal" href="#environment-setup">Environment setup</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#building-nix-targets">Building Nix Targets</a>
+    <li class="toctree-l2"><a class="reference internal" href="#directory-structure">Directory Structure</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#development-environments-and-setup">Development Environments and Setup</a>
+    <li class="toctree-l2"><a class="reference internal" href="#coding-style">Coding Style</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#coverage">Coverage</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#tools-for-screencast-recording">Tools for Screencast Recording</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#other-development-scenarios">Other Development Scenarios</a>
-    </li>
     <li class="toctree-l2"><a class="reference internal" href="#github-ci">Github CI</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#technical-insights">Technical Insights</a>
+    <li class="toctree-l2"><a class="reference internal" href="#other-development-scenatios">Other Development Scenatios</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#screencast-recording">Screencast Recording</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#known-limitations">Known Limitations</a>
+    <li class="toctree-l3"><a class="reference internal" href="#more-nix-targets">More Nix Targets</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#more-development-scenarios">More Development Scenarios</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#insight-and-limitation">Insight And Limitation</a>
     </li>
     </ul>
                 </li>
@@ -121,9 +125,37 @@ framework. The file <a href="../static/flake.nix">flake.nix</a> manages the sour
 dependencies required by Nix, whereas <a href="../static/default.nix">default.nix</a> specifies
 common build targets, including PyPI and Vim packages, demo Vim configurations,
 development shells, and more.</p>
-<h3 id="contributing">Contributing</h3>
-<p>The original author used his favorite Python coding style for this project, the
-following guidelines are applied:</p>
+<h3 id="environment-setup">Environment setup</h3>
+<p>The default development shell is defined in the <code>./default.nix</code> as a Nix
+expression named <code>shell</code> which is the default name for development shells.
+Running</p>
+<pre><code class="language-sh">$ nix develop
+</code></pre>
+<p>will ask Nix to install the development dependencies and open the shell.</p>
+<h3 id="directory-structure">Directory Structure</h3>
+<p>The project is organized in the following way:</p>
+<p>The code:</p>
+<ul>
+<li><code>python</code> contains most of the Litrepl code.  <code>python/litrepl</code> is where most of
+  the code reside, <code>python/bin</code> is the entry point.</li>
+<li><code>vim</code> contains the code for the Litrepl Vim plugin.</li>
+<li><code>semver.txt</code> contains the current Litrepl version, <code>semver_released.txt</code>
+  tracks the last Litrepl version uploaded to Pypi.</li>
+</ul>
+<p>The environment:</p>
+<ul>
+<li><code>vimrc</code> contains vim configurations used by the author for the development.</li>
+<li><code>sh</code> contains vaious shell scripts and tests for the development.</li>
+<li><code>env.sh</code> contains developement shell definitions. Notably, it adds <code>python</code> to
+  the <code>PYTHONPATH</code>, <code>sh</code> to <code>PATH</code>, etc.</li>
+<li><code>Makefile</code> encodes most of the developmemnt actions. <code>make help</code> will print
+  the list of them.</li>
+<li><code>flake.nix</code>, <code>default.nix</code>, <code>shell.nix</code> Nix expressions describing software
+  build targets and dependencies. See the latter sections for the list.</li>
+</ul>
+<h3 id="coding-style">Coding Style</h3>
+<p>The author uses his favorite yet unusual Python coding style for this project,
+the following guidelines are applied:</p>
 <ul>
 <li>Use 2-space indentation for everything.</li>
 <li>Use CamelCase for class names and snake_case for function names</li>
@@ -135,47 +167,13 @@ following guidelines are applied:</p>
 <li>Import name lists</li>
 <li>Function argument declarations</li>
 </ul>
-<h3 id="building-nix-targets">Building Nix Targets</h3>
-<p>To build individual Nix expressions, execute the command <code>nix build '.#NAME'</code>,
-replacing <code>NAME</code> with the actual name of the Nix expression you want to build.
-If the build is successful, Nix places the results of the last build in a
-symbolic link located at <code>./result</code>.</p>
-<p>For example, to build a version of Vim pre-configured for demo, run</p>
-<pre><code class="language-sh">$ nix build '.#vim-demo'
-$ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
-</code></pre>
-<p>The list of Nix build targets includes:</p>
-<ul>
-<li><code>litrepl-release</code> - Litrepl script and Python lib</li>
-<li><code>litrepl-release-pypi</code> - Litrepl script and Python lib</li>
-<li><code>vim-litrepl-release</code> - Vim with locally built litrepl plugin</li>
-<li><code>vim-litrepl-release-pypi</code> - Vim with litrepl plugin built from PYPI</li>
-<li><code>vim-test</code> - A minimalistic Vim with a single litrepl plugin</li>
-<li><code>vim-demo</code> - Vim configured to use litrepl suitable for recording screencasts.
-  Uses the latest released version of Litrepl rather than the current revision.</li>
-<li><code>vim-plug</code> - Vim configured to use litrepl via the Plug manager</li>
-<li><code>shell-dev</code> - The development shell</li>
-<li><code>shell-screencast</code> - The shell for recording demonstrations, includes <code>vim-demo</code>.</li>
-</ul>
-<p>See the <code>local.collection</code> attribute-set in the
-<a href="../static/default.nix">default.nix</a> for the full list of defined targets.</p>
-<p>Note: The default development shell <code>shell-dev</code> installs many dependencies,
-the users are encouraged to define their own shells when needed.</p>
-<h3 id="development-environments-and-setup">Development Environments and Setup</h3>
-<p>The default development shell is defined in the <code>./default.nix</code> as a Nix
-expression named <code>shell</code> which is the default name for development shells.
-Running</p>
-<pre><code class="language-sh">$ nix develop
-</code></pre>
-<p>will ask Nix to install the development dependencies and open the shell.</p>
 <h3 id="testing">Testing</h3>
-<p>The <a href="../static/runtests.sh">sh/runtests.sh</a> script runs all tests by default, but
-accepts command-line arguments for running specific tests. Note, that Litrepl
-distinguishes the Python interpreter use to run the <code>litrepl</code> script (<code>-p</code>
-argument) from the Python interpreters used to run the code sections (<code>-i</code>
-argument).  By default, <code>./runtest.sh</code> runs the litrepl script with the <code>python</code>
-interpreter (whatever it is, leaving the OS to decide) and iterates over all
-visible Python interpreters for running code sections.</p>
+<p>The <a href="../static/runtests.sh">sh/runtests.sh</a> script runs all or selected tests.
+Note, that Litrepl distinguishes the Python interpreter used to run the <code>litrepl</code>
+script (<code>-p</code> argument) from the Python interpreters used to run the code
+sections (<code>-i</code> argument).  By default, <code>runtest.sh</code> runs the litrepl script with
+the <code>python</code> interpreter (whatever it is, leaving the OS to decide) and iterates
+over all visible Python interpreters for running code sections.</p>
 <!--
 
 <pre><code class="language-python">print(&quot;~~~~ shell\n[ LitREPL-DEV ] $ runtests.sh --help&quot;)
@@ -215,7 +213,12 @@ just the default system Python and IPython interpreters only.</p>
 <h3 id="coverage">Coverage</h3>
 <p>Coverage is performed after the full testing cycle.</p>
 <p>The latest coverage report is <a href="../coverage/">available</a>.</p>
-<h3 id="tools-for-screencast-recording">Tools for Screencast Recording</h3>
+<h3 id="github-ci">Github CI</h3>
+<p>The <a href="../static/testing.yaml">.github/workflows/testing.yaml</a> rule set
+instructs Github CI to run the set of <code>test-small</code> tests for some versions of
+Python interpreter. The badge on the main page highlightes the CI status.</p>
+<h3 id="other-development-scenatios">Other Development Scenatios</h3>
+<h4 id="screencast-recording">Screencast Recording</h4>
 <p>Another shell which might be useful is <code>shell-screencast</code>. This would build the
 full set of Litrepl tools and makes sure that the screencasting software is
 available. To enter it, specify its Nix-flake path as follows:</p>
@@ -227,7 +230,33 @@ arranges demo and recorder wondows.</p>
 </code></pre>
 <p><code>screencast.sh</code> accepts an optional parameter specifying the template file to
 open for the recording session.</p>
-<h3 id="other-development-scenarios">Other Development Scenarios</h3>
+<h4 id="more-nix-targets">More Nix Targets</h4>
+<p>To build individual Nix expressions, execute the command <code>nix build '.#NAME'</code>,
+replacing <code>NAME</code> with the actual name of the Nix expression you want to build.
+If the build is successful, Nix places the results of the last build in a
+symbolic link located at <code>./result</code>.</p>
+<p>For example, to build a version of Vim pre-configured for demo, run</p>
+<pre><code class="language-sh">$ nix build '.#vim-demo'
+$ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
+</code></pre>
+<p>The list of Nix build targets includes:</p>
+<ul>
+<li><code>litrepl-release</code> - Litrepl script and Python lib</li>
+<li><code>litrepl-release-pypi</code> - Litrepl script and Python lib</li>
+<li><code>vim-litrepl-release</code> - Vim with locally built litrepl plugin</li>
+<li><code>vim-litrepl-release-pypi</code> - Vim with litrepl plugin built from PYPI</li>
+<li><code>vim-test</code> - A minimalistic Vim with a single litrepl plugin</li>
+<li><code>vim-demo</code> - Vim configured to use litrepl suitable for recording screencasts.
+  Uses the latest released version of Litrepl rather than the current revision.</li>
+<li><code>vim-plug</code> - Vim configured to use litrepl via the Plug manager</li>
+<li><code>shell-dev</code> - The development shell</li>
+<li><code>shell-screencast</code> - The shell for recording demonstrations, includes <code>vim-demo</code>.</li>
+</ul>
+<p>See the <code>local.collection</code> attribute-set in the
+<a href="../static/default.nix">default.nix</a> for the full list of defined targets.</p>
+<p>Note: The default development shell <code>shell-dev</code> installs many dependencies,
+the users are encouraged to define their own shells when needed.</p>
+<h4 id="more-development-scenarios">More Development Scenarios</h4>
 <p>The top-level <a href="../static/Makefile">Makefile</a> encodes common development scenarios:</p>
 <!--
 
@@ -260,11 +289,7 @@ wheel:        Build Python wheel (the DEFAULT target)
 </code></pre>
 <!-- noresult -->
 
-<h3 id="github-ci">Github CI</h3>
-<p>The <a href="../static/testing.yaml">.github/workflows/testing.yaml</a> rule set
-instructs Github CI to run the set of <code>test-small</code> tests for some versions of
-Python interpreter. The badge on the main page highlightes the CI status.</p>
-<h3 id="technical-insights">Technical Insights</h3>
+<h3 id="insight-and-limitation">Insight And Limitation</h3>
 <p>The following events should normally happen after users type the <code>:LitEval1</code>
 command:</p>
 <ol>
@@ -283,7 +308,7 @@ command:</p>
 <li>Re-evaluating sections with temporary results causes LitREPL to update
    these results.</li>
 </ol>
-<h3 id="known-limitations">Known Limitations</h3>
+<p>Known Limitations:</p>
 <ul>
 <li>Formatting: Nested code sections are not supported.</li>
 <li>~~Formatting: Special symbols in the Python output could invalidate the
