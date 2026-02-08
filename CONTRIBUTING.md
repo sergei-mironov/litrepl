@@ -6,7 +6,7 @@ dependencies required by Nix, whereas [default.nix](./default.nix) specifies
 common build targets, including PyPI and Vim packages, demo Vim configurations,
 development shells, and more.
 
-### Environment Setup
+### Environment setup
 
 The default development shell is defined in the `./default.nix` as a Nix
 expression named `shell` which is the default name for development shells.
@@ -18,7 +18,7 @@ $ nix develop
 
 will ask Nix to install the development dependencies and open the shell.
 
-### Directory Structure
+### Directory structure
 
 The project is organized in the following way:
 
@@ -41,7 +41,7 @@ The environment:
 * `flake.nix`, `default.nix`, `shell.nix` Nix expressions describing software
   build targets and dependencies.
 
-### Coding Style
+### Coding style
 
 The author uses his favorite yet unusual Python coding style for this project,
 the following guidelines are applied:
@@ -101,6 +101,13 @@ The project Makefile provides a couple of phony targets for testing: `make test`
 runs the testing with all default parameters (effectively checking all Python
 interpreters available in PATH), while the `make test-small` makes a run with
 just the default system Python and IPython interpreters only.
+
+### Updating version
+
+We follow the https://semver.org/ guidelines for setting the package version.
+
+The `./semver.txt` file contains the version string. Please update it according to
+the nature of changes and include into the pull request.
 
 ### More
 
