@@ -65,13 +65,15 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="./">Development</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#environment-setup">Environment Setup</a>
+    <li class="toctree-l2"><a class="reference internal" href="#environment-setup">Environment setup</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#directory-structure">Directory Structure</a>
+    <li class="toctree-l2"><a class="reference internal" href="#directory-structure">Directory structure</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#coding-style">Coding Style</a>
+    <li class="toctree-l2"><a class="reference internal" href="#coding-style">Coding style</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#running-tests">Running tests</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#updating-version">Updating version</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#coverage">Coverage</a>
     </li>
@@ -127,14 +129,14 @@ framework. The file <a href="../static/flake.nix">flake.nix</a> manages the sour
 dependencies required by Nix, whereas <a href="../static/default.nix">default.nix</a> specifies
 common build targets, including PyPI and Vim packages, demo Vim configurations,
 development shells, and more.</p>
-<h3 id="environment-setup">Environment Setup</h3>
+<h3 id="environment-setup">Environment setup</h3>
 <p>The default development shell is defined in the <code>./default.nix</code> as a Nix
 expression named <code>shell</code> which is the default name for development shells.
 Running</p>
 <pre><code class="language-sh">$ nix develop
 </code></pre>
 <p>will ask Nix to install the development dependencies and open the shell.</p>
-<h3 id="directory-structure">Directory Structure</h3>
+<h3 id="directory-structure">Directory structure</h3>
 <p>The project is organized in the following way:</p>
 <p>The code:</p>
 <ul>
@@ -155,7 +157,7 @@ Running</p>
 <li><code>flake.nix</code>, <code>default.nix</code>, <code>shell.nix</code> Nix expressions describing software
   build targets and dependencies.</li>
 </ul>
-<h3 id="coding-style">Coding Style</h3>
+<h3 id="coding-style">Coding style</h3>
 <p>The author uses his favorite yet unusual Python coding style for this project,
 the following guidelines are applied:</p>
 <ul>
@@ -212,6 +214,10 @@ Examples:
 runs the testing with all default parameters (effectively checking all Python
 interpreters available in PATH), while the <code>make test-small</code> makes a run with
 just the default system Python and IPython interpreters only.</p>
+<h3 id="updating-version">Updating version</h3>
+<p>We follow the https://semver.org/ guidelines for setting the package version.</p>
+<p>The <code>./semver.txt</code> file contains the version string. Please update it according to
+the nature of changes and include into the pull request.</p>
 <!-- END OF CONTRIBUTING.md -->
 
 <h3 id="coverage">Coverage</h3>
