@@ -65,13 +65,13 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="./">Development</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#environment-setup">Environment setup</a>
+    <li class="toctree-l2"><a class="reference internal" href="#environment-setup">Environment Setup</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#directory-structure">Directory Structure</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#coding-style">Coding Style</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a>
+    <li class="toctree-l2"><a class="reference internal" href="#running-tests">Running tests</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#coverage">Coverage</a>
     </li>
@@ -87,7 +87,7 @@
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#insight-and-limitation">Insight And Limitation</a>
+    <li class="toctree-l2"><a class="reference internal" href="#insights-and-limitations">Insights And Limitations</a>
     </li>
     </ul>
                 </li>
@@ -120,12 +120,14 @@
             <div class="section" itemprop="articleBody">
               
                 <h2 id="development">Development</h2>
+<!-- BEGIN OF CONTRIBUTING.md -->
+
 <p>Litrepl uses <a href="https://nixos.org/nix">Nix</a> as its main development
 framework. The file <a href="../static/flake.nix">flake.nix</a> manages the source-level
 dependencies required by Nix, whereas <a href="../static/default.nix">default.nix</a> specifies
 common build targets, including PyPI and Vim packages, demo Vim configurations,
 development shells, and more.</p>
-<h3 id="environment-setup">Environment setup</h3>
+<h3 id="environment-setup">Environment Setup</h3>
 <p>The default development shell is defined in the <code>./default.nix</code> as a Nix
 expression named <code>shell</code> which is the default name for development shells.
 Running</p>
@@ -151,7 +153,7 @@ Running</p>
 <li><code>Makefile</code> encodes most of the developmemnt actions. <code>make help</code> will print
   the list of them.</li>
 <li><code>flake.nix</code>, <code>default.nix</code>, <code>shell.nix</code> Nix expressions describing software
-  build targets and dependencies. See the latter sections for the list.</li>
+  build targets and dependencies.</li>
 </ul>
 <h3 id="coding-style">Coding Style</h3>
 <p>The author uses his favorite yet unusual Python coding style for this project,
@@ -167,7 +169,7 @@ the following guidelines are applied:</p>
 <li>Import name lists</li>
 <li>Function argument declarations</li>
 </ul>
-<h3 id="testing">Testing</h3>
+<h3 id="running-tests">Running tests</h3>
 <p>The <a href="../static/runtests.sh">sh/runtests.sh</a> script runs all or selected tests.
 Note, that Litrepl distinguishes the Python interpreter used to run the <code>litrepl</code>
 script (<code>-p</code> argument) from the Python interpreters used to run the code
@@ -210,6 +212,8 @@ Examples:
 runs the testing with all default parameters (effectively checking all Python
 interpreters available in PATH), while the <code>make test-small</code> makes a run with
 just the default system Python and IPython interpreters only.</p>
+<!-- END OF CONTRIBUTING.md -->
+
 <h3 id="coverage">Coverage</h3>
 <p>Coverage is performed after the full testing cycle.</p>
 <p>The latest coverage report is <a href="../coverage/">available</a>.</p>
@@ -289,8 +293,8 @@ wheel:        Build Python wheel (the DEFAULT target)
 </code></pre>
 <!-- noresult -->
 
-<h3 id="insight-and-limitation">Insight And Limitation</h3>
-<p>The following events should normally happen after users type the <code>:LitEval1</code>
+<h3 id="insights-and-limitations">Insights And Limitations</h3>
+<p>The following events should normally happen after users type the <code>:LEval</code>
 command:</p>
 <ol>
 <li>On the first run, LitREPL starts the Python interpreter in the background.
