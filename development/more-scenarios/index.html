@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Advanced - Litrepl Docs</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Advanced";
+        var mkdocs_page_input_path = "development/more-scenarios.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Litrepl Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Usage</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/general-concepts/">General concepts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/formatting/">Formatting</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/vim-plugin/">Vim plugin</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/application-scenarios/">Application Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Development</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../common-scenarios/">Common scenarios</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Advanced</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#screencast-recording">Screencast Recording</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#more-nix-targets">More Nix Targets</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#more-development-scenarios">More Development Scenarios</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../insights-limitations/">Insights and limitations</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../reference/">Reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../related/">Related</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Litrepl Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Development</li>
+      <li class="breadcrumb-item active">Advanced</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="other-development-scenatios">Other Development Scenatios</h2>
+<h3 id="screencast-recording">Screencast Recording</h3>
+<p>Another shell which might be useful is <code>shell-screencast</code>. This would build the
+full set of Litrepl tools and makes sure that the screencasting software is
+available. To enter it, specify its Nix-flake path as follows:</p>
+<pre><code class="language-sh">$ nix develop '.#shell-screencast'
+</code></pre>
+<p>In the opened shell, run the <code>screencast.sh</code> and wait a second, until the script
+arranges demo and recorder wondows.</p>
+<pre><code class="language-sh">$ screencast.sh
+</code></pre>
+<p><code>screencast.sh</code> accepts an optional parameter specifying the template file to
+open for the recording session.</p>
+<h3 id="more-nix-targets">More Nix Targets</h3>
+<p>To build individual Nix expressions, execute the command <code>nix build '.#NAME'</code>,
+replacing <code>NAME</code> with the actual name of the Nix expression you want to build.
+If the build is successful, Nix places the results of the last build in a
+symbolic link located at <code>./result</code>.</p>
+<p>For example, to build a version of Vim pre-configured for demo, run</p>
+<pre><code class="language-sh">$ nix build '.#vim-demo'
+$ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
+</code></pre>
+<p>The list of Nix build targets includes:</p>
+<ul>
+<li><code>litrepl-release</code> - Litrepl script and Python lib</li>
+<li><code>litrepl-release-pypi</code> - Litrepl script and Python lib</li>
+<li><code>vim-litrepl-release</code> - Vim with locally built litrepl plugin</li>
+<li><code>vim-litrepl-release-pypi</code> - Vim with litrepl plugin built from PYPI</li>
+<li><code>vim-test</code> - A minimalistic Vim with a single litrepl plugin</li>
+<li><code>vim-demo</code> - Vim configured to use litrepl suitable for recording screencasts.
+  Uses the latest released version of Litrepl rather than the current revision.</li>
+<li><code>vim-plug</code> - Vim configured to use litrepl via the Plug manager</li>
+<li><code>shell-dev</code> - The development shell</li>
+<li><code>shell-screencast</code> - The shell for recording demonstrations, includes <code>vim-demo</code>.</li>
+</ul>
+<p>See the <code>local.collection</code> attribute-set in the
+<a href="../../static/default.nix">default.nix</a> for the full list of defined targets.</p>
+<p>Note: The default development shell <code>shell-dev</code> installs many dependencies,
+the users are encouraged to define their own shells when needed.</p>
+<h3 id="more-development-scenarios">More Development Scenarios</h3>
+<p>The top-level <a href="../../static/Makefile">Makefile</a> encodes common development scenarios:</p>
+<!--
+
+<pre><code class="language-python">print(&quot;~~~~ shell\n[ LitREPL-DEV ] $ make help&quot;)
+!make help | grep -v -E 'Entering|Leaving'
+print(&quot;~~~~&quot;)
+</code></pre>
+
+-->
+<!-- result -->
+
+<pre><code class="language-shell">[ LitREPL-DEV ] $ make help
+LitREPL is a macroprocessing Python library for Litrate programming and code execution
+Build targets:
+dist:         Build Python and Vim packages
+docs:         Build the MkDocs documentation
+examples:     Build examples
+help:         Print help
+man:          Build a manpage
+paper-md:     Check and compile the paper PDF out of its Markdown source using JOSS tools
+paper-quick:  Compile the paper PDF out of its LaTeX source without re-evaluation
+paper:        Check and compile the paper PDF out of its LaTeX source
+readme:       Update code sections in the README.md
+test-small:   Run tests script using just the current Python and Shell interpreters
+test:         Run tests script using all available interpreters
+upload:       Upload Python wheel to Pypi.org (./_token.pypi is required)
+version:      Print the version
+vimbundle:    Build Vim bundle
+wheel:        Build Python wheel (the DEFAULT target)
+</code></pre>
+<!-- noresult -->
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../common-scenarios/" class="btn btn-neutral float-left" title="Common scenarios"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../insights-limitations/" class="btn btn-neutral float-right" title="Insights and limitations">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../common-scenarios/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../insights-limitations/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

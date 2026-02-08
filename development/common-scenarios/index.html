@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Common scenarios - Litrepl Docs</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Common scenarios";
+        var mkdocs_page_input_path = "development/common-scenarios.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Litrepl Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Usage</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/general-concepts/">General concepts</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/formatting/">Formatting</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/vim-plugin/">Vim plugin</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/application-scenarios/">Application Scenarios</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Development</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Common scenarios</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#environment-setup">Environment setup</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#directory-structure">Directory structure</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#coding-style">Coding style</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#running-tests">Running tests</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#updating-version">Updating version</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#coverage">Coverage</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#github-ci">Github CI</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../more-scenarios/">Advanced</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../insights-limitations/">Insights and limitations</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../reference/">Reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../related/">Related</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Litrepl Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Development</li>
+      <li class="breadcrumb-item active">Common scenarios</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="common-scenarios">Common scenarios</h2>
+<!-- BEGIN OF CONTRIBUTING.md -->
+
+<p>Litrepl uses <a href="https://nixos.org/nix">Nix</a> as its main development
+framework. The file <a href="../../static/flake.nix">flake.nix</a> manages the source-level
+dependencies required by Nix, whereas <a href="../../static/default.nix">default.nix</a> specifies
+common build targets, including PyPI and Vim packages, demo Vim configurations,
+development shells, and more.</p>
+<h3 id="environment-setup">Environment setup</h3>
+<p>The default development shell is defined in the <code>./default.nix</code> as a Nix
+expression named <code>shell</code> which is the default name for development shells.
+Running</p>
+<pre><code class="language-sh">$ nix develop
+</code></pre>
+<p>will ask Nix to install the development dependencies and open the shell.</p>
+<h3 id="directory-structure">Directory structure</h3>
+<p>The project is organized in the following way:</p>
+<p>The code:</p>
+<ul>
+<li><code>python</code> contains most of the Litrepl code.  <code>python/litrepl</code> is where most of
+  the code reside, <code>python/bin</code> is the entry point.</li>
+<li><code>vim</code> contains the code for the Litrepl Vim plugin.</li>
+<li><code>semver.txt</code> contains the current Litrepl version, <code>semver_released.txt</code>
+  tracks the last Litrepl version uploaded to Pypi.</li>
+</ul>
+<p>The environment:</p>
+<ul>
+<li><code>vimrc</code> contains vim configurations used by the author for the development.</li>
+<li><code>sh</code> contains vaious shell scripts and tests for the development.</li>
+<li><code>env.sh</code> contains developement shell definitions. Notably, it adds <code>python</code> to
+  the <code>PYTHONPATH</code>, <code>sh</code> to <code>PATH</code>, etc.</li>
+<li><code>Makefile</code> encodes most of the developmemnt actions. <code>make help</code> will print
+  the list of them.</li>
+<li><code>flake.nix</code>, <code>default.nix</code>, <code>shell.nix</code> Nix expressions describing software
+  build targets and dependencies.</li>
+</ul>
+<h3 id="coding-style">Coding style</h3>
+<p>The author uses his favorite yet unusual Python coding style for this project,
+the following guidelines are applied:</p>
+<ul>
+<li>Use 2-space indentation for everything.</li>
+<li>Use CamelCase for class names and snake_case for function names</li>
+<li>Use explicit <code>from &lt;module&gt; import &lt;function&gt;</code> rather than <code>import &lt;module&gt;</code>
+  for importing.</li>
+<li>Insert type annotations where possible, use old-style upper-case type names
+  from the <code>typing</code> module.</li>
+<li>Avoid spaces where possible with the following exceptions:</li>
+<li>Import name lists</li>
+<li>Function argument declarations</li>
+</ul>
+<h3 id="running-tests">Running tests</h3>
+<p>The <a href="../../static/sh/runtests.sh">sh/runtests.sh</a> script runs all or selected tests.
+Note, that Litrepl distinguishes the Python interpreter used to run the <code>litrepl</code>
+script (<code>-p</code> argument) from the Python interpreters used to run the code
+sections (<code>-i</code> argument).  By default, <code>runtest.sh</code> runs the litrepl script with
+the <code>python</code> interpreter (whatever it is, leaving the OS to decide) and iterates
+over all visible Python interpreters for running code sections.</p>
+<!--
+
+<pre><code class="language-python">print(&quot;~~~~ shell\n[ LitREPL-DEV ] $ runtests.sh --help&quot;)
+!runtests.sh --help
+print(&quot;~~~~&quot;)
+</code></pre>
+
+-->
+<!-- result -->
+
+<pre><code class="language-shell">[ LitREPL-DEV ] $ runtests.sh --help
+Usage: runtest.sh [-d] [-i I(,I)*] [-t T(,T)*]
+Arguments:
+  -d                        Be very verbose
+  -i I, --interpreters=I    Run tests requiring interpreters matching the grep expression I
+                            Run -i '?' to list all available interpreters
+  -t T, --tests=T           Run tests whose names match the grep expression T
+                            Run -t '?' to list all available tests
+  -p P, --python=P          Use this Python interpreter to run Litrepl
+                            Run -p '?' to list available python interpreters
+  -c FILE, --coverage=FILE  Collect coverage results into the FILE. Defaults to
+                            `.coverage` if no tests or interpreters are
+                            selected, otherwize disabled.
+  -c -,    --coverage=-     Disable coverage.
+
+Examples:
+  runtests.sh -t '?' -i '?'
+  runtests.sh -i ipython
+  runtests.sh -t 'test_eval_code|test_status' -i python
+</code></pre>
+<!-- noresult -->
+
+<p>The project Makefile provides a couple of phony targets for testing: <code>make test</code>
+runs the testing with all default parameters (effectively checking all Python
+interpreters available in PATH), while the <code>make test-small</code> makes a run with
+just the default system Python and IPython interpreters only.</p>
+<h3 id="updating-version">Updating version</h3>
+<p>We follow the https://semver.org/ guidelines for setting the package version.</p>
+<p>The <code>./semver.txt</code> file contains the version string. Please update it according to
+the nature of changes and include into the pull request.</p>
+<!-- END OF CONTRIBUTING.md -->
+
+<h3 id="coverage">Coverage</h3>
+<p>Coverage is performed after the full testing cycle.</p>
+<p>The latest coverage report is <a href="../../coverage/">available</a>.</p>
+<h3 id="github-ci">Github CI</h3>
+<p>The <a href="../../static/.github/workflows/testing.yaml">.github/workflows/testing.yaml</a>
+rule set instructs Github CI to run the set of <code>test-small</code> tests for some
+versions of Python interpreter. The badge on the main page highlightes the CI
+status.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../usage/application-scenarios/" class="btn btn-neutral float-left" title="Application Scenarios"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../more-scenarios/" class="btn btn-neutral float-right" title="Advanced">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../usage/application-scenarios/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../more-scenarios/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

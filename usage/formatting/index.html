@@ -66,7 +66,11 @@
               </ul>
               <p class="caption"><span class="caption-text">Development</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../development/">Development</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../development/common-scenarios/">Common scenarios</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../development/more-scenarios/">Advanced</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../development/insights-limitations/">Insights and limitations</a>
                   </li>
               </ul>
               <ul>
@@ -101,8 +105,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="formatting">Formatting</h1>
-<h2 id="markdown">Markdown</h2>
+                <h2 id="formatting-documents">Formatting documents</h2>
+<h3 id="markdown">Markdown</h3>
 <p>Executable sections are verbatim sections marked with a number of tags,
 including "python" and "code".</p>
 <pre><code>``` python
@@ -121,7 +125,7 @@ mark result sections. This syntax allows emitting parts of Markdown document.</p
 Hello, World!
 &lt;!-- noresult --&gt;
 </code></pre>
-<h2 id="latex">Latex</h2>
+<h3 id="latex">Latex</h3>
 <p>Litrepl treats <code>\begin{python}\end{python}</code> environment as code sections and
 <code>\begin{result}\end{result}</code> environment as result sections. The names are
 currently hardcoded into the simplified LitREPL parser. Wrapping it in other
