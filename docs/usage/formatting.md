@@ -1,5 +1,5 @@
-# Formatting
-## Markdown
+## Formatting documents
+### Markdown
 
 Executable sections are verbatim sections marked with a number of tags,
 including "python" and "code".
@@ -29,7 +29,7 @@ Hello, World!
 ~~~~
 
 
-## Latex
+### Latex
 
 Litrepl treats `\begin{python}\end{python}` environment as code sections and
 `\begin{result}\end{result}` environment as result sections. The names are
