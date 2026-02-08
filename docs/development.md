@@ -1,60 +1,14 @@
 ## Development
 
+<!-- BEGIN OF CONTRIBUTING.md -->
+
 Litrepl uses [Nix](https://nixos.org/nix) as its main development
 framework. The file [flake.nix](./static/flake.nix) manages the source-level
 dependencies required by Nix, whereas [default.nix](./static/default.nix) specifies
 common build targets, including PyPI and Vim packages, demo Vim configurations,
 development shells, and more.
 
-### Contributing
-
-The original author used his favorite Python coding style for this project, the
-following guidelines are applied:
-
-* Use 2-space indentation for everything.
-* Use CamelCase for class names and snake_case for function names
-* Use explicit `from <module> import <function>` rather than `import <module>`
-  for importing.
-* Insert type annotations where possible, use old-style upper-case type names
-  from the `typing` module.
-* Avoid spaces where possible with the following exceptions:
-  - Import name lists
-  - Function argument declarations
-
-### Building Nix Targets
-
-To build individual Nix expressions, execute the command `nix build '.#NAME'`,
-replacing `NAME` with the actual name of the Nix expression you want to build.
-If the build is successful, Nix places the results of the last build in a
-symbolic link located at `./result`.
-
-For example, to build a version of Vim pre-configured for demo, run
-
-``` sh
-$ nix build '.#vim-demo'
-$ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
-```
-
-The list of Nix build targets includes:
-
-* `litrepl-release` - Litrepl script and Python lib
-* `litrepl-release-pypi` - Litrepl script and Python lib
-* `vim-litrepl-release` - Vim with locally built litrepl plugin
-* `vim-litrepl-release-pypi` - Vim with litrepl plugin built from PYPI
-* `vim-test` - A minimalistic Vim with a single litrepl plugin
-* `vim-demo` - Vim configured to use litrepl suitable for recording screencasts.
-  Uses the latest released version of Litrepl rather than the current revision.
-* `vim-plug` - Vim configured to use litrepl via the Plug manager
-* `shell-dev` - The development shell
-* `shell-screencast` - The shell for recording demonstrations, includes `vim-demo`.
-
-See the `local.collection` attribute-set in the
-[default.nix](./static/default.nix) for the full list of defined targets.
-
-Note: The default development shell `shell-dev` installs many dependencies,
-the users are encouraged to define their own shells when needed.
-
-### Development Environments and Setup
+### Environment Setup
 
 The default development shell is defined in the `./default.nix` as a Nix
 expression named `shell` which is the default name for development shells.
@@ -66,15 +20,52 @@ $ nix develop
 
 will ask Nix to install the development dependencies and open the shell.
 
-### Testing
+### Directory Structure
 
-The [sh/runtests.sh](static/runtests.sh) script runs all tests by default, but
-accepts command-line arguments for running specific tests. Note, that Litrepl
-distinguishes the Python interpreter use to run the `litrepl` script (`-p`
-argument) from the Python interpreters used to run the code sections (`-i`
-argument).  By default, `runtest.sh` runs the litrepl script with the `python`
-interpreter (whatever it is, leaving the OS to decide) and iterates over all
-visible Python interpreters for running code sections.
+The project is organized in the following way:
+
+The code:
+
+* `python` contains most of the Litrepl code.  `python/litrepl` is where most of
+  the code reside, `python/bin` is the entry point.
+* `vim` contains the code for the Litrepl Vim plugin.
+* `semver.txt` contains the current Litrepl version, `semver_released.txt`
+  tracks the last Litrepl version uploaded to Pypi.
+
+The environment:
+
+* `vimrc` contains vim configurations used by the author for the development.
+* `sh` contains vaious shell scripts and tests for the development.
+* `env.sh` contains developement shell definitions. Notably, it adds `python` to
+  the `PYTHONPATH`, `sh` to `PATH`, etc.
+* `Makefile` encodes most of the developmemnt actions. `make help` will print
+  the list of them.
+* `flake.nix`, `default.nix`, `shell.nix` Nix expressions describing software
+  build targets and dependencies.
+
+### Coding Style
+
+The author uses his favorite yet unusual Python coding style for this project,
+the following guidelines are applied:
+
+* Use 2-space indentation for everything.
+* Use CamelCase for class names and snake_case for function names
+* Use explicit `from <module> import <function>` rather than `import <module>`
+  for importing.
+* Insert type annotations where possible, use old-style upper-case type names
+  from the `typing` module.
+* Avoid spaces where possible with the following exceptions:
+  - Import name lists
+  - Function argument declarations
+
+### Running tests
+
+The [sh/runtests.sh](./static/sh/runtests.sh) script runs all or selected tests.
+Note, that Litrepl distinguishes the Python interpreter used to run the `litrepl`
+script (`-p` argument) from the Python interpreters used to run the code
+sections (`-i` argument).  By default, `runtest.sh` runs the litrepl script with
+the `python` interpreter (whatever it is, leaving the OS to decide) and iterates
+over all visible Python interpreters for running code sections.
 
 
 <!--
@@ -113,13 +104,24 @@ runs the testing with all default parameters (effectively checking all Python
 interpreters available in PATH), while the `make test-small` makes a run with
 just the default system Python and IPython interpreters only.
 
+<!-- END OF CONTRIBUTING.md -->
+
 ### Coverage
 
 Coverage is performed after the full testing cycle.
 
 The latest coverage report is [available](./coverage.md).
 
-### Tools for Screencast Recording
+### Github CI
+
+The [.github/workflows/testing.yaml](./static/.github/workflows/testing.yaml)
+rule set instructs Github CI to run the set of `test-small` tests for some
+versions of Python interpreter. The badge on the main page highlightes the CI
+status.
+
+### Other Development Scenatios
+
+#### Screencast Recording
 
 Another shell which might be useful is `shell-screencast`. This would build the
 full set of Litrepl tools and makes sure that the screencasting software is
@@ -139,7 +141,41 @@ $ screencast.sh
 `screencast.sh` accepts an optional parameter specifying the template file to
 open for the recording session.
 
-### Other Development Scenarios
+#### More Nix Targets
+
+To build individual Nix expressions, execute the command `nix build '.#NAME'`,
+replacing `NAME` with the actual name of the Nix expression you want to build.
+If the build is successful, Nix places the results of the last build in a
+symbolic link located at `./result`.
+
+For example, to build a version of Vim pre-configured for demo, run
+
+``` sh
+$ nix build '.#vim-demo'
+$ ./result/bin/vim-demo  # Run the pre-configured demo instance of Vim
+```
+
+The list of Nix build targets includes:
+
+* `litrepl-release` - Litrepl script and Python lib
+* `litrepl-release-pypi` - Litrepl script and Python lib
+* `vim-litrepl-release` - Vim with locally built litrepl plugin
+* `vim-litrepl-release-pypi` - Vim with litrepl plugin built from PYPI
+* `vim-test` - A minimalistic Vim with a single litrepl plugin
+* `vim-demo` - Vim configured to use litrepl suitable for recording screencasts.
+  Uses the latest released version of Litrepl rather than the current revision.
+* `vim-plug` - Vim configured to use litrepl via the Plug manager
+* `shell-dev` - The development shell
+* `shell-screencast` - The shell for recording demonstrations, includes `vim-demo`.
+
+See the `local.collection` attribute-set in the
+[default.nix](./static/default.nix) for the full list of defined targets.
+
+Note: The default development shell `shell-dev` installs many dependencies,
+the users are encouraged to define their own shells when needed.
+
+
+#### More Development Scenarios
 
 The top-level [Makefile](./static/Makefile) encodes common development scenarios:
 
@@ -173,15 +209,9 @@ wheel:        Build Python wheel (the DEFAULT target)
 ~~~~
 <!-- noresult -->
 
-### Github CI
+### Insights And Limitations
 
-The [.github/workflows/testing.yaml](./static/testing.yaml) rule set
-instructs Github CI to run the set of `test-small` tests for some versions of
-Python interpreter. The badge on the main page highlightes the CI status.
-
-### Technical Insights
-
-The following events should normally happen after users type the `:LitEval1`
+The following events should normally happen after users type the `:LEval`
 command:
 
 1. On the first run, LitREPL starts the Python interpreter in the background.
@@ -199,7 +229,7 @@ command:
 5. Re-evaluating sections with temporary results causes LitREPL to update
    these results.
 
-### Known Limitations
+Known Limitations:
 
 * Formatting: Nested code sections are not supported.
 * ~~Formatting: Special symbols in the Python output could invalidate the
@@ -212,3 +242,4 @@ command:
 * ~~Interpreter: No asynchronous code execution.~~
 * ~~Interpreter: Background Python interpreter couldn't be interrupted~~
 * ~~[Bad PDF fonts in Firefox](https://github.com/mozilla/pdf.js/issues/17401)~~
+

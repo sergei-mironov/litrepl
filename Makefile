@@ -46,8 +46,10 @@ $(MAN): $(PY) Makefile python/bin/litrepl docs/static/description.md
 .PHONY: docs # Build the MkDocs documentation
 docs: .stamp_docs_deploy
 .stamp_docs: $(PY) $(DOCS) $(TOP) .stamp_examples python/bin/litrepl
-	cp $(TOP) docs/static
 	set -e; \
+	for f in $(TOP) ; do \
+		mkdir -p docs/static/`dirname $$f` ; cp $$f docs/static/$$f  ; \
+	done ; \
 	for d in $(DOCS) ; do \
 		echo "Evaluating $$d" ; \
 		cat $$d | litrepl --foreground \
@@ -59,9 +61,11 @@ docs: .stamp_docs_deploy
 				eval-sections \
 		>$$d.new ; \
 		mv $$d.new $$d ; \
-	done
+	done ; \
+	mkcontributing.sh
 	mkdocs build
 	touch $@
+
 .stamp_docs_deploy: .stamp_docs
 	mkdocs gh-deploy
 	touch $@
