@@ -82,6 +82,13 @@ the file system by leveraging POSIX [@POSIX2024] system features. We hope that
 this design will better align with formally-reproducible frameworks by modestly
 reducing the number of supported use cases.
 
+Litrepl builds on existing plain text markup formats with few or no extensions,
+so the resulting documents remain simple text files. This makes the workflow
+perfectly compatible with standard version control systems, enabling clean
+diffs, code reviews, and collaboration. Such properties are especially
+important for software developers, researchers, and technical writers who need
+long-lived, reviewable documents.
+
 \begin{footnotesize}
 \begin{table}[!th]
     \caption{Litrepl compared to outher literate programming tools \label{table}.}
