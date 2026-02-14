@@ -142,6 +142,8 @@ the document named `input.tex`:
 ``` sh
 echo '~~~ sh'
 echo '$ cat input.tex'
+echo '~~~'
+echo '~~~ tex'
 cat input.tex
 echo '~~~'
 ```
@@ -149,10 +151,13 @@ echo '~~~'
 <!--result-->
 ~~~ sh
 $ cat input.tex
+~~~
+~~~ tex
 \begin{python}
 import sys
 print(f"I use {sys.platform.upper()} btw!")
 \end{python}
+
 \begin{result}
 \end{result}
 ~~~
@@ -166,7 +171,9 @@ follows (only the last three relevant lines of the result are shown).
 <!--
 ``` sh
 echo '~~~ sh'
-echo '$ cat input.tex | litrepl eval-sections 1 | tail -n 3'
+echo '$ cat input.tex | litrepl eval-sections | tail -n 3'
+echo '~~~'
+echo '~~~ tex'
 echo "sys.platform='linux'" | litrepl repl python >/dev/null
 cat input.tex | litrepl | tail -n 3
 echo '~~~'
@@ -174,7 +181,9 @@ echo '~~~'
 -->
 <!--result-->
 ~~~ sh
-$ cat input.tex | litrepl eval-sections 1 | tail -n 3
+$ cat input.tex | litrepl eval-sections | tail -n 3
+~~~
+~~~ tex
 \begin{result}
 I use LINUX btw!
 \end{result}
