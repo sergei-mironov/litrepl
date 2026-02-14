@@ -65,29 +65,28 @@ illustrated by [@Dolstra2010], we argue that this challenge exceeds the capacity
 of a single tool or library, needing a system-scale solutions. Such a solution
 would define a reproducible environment in a formal language and would include a
 closure of dependencies of every installed software component. The
-responsibility of tools writers remains minimizing the added dependcies and
+responsibility of tool writers remains minimizing the added dependencies and
 keeping the communication transparent to user [@Vallet2022].
+
+Software developers, researchers, and technical writers migh need a way to
+combine such environment descriptions with an equally transparent record of
+their REPL-driven work: something that behaves like an ordinary process managed
+by the operating system, produces plain text artefacts suitable for version
+control, and can be reliably re-deployed and replayed.
 
 In Table \ref{table} we list popular literate programming tools together with a
 new **Litrepl** tool, developed by the author. We note that most existing tools
 depend on Juptyer kerenls technology adding Web client-server and the
 Xeus/ZeroMQ message passing library to the environment. Moreover, both Web and
-ZeroMQ protocols define non-trivial states aiming to support multi-user modes
-and various computer network conditions.
+ZeroMQ protocols require maintaining mutable states in computer memory aiming to
+support multi-user modes and network conditions.
 
 Litrepl, in contrast, focuses on a simple single-user communication held via
-simple bi-directional text streams built into any modern operating systems. We
+bi-directional text stream objects available in a modern operating system. We
 reduce the internal communication state down to a few entities all visible via
-the file system by leveraging POSIX [@POSIX2024] system features. We hope that
-this design will better align with formally-reproducible frameworks by modestly
-reducing the number of supported use cases.
-
-Litrepl builds on existing plain text markup formats with few or no extensions,
-so the resulting documents remain simple text files. This makes the workflow
-perfectly compatible with standard version control systems, enabling clean
-diffs, code reviews, and collaboration. Such properties are especially
-important for software developers, researchers, and technical writers who need
-long-lived, reviewable documents.
+the file system by leveraging POSIX [@POSIX2024] features. By reducing the
+number of supported use cases we align with formally-reproducible frameworks,
+batch and continuous integration environments.
 
 \begin{footnotesize}
 \begin{table}[!th]
