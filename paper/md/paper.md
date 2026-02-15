@@ -41,8 +41,8 @@ both readable documentation and executable code, and over time, this concept has
 evolved towards simplification [@Ramsey1994lps].
 
 The Read-Evaluate-Print Loop (REPL), a key concept in human-computer
-interaction, gained importance in the LISP and APL communities [@Spence1975apl],
-[@McCarthy1959recfun], [@Iverson1962apl]. By combining a command-line interface
+interaction, gained importance in the LISP and APL communities [@Spence1975apl;
+@McCarthy1959recfun; @Iverson1962apl]. By combining a command-line interface
 with a language interpreter, REPL enables incremental and interactive
 programming, allowing users to modify the interpreter state directly. This
 approach is believed to enhance human thought processes by keeping users
