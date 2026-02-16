@@ -190,36 +190,36 @@ I use LINUX btw!
 <!--noresult-->
 
 The side effect of this execution is the starting of a session with the Python
-interpreter, which now runs in the background. Evaluation results are written
-back into the result sections, and the entire document is printed. At this
-stage, certain conditions can be optionally checked. First, adding
-`--pending-exitcode=INT` instructs Litrepl to report an error if a section takes
-longer than the timeout to evaluate. Second, setting `--exception-exitcode=INT`
-directs Litrepl to detect Python exceptions. Lastly,
-`--irreproducible-exitcode=INT` triggers an error if the evaluation result
-doesn't match the text initially present in the result section.
+interpreter in the background. Evaluation results are written back into the
+result sections, and the entire document is printed. At this stage, certain
+conditions can be optionally checked. First, adding `--pending-exitcode=<NUM>`
+instructs Litrepl to report an error if a section takes longer than the timeout
+to evaluate. Second, setting `--exception-exitcode=<NUM>` directs Litrepl to
+detect Python exceptions. Lastly, `--irreproducible-exitcode=<NUM>` triggers an
+error if the evaluation result doesn't match the text initially present in the
+result section. Unlike Jupyter, running a Litrepl session does not run a
+separate sessioin server. As we describe next, the idling interpreter is locked
+in a POSIX read operation waiting for user interaction.
 
 ## Interfacing Interpreters
 
-Litrepl communicates with interpreters using POSIX uni-directional streams, one
-for writing input and another for reading outputs. During the communication,
-Litrepl makes the following general assumptions:
+Litrepl communicates with interpreters using POSIX uni-directional pipes making
+the following general assumptions:
 
 * The streams implement synchronous single-user mode.
-* Command line prompts are disabled. Litrepl relies on the echo response, as
-  described below, rather than on prompt detection.
 * The presence of an echo command or equivalent. The interpreter must be able to
   echo an argument string provided by the user in response to such command.
+* Command line prompts are disabled. Litrepl relies on the echo response rather
+  than on prompt detection.
 
-The simplicity of this approach is a key advantage, but it also has drawbacks.
-There's no parallel evaluation at the communication level, locking the
-interpreter until each snippet is evaluated. This can be addressed by using
-interpreter-specific parallelism, such as Python's subprocess utilities or shell
-job control. The text-only data type limitation is more fundamental; Litrepl
-overcomes this by supporting text-only document formats. Formats like LaTeX and
-Markdown handle non-text data via references or side channels (e.g., file
-systems), balancing benefits in version control with the need for explicit data
-transfer organization.
+The simplicity is a key advantage here, but it also has drawbacks. There's no
+parallel evaluation at the communication level. This can be addressed by using
+interpreter-specific parallelism, such as Python's subprocess module utilities.
+The text-only data type limitation is more fundamental; Litrepl overcomes this
+by supporting text-only document formats. Formats like LaTeX and Markdown handle
+non-text data via references or side channels (e.g., file systems), balancing
+benefits in version control with the need for explicit data transfer
+organization.
 
 ## Session Management
 
@@ -229,13 +229,12 @@ the Figure \ref{figure}.
 
 ![\label{figure} Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](./pic.png)
 
-Resources are stored in an auxiliary directory specified by command-line
-arguments, environment variables, or the current directory.  The session is
-represented by a couple of pipes, the interpreter process identifier, and by a
-sink file for asyncronous response. Litrepl connects to a session by sending the
-contents of a code section to the input pipe and forking out a reader process
-receiving the interpreter response from the output pipe. POSIX file lock
-mechanism helps Litrepl to manage a possibly concurrent access to the pipes.
+Resources are stored in an auxiliary directory specified via command-line or
+environment variables. The session is represented by pipe files, one for writing
+input and another for reading outputs, the file storing the interpreter process
+identifier, and a sink file for storing asyncronous output.  Litrepl connects to
+a session by opening pipes. The asynchronous output is received by forking a
+readout process that lives until the interpreter finishes printing.
 
 # Conclusion
 
