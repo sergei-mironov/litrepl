@@ -4,6 +4,34 @@ vim: tw=80
 Changelog
 =========
 
+Version 3.14.0
+--------------
+
+1. **Python**
+   - Fixed leaking stdout in on-demand interpreter start mode and now raise an
+     explicit error on double-start.
+   - Added the `--keep-readout` debugging option for retaining interpreter output.
+   - Performed extra `fsync` operations to make file handling more robust.
+   - Improved error handling and reporting, including printing a clear error
+     when `litrepl` is called from a TTY without arguments.
+   - Recognize IPython command lines more reliably as IPython and set up IPython
+     in a safer way, omitting log files and performing initial configuration
+     in-stream.
+   - Added support for relative section indexing.
+   - Refactored Python code style: converted CamelCase function names to
+     `snake_case` and replaced bare `assert` with an `assert_()` helper.
+   - Updated the `aicli` interpreter to require explicit `/ask` endings and to
+     avoid modifying verbosity settings.
+
+2. **Environment**
+   - Removed `aicli` from the Nix flake to break a mutual dependency, deferring
+     a cleaner integration to later.
+   - Updated inline help formatting, completed remaining help TODOs, and
+     corrected the manual page section from 5 to 1.
+
+3. **Vim**
+   - No Vim-related changes in this release.
+
 Version 3.13.0
 --------------
 
