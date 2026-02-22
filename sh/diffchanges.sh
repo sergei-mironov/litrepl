@@ -1,11 +1,22 @@
 #!/bin/sh
 
 git log HEAD^ --oneline | grep 'Version [0-9]\+\.[0-9]\+\.[0-9]\+' >_versions.txt
-HASH_LAST=`git rev-parse HEAD`
-HASH_PREV=`head -n 1 _versions.txt | awk '{print $1}' `
+HASH_LAST=3.14.0
+HASH_PREV=3.13.0
+# HASH_LAST=`git rev-parse HEAD`
+# HASH_PREV=`head -n 1 _versions.txt | awk '{print $1}' `
+
 
 # git log $HASH_PREV..$HASH_LAST --pretty=format:"%h %s" --patch -- python ':(exclude)README.md' ':(exclude)semver.txt' >_lastdiff.diff
 git log $HASH_PREV..$HASH_LAST --pretty=format:"%h %s" -- python ':(exclude)README.md' ':(exclude)semver.txt' >_lastdiff.diff
+
+{
+echo Reviewing $HASH_LAST .. $HASH_PREV
+cat _lastdiff.diff
+} | less
+
+echo "Was this OK? (Ctrl+C to cancel)"
+read
 
 cat >_mkchangelog.ai <<"EOF"
 You task is to check the diff file and generate a text briefly describing the
