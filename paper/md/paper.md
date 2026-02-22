@@ -79,7 +79,7 @@ new **Litrepl** tool, developed by the author. We note that most existing tools
 depend on Juptyer kerenls technology adding Web client-server and the
 Xeus/ZeroMQ message passing library to the environment. Moreover, both Web and
 ZeroMQ protocols require maintaining mutable states in computer memory aiming to
-support multi-user modes and network conditions.
+support multi-user modes and various network conditions.
 
 Litrepl, in contrast, focuses on a simple single-user communication held via
 bi-directional text stream objects available in a modern operating system. We
