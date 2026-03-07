@@ -68,7 +68,7 @@ closure of dependencies of every installed software component. The
 responsibility of tool writers remains minimizing the added dependencies and
 keeping the communication transparent to user [@Vallet2022].
 
-Software developers, researchers, and technical writers migh need a way to
+Software developers, researchers, and technical writers might need a way to
 combine such environment descriptions with an equally transparent record of
 their REPL-driven work: something that behaves like an ordinary process managed
 by the operating system, produces plain text artefacts suitable for version
