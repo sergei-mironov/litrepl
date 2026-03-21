@@ -76,7 +76,7 @@ control, and can be reliably re-deployed and replayed.
 
 In Table \ref{table} we list popular literate programming tools together with a
 new **Litrepl** tool, developed by the author. We note that most existing tools
-depend on Juptyer kerenls technology adding Web client-server and the
+depend on Jupyter kerenls technology adding Web client-server and the
 Xeus/ZeroMQ message passing library to the environment. Moreover, both Web and
 ZeroMQ protocols require maintaining mutable states in computer memory aiming to
 support multi-user modes and various network conditions.
@@ -90,7 +90,7 @@ batch and continuous integration environments.
 
 \begin{footnotesize}
 \begin{table}[!th]
-    \caption{Litrepl compared to outher literate programming tools \label{table}.}
+    \caption{Litrepl compared to other literate programming tools \label{table}.}
     \begin{tabular}{p{1.6cm}p{1.8cm}p{1.8cm}p{1.8cm}p{1.8cm}p{1.8cm}}
         \hline
         \hline
@@ -233,7 +233,7 @@ Resources are stored in an auxiliary directory specified via command-line or
 environment variables. The session is represented by pipe files, one for writing
 input and another for reading outputs, the file storing the interpreter process
 identifier, and a sink file for storing asyncronous output.  Litrepl connects to
-a session by opening pipes. The asynchronous output is received by forking a
+a session by opening pipes. The asyncronous output is received by forking a
 readout process that lives until the interpreter finishes printing.
 
 # Conclusion
