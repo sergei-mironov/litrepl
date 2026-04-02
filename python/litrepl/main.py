@@ -186,6 +186,17 @@ def make_parser():
   _with_type(sps.add_parser('print-auxdir',
     help=dedent('''
     Print the auxdir for the given interpreter type.''')))
+  tangle=sps.add_parser('tangle',
+    help=dedent('''
+    Tangle code and result sections by sending them to files or file handlers.'''))
+  tangle.add_argument('--before-code',type=str,metavar='STR',default='',
+    help='Line to insert before code sections',nargs='?')
+  tangle.add_argument('--after-code',type=str,metavar='STR',default='',
+    help='Line to insert after code sections',nargs='?')
+  tangle.add_argument('--before-result',type=str,metavar='STR',default='',
+    help='Line to insert before result sections',nargs='?')
+  tangle.add_argument('--after-result',type=str,metavar='STR',default='',
+    help='Line to insert after result sections',nargs='?')
   return ap
 
 AP=make_parser()
@@ -358,6 +369,11 @@ def main(args=None):
     st=name2st(a.type)
     fns=pipenames(a,st)
     print(fns.wd)
+  elif a.command=='tangle':
+    t=parse_(a).tree
+    ecode=tangle(a,t)
+    exit(0 if ecode is None else ecode)
+
   else:
     pstderr(f'Unknown or invalid command: \"{a.command}\".')
     exit(1)

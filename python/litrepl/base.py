@@ -470,6 +470,8 @@ def parse_maybe(a:LitreplArgs)->Optional[ParseResult]:
   return res
 
 def parse_(a:LitreplArgs)->ParseResult:
+  """ Parses input file. The Underscore in name is to avoid clashes with default
+  Python. """
   res=parse_maybe(a)
   if res is None:
     raise ValueError(f"Unsupported filetype \"{a.filetype}\"")
@@ -815,3 +817,48 @@ def status_verbose(a:LitreplArgs, t:Optional[LarkTree], sts:List[SType], version
     ecode=interp_exitcode(fns)
     ecodes.add(0 if ecode is None else ecode)
   return max(ecodes)
+
+def tangle(a:LitreplArgs, tree:LarkTree)->ECode:
+  class C(LarkInterpreter):
+    def __init__(self):
+      self.validcode=False
+    def _print(self, s:str):
+      pass
+    def text(self,tree):
+      pass
+    def topleveltext(self,tree):
+      return self.text(tree)
+    def codesec(self,tree):
+      t=tree.children[1].children[0].value
+      bmarker=tree.children[0].children[0].value
+      bm,em=tree.children[0].meta,tree.children[2].meta
+      st=bmarker2st(a,bmarker)
+      if st is not None:
+        code=unindent(bm.column-1,t)
+        print(a.before_code, end='')
+        print(code)
+        print(a.after_code, end='')
+        self.validcode=True
+      else:
+        self.validcode=False
+    def resultsec(self,tree):
+      if self.validcode:
+        t=tree.children[1].children[0].value
+        bmarker=tree.children[0].children[0].value
+        bm,em=tree.children[0].meta,tree.children[2].meta
+        result=unindent(bm.column-1,t)
+        print(a.before_result, end='')
+        print(result)
+        print(a.after_result, end='')
+    def inlinecodesec(self,tree):
+      # FIXME: Check: Latex-only
+      # code=tree.children[1].children[0].value
+      # print(a.before_code, end='')
+      # print(code)
+      # print(a.after_code, end='')
+      pass
+    def ignoresec(self,tree):
+      pass
+  C().visit(tree)
+  return 0
+
