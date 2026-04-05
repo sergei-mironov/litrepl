@@ -69,11 +69,11 @@ usage: litrepl [-h] [-v] [--filetype STR] [--python-markers STR[,STR]]
                [--irreproducible-exitcode INT] [--exception-exitcode INT]
                [--foreground] [--map-cursor LINE:COL:FILE]
                [--result-textwidth NUM]
-               {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir}
+               {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir,tangle}
                ...
 
 positional arguments:
-  {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir}
+  {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir,tangle}
                               Commands to execute
     start                     Start a background interpreter. The CLASS of an
                               interpreter should be specified.
@@ -98,6 +98,8 @@ positional arguments:
     print-grammar             Print the resulting grammar for the given
                               filetype.
     print-auxdir              Print the auxdir for the given interpreter type.
+    tangle                    Tangle code and result sections by sending them
+                              to files or file handlers.
 
 options:
   -h, --help                  show this help message and exit

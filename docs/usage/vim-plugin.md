@@ -86,3 +86,46 @@ The equivalent Vim commands are `:LRepl [CLASS]` or `:LTerm [CLASS]`. Both
 commands open Vim terminal window.
 
 
+### Shell script interface
+
+
+`litrepl_extras.vim` defines commands for interaction with external shell
+scripts. These functions are intended for AI integrations but could be used for
+any kind of scripts. The `<name>` argument accepted by the commands shown below
+is expanded into the `litrepl-<name>` whenever this executable exists in `PATH`.
+
+* `LPipe <name> prompt` - sends the selection to an external script, passing
+  `prompt` via command-line arguments. Replaces the selection with the script's
+  output.
+* `LPush <name> prompt` - Sends the selection to an external script without
+  processing output
+* `LPipeFile <name> prompt` - Sends the entire file to script `<name>` also
+  providing its name. Replace the buffer with the script's output.
+
+
+The `litrepl-<name>` scripts are expected to have the following reference
+command-line processing algorithm:
+
+``` sh
+while test "$#" -gt 0 ; do
+    case "$1" in
+        -h|--help) exit 1 ;;
+        -P|--prompt) shift ;;
+        -s|--selection-paste) shift ;;
+        -S|--selection-raw) shift ;;
+        -f|--output-format) shift ;;
+        -w|--textwidth) shift ;;
+        -v|-d|--debug|--verbose) ;;
+        --dry-run) ;;
+        --command) shift ;;
+        --) break ;;
+        -*) echo "Unknown option: $1" >&2; exit 1 ;;
+        *) ;;
+    esac
+    shift
+done
+```
+
+
+
+
