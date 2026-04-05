@@ -35,7 +35,7 @@ fun! LitReplExCmdline(action, prompt, selmode, file, extras, errfile)
   if LitReplGet('litrepl_workdir') != ''
     let command = "cd \"".expand(LitReplGet('litrepl_workdir'))."\"; " . command
   endif
-  if len(selmode)>0 " 'raw' or 'paste'
+  if len(selmode)>0 " 'raw' or 'paste' (or nothing)
     let command = command . ' --selection-'.selmode.' - '
   endif
   if prompt != '-'
