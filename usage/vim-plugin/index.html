@@ -79,6 +79,8 @@
     </li>
         </ul>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#shell-script-interface">Shell script interface</a>
+    </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../application-scenarios/">How-Tos</a>
@@ -180,6 +182,40 @@ return control to the editor, leaving the evaluation ongoing in the background.<
 <h4 id="attaching-interpreter-sessions">Attaching Interpreter Sessions</h4>
 <p>The equivalent Vim commands are <code>:LRepl [CLASS]</code> or <code>:LTerm [CLASS]</code>. Both
 commands open Vim terminal window.</p>
+<h3 id="shell-script-interface">Shell script interface</h3>
+<p><code>litrepl_extras.vim</code> defines commands for interaction with external shell
+scripts. These functions are intended for AI integrations but could be used for
+any kind of scripts. The <code>&lt;name&gt;</code> argument accepted by the commands shown below
+is expanded into the <code>litrepl-&lt;name&gt;</code> whenever this executable exists in <code>PATH</code>.</p>
+<ul>
+<li><code>LPipe &lt;name&gt; prompt</code> - sends the selection to an external script, passing
+  <code>prompt</code> via command-line arguments. Replaces the selection with the script's
+  output.</li>
+<li><code>LPush &lt;name&gt; prompt</code> - Sends the selection to an external script without
+  processing output</li>
+<li><code>LPipeFile &lt;name&gt; prompt</code> - Sends the entire file to script <code>&lt;name&gt;</code> also
+  providing its name. Replace the buffer with the script's output.</li>
+</ul>
+<p>The <code>litrepl-&lt;name&gt;</code> scripts are expected to have the following reference
+command-line processing algorithm:</p>
+<pre><code class="language-sh">while test &quot;$#&quot; -gt 0 ; do
+    case &quot;$1&quot; in
+        -h|--help) exit 1 ;;
+        -P|--prompt) shift ;;
+        -s|--selection-paste) shift ;;
+        -S|--selection-raw) shift ;;
+        -f|--output-format) shift ;;
+        -w|--textwidth) shift ;;
+        -v|-d|--debug|--verbose) ;;
+        --dry-run) ;;
+        --command) shift ;;
+        --) break ;;
+        -*) echo &quot;Unknown option: $1&quot; &gt;&amp;2; exit 1 ;;
+        *) ;;
+    esac
+    shift
+done
+</code></pre>
               
             </div>
           </div><footer>
