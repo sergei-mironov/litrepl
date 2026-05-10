@@ -71,7 +71,7 @@ def with_sigmask(signals=None):
       pthread_sigmask(SIG_SETMASK,old)
 
 def readipid(fns:FileNames)->Optional[int]:
-  """ Reads a PID of the background interpeter session process from the
+  """ Reads a PID of the background interpreter session process from the
   auxiliary directory. """
   try:
     return int(open(fns.pidf).read())
@@ -229,7 +229,7 @@ def interact(fdr, fdw, text:str, fo:int, ss:Interpreter)->None:
     fdr (int): Interpreter's stdout pipe, available for reading
     fdw (int): Interpreter's stdin pipe, available for writing
     text (str): Text to send to the interpreter
-    fo (int): Output desctiptor, available for writing
+    fo (int): Output descriptor, available for writing
     ss (Interpreter): Interpreter abstraction object
   """
   p1,p2=ss.patterns()
@@ -390,7 +390,7 @@ def process_async(fns:FileNames, ss:Interpreter, code:str)->RunResult:
         return RunResult(fname)
     else:
       # The reader is already running, try to own it.
-      pdebug(f"process_async re-uses already existing reader")
+      pdebug(f"process_async reuses already existing reader")
       return RunResult(fname)
 
 def process_cont(fns:FileNames,

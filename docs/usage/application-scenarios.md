@@ -4,7 +4,7 @@
 
 When performing batch processing of documents, it might be necessary to initiate
 a new interpreter session solely for the evaluation's duration rather than
-re-using the currently running session. The `--foreground` option can be used to
+reusing the currently running session. The `--foreground` option can be used to
 activate this mode.
 
 <!--lignore-->
@@ -68,9 +68,9 @@ Litrepl exercise IPyhton-specific communication settings.
 
 #### Command Line, Converting formatted Markdown to Jupyter Notebook
 
-[Pandoc](https://pandoc.org) could be used to conver LitREPL-formatted markdown
+[Pandoc](https://pandoc.org) could be used to convert LitREPL-formatted markdown
 documents to the Jupyter Notebook format. In order to make it recognize the code
-and result fields, addtional formatting is required. Currently we aware of two
+and result fields, additional formatting is required. Currently we aware of two
 options:
 
 ##### Using fenced Markdown syntax extension
@@ -148,7 +148,7 @@ the system.
 \BeforeBeginEnvironment{python}{\begin{mdframed}[nobreak=false,everyline=true]}
 \AfterEndEnvironment{python}{\end{mdframed}}
 
-% LitREPL-compatible ai secitons
+% LitREPL-compatible ai sections
 \newenvironment{ai}
   {\vsp\textbf{User:}\vsp}
   {}
@@ -304,7 +304,7 @@ The `litrepl_extras.vim` defines the following Vim commands:
 
 
 All the above commands get translated into a command line matching
-the following convension (subject to change):
+the following convention (subject to change):
 
 ~~~ sh
 usage: litrepl-<script> [-h] [-P PROMPT_LIST] [-s SELECTION_PASTE]

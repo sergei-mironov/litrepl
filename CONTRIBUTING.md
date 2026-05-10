@@ -33,10 +33,10 @@ The code:
 The environment:
 
 * `vimrc` contains vim configurations used by the author for the development.
-* `sh` contains vaious shell scripts and tests for the development.
-* `env.sh` contains developement shell definitions. Notably, it adds `python` to
+* `sh` contains various shell scripts and tests for the development.
+* `env.sh` contains development shell definitions. Notably, it adds `python` to
   the `PYTHONPATH`, `sh` to `PATH`, etc.
-* `Makefile` encodes most of the developmemnt actions. `make help` will print
+* `Makefile` encodes most of the development actions. `make help` will print
   the list of them.
 * `flake.nix`, `default.nix`, `shell.nix` Nix expressions describing software
   build targets and dependencies.
@@ -87,7 +87,7 @@ Arguments:
                             Run -p '?' to list available python interpreters
   -c FILE, --coverage=FILE  Collect coverage results into the FILE. Defaults to
                             `.coverage` if no tests or interpreters are
-                            selected, otherwize disabled.
+                            selected, otherwise disabled.
   -c -,    --coverage=-     Disable coverage.
 
 Examples:

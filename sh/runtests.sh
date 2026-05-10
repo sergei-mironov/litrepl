@@ -1606,7 +1606,7 @@ Arguments:
                             Run -p '?' to list available python interpreters
   -c FILE, --coverage=FILE  Collect coverage results into the FILE. Defaults to
                             \`.coverage\` if no tests or interpreters are
-                            selected, otherwize disabled.
+                            selected, otherwise disabled.
   -c -,    --coverage=-     Disable coverage.
 
 Examples:

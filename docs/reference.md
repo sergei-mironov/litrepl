@@ -82,7 +82,7 @@ positional arguments:
     stop                      Stop the background interpreters.
     restart                   Restart the background interpreters.
     status                    Print background interpreter's status.
-    parse                     Parse the input file without futher processing
+    parse                     Parse the input file without further processing
                               (diagnostics).
     parse-print               Parse and print the input file back
                               (diagnostics).
@@ -108,14 +108,14 @@ options:
                               (markdown|[la]tex|auto).
   --python-markers STR[,STR]  Specify section markers recognized as `python`
                               sections. Defaults to the value of
-                              LITREPL_PYTHON_MARERS if set, otherwize
+                              LITREPL_PYTHON_MARERS if set, otherwise
                               "python".
   --ai-markers STR[,STR]      Specify section markers recognized as `ai`
                               sections. Defaults to the value of
-                              LITREPL_AI_MARERS if set, otherwize "codeai,ai".
+                              LITREPL_AI_MARERS if set, otherwise "codeai,ai".
   --sh-markers STR[,STR]      Specify section markers recognized as `shell`
                               sections. Defaults to the value of
-                              LITREPL_SH_MARERS if set, otherwize "shell".
+                              LITREPL_SH_MARERS if set, otherwise "shell".
   --python-interpreter EXE    Python interpreter command line, or `auto`.
                               Defaults to the LITREPL_PYTHON_INTERPRETER
                               environment variable if set, otherwise "auto".

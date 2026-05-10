@@ -272,7 +272,7 @@ How can I assist you today?
 
 All Aicli `/`-commands like the `/model` command above are passed as-is to the
 interpreter. The `/ask` command is added automatically at the of each section,
-so make sure that `ai` secions have self-contained questions.
+so make sure that `ai` sections have self-contained questions.
 
 As a pre-processing step, Litrepl can paste text from other sections of the
 document in place of special reference markers. The markers have the following

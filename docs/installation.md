@@ -97,7 +97,7 @@ environment.systemPackages = with pkgs; [
 
 Nix will manage all necessary dependencies automatically.
 
-For the full list of expressions which includes developement shells, see the
+For the full list of expressions which includes development shells, see the
 [Development](./development/common-scenarios.md) section.
 
 

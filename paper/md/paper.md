@@ -26,7 +26,7 @@ Project Jupyter, Litrepl aims to facilitate the creation of research documents.
 Following developments in software deployment theory, however, we shift our
 focus from informal reproducibility to enhancing transparency in communication
 with interpreters by relying on POSIX interfaces: named pipes are accessible via
-the file system, asyncronous process identifiers are visible in status reports.
+the file system, asynchronous process identifiers are visible in status reports.
 The tool provides a comprehensive command-line interface, making it easier to
 integrate with code editors. The project repository includes a reference Vim
 plugin.
@@ -76,7 +76,7 @@ control, and can be reliably re-deployed and replayed.
 
 In Table \ref{table} we list popular literate programming tools together with a
 new **Litrepl** tool, developed by the author. We note that most existing tools
-depend on Jupyter kerenls technology adding Web client-server and the
+depend on Jupyter kernels technology adding Web client-server and the
 Xeus/ZeroMQ message passing library to the environment. Moreover, both Web and
 ZeroMQ protocols require maintaining mutable states in computer memory aiming to
 support multi-user modes and various network conditions.
@@ -232,8 +232,8 @@ the Figure \ref{figure}.
 Resources are stored in an auxiliary directory specified via command-line or
 environment variables. The session is represented by pipe files, one for writing
 input and another for reading outputs, the file storing the interpreter process
-identifier, and a sink file for storing asyncronous output.  Litrepl connects to
-a session by opening pipes. The asyncronous output is received by forking a
+identifier, and a sink file for storing asynchronous output.  Litrepl connects to
+a session by opening pipes. The asynchronous output is received by forking a
 readout process that lives until the interpreter finishes printing.
 
 # Conclusion

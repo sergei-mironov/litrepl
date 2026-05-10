@@ -54,7 +54,7 @@ introduce these environments in the preamble:
 ```
 
 Executable sections is the document are enclosed with the `python` tags, results
-- wtih `result` tags:
+- with `result` tags:
 
 ``` tex
 \begin{python}
@@ -76,8 +76,8 @@ Hello, World!
 %noresult
 ```
 
-Additionally, LitREPL recognises `linline` 2-argument tags. The first arguement
-is treated as a Python printable expression. The second arguemnt is an immediate
+Additionally, LitREPL recognises `linline` 2-argument tags. The first argument
+is treated as a Python printable expression. The second argument is an immediate
 result section where the value of expression will be placed.
 
 ``` tex

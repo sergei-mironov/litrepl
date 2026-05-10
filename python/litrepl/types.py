@@ -48,7 +48,7 @@ class ReadResult:
   """ Result of reading from the readout job, as specified by a `RunResult`
   structure. """
   text:str           # Current contents of the readout file.
-  timeout:bool       # Did the current read attmept timeout? If so, Litrepl
+  timeout:bool       # Did the current read attempt timeout? If so, Litrepl
                      # would return control to the user with a
                      # continuation-looking result..
 
@@ -117,7 +117,7 @@ SECVAR_RE = re_compile("(\^+ *R[0-9]+ *\^+)|(v+ *R[0-9]+ *v+)|(\>+ *R[0-9]+ *\<+
 @dataclass
 class EvalState:
   """ Litrepl interpreter state, trackes the processing of a document passed as
-  Litrepl intput. """
+  Litrepl input. """
   sr:SecRec                         # The request for sections evaluation
   sres:Dict[int,str]                # Section results: sec.num -> result
   ledder:Dict[int,int]              # Facility to restore the cursor: line -> offset
@@ -160,7 +160,7 @@ class Interpreter:
     raise NotImplementedError()
   def result_postprocess(self, a:LitreplArgs, text:str) -> str:
     """ Postprocess evaluation results before printing them into the output
-    document. Return the result string to be sent to the output docuemnt. """
+    document. Return the result string to be sent to the output document. """
     raise NotImplementedError()
   def run_repl(self, a:LitreplArgs) -> None:
     """ Run foreground repl loop. """

@@ -47,19 +47,19 @@ def make_parser():
     default=environ.get('LITREPL_PYTHON_MARKERS','python'),
     help=dedent('''
     Specify section markers recognized as `python` sections.
-    Defaults to the value of LITREPL_PYTHON_MARERS if set, otherwize
+    Defaults to the value of LITREPL_PYTHON_MARERS if set, otherwise
     "python".'''))
   ap.add_argument('--ai-markers',metavar='STR[,STR]',
     default=environ.get('LITREPL_AI_MARKERS','codeai,ai'),
     help=dedent('''
     Specify section markers recognized as `ai` sections.
-    Defaults to the value of LITREPL_AI_MARERS if set, otherwize
+    Defaults to the value of LITREPL_AI_MARERS if set, otherwise
     "codeai,ai".'''))
   ap.add_argument('--sh-markers',metavar='STR[,STR]',
     default=environ.get('LITREPL_SH_MARERS','sh,bash'),
     help=dedent('''
     Specify section markers recognized as `shell` sections.
-    Defaults to the value of LITREPL_SH_MARERS if set, otherwize "shell". '''))
+    Defaults to the value of LITREPL_SH_MARERS if set, otherwise "shell". '''))
   ap.add_argument('--python-interpreter',metavar='EXE',
     default=_ensure_nonepty(environ.get('LITREPL_PYTHON_INTERPRETER','auto')),
     help=dedent('''
@@ -155,7 +155,7 @@ def make_parser():
   sstatus.add_argument('--tty',action='store_true',
     help='Block terminal by reading input (required to get per-section status).')
   sps.add_parser('parse',
-    help='Parse the input file without futher processing (diagnostics).')
+    help='Parse the input file without further processing (diagnostics).')
   sps.add_parser('parse-print',
     help=dedent('''
     Parse and print the input file back (diagnostics).'''))

@@ -35,8 +35,8 @@ The code:
 The environment:
 
 * `vimrc` contains vim configurations used by the author for the development.
-* `sh` contains vaious shell scripts and tests for the development.
-* `env.sh` contains developement shell definitions. Notably, it adds `python` to
+* `sh` contains various shell scripts and tests for the development.
+* `env.sh` contains development shell definitions. Notably, it adds `python` to
   the `PYTHONPATH`, `sh` to `PATH`, etc.
 * `Makefile` encodes most of the developmemnt actions. `make help` will print
   the list of them.
@@ -89,7 +89,7 @@ Arguments:
                             Run -p '?' to list available python interpreters
   -c FILE, --coverage=FILE  Collect coverage results into the FILE. Defaults to
                             `.coverage` if no tests or interpreters are
-                            selected, otherwize disabled.
+                            selected, otherwise disabled.
   -c -,    --coverage=-     Disable coverage.
 
 Examples:
@@ -123,6 +123,6 @@ The latest coverage report is [available](../coverage.md).
 
 The [.github/workflows/testing.yaml](../static/.github/workflows/testing.yaml)
 rule set instructs Github CI to run the set of `test-small` tests for some
-versions of Python interpreter. The badge on the main page highlightes the CI
+versions of Python interpreter. The badge on the main page highlights the CI
 status.
 

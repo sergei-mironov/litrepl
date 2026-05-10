@@ -11,7 +11,7 @@ $ nix develop '.#shell-screencast'
 ```
 
 In the opened shell, run the `screencast.sh` and wait a second, until the script
-arranges demo and recorder wondows.
+arranges demo and recorder windows.
 
 ``` sh
 $ screencast.sh

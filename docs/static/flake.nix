@@ -1,5 +1,5 @@
 {
-  description = "LitREPL developement environment";
+  description = "LitREPL development environment";
 
   nixConfig = {
     bash-prompt = "[LitREPL-DEV  \\w ]$ ";
