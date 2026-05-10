@@ -186,9 +186,9 @@ def readout(fdr,
 def readout_asis(fdr:int, fdw:int, fo:int, pattern:str, prompt,
                  timeout:Optional[int]=None)->None:
   """ Read everything from FD `fdr` and send to `fo` until `prompt` regexp is
-  matched. If the `propmt` is not found within the `timeout` seconds, re-send
+  matched. If the `prompt` is not found within the `timeout` seconds, re-send
   the `pattern` and continue the interaction. This function is intended to be
-  run from a separate process, governing the interaction with intepreters.
+  run from a separate process, governing the interaction with interpreters.
   """
   acc:bytes=b''
   os.write(fdw,pattern.encode())

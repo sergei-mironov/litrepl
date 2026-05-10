@@ -22,7 +22,7 @@ let
       version;
 
     inherit (pkgs) lib stdenv fetchFromGitHub imagemagick makeWrapper cloc
-    gnumake socat latexrun sloc;
+    gnumake socat latexrun sloc codespell;
 
     callPackage = pkgs.lib.callPackageWith collection;
 
@@ -216,6 +216,7 @@ let
         pkgs.pandoc
         pkgs.inkscape
         sloc
+        codespell
         # (aicli.aicli python-release.pkgs) # FIXME: this is required
       ];
       shellHook = with pkgs; ''
