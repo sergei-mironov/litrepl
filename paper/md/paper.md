@@ -84,9 +84,11 @@ support multi-user modes and various network conditions.
 Litrepl, in contrast, focuses on a simple single-user communication held via
 bi-directional text stream objects available in a modern operating system. We
 reduce the internal communication state down to a few entities all visible via
-the file system by leveraging POSIX [@POSIX2024] features. By reducing the
-number of supported use cases we align with formally-reproducible frameworks,
-batch and continuous integration environments.
+the file system by leveraging POSIX [@POSIX2024] features. By excluding network
+protocols from the pipeline, we reduce the size of the project's dependency
+closure and thereby improve alignment with formally reproducible frameworks,
+batch processing environments, and continuous integration systems.
+
 
 \begin{footnotesize}
 \begin{table}[!th]
