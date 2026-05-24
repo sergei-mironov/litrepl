@@ -134,8 +134,18 @@ $ litrepl eval-sections '34:1,+1' # Section at line 34 column 1 and the next one
 
 #### Managing Interpreter Sessions
 
-Each interpreter session uses an auxiliary directory where Litrepl stores
-filesystem pipes and other runtime data.
+Litrepl maintains interpreter sessions in the background to support REPL
+experience. The components that builds up this functionality are illustrated on
+the Figure \ref{figure}.
+
+![\label{figure} Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](./docs/pic.png)
+
+Resources are stored in an auxiliary directory specified via command-line or
+environment variables. The session is represented by pipe files, one for writing
+input and another for reading outputs, the file storing the interpreter process
+identifier, and a sink file for storing asynchronous output.  Litrepl connects to
+a session by opening pipes. The asynchronous output is received by forking a
+readout process that lives until the interpreter finishes printing.
 
 By default, the auxiliary directory path is derived from the working directory
 name (for Vim, this defaults to the directory of the current file).

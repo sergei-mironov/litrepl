@@ -134,75 +134,6 @@ batch processing environments, and continuous integration systems.
 \end{table}
 \end{footnotesize}
 
-# How it works
-
-The operation of Litrepl is best illustrated through the example below. Consider
-the document named `input.tex`:
-
-<!--
-``` sh
-echo '~~~ sh'
-echo '$ cat input.tex'
-echo '~~~'
-echo '~~~ tex'
-cat input.tex
-echo '~~~'
-```
--->
-<!--result-->
-~~~ sh
-$ cat input.tex
-~~~
-~~~ tex
-\begin{python}
-import sys
-print(f"I use {sys.platform.upper()} btw!")
-\end{python}
-
-\begin{result}
-\end{result}
-~~~
-<!--noresult-->
-
-This document contains a Python code section and an empty result section marked
-with the corresponding LaTeX environment tags. To "execute" the code sections of
-the document, we pipe the whole document through the Litrepl processor as
-follows (only the last three relevant lines of the result are shown).
-
-<!--
-``` sh
-echo '~~~ sh'
-echo '$ cat input.tex | litrepl eval-sections | tail -n 3'
-echo '~~~'
-echo '~~~ tex'
-echo "sys.platform='linux'" | litrepl repl python >/dev/null
-cat input.tex | litrepl | tail -n 3
-echo '~~~'
-```
--->
-<!--result-->
-~~~ sh
-$ cat input.tex | litrepl eval-sections | tail -n 3
-~~~
-~~~ tex
-\begin{result}
-I use LINUX btw!
-\end{result}
-~~~
-<!--noresult-->
-
-The side effect of this execution is the starting of a session with the Python
-interpreter in the background. Evaluation results are written back into the
-result sections, and the entire document is printed. At this stage, certain
-conditions can be optionally checked. First, adding `--pending-exitcode=<NUM>`
-instructs Litrepl to report an error if a section takes longer than the timeout
-to evaluate. Second, setting `--exception-exitcode=<NUM>` directs Litrepl to
-detect Python exceptions. Lastly, `--irreproducible-exitcode=<NUM>` triggers an
-error if the evaluation result doesn't match the text initially present in the
-result section. Unlike Jupyter, running a Litrepl session does not run a
-separate sessioin server. As we describe next, the idling interpreter is locked
-in a POSIX read operation waiting for user interaction.
-
 ## Interfacing Interpreters
 
 Litrepl communicates with interpreters using POSIX uni-directional pipes making
@@ -214,29 +145,30 @@ the following general assumptions:
 * Command line prompts are disabled. Litrepl relies on the echo response rather
   than on prompt detection.
 
-The simplicity is a key advantage here, but it also has drawbacks. There's no
-parallel evaluation at the communication level. This can be addressed by using
+The simplicity is a key advantage, but it also has drawbacks. There's no
+parallel evaluation at the communication level. We expect users to employ
 interpreter-specific parallelism, such as Python's subprocess module utilities.
-The text-only data type limitation is more fundamental; Litrepl overcomes this
-by supporting text-only document formats. Formats like LaTeX and Markdown handle
-non-text data via references or side channels (e.g., file systems), balancing
-benefits in version control with the need for explicit data transfer
-organization.
+The text-only data type limitation is more fundamental; LaTeX and Markdown
+formats process non-text data via references. Litrepl is following these
+conventions directly, expecting users to organize the transfer e.g. by storing
+images on a file system.
 
-## Session Management
-
-Litrepl maintains interpreter sessions in the background to support REPL
-experience. The components that builds up this functionality are illustrated on
-the Figure \ref{figure}.
-
-![\label{figure} Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](./pic.png)
+![\label{figure} Litrepl resource allocation diagram. Hash **A** represents the interpreter session and is computed from the Litrepl working directory and the interpreter class. Hash **B** represents the asynchronous execution of a code snippet and is computed from the contents of the corresponding input.](./pic.png)
 
 Resources are stored in an auxiliary directory specified via command-line or
-environment variables. The session is represented by pipe files, one for writing
-input and another for reading outputs, the file storing the interpreter process
-identifier, and a sink file for storing asynchronous output.  Litrepl connects to
-a session by opening pipes. The asynchronous output is received by forking a
-readout process that lives until the interpreter finishes printing.
+environment variables. The editor-interpreter session is represented by pipe
+files, one for writing input and another for reading outputs, and a file storing
+the interpreter process identifier.
+
+If the language interpreter takes longer than expected, Litrepl forks a readout
+process that redirects the output into a sink file. To keep the user interface
+responsive, Litrepl releases control after inserting a tag into the output,
+allowing the output to be updated during subsequent REPL execution rounds.
+
+We avoid using document formatting or configuration files for configuration,
+preferring command-line options instead. Formatting is used exclusively for code
+and result sections, which we hope improves forward compatibility with text
+formats.
 
 # Conclusion
 
