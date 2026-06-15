@@ -165,6 +165,7 @@ let
         ${./sh/runtests.sh}
       '';
 
+      format = "setuptools";
       doCheck = true;
     });
 
