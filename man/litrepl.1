@@ -1,4 +1,4 @@
-.TH LITREPL "1" "1980\-01\-01" "litrepl 3.14.1" "Generated Python Manual"
+.TH LITREPL "1" "1980\-01\-01" "litrepl 3.14.2" "Generated Python Manual"
 .SH NAME
 litrepl \- command\-line processor for Markdown or LaTeX documents with literate
 programming code sections. Instructed by its arguments, it evaluates and
@@ -6,7 +6,7 @@ updates sections via background interpreters. Interpreters can stay
 active for a read\-eval\-paste\-loop style.
 .SH SYNOPSIS
 .B litrepl
-[-h] [-v] [--filetype STR] [--python-markers STR[,STR]] [--ai-markers STR[,STR]] [--sh-markers STR[,STR]] [--python-interpreter EXE] [--ai-interpreter EXE] [--sh-interpreter EXE] [--python-auxdir DIR] [--ai-auxdir DIR] [--sh-auxdir DIR] [--timeout F[,F]] [--propagate-sigint] [-d INT] [-K] [--verbose] [-C DIR] [--pending-exitcode INT] [--irreproducible-exitcode INT] [--exception-exitcode INT] [--foreground] [--map-cursor LINE:COL:FILE] [--result-textwidth NUM] {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir} ...
+[-h] [-v] [--filetype STR] [--python-markers STR[,STR]] [--ai-markers STR[,STR]] [--sh-markers STR[,STR]] [--python-interpreter EXE] [--ai-interpreter EXE] [--sh-interpreter EXE] [--python-auxdir DIR] [--ai-auxdir DIR] [--sh-auxdir DIR] [--timeout F[,F]] [--propagate-sigint] [-d INT] [-K] [--verbose] [-C DIR] [--pending-exitcode INT] [--irreproducible-exitcode INT] [--exception-exitcode INT] [--foreground] [--map-cursor LINE:COL:FILE] [--result-textwidth NUM] {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir,tangle} ...
 
 .SH
 POSITIONAL ARGUMENTS
@@ -52,6 +52,9 @@ Print the resulting grammar for the given filetype.
 .TP
 \fBlitrepl\fR \fI\,print\-auxdir\/\fR
 Print the auxdir for the given interpreter type.
+.TP
+\fBlitrepl\fR \fI\,tangle\/\fR
+Tangle code and result sections by sending them to files or file handlers.
 
 .SH COMMAND \fI\,'litrepl start'\/\fR
 usage: litrepl start [\-h] CLASS
@@ -146,6 +149,27 @@ usage: litrepl print\-auxdir [\-h] CLASS
 .TP
 \fBCLASS\fR
 Interpreter class: python|ai|sh.
+
+.SH COMMAND \fI\,'litrepl tangle'\/\fR
+usage: litrepl tangle [\-h] [\-\-before\-code [STR]] [\-\-after\-code [STR]]
+                      [\-\-before\-result [STR]] [\-\-after\-result [STR]]
+
+.SH OPTIONS \fI\,'litrepl tangle'\/\fR
+.TP
+\fB\-\-before\-code\fR \fI\,[STR]\/\fR
+Line to insert before code sections
+
+.TP
+\fB\-\-after\-code\fR \fI\,[STR]\/\fR
+Line to insert after code sections
+
+.TP
+\fB\-\-before\-result\fR \fI\,[STR]\/\fR
+Line to insert before result sections
+
+.TP
+\fB\-\-after\-result\fR \fI\,[STR]\/\fR
+Line to insert after result sections
 
 .SH OPTIONS
 .TP
