@@ -1517,10 +1517,24 @@ add_ipython() {
   done
 }
 
+find_aicli() {
+  AICLI_FOUND=n
+  for aicli in $(which -a aicli 2>/dev/null) ; do
+    if $aicli --version >/dev/null 2>&1 ; then
+      AICLI_FOUND=y
+      echo $aicli
+    else
+      echo "Skipping $aicli as non-runnable" >&2
+    fi
+  done
+  if test "$AICLI_FOUND" = "n" ; then
+    return 1
+  fi
+}
+
 tests() {
   sh=$(which sh)
-  # aicli=$(which aicli 2>/dev/null || echo '-')
-  for aicli in $(which -a aicli || echo '-'); do
+  for aicli in $(find_aicli || echo '-'); do
     for python in $(which -a python | add_ipython ); do
       echo test_parse_print $python - -
       echo test_eval_md $python - $sh
