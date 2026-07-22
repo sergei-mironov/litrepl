@@ -9,7 +9,11 @@ endif
 fun! LitReplActionGlob(action)
   let l:template = LitReplGet('litrepl_extras_script_template')
   let l:pattern = substitute(l:template, '*', a:action, '')
-  let l:matches = uniq(globpath(substitute($PATH,':',',','g'), l:pattern . '*', 1, 1, 1))
+  if l:pattern[0] != '/'
+    let l:matches = uniq(globpath(substitute($PATH,':',',','g'), l:pattern . '*', 1, 1, 1))
+  else
+    let l:matches = uniq(glob(l:pattern . '*', 1, 1, 1))
+  endif
   if len(l:matches) == 0
     throw "No matches found for: " . l:pattern
   elseif len(l:matches) > 1
