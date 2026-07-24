@@ -21,12 +21,12 @@ bibliography: paper.bib
 Litrepl is a lightweight text processing tool designed to recognize and evaluate
 code sections within Markdown or Latex documents. This functionality is useful
 for both batch document section evaluation and interactive coding within a text
-editor, provided a straightforward integration is established.  Inspired by
+editor, provided a straightforward integration is established.  Originally inspired by
 Project Jupyter, Litrepl aims to facilitate the creation of research documents.
-Following developments in software deployment theory, however, we shift our
+Following developments in software deployment theory, however, we shifted our
 focus from informal reproducibility to enhancing transparency in communication
 with interpreters by relying on POSIX interfaces: named pipes are accessible via
-the file system, asynchronous process identifiers are visible in status reports.
+the file system, and asynchronous process identifiers are visible in status reports.
 The tool provides a comprehensive command-line interface, making it easier to
 integrate with code editors. The project repository includes a reference Vim
 plugin.
@@ -55,13 +55,13 @@ and code that can interact with language interpreters, enabling REPL-like
 programming for well-structured, shareable documents. This concept became a part
 of *Literate Computing* [@Perez2015blog], which aims to reach broad audiences,
 enhance reproducibility, and promote collaboration. Key technical aspects
-include bidirectional communication between the Jupyter Kernel and Notebook
-renderer, alongside client-server interactions between the web server and user
+include bidirectional communication between the Jupyter Kernel and the Notebook
+renderer, alongside client-server interactions between the web server and the user
 browser.
 
 We believe that reproducibility is indeed crucial in the Literate Computing
 framework, enhancing communication among dispersed researchers. However, as
-illustrated by [@Dolstra2010], we argue that this challenge exceeds the capacity
+illustrated by @Dolstra2010, we argue that this challenge exceeds the capacity
 of a single tool or library, needing a system-scale solutions. Such a solution
 would define a reproducible environment in a formal language and would include a
 closure of dependencies of every installed software component. The
@@ -76,7 +76,7 @@ control, and can be reliably re-deployed and replayed.
 
 In Table \ref{table} we list popular literate programming tools together with a
 new **Litrepl** tool, developed by the author. We note that most existing tools
-depend on Jupyter kernels technology adding Web client-server and the
+depend on Jupyter kernels technology, adding Web client-server and the
 Xeus/ZeroMQ message passing library to the environment. Moreover, both Web and
 ZeroMQ protocols require maintaining mutable states in computer memory aiming to
 support multi-user modes and various network conditions.
@@ -136,11 +136,11 @@ batch processing environments, and continuous integration systems.
 
 ## Interfacing Interpreters
 
-Litrepl communicates with interpreters using POSIX uni-directional pipes making
+Litrepl communicates with interpreters using POSIX uni-directional pipes, making
 the following general assumptions:
 
 * The streams implement synchronous single-user mode.
-* The presence of an echo command or equivalent. The interpreter must be able to
+* An echo command or equivalent is present. The interpreter must be able to
   echo an argument string provided by the user in response to such command.
 * Command line prompts are disabled. Litrepl relies on the echo response rather
   than on prompt detection.
@@ -149,8 +149,8 @@ The simplicity is a key advantage, but it also has drawbacks. There's no
 parallel evaluation at the communication level. We expect users to employ
 interpreter-specific parallelism, such as Python's subprocess module utilities.
 The text-only data type limitation is more fundamental; LaTeX and Markdown
-formats process non-text data via references. Litrepl is following these
-conventions directly, expecting users to organize the transfer e.g. by storing
+formats process non-text data via references. Litrepl follows these
+conventions directly, expecting users to organize the transfer, e.g., by storing
 images on a file system.
 
 ![\label{figure} Litrepl resource allocation diagram. Hash **A** represents the interpreter session and is computed from the Litrepl working directory and the interpreter class. Hash **B** represents the asynchronous execution of a code snippet and is computed from the contents of the corresponding input.](./pic.png)
@@ -172,8 +172,8 @@ formats.
 
 # Conclusion
 
-The tool is implemented in Python in under 2K lines of code according to the LOC
-metric, and has only two Python dependencies so far, at the cost of the
+The tool is implemented in Python in under 2K lines of code,
+and has only two Python dependencies, at the cost of the
 dependency on the POSIX operating system interfaces. Needless to say, we used
 Litrepl to evaluate and verify the examples presented in this document.
 
