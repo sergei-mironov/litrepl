@@ -17,15 +17,17 @@ fun! LitReplActionGlob(action)
   if len(l:matches) == 0
     throw "No matches found for: " . l:pattern
   elseif len(l:matches) > 1
-    let msg = ""
-    let sep = ""
-    for match in l:matches
-      let msg = msg . sep . match
-      if len(sep) == 0
-        let sep = ", "
-      endif
-    endfor
-    throw "Multiple matches found for: " . l:pattern . "(" . msg . ")"
+    if LitReplGet('litrepl_debug')
+      let msg = ""
+      let sep = ""
+      for match in l:matches
+        let msg = msg . sep . match
+        if len(sep) == 0
+          let sep = ", "
+        endif
+      endfor
+      echoerr "Multiple matches found for: " . l:pattern . "(" . msg . ")"
+    endif
   endif
   return l:matches[0]
 endfun
