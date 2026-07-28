@@ -7,6 +7,7 @@
 
 [![](./img/coverage.svg)](./docs/coverage.md)
 [![Litrepl tests](https://github.com/sergei-mironov/litrepl/actions/workflows/testing.yaml/badge.svg)](https://github.com/sergei-mironov/litrepl/actions/workflows/testing.yaml)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.08384/status.svg)](https://doi.org/10.21105/joss.08384)
 
 </div>
 
@@ -45,7 +46,8 @@ _Notes:_
     <td>
       Preprint: <i>(2025, Sergei Mironov)</i>
       <ins>Litrepl: Literate Paper Processor Promoting Transparency More Than Reproducibility</ins>
-      <a href="https://arxiv.org/abs/2501.10738">arXiv:2501.10738</a>
+      <a href="https://arxiv.org/abs/2501.10738">arXiv:2501.10738 preprint</a>
+      <a href="https://doi.org/10.21105/joss.08384">JOSS</a>
     </td>
   </tr>
 </table>
