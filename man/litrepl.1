@@ -215,19 +215,23 @@ LITREPL_SH_INTERPRETER environment variable if set, otherwise "auto".
 \fB\-\-python\-auxdir\fR \fI\,DIR\/\fR
 This directory stores Python interpreter pipes. It defaults to
 LITREPL_PYTHON_AUXDIR if set; otherwise, it's created in the system's
-temporary directory, named after the current working directory.
+temporary directory, named after the current working directory. A number of
+magic patterns are recognised: %FN expands to a filename of the contents of
+the LITREPL_FILE variable without extension; %FE to its extension; %FD expands
+to the dirname of the variable; %TD to a temp directory; %UI to the OS user
+identifier; %CH to the working directory hash; %IH to the interpreter hash.
 
 .TP
 \fB\-\-ai\-auxdir\fR \fI\,DIR\/\fR
 This directory stores AI interpreter pipes. It defaults to LITREPL_AI_AUXDIR
 if set; otherwise, it's created in the system's temporary directory, named
-after the current working directory.
+after the current working directory. The above magic pattern notice applies.
 
 .TP
 \fB\-\-sh\-auxdir\fR \fI\,DIR\/\fR
 This directory stores AI interpreter pipes. It defaults to LITREPL_SH_AUXDIR
 if set; otherwise, it's created in the system's temporary directory, named
-after the current working directory.
+after the current working directory. The above magic pattern notice applies.
 
 .TP
 \fB\-\-timeout\fR \fI\,F[,F]\/\fR

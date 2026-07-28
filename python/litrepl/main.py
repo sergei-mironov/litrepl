@@ -79,21 +79,28 @@ def make_parser():
   ap.add_argument('--python-auxdir',type=str,metavar='DIR',
     default=_ensure_nonepty(environ.get('LITREPL_PYTHON_AUXDIR')),
     help=dedent('''
-    This directory stores Python interpreter pipes. It defaults
-    to LITREPL_PYTHON_AUXDIR if set; otherwise, it's created in the system's
-    temporary directory, named after the current working directory.'''))
+    This directory stores Python interpreter pipes. It defaults to
+    LITREPL_PYTHON_AUXDIR if set; otherwise, it's created in the system's
+    temporary directory, named after the current working directory. A number of
+    magic patterns are recognised: %%FN expands to a filename of the contents of
+    the LITREPL_FILE variable without extension; %%FE to its extension; %%FD
+    expands to the dirname of the variable; %%TD to a temp directory; %%UI to
+    the OS user identifier; %%CH to the working directory hash; %%IH to the
+    interpreter hash.'''))
   ap.add_argument('--ai-auxdir',type=str,metavar='DIR',
     default=_ensure_nonepty(environ.get('LITREPL_AI_AUXDIR')),
     help=dedent('''
     This directory stores AI interpreter pipes. It defaults to
     LITREPL_AI_AUXDIR if set; otherwise, it's created in the system's temporary
-    directory, named after the current working directory.'''))
+    directory, named after the current working directory. The above magic
+    pattern notice applies.'''))
   ap.add_argument('--sh-auxdir',type=str,metavar='DIR',
     default=_ensure_nonepty(environ.get('LITREPL_SH_AUXDIR')),
     help=dedent('''
     This directory stores AI interpreter pipes. It defaults to
     LITREPL_SH_AUXDIR if set; otherwise, it's created in the system's temporary
-    directory, named after the current working directory.'''))
+    directory, named after the current working directory. The above magic
+    pattern notice applies.'''))
   ap.add_argument('--timeout',type=str,metavar='F[,F]',default='inf',
     help=dedent('''
     Timeouts for initial evaluation and for pending checks, in
