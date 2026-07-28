@@ -110,7 +110,7 @@ class FileNames:
   emsgf:str                         # File containing last output
 
 
-SECVAR_RE = re_compile("(\^+ *R[0-9]+ *\^+)|(v+ *R[0-9]+ *v+)|(\>+ *R[0-9]+ *\<+)",
+SECVAR_RE = re_compile(r"(\^+ *R[0-9]+ *\^+)|(v+ *R[0-9]+ *v+)|(\>+ *R[0-9]+ *\<+)",
                        flags=re.MULTILINE|re.A)
 
 

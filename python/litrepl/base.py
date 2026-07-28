@@ -290,11 +290,11 @@ class SymbolsMarkdown(Symbols):
     self.ignorebegin=r"<!--[ ]*l?ignore[ ]*-->"
     self.ignoreend=r"<!--[ ]*l?noignore[ ]*-->"
     self.secbegin_dict={
-      'vim':(codebegin_re+'|'+comcodebegin_re).replace('?','\?'),
+      'vim':(codebegin_re+'|'+comcodebegin_re).replace('?','\\?'),
       'lark':(codebegin_re+'|'+comcodebegin_re)
     }
     self.secend_dict={
-      'vim':(self.resultend+'|'+self.comresultend).replace('?','\?'),
+      'vim':(self.resultend+'|'+self.comresultend).replace('?','\\?'),
       'lark':(self.resultend+'|'+self.comresultend),
     }
 

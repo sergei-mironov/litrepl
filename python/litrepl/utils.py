@@ -19,7 +19,7 @@ def indent(col:int, lines:str)->str:
   return '\n'.join([((' '*col+l) if (len(l)>0 or i==len(ls)-1) else '') for i,l in enumerate(ls)])
 
 def escape(text, pat:str):
-  """ Escapes every letter of a pattern with (\) """
+  """ Escapes every letter of a pattern with (\\) """
   epat=''.join(['\\'+c for c in pat])
   return text.replace(pat,epat)
 
