@@ -82,7 +82,7 @@ let
         pylsp
         pylsp-mypy
         setuptools
-        setuptools_scm
+        setuptools-scm
         ipython
         hypothesis
         pytest
@@ -94,7 +94,7 @@ let
         tqdm
         matplotlib
         numpy
-        bpython
+        # bpython
         psutil
         coverage
         # (aicli.aicli pp) # FIXME: this does not work for some reason.
