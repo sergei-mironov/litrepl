@@ -33,7 +33,7 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
 from .eval import (process, pstderr, rresult_load, rresult_save, process_adapt,
                    process_cont, interp_exitcode, readipid, with_parent_finally,
                    with_fd, read_nonblock, eval_code, eval_code_,
-                   interp_is_running)
+                   interp_is_running, isync, with_locked_fd)
 from .utils import(unindent, indent, escape, fillspaces, fmterror, assert_,
                    cursor_within, nlines, wraplong, remove_silent, hashdigest)
 
@@ -174,7 +174,11 @@ def write_child_pid(pidf:str, pid:int)->bool:
 
 def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
   """ Starts the background Python interpreter. Kill an existing interpreter if
-  any. Creates files `inp.pipe`, `out.pipe`, `pid.txt`, etc."""
+  any. Creates files `inp.pipe`, `out.pipe`, `pid.txt`; Calls isync to
+  synchronize with interpreter prompts;
+
+  Calling isync() is important e.g. to let the interpreter install
+  KeyboardInterrupt handlers and process SIGINTs."""
   fns=i.fns
   if not restart and interp_is_running(fns):
     pdebug(f"Not restarting an already running interpreter")
@@ -191,7 +195,7 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
   mkfifo(fns.outp)
   sys.stdout.flush(); sys.stderr.flush() # FIXME: to avoid duplicated stdout
   npid=os.fork()
-  if npid==0:
+  if npid==0: # Child
     os.close(sys.stdout.fileno())
     os.close(sys.stderr.fileno())
     os.close(sys.stdin.fileno())
@@ -206,10 +210,16 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
     with open(fns.ecodef,'w') as f:
       f.write(str(ret))
     exit(ret)
-  else:
+  else: # Parent
     pdebug(f"starting in {fns.wd}")
     finp,foutp=open_parent_pipes(fns.inp,fns.outp)
     i.setup_child(a,finp,foutp)
+    with with_locked_fd(fns.inp, os.O_WRONLY|os.O_SYNC,
+                        fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdw:
+      with with_locked_fd(fns.outp, os.O_RDONLY|os.O_SYNC,
+                          fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdr:
+        assert fdw and fdr, "Failed to acquire on-start pipe locks"
+        isync(fdr,fdw,i)
     if write_child_pid(fns.pidf,npid):
       return 0
     else:
@@ -512,15 +522,15 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
     if interrupt:
       ipid=readipid(fns)
       if ipid is not None:
-        pdebug("Sending SIGINT to the interpreter")
+        pdebug("Sending SIGINT to the interpreter immediately")
         os.kill(ipid,SIGINT)
       else:
         pdebug("Failed to determine interpreter pid, not sending SIGINT")
     return fns,ss
 
   def _bm2interp(bmarker:str)->Tuple[Optional[FileNames],Union[Interpreter,ErrorMsg]]:
-    """ Map code marker into FileName (None if the code marker is disabled by
-    options) and resolve the interpreter. """
+    """ Map code marker into FileNames (None if the code marker is disabled by
+    options) and resolve the interpreter type. """
     st=bmarker2st(a,bmarker)
     if st is None:
       return (None, f"Failed to attach to interpreter.")

@@ -306,9 +306,10 @@ def main(args=None):
     ecode=eval_section_(a,parse_(a).tree,sr0)
     exit(0 if ecode is None else ecode)
   elif a.command=='eval-sections':
-    t=parse_(a).tree
-    nsecs=solve_sloc(a.locs,t)
-    ecode=eval_section_(a,t,nsecs)
+    with with_early_sigint():
+      t=parse_(a).tree
+      nsecs=solve_sloc(a.locs,t)
+      ecode=eval_section_(a,t,nsecs)
     exit(0 if ecode is None else ecode)
   elif a.command=='repl':
     st=name2st(a.type)
@@ -324,24 +325,26 @@ def main(args=None):
       ecode=interp_exitcode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='interrupt':
-    tree=parse_(a).tree
-    sr=solve_sloc(a.locs,tree)
-    sr.nsecs|=set(sr.preproc.pending.keys())
-    ecode=eval_section_(a,tree,sr,interrupt=True)
+    with with_early_sigint():
+      tree=parse_(a).tree
+      sr=solve_sloc(a.locs,tree)
+      sr.nsecs|=set(sr.preproc.pending.keys())
+      ecode=eval_section_(a,tree,sr,interrupt=True)
     exit(ecode)
   elif a.command=='eval-code':
-    st=name2st(a.type)
-    es=EvalState(SecRec.empty())
-    with with_parent_finally(partial(_foreground_stop,st)):
-      fns=pipenames(a,st)
-      if not running(a,st) or a.foreground:
-        start(a,st,restart=True)
-      ss=attach(fns,st)
-      if not isinstance(ss,Interpreter):
-        ec=interp_exitcode(fns)
-        raise RuntimeError(failmsg(fns,ss,ec))
-      print(eval_code(a,fns,ss,es,sys.stdin.read()),end='',flush=True)
-      ecode=interp_exitcode(fns,undefined=200)
+    with with_early_sigint():
+      st=name2st(a.type)
+      es=EvalState(SecRec.empty())
+      with with_parent_finally(partial(_foreground_stop,st)):
+        fns=pipenames(a,st)
+        if not running(a,st) or a.foreground:
+          start(a,st,restart=True)
+        ss=attach(fns,st)
+        if not isinstance(ss,Interpreter):
+          ec=interp_exitcode(fns)
+          raise RuntimeError(failmsg(fns,ss,ec))
+        print(eval_code(a,fns,ss,es,sys.stdin.read()),end='',flush=True)
+        ecode=interp_exitcode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='status':
     p=parse_maybe(a)

@@ -1143,6 +1143,38 @@ cat out1.md | runlitrepl \
 grep -q 'KeyboardInterrupt' out2.md
 )} #}}}
 
+
+test_sigint() {( #{{{
+mktest "_test_sigint"
+runlitrepl start python
+cat >source.md <<"EOF"
+```python
+from time import sleep
+while True:
+  sleep(1)
+```
+```result
+```
+```python
+print(40+2)
+```
+```result
+```
+END-OF-DOCUMENT
+EOF
+cat source.md | runlitrepl --propagate-sigint eval-sections >out.md &
+PID=$!
+trap "kill -9 '$PID' 2>/dev/null || true" EXIT
+sleep 0.3
+kill -INT $PID
+wait $PID
+
+grep -q 'KeyboardInterrupt' out.md
+grep -q 'END-OF-DOCUMENT' out.md
+grep -q '42' out.md
+)} #}}}
+
+
 test_invalid_interpreter() {( #{{{
 # Exact result messages might start a race (exit code X VS broken pipe) That is
 # why we put tow sections.
@@ -1554,6 +1586,7 @@ tests() {
       echo test_foreground $python - -
       echo test_status $python - -
       echo test_interrupt $python - -
+      echo test_sigint $python - -
       echo test_invalid_interpreter $python - -
       echo test_vim_eval_code $python - -
       echo test_vim_eval_selection $python - -

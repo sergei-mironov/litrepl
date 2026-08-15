@@ -78,27 +78,57 @@ def readipid(fns:FileNames)->Optional[int]:
   except (ValueError,FileNotFoundError):
     return None
 
+EARLY_SIGINT_PENDING=False
+
 @contextmanager
-def with_sigint(propagate_sigint:bool, fns:FileNames):
-  """ Runs a context code with a SIGINT handler which kills the background
-  interpreter rahter than the LitRepl itself. """
-  ipid=readipid(fns)
+def with_early_sigint():
+  """ Recording SIGINT signal by raising a flag. The `with_sigint` is expected
+  to be called later to handle it. """
   def _handler(signum,frame):
-    pdebug(f"Sending SIGINT to {ipid}")
-    os.kill(ipid,SIGINT)
+    global EARLY_SIGINT_PENDING
+    pdebug(f"with_early_sigint triggered")
+    EARLY_SIGINT_PENDING=True
   prev=None
-  def _finally():
+  try:
+    pdebug(f"with_early_sigint installed")
+    with with_sigmask():
+      prev=signal(SIGINT,_handler)
+    yield
+  finally:
     with with_sigmask():
       if prev is not None:
         signal(SIGINT,prev)
-  with with_parent_finally(_finally):
+      pdebug(f"with_early_sigint cleared")
+
+@contextmanager
+def with_sigint(propagate_sigint:bool, fns:FileNames):
+  """ Runs a context code with a SIGINT handler which kills the background
+  interpreter rather than the LitRepl itself. Checks early SIGINT flag and call
+  the handler if required."""
+  global EARLY_SIGINT_PENDING
+  ipid=readipid(fns)
+  assert ipid is not None, f"Failed to read interpreter PID, fns:{fns}"
+  def _handler(signum,frame):
+    pdebug(f"with_sigint triggered, sending SIGINT to {ipid}")
+    os.kill(ipid,SIGINT)
+  prev=None
+  try:
+    pdebug(f"with_sigint installed")
     with with_sigmask():
       if ipid is not None:
         if propagate_sigint:
           prev=signal(SIGINT,_handler)
       else:
         pdebug(f"Failed to read pid: not installing SIGINT handler")
+    if EARLY_SIGINT_PENDING:
+      EARLY_SIGINT_PENDING=False
+      _handler(0,0)
     yield
+  finally:
+    with with_sigmask():
+      if prev is not None:
+        signal(SIGINT,prev)
+      pdebug(f"with_sigint cleared")
 
 @contextmanager
 def with_alarm(timeout_sec:float):
@@ -219,6 +249,12 @@ def mkre(prompt:str):
   return re_compile(f"((.(?!{prompt}))*(.(?={prompt}))?)({prompt})+".encode('utf-8'),
                     re.MULTILINE|re.DOTALL)
 
+def isync(fdr, fdw, ss:Interpreter)->None:
+  p1,p2=ss.patterns()
+  os.write(fdw,p1[0].encode())
+  x=readout(fdr,prompt=mkre(p1[1]),merge=merge_rn2)
+  pdebug(f"sync returned '{x}'")
+
 
 def interact(fdr, fdw, text:str, fo:int, ss:Interpreter)->None:
   """ Interpreter interaction procedure, running in a forked process. Its goal
@@ -232,10 +268,8 @@ def interact(fdr, fdw, text:str, fo:int, ss:Interpreter)->None:
     fo (int): Output descriptor, available for writing
     ss (Interpreter): Interpreter abstraction object
   """
+  isync(fdr,fdw,ss)
   p1,p2=ss.patterns()
-  os.write(fdw,p1[0].encode())
-  x=readout(fdr,prompt=mkre(p1[1]),merge=merge_rn2)
-  pdebug(f"interact readout returned '{x}'")
   os.write(fdw,text.encode())
   os.write(fdw,'\n'.encode())
   pdebug(f"interact main text ({len(text)} chars) sent")
@@ -247,13 +281,12 @@ def process(a:LitreplArgs,fns:FileNames, ss:Interpreter, lines:str)->Tuple[str,R
   p1,p2=ss.patterns()
   runr=process_async(fns,ss,lines)
   res=''
-  with with_sigint(a.propagate_sigint,fns):
-    with with_locked_fd(runr.fname,OPEN_RDONLY,LOCK_EX) as fdr:
-      assert_(fdr is not None)
-      pdebug("process readout")
-      res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
-      remove_silent(runr.fname)
-      pdebug("process readout complete")
+  with with_locked_fd(runr.fname,OPEN_RDONLY,LOCK_EX) as fdr:
+    assert_(fdr is not None)
+    pdebug("process readout")
+    res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
+    remove_silent(runr.fname)
+    pdebug("process readout complete")
   return res,runr
 
 def interp_is_running(fns:FileNames)->bool:
@@ -382,7 +415,7 @@ def process_async(fns:FileNames, ss:Interpreter, code:str)->RunResult:
                 os.write(fo,"<Unable to access the interpreter>\n".encode())
             finally:
               os.fsync(fo)
-        pdebug("Exiting!")
+        pdebug("process_async reader finishes")
         exit(0)
       else:
         # Parent
@@ -397,35 +430,33 @@ def process_cont(fns:FileNames,
                  ss:Interpreter,
                  runr:RunResult,
                  timeout:float,
-                 propagate_sigint:bool,
                  keep_readout_file:bool=False)->ReadResult:
   """ Read from the running readout process. """
   rr:Optional[ReadResult]=None
   p1,p2=ss.patterns()
-  with with_sigint(propagate_sigint,fns):
-    pdebug(f"process_cont starting via {runr.fname}")
-    with with_locked_fd(runr.fname,
-                        os.O_RDONLY|os.O_SYNC,
-                        LOCK_BLOCKING if timeout>0 else LOCK_NONBLOCKING,
-                        lock_timeout_sec=timeout) as fdr:
+  pdebug(f"process_cont starting via {runr.fname}")
+  with with_locked_fd(runr.fname,
+                      os.O_RDONLY|os.O_SYNC,
+                      LOCK_BLOCKING if timeout>0 else LOCK_NONBLOCKING,
+                      lock_timeout_sec=timeout) as fdr:
 
-      if fdr:
-        pdebug(f"process_cont final readout start")
-        res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
-        pdebug(f"process_cont final readout finish")
-        rr=ReadResult(res,False) # Return final result
-        if keep_readout_file:
-          pdebug(f"process_cont keep {runr.fname}")
-        else:
-          remove_silent(runr.fname)
-          pdebug(f"process_cont unlinked {runr.fname}")
+    if fdr:
+      pdebug(f"process_cont final readout start")
+      res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
+      pdebug(f"process_cont final readout finish")
+      rr=ReadResult(res,False) # Return final result
+      if keep_readout_file:
+        pdebug(f"process_cont keep {runr.fname}")
       else:
-        with with_fd(runr.fname,os.O_RDONLY|os.O_SYNC) as fdr:
-          assert_(fdr is not None)
-          pdebug("process_cont readout(nonblocking) start")
-          res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
-          pdebug(f"process_cont readout(nonblocking) finish")
-          rr=ReadResult(res,True) # Timeout ==> Return continuation
+        remove_silent(runr.fname)
+        pdebug(f"process_cont unlinked {runr.fname}")
+    else:
+      with with_fd(runr.fname,os.O_RDONLY|os.O_SYNC) as fdr:
+        assert_(fdr is not None)
+        pdebug("process_cont readout(nonblocking) start")
+        res=readout(fdr,prompt=mkre(p2[1]),merge=merge_rn2)
+        pdebug(f"process_cont readout(nonblocking) finish")
+        rr=ReadResult(res,True) # Timeout ==> Return continuation
   assert_(rr is not None)
   return rr
 
@@ -433,17 +464,12 @@ def process_adapt(fns:FileNames,
                   ss:Interpreter,
                   code:str,
                   timeout:float=1.0,
-                  propagate_sigint:bool=True,
                   keep_readout_file:bool=False)->Tuple[ReadResult,RunResult]:
   """ Push `code` to the interpreter and wait for `timeout` seconds for
   the immediate answer. In case of delay, return intermediate answer and
   the continuation context."""
-  # if timeout == float('inf'):
-  #   lines2,runr=process(fns,ss,code)
-  #   return ReadResult(lines2,False),runr
-  # else:
   runr=process_async(fns,ss,code)
-  rr=process_cont(fns,ss,runr,timeout=timeout,propagate_sigint=propagate_sigint,
+  rr=process_cont(fns,ss,runr,timeout=timeout,
                   keep_readout_file=keep_readout_file)
   return rr,runr
 
@@ -492,26 +518,26 @@ def eval_code_(a:LitreplArgs,
   encoded in the result for later reference.
   """
   rr:ReadResult
-  rr,runr=eval_code_raw(ss,interp_code_preprocess(a,ss,es,code),
-                        a.timeout_initial,a.timeout_continue,a.propagate_sigint,runr,
-                        keep_readout_file=a.keep_readout)
-  pptext=interp_result_postprocess(a,ss,rr.text)
-  res=rresult_save(pptext,runr) if rr.timeout else pptext
+  with with_sigint(a.propagate_sigint, fns):
+    rr,runr=eval_code_raw(ss,interp_code_preprocess(a,ss,es,code),
+                          a.timeout_initial,a.timeout_continue,runr,
+                          keep_readout_file=a.keep_readout)
+    pptext=interp_result_postprocess(a,ss,rr.text)
+    res=rresult_save(pptext,runr) if rr.timeout else pptext
   return res,rr
 
 def eval_code_raw(ss:Interpreter,
                   code:str,
                   timeout_initial,
                   timeout_continue,
-                  propagate_sigint:bool,
                   runr:Optional[RunResult]=None,
                   keep_readout_file:bool=False) -> Tuple[ReadResult,RunResult]:
   """ Start or complete the code section evaluation without pre- and
   post-processing. See also `eval_code_`. """
   fns=ss.fns
   if runr is None:
-    rr,runr=process_adapt(fns,ss,code,timeout_initial,propagate_sigint,keep_readout_file)
+    rr,runr=process_adapt(fns,ss,code,timeout_initial,keep_readout_file)
   else:
-    rr=process_cont(fns,ss,runr,timeout_continue,propagate_sigint,keep_readout_file)
+    rr=process_cont(fns,ss,runr,timeout_continue,keep_readout_file)
   return rr,runr
 
