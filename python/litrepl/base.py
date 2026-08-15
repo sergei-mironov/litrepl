@@ -167,6 +167,7 @@ def write_child_pid(pidf:str, pid:int)->bool:
   for attempt in range(20):
     try:
       cpid=Process(pid).children()[0].pid
+      break
     except IndexError:
       sleep(0.1)
   if cpid is None:
