@@ -249,11 +249,12 @@ def mkre(prompt:str):
   return re_compile(f"((.(?!{prompt}))*(.(?={prompt}))?)({prompt})+".encode('utf-8'),
                     re.MULTILINE|re.DOTALL)
 
-def isync(fdr, fdw, ss:Interpreter)->None:
+def isync(fdr, fdw, ss:Interpreter):
   p1,p2=ss.patterns()
-  os.write(fdw,p1[0].encode())
+  err=os.write(fdw,p1[0].encode())
   x=readout(fdr,prompt=mkre(p1[1]),merge=merge_rn2)
   pdebug(f"sync returned '{x}'")
+  return x
 
 
 def interact(fdr, fdw, text:str, fo:int, ss:Interpreter)->None:

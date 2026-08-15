@@ -133,7 +133,7 @@ def attach(fns:FileNames, st:Optional[SType]=None)->Union[Interpreter,ErrorMsg]:
   """ Attach to the interpreter associated with the given pipe filenames. """
   pid=readipid(fns)
   if pid is None:
-    return f"Could not determine pid of an interpreter"
+    return f"Can not read PID of a {st2name(st)} interpreter to attach"
   try:
     p=Process(pid)
     cmd=p.cmdline()
@@ -163,14 +163,18 @@ def write_child_pid(pidf:str, pid:int)->bool:
   """ Write first children of a fork-child process as the main interpreter
   pid. This works as long as `Interpreter.run_child` calls real interpreter
   using system() call."""
-  with open(pidf,'w') as f:
-    for attempt in range(20):
-      try:
-        f.write(str(Process(pid).children()[0].pid))
-        return True
-      except IndexError:
-        sleep(0.1)
-  return False
+  cpid=None
+  for attempt in range(20):
+    try:
+      cpid=Process(pid).children()[0].pid
+    except IndexError:
+      sleep(0.1)
+  if cpid is None:
+    return False
+  else:
+    with open(pidf,'w') as f:
+      f.write(str(cpid))
+    return True
 
 def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
   """ Starts the background Python interpreter. Kill an existing interpreter if
@@ -204,9 +208,7 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
     open_child_pipes(fns.inp,fns.outp)
     ret=i.run_child(interpreter)
     ret=ret if ret<256 else WEXITSTATUS(ret)
-    with open(fns.emsgf,'w') as f:
-      f.write(read_nonblock(fns.outp))
-    pdebug(f"Fork records ecode: {ret} into {fns.wd}")
+    #pdebug(f"Fork records ecode: {ret} into {fns.wd}")
     with open(fns.ecodef,'w') as f:
       f.write(str(ret))
     exit(ret)
@@ -219,7 +221,9 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
       with with_locked_fd(fns.outp, os.O_RDONLY|os.O_SYNC,
                           fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdr:
         assert fdw and fdr, "Failed to acquire on-start pipe locks"
-        isync(fdr,fdw,i)
+        out=isync(fdr,fdw,i)
+        with open(fns.emsgf,'w') as f:
+          f.write(out)
     if write_child_pid(fns.pidf,npid):
       return 0
     else:
@@ -256,8 +260,8 @@ def start(a:LitreplArgs, st:SType, restart:bool=False)->int:
 def isdisabled(a:LitreplArgs, st:SType)->bool:
   return getattr(a,f"{st2name(st)}_interpreter",None)=='-'
 
-def restart(a:LitreplArgs,st:SType):
-  start(a,st,restart=True)
+def restart(a:LitreplArgs,st:SType)->int:
+  return start(a,st,restart=True)
 
 def running(a:LitreplArgs,st:SType)->bool:
   """ Checks if the background session was run or not. """
@@ -487,7 +491,7 @@ def parse_(a:LitreplArgs)->ParseResult:
     raise ValueError(f"Unsupported filetype \"{a.filetype}\"")
   return res
 
-def failmsg(fns:FileNames,ss:Union[Interpreter,str],ec:ECode)->str:
+def failmsg(st:SType,fns:FileNames,ss:Union[Interpreter,str],ec:ECode)->str:
   """ Retrieve information about the failed interpreter: attempt to access its
   last error message, format the syscall diagnostic, print OS exitcode. """
   msg=''
@@ -498,9 +502,8 @@ def failmsg(fns:FileNames,ss:Union[Interpreter,str],ec:ECode)->str:
     pass
   if isinstance(ss,str):
     msg+=ss.rstrip()+"\n"
-  else:
-    if ec is not ECODE_RUNNING:
-      msg+=f"Interpreter process terminated with OS exitcode: {ec}\n"
+  if ec is not ECODE_RUNNING:
+    msg+=f"{st2name(st)} interpreter terminated with OS exitcode: {ec}\n"
   msg+=f"Note: auxiliary directory is set to \"{fns.wd}\"\n"
   return msg
 
@@ -515,7 +518,8 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
     es.stypes.add(st)
     fns=pipenames(a,st)
     if not running(a,st):
-      start(a,st)
+      if 0 != start(a,st):
+        return (fns, f"Failed to start {st2name(st)} interpreter")
     ss=attach(fns,st)
     if not isinstance(ss,Interpreter):
       return (fns,ss)
@@ -525,7 +529,7 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
         pdebug("Sending SIGINT to the interpreter immediately")
         os.kill(ipid,SIGINT)
       else:
-        pdebug("Failed to determine interpreter pid, not sending SIGINT")
+        pdebug(f"Failed to determine {st2name(st)} interpreter pid, not sending SIGINT")
     return fns,ss
 
   def _bm2interp(bmarker:str)->Tuple[Optional[FileNames],Union[Interpreter,ErrorMsg]]:
@@ -533,8 +537,8 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
     options) and resolve the interpreter type. """
     st=bmarker2st(a,bmarker)
     if st is None:
-      return (None, f"Failed to attach to interpreter.")
-    return _st2interp(st)
+      return (st,None,f"Code marker '{bmarker.strip()}' is not associated with an interpreter.")
+    return (st,*_st2interp(st))
 
   def _checkecode(fns,nsec,pending:bool)->ECode:
     ec=interp_exitcode(fns)
@@ -565,14 +569,14 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       code=unindent(bm.column-1,t)
       if es.nsec in nsecs:
         ok,sres,ec=False,'',ECODE_RUNNING
-        fns,ss=_bm2interp(bmarker)
+        st,fns,ss=_bm2interp(bmarker)
         if isinstance(fns,FileNames):
           rr=None
           if isinstance(ss,Interpreter):
             sres,rr=eval_code_(a,fns,ss,es,code,sr.preproc.pending.get(es.nsec))
           ec=_checkecode(fns,es.nsec,(rr.timeout if rr else False))
           if (ec is not ECODE_RUNNING) or isinstance(ss,str):
-            msg=failmsg(fns,ss,ec)
+            msg=failmsg(st,fns,ss,ec)
             pstderr(msg)
             sres+=msg
           es.sres[es.nsec]=sres
@@ -601,12 +605,13 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       im=tree.children[0].children[0].value
       result=''
       if es.nsec in nsecs:
-        fns,ss=_st2interp(SType.SPython)
+        st=SType.SPython
+        fns,ss=_st2interp(st)
         if isinstance(ss,Interpreter):
           result=process(a,fns,ss,'print('+code+');\n')[0].rstrip('\n')
         ec=_checkecode(fns,es.nsec,False)
         if ec is not ECODE_RUNNING:
-          msg=failmsg(fns,ss,ec)
+          msg=failmsg(st,fns,ss,ec)
           pstderr(msg)
           result=msg
       else:
