@@ -106,11 +106,14 @@ def make_parser():
     Timeouts for initial evaluation and for pending checks, in
     seconds. If the latter is omitted, it is considered to be equal to the
     former one.'''))
+  ap.add_argument('--detach-on-sigint',action='store_true',
+    help=dedent('''
+    If set, litrepl will catch SIGINT signals and send a SIGALRM signal to
+    itself, effectively cancelling any wait timeouts.'''))
   ap.add_argument('--propagate-sigint',action='store_true',
     help=dedent('''
-    If set, litrepl will catch and resend SIGINT signals to the
-    running interpreter. Otherwise it will just terminate itself leaving the
-    interpreter as-is.'''))
+    If set, litrepl will catch and resend SIGINT signals to the running
+    interpreter.'''))
   ap.add_argument('-d','--debug',type=int,metavar='INT',default=0,
     help="Enable (a lot of) debug messages.")
   ap.add_argument('-K','--keep-readout',action='store_true',
@@ -306,7 +309,7 @@ def main(args=None):
     ecode=eval_section_(a,parse_(a).tree,sr0)
     exit(0 if ecode is None else ecode)
   elif a.command=='eval-sections':
-    with with_early_sigint():
+    with with_early_sigalarm(), with_early_sigint():
       t=parse_(a).tree
       nsecs=solve_sloc(a.locs,t)
       ecode=eval_section_(a,t,nsecs)
@@ -325,14 +328,14 @@ def main(args=None):
       ecode=interp_exitcode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
   elif a.command=='interrupt':
-    with with_early_sigint():
+    with with_early_sigalarm(), with_early_sigint():
       tree=parse_(a).tree
       sr=solve_sloc(a.locs,tree)
       sr.nsecs|=set(sr.preproc.pending.keys())
       ecode=eval_section_(a,tree,sr,interrupt=True)
     exit(ecode)
   elif a.command=='eval-code':
-    with with_early_sigint():
+    with with_early_sigalarm(), with_early_sigint():
       st=name2st(a.type)
       es=EvalState(SecRec.empty())
       with with_parent_finally(partial(_foreground_stop,st)):

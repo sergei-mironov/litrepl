@@ -317,7 +317,7 @@ fun! LitReplRunBufferOrUndo(command, timeout)
   execute "normal! I "
   execute "normal! x"
   let cur = getcharpos('.')
-  let command = '--propagate-sigint ' . a:command
+  let command = '--detach-on-sigint ' . a:command
   let errcode = LitReplRunBufferVC(command, a:timeout)
   if errcode == 0 || errcode == LitReplGet('litrepl_pending')
     return errcode

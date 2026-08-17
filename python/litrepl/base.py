@@ -221,7 +221,7 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
                         fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdw:
       with with_locked_fd(fns.outp, os.O_RDONLY|os.O_SYNC,
                           fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdr:
-        assert fdw and fdr, "Failed to acquire on-start pipe locks"
+        assert_(fdw and fdr, "Failed to acquire on-start pipe locks")
         out=isync(fdr,fdw,i)
         with open(fns.emsgf,'w') as f:
           f.write(out)

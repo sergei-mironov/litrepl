@@ -12,7 +12,7 @@ from os import environ, system, getpid, unlink
 from lark import Lark, Visitor, Transformer, Token, Tree
 from lark.visitors import Interpreter
 from os.path import isfile, join
-from signal import signal, SIGINT, SIGALRM, setitimer, ITIMER_REAL
+from signal import signal, SIGINT, SIGTSTP, SIGALRM, setitimer, ITIMER_REAL
 from time import sleep, time
 from dataclasses import dataclass, astuple
 from functools import partial
@@ -100,35 +100,64 @@ def with_early_sigint():
         signal(SIGINT,prev)
       pdebug(f"with_early_sigint cleared")
 
+
+
 @contextmanager
-def with_sigint(propagate_sigint:bool, fns:FileNames):
+def with_sigint(detach_on_sigint:bool, propagate_sigint:bool, fns:FileNames):
   """ Runs a context code with a SIGINT handler which kills the background
   interpreter rather than the LitRepl itself. Checks early SIGINT flag and call
   the handler if required."""
   global EARLY_SIGINT_PENDING
   ipid=readipid(fns)
-  assert ipid is not None, f"Failed to read interpreter PID, fns:{fns}"
+  assert_(ipid is not None, f"Failed to read interpreter PID, fns:{fns}")
   def _handler(signum,frame):
-    pdebug(f"with_sigint triggered, sending SIGINT to {ipid}")
-    os.kill(ipid,SIGINT)
+    pdebug(f"with_sigint triggered")
+    if detach_on_sigint:
+      pdebug(f"with_sigint, sending SIGALRM to itself ({getpid()})")
+      os.kill(getpid(),SIGALRM)
+    if propagate_sigint:
+      pdebug(f"with_sigint, sending SIGINT to {ipid}")
+      os.kill(ipid,SIGINT)
   prev=None
   try:
     pdebug(f"with_sigint installed")
     with with_sigmask():
-      if ipid is not None:
-        if propagate_sigint:
+      if propagate_sigint or detach_on_sigint:
+        if ipid is not None:
           prev=signal(SIGINT,_handler)
-      else:
-        pdebug(f"Failed to read pid: not installing SIGINT handler")
-    if EARLY_SIGINT_PENDING:
-      EARLY_SIGINT_PENDING=False
-      _handler(0,0)
+        else:
+          pdebug(f"Failed to read pid: not installing SIGINT handler")
+        if EARLY_SIGINT_PENDING:
+          EARLY_SIGINT_PENDING=False
+          _handler(0,0)
     yield
   finally:
     with with_sigmask():
       if prev is not None:
         signal(SIGINT,prev)
       pdebug(f"with_sigint cleared")
+
+EARLY_SIGALARM_PENDING=False
+
+@contextmanager
+def with_early_sigalarm():
+  """ Recording SIGINT signal by raising a flag. The `with_sigint` is expected
+  to be called later to handle it. """
+  def _handler(signum,frame):
+    global EARLY_SIGALARM_PENDING
+    pdebug(f"with_early_sigalarm triggered")
+    EARLY_SIGALARM_PENDING=True
+  prev=None
+  try:
+    pdebug(f"with_early_sigalarm installed")
+    with with_sigmask():
+      prev=signal(SIGALRM,_handler)
+    yield
+  finally:
+    with with_sigmask():
+      if prev is not None:
+        signal(SIGALRM,prev)
+      pdebug(f"with_early_sigalarm cleared")
 
 @contextmanager
 def with_alarm(timeout_sec:float):
@@ -148,11 +177,13 @@ def with_alarm(timeout_sec:float):
           signal(SIGALRM,prev)
 
   with with_parent_finally(_finally):
-    if timeout_sec>0 and timeout_sec<float('inf'):
-      with with_sigmask():
-        prev=signal(SIGALRM,_handler)
+    with with_sigmask():
+      prev=signal(SIGALRM,_handler)
+      if timeout_sec>0 and timeout_sec<float('inf'):
         setitimer(ITIMER_REAL,timeout_sec)
-      # pdebug(f"Alarm {timeout_sec} set")
+      if EARLY_SIGALARM_PENDING:
+        EARLY_SIGINT_PENDING=False
+        _handler(0,0)
     yield
 
 
@@ -384,7 +415,7 @@ def process_async(fns:FileNames, ss:Interpreter, code:str)->RunResult:
   wd,inp,outp,_,_,_=astuple(fns)
   codehash=hashdigest(code)
   fname=join(wd,f"partial_{codehash}.txt")
-  pdebug(f"process_async starting via {fname}")
+  pdebug(f"process_async locking {fname}")
   with with_locked_fd(fname,CREATE_WRONLY_EMPTY,LOCK_NONBLOCKING) as fo:
     if fo is not None:
       sys.stdout.flush(); sys.stderr.flush() # FIXME: crude
@@ -395,19 +426,20 @@ def process_async(fns:FileNames, ss:Interpreter, code:str)->RunResult:
         def _handler(signum,frame):
           pass
         signal(SIGINT,_handler)
-        pdebug(f"process_async reader opening pipes")
+        signal(SIGTSTP,_handler)
+        pdebug(f"process_async(reader) opening pipes")
         with with_locked_fd(inp, os.O_WRONLY|os.O_SYNC,
                             fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdw:
           with with_locked_fd(outp, os.O_RDONLY|os.O_SYNC,
                               fcntl.LOCK_EX|fcntl.LOCK_NB,open_timeout_sec=0.5) as fdr:
             try:
               if fdw and fdr:
-                pdebug("process_async reader interact start")
+                pdebug("process_async(reader) interact start")
                 try:
                   interact(fdr,fdw,code,fo,ss)
-                  pdebug("process_async reader interact finish")
+                  pdebug("process_async(reader) interact finish")
                 except BrokenPipeError:
-                  pdebug("process_async catches Broken Pipe error")
+                  pdebug("process_async(reader) catches Broken Pipe error")
                   os.write(fo,"<BrokenPipe>\n".encode())
                   raise
               else:
@@ -416,7 +448,7 @@ def process_async(fns:FileNames, ss:Interpreter, code:str)->RunResult:
                 os.write(fo,"<Unable to access the interpreter>\n".encode())
             finally:
               os.fsync(fo)
-        pdebug("process_async reader finishes")
+        pdebug("process_async(reader) finishes")
         exit(0)
       else:
         # Parent
@@ -435,7 +467,8 @@ def process_cont(fns:FileNames,
   """ Read from the running readout process. """
   rr:Optional[ReadResult]=None
   p1,p2=ss.patterns()
-  pdebug(f"process_cont starting via {runr.fname}")
+  pdebug(f"process_cont locking {runr.fname}")
+
   with with_locked_fd(runr.fname,
                       os.O_RDONLY|os.O_SYNC,
                       LOCK_BLOCKING if timeout>0 else LOCK_NONBLOCKING,
@@ -517,9 +550,11 @@ def eval_code_(a:LitreplArgs,
 
   The function returns either the evaluation result or the running context
   encoded in the result for later reference.
+
+  TODO: Should we call with_sigint inside `eval_code_raw` to also protect it?
   """
   rr:ReadResult
-  with with_sigint(a.propagate_sigint, fns):
+  with with_sigint(a.detach_on_sigint, a.propagate_sigint, fns):
     rr,runr=eval_code_raw(ss,interp_code_preprocess(a,ss,es,code),
                           a.timeout_initial,a.timeout_continue,runr,
                           keep_readout_file=a.keep_readout)

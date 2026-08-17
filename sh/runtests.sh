@@ -1170,7 +1170,7 @@ $LITREPL_TEST_PYTHON $LITREPL --debug="$LITREPL_DEBUG" \
   --sh-interpreter="$LITREPL_TEST_SH_INTERPRETER" \
   --propagate-sigint eval-sections <source.md >out.md &
 PID=$!
-sleep 0.3
+sleep 1
 kill -INT $PID || true
 wait $PID
 
