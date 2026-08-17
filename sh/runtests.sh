@@ -1162,11 +1162,14 @@ print(40+2)
 ```
 END-OF-DOCUMENT
 EOF
-cat source.md | runlitrepl --propagate-sigint eval-sections >out.md &
+$LITREPL_TEST_PYTHON $LITREPL --debug="$LITREPL_DEBUG" \
+  --python-interpreter="$LITREPL_TEST_PYTHON_INTERPRETER" \
+  --ai-interpreter="$LITREPL_TEST_AI_INTERPRETER" \
+  --sh-interpreter="$LITREPL_TEST_SH_INTERPRETER" \
+  --propagate-sigint eval-sections <source.md >out.md &
 PID=$!
-trap "kill -9 '$PID' 2>/dev/null || true" EXIT
 sleep 0.3
-kill -INT $PID
+kill -INT $PID || true
 wait $PID
 
 grep -q 'KeyboardInterrupt' out.md
