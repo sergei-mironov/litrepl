@@ -1162,6 +1162,8 @@ print(40+2)
 ```
 END-OF-DOCUMENT
 EOF
+# This runlitrepl "unrolling" is required in order for nix-build shell do
+# determine the right PID.
 $LITREPL_TEST_PYTHON $LITREPL --debug="$LITREPL_DEBUG" \
   --python-interpreter="$LITREPL_TEST_PYTHON_INTERPRETER" \
   --ai-interpreter="$LITREPL_TEST_AI_INTERPRETER" \
