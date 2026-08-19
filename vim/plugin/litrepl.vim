@@ -56,8 +56,8 @@ endif
 if ! exists("g:litrepl_dump_mon")
   let g:litrepl_dump_mon = 0
 endif
-if ! exists("g:litrepl_use_interactive_shell")
-  let g:litrepl_use_interactive_shell = 1
+if ! exists("g:litrepl_shellexec_prefix")
+  let g:litrepl_shellexec_prefix = "if test -f $HOME/.bashrc; then . $HOME/.bashrc; fi"
 endif
 
 fun! LitReplGet(name)
@@ -79,66 +79,36 @@ fun! LitReplExe()
   return litrepl
 endfun
 
-fun! LitReplSystem(line, input)
-  let ret = ''
-  let old = &shellcmdflag
-  try
-    if LitReplGet('litrepl_use_interactive_shell') == 1
-      let &shellcmdflag = '-i '.&shellcmdflag
-    endif
-    let $LITREPL_FILE = expand('%:p')
-    let ret = system(a:line, a:input)
-  finally
-    let &shellcmdflag = old
-    unlet $LITREPL_FILE
-  endtry
-  return ret
-endfun
-
 fun! LitReplSystemL(line, input)
   let ret = ''
-  let old = &shellcmdflag
+  let line = a:line
   try
-    if LitReplGet('litrepl_use_interactive_shell') == 1
-      let &shellcmdflag = '-i '.&shellcmdflag
-    endif
     let $LITREPL_FILE = expand('%:p')
-    let ret = systemlist(a:line, a:input)
+    let line = LitReplGet('litrepl_shellexec_prefix').';'.line
+    silent let ret = systemlist(line, a:input)
   finally
-    let &shellcmdflag = old
     unlet $LITREPL_FILE
   endtry
   return ret
 endfun
 
-fun! LitReplExecute(line)
-  let old = &shellcmdflag
+fun! LitReplSystem(line, input)
+  return join(LitReplSystemL(a:line, a:input),'\n')
+endfun
+
+fun! LitReplExecute(prefix, line)
+  let [prefix,line] = [a:prefix, a:line]
   try
-    if LitReplGet('litrepl_use_interactive_shell') == 1
-      let &shellcmdflag = '-i '.&shellcmdflag
-    endif
     let $LITREPL_FILE = expand('%:p')
-    silent execute a:line
+    let line = LitReplGet('litrepl_shellexec_prefix').';'.line
+    execute prefix . line
   finally
-    let &shellcmdflag = old
     unlet $LITREPL_FILE
   endtry
 endfun
 
 fun! LitReplTerminal(line)
-  let old = &shellcmdflag
-  let shell = ""
-  try
-    if LitReplGet('litrepl_use_interactive_shell') == 1
-      let &shellcmdflag = '-i '.&shellcmdflag
-      let shell = "++shell"
-    endif
-    let $LITREPL_FILE = expand('%:p')
-    execute 'terminal '.shell.' '.a:line
-  finally
-    let &shellcmdflag = old
-    unlet $LITREPL_FILE
-  endtry
+  call LitReplExecute('terminal ++shell ', a:line)
 endfun
 
 if ! exists("g:litrepl_plugin_version")
@@ -254,8 +224,8 @@ fun! LitReplNotice(message)
   echohl None
 endfun
 
-fun! LitReplVisualize(errcode, errmsg)
-  let [errcode, errmsg] = [a:errcode, a:errmsg]
+fun! LitReplVisualize(errcode)
+  let [errcode] = [a:errcode]
   if errcode == LitReplGet('litrepl_pending')
     call LitReplNotice('Re-evaluate to continue')
   else
@@ -265,7 +235,7 @@ fun! LitReplVisualize(errcode, errmsg)
         call LitReplOpenErr('')
       endif
     else
-      call LitReplOpenErr(errmsg." (".string(errcode).")")
+      call LitReplOpenErr("Failed with code (".string(errcode).")")
     endif
   endif
 endfun
@@ -303,18 +273,27 @@ endfun
 
 fun! LitReplRunV(command, input) range
   let [errcode, result] = LitReplRun(a:command, a:input)
-  call LitReplVisualize(errcode, result)
+  call LitReplVisualize(errcode)
   return [errcode, result]
 endfun
 
 fun! LitReplRunBuffer(command, timeout) range
   " Run the current buffer 'through' the litrepl processor.
   let errfile = LitReplGet('litrepl_errfile')
-  let cmd = '%!'.LitReplCmdTimeout(a:timeout).' '.a:command.' 2>>'.errfile
+  let cmd = LitReplCmdTimeout(a:timeout).' '.a:command.' 2>>'.errfile
   call LitReplLogInput(errfile, cmd, "<vim-buffer>")
-  call LitReplExecute(cmd)
+  let input = join(getline(1, '$'), "\n")
+  let input_lastline = getline('$')
+  let result = LitReplSystemL(cmd, input)
   call writefile(['<end-of-stderr>'],errfile,'a')
   let errcode = v:shell_error
+  if errcode == 0 || errcode == LitReplGet('litrepl_pending')
+    silent %delete _
+    call append(0, result)
+    if input_lastline != '' && getline('$') == ''
+      silent execute '%delete '.string(getpos('$')[1])
+    endif
+  endif
   return errcode
 endfun
 
@@ -323,25 +302,25 @@ fun! LitReplRunBufferVC(command, timeout) range
   " update the cursor if needed.
   let cur = getcharpos('.')
   let errcode = LitReplRunBuffer(a:command, a:timeout)
-  call LitReplVisualize(errcode, 'Failed')
+  call LitReplVisualize(errcode)
   call LitReplUpdateCursor(cur)
   return errcode
 endfun
 
 fun! LitReplRunBufferOrUndo(command, timeout)
   " We use a hack to force remembering the undo position
-  execute "normal! I "
-  execute "normal! x"
-  let cur = getcharpos('.')
+  " execute "normal! I "
+  " execute "normal! x"
+  " let cur = getcharpos('.')
   let command = '--detach-on-sigint ' . a:command
   let errcode = LitReplRunBufferVC(command, a:timeout)
-  if errcode == 0 || errcode == LitReplGet('litrepl_pending')
-    return errcode
-  else
-    execute "u"
-    call setcharpos('.', cur)
-    return 0
-  endif
+  " if errcode == 0 || errcode == LitReplGet('litrepl_pending')
+  return errcode
+  " else
+    " execute "u"
+    " call setcharpos('.', cur)
+    " return 0
+  " endif
 endfun
 
 let g:log_count = 1
@@ -360,7 +339,7 @@ fun! LitReplRunBufferMonitor()
   try
     let g:log_count = 0
     while 1
-      let &ul=&ul " [1]
+      " let &ul=&ul " [1]
       let cur = getcharpos('.')
       let command = "eval-sections ".cur[1].":".cur[2]
       let errcode = LitReplRunBuffer(command, LitReplGet('litrepl_timeout').',0.0')
@@ -379,9 +358,7 @@ fun! LitReplRunBufferMonitor()
           call LitReplUpdateCursor(cur)
           silent execute "redraw"
         else
-          execute "u"
           call setcharpos('.', cur)
-          call LitReplVisualize(errcode, 'Failed')
           break
         endif
       endif
@@ -400,8 +377,8 @@ fun! LitReplStatus()
   let cur = getcharpos('.')
   execute "normal! I "
   execute "normal! x"
-  let cmd = '%!'.LitReplCmd().' '.flag.' status 2>'.LitReplGet('litrepl_errfile').' >&2'
-  call LitReplExecute(cmd)
+  let cmd = LitReplCmd().' '.flag.' status 2>'.LitReplGet('litrepl_errfile').' >&2'
+  call LitReplExecute("%!", cmd)
   call setcharpos('.', cur)
   execute "u"
   call LitReplOpenErrS('',splitcmd)
