@@ -133,7 +133,7 @@ def attach(fns:FileNames, st:Optional[SType]=None)->Union[Interpreter,ErrorMsg]:
   """ Attach to the interpreter associated with the given pipe filenames. """
   pid=readipid(fns)
   if pid is None:
-    return f"Can not read PID of a {st2name(st)} interpreter to attach"
+    return f"Can not access PID of a {st2name(st)} interpreter to attach"
   try:
     p=Process(pid)
     cmd=p.cmdline()
@@ -147,11 +147,11 @@ def attach(fns:FileNames, st:Optional[SType]=None)->Union[Interpreter,ErrorMsg]:
     elif (st is None or st==SType.SShell) and any('sh' in w for w in cmd):
       cls=ShellInterpreter
     else:
-      return f"Unknown or undefined interpreter pid {pid} cmd '{cmd}' (among {st})"
-    pdebug(f"Interpreter pid {pid} cmd '{cmd}' was resolved into '{cls}'")
+      return f"Unsupported {st2name(st)} interpreter PID {pid} cmd '{cmd}'"
+    pdebug(f"Interpreter PID {pid} cmd '{cmd}' was resolved into '{cls}'")
     return cls(fns)
   except NoSuchProcess as err:
-    return f"Could resolve pid {pid} into interpreter class: ({err})"
+    return f"Could not attach to a {st2name(st)} interpreter PID {pid}: {err}"
 
 def open_child_pipes(inp,outp):
   return os.open(inp,os.O_RDWR|os.O_SYNC),os.open(outp,os.O_RDWR|os.O_SYNC);
