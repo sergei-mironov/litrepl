@@ -95,6 +95,22 @@ fun! LitReplSystem(line, input)
   return ret
 endfun
 
+fun! LitReplSystemL(line, input)
+  let ret = ''
+  let old = &shellcmdflag
+  try
+    if LitReplGet('litrepl_use_interactive_shell') == 1
+      let &shellcmdflag = '-i '.&shellcmdflag
+    endif
+    let $LITREPL_FILE = expand('%:p')
+    let ret = systemlist(a:line, a:input)
+  finally
+    let &shellcmdflag = old
+    unlet $LITREPL_FILE
+  endtry
+  return ret
+endfun
+
 fun! LitReplExecute(line)
   let old = &shellcmdflag
   try
@@ -279,7 +295,7 @@ fun! LitReplRun(command, input) range
   let errfile = LitReplGet('litrepl_errfile')
   let cmd = LitReplCmdTimeout('inf').' '.a:command.' 2>>'.errfile
   call LitReplLogInput(errfile, cmd, a:input)
-  let result = LitReplSystem(cmd, a:input)
+  let result = LitReplSystemL(cmd, a:input)
   call writefile(['<end-of-stderr>'],errfile,'a')
   let errcode = v:shell_error
   return [errcode, result]
@@ -439,7 +455,6 @@ fun! LitReplEvalSelection(type) range " -> [int, string]
   let [line_end, column_end] = getpos("'>")[1:2]
   let [errcode, result] = LitReplRunV('eval-code '.a:type, selection)
   if errcode == 0
-    let result = split(result, '\n')
     call append(line_end, result)
   else
     call LitReplOpenErr("Failed (".string(errcode).")")
