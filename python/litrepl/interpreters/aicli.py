@@ -57,10 +57,10 @@ class AicliInterpreter(Interpreter):
     return code + f"{self.endcmd if a.command!='eval-code' else ''}\n"
   def run_repl(self, a:LitreplArgs):
     rr,_=eval_code_raw(self,f"/set terminal prompt \">>> \"\n\n",
-                  float('inf'),float('inf'),True)
+                  float('inf'),float('inf'))
     assert_(not rr.timeout, "Setting non-empty prompt did not happen fast")
     runsocat(self.fns, hint=SOCAT_HINT.replace('NO PROMPTS, ','')+'>>> ')
     rr,_=eval_code_raw(self,f"/set terminal prompt \"\"\n",
-                  float('inf'),float('inf'),True)
+                  float('inf'),float('inf'))
     assert_(not rr.timeout, "Setting empty prompt did not happen fast")
 

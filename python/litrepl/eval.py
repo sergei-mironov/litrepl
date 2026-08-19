@@ -556,7 +556,8 @@ def eval_code_(a:LitreplArgs,
   rr:ReadResult
   with with_sigint(a.detach_on_sigint, a.propagate_sigint, fns):
     rr,runr=eval_code_raw(ss,interp_code_preprocess(a,ss,es,code),
-                          a.timeout_initial,a.timeout_continue,runr,
+                          a.timeout_initial,a.timeout_continue,
+                          runr,
                           keep_readout_file=a.keep_readout)
     pptext=interp_result_postprocess(a,ss,rr.text)
     res=rresult_save(pptext,runr) if rr.timeout else pptext

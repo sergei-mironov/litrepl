@@ -323,7 +323,7 @@ def main(args=None):
       ss=attach(fns,st)
       if not isinstance(ss,Interpreter):
         ec=interp_exitcode(fns)
-        raise RuntimeError(failmsg(fns,ss,ec))
+        raise RuntimeError(failmsg(st,fns,ss,ec))
       ss.run_repl(a)
       ecode=interp_exitcode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
@@ -345,7 +345,7 @@ def main(args=None):
         ss=attach(fns,st)
         if not isinstance(ss,Interpreter):
           ec=interp_exitcode(fns)
-          raise RuntimeError(failmsg(fns,ss,ec))
+          raise RuntimeError(failmsg(st,fns,ss,ec))
         print(eval_code(a,fns,ss,es,sys.stdin.read()),end='',flush=True)
         ecode=interp_exitcode(fns,undefined=200)
     exit(0 if ecode is None else ecode)
