@@ -32,8 +32,8 @@ from .types import (PrepInfo, RunResult, NSec, FileName, SecRec, FileNames,
                     LarkGrammar, Symbols, LarkTree, ParseResult, ErrorMsg)
 from .eval import (process, pstderr, rresult_load, rresult_save, process_adapt,
                    process_cont, interp_exitcode, readipid, with_parent_finally,
-                   with_fd, read_nonblock, eval_code, eval_code_,
-                   interp_is_running, isync, with_locked_fd)
+                   with_fd, eval_code, eval_code_, interp_is_running, isync,
+                   with_locked_fd)
 from .utils import(unindent, indent, escape, fillspaces, fmterror, assert_,
                    cursor_within, nlines, wraplong, remove_silent, hashdigest)
 
