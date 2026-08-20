@@ -238,13 +238,13 @@ termination on user Ctrl+C command. The output document will not be produced
 completely. The following command-line arguments change this behavior:
 
 * `--propagate-sigint` will catch SIGINT and re-send it to the currently running
-  interpreter process. If the interpreter supports it, it pauses the current
-  execution with something like `KeyboardInterrupt` exception (for the Python
-  case) and release the code section reader process, causeing litrepl to return
-  quickly.
+  interpreter process. If the interpreter supports it, it halts the code
+  execution with something like `KeyboardInterrupt` exception (in the Python
+  case) and release the section reader process, making litrepl return quickly.
 * `--detach-on-sigint` will catch SIGINT and emulate the internal timeout event
   asking Litrepl to print the continuation `[LR:...]` tag and exit quickly. The
-  background interpreter will not be affected.
+  background interpreter will not be affected. This mode is enabled by most of
+  the Vim evaluation commands.
 
 #### Attaching Interpreter Sessions
 
