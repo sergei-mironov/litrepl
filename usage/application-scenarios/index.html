@@ -55,7 +55,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../vim-plugin/">Vim plugin</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">How-Tos</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">How-Tos</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#command-line-foreground-evaluation">Command Line, Foreground Evaluation</a>
     </li>
@@ -136,7 +136,7 @@
 <h4 id="command-line-foreground-evaluation">Command Line, Foreground Evaluation</h4>
 <p>When performing batch processing of documents, it might be necessary to initiate
 a new interpreter session solely for the evaluation's duration rather than
-re-using the currently running session. The <code>--foreground</code> option can be used to
+reusing the currently running session. The <code>--foreground</code> option can be used to
 activate this mode.</p>
 <!--lignore-->
 
@@ -184,9 +184,9 @@ cat README.md | litrepl --python-interpreter=ipython-testbed.sh
 <p>Note that the string <code>ipython</code> must appear in the interpreter name, to let
 Litrepl exercise IPyhton-specific communication settings.</p>
 <h4 id="command-line-converting-formatted-markdown-to-jupyter-notebook">Command Line, Converting formatted Markdown to Jupyter Notebook</h4>
-<p><a href="https://pandoc.org">Pandoc</a> could be used to conver LitREPL-formatted markdown
+<p><a href="https://pandoc.org">Pandoc</a> could be used to convert LitREPL-formatted markdown
 documents to the Jupyter Notebook format. In order to make it recognize the code
-and result fields, addtional formatting is required. Currently we aware of two
+and result fields, additional formatting is required. Currently we aware of two
 options:</p>
 <h5 id="using-fenced-markdown-syntax-extension">Using fenced Markdown syntax extension</h5>
 <p>Mark Jupyter sections with fenced-div markup as described in the <a href="https://pandoc.org/MANUAL.html#jupyter-notebooks">Pandoc
@@ -245,7 +245,7 @@ the system.</p>
 \BeforeBeginEnvironment{python}{\begin{mdframed}[nobreak=false,everyline=true]}
 \AfterEndEnvironment{python}{\end{mdframed}}
 
-% LitREPL-compatible ai secitons
+% LitREPL-compatible ai sections
 \newenvironment{ai}
   {\vsp\textbf{User:}\vsp}
   {}
@@ -361,7 +361,7 @@ of backends, it is primarily designed to integrate smoothly with
   executable's output at the cursor position.</li>
 </ul>
 <p>All the above commands get translated into a command line matching
-the following convension (subject to change):</p>
+the following convention (subject to change):</p>
 <pre><code class="language-sh">usage: litrepl-&lt;script&gt; [-h] [-P PROMPT_LIST] [-s SELECTION_PASTE]
                         [-S SELECTION_RAW] [-f OUTPUT_FORMAT] [-w TEXTWIDTH]
                         [-v] [--location NAME LOC]

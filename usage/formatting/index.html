@@ -51,7 +51,7 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../general-concepts/">General concepts</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Formatting documents</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Formatting documents</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#markdown">Markdown</a>
     </li>
@@ -126,6 +126,8 @@ mark result sections. This syntax allows emitting parts of Markdown document.</p
 Hello, World!
 &lt;!-- noresult --&gt;
 </code></pre>
+<p>Litrepl resolves <code>python</code> tags into call to an actual Python interpreter using
+the <code>--python-interpreter</code> command line argument.</p>
 <h3 id="latex">Latex</h3>
 <p>Litrepl treats <code>\begin{python}\end{python}</code> environment as code sections and
 <code>\begin{result}\end{result}</code> environment as result sections. The names are
@@ -146,7 +148,7 @@ introduce these environments in the preamble:</p>
 \end{document}
 </code></pre>
 <p>Executable sections is the document are enclosed with the <code>python</code> tags, results
-- wtih <code>result</code> tags:</p>
+- with <code>result</code> tags:</p>
 <pre><code class="language-tex">\begin{python}
 W='Hello, World!'
 print(W)
@@ -156,14 +158,12 @@ print(W)
 Hello, World!
 \end{result}
 </code></pre>
-<p>LitREPL recognizes <code>result</code>/<code>noresult</code> LaTeX comments as result section markers.
-This way we can use Python to emit LaTeX markup as output.</p>
 <pre><code class="language-tex">%result
 Hello, World!
 %noresult
 </code></pre>
-<p>Additionally, LitREPL recognises <code>linline</code> 2-argument tags. The first arguement
-is treated as a Python printable expression. The second arguemnt is an immediate
+<p>Additionally, LitREPL recognises <code>linline</code> 2-argument tags. The first argument
+is treated as a Python printable expression. The second argument is an immediate
 result section where the value of expression will be placed.</p>
 <pre><code class="language-tex">\linline{W}{Hello, World!}
 </code></pre>

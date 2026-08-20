@@ -49,7 +49,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Usage</span></p>
               <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">General concepts</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">General concepts</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#basic-execution">Basic Execution</a>
     </li>
@@ -134,13 +134,21 @@ to work well.</p>
 <h4 id="basic-execution">Basic Execution</h4>
 <p>Litrepl searches for verbatim code sections followed by zero or more result
 sections. In Markdown documents, the Python code is any triple-quoted section
-with a pre-configured label such as <code>python</code>. The result is any triple-quoted
-<code>result</code> section.  In LaTeX documents, sections are marked with
-<code>\begin{...}\end{...}</code> environments correspondingly.</p>
+with a pre-configured label such as <code>python</code>. Results could be marked in a
+variety of ways, the most common one is a triple-quoted <code>result</code> section.  In
+LaTeX documents, sections are marked with <code>\begin{python}...\end{python}</code> and
+<code>\begin{result}...\end{result}</code> environments correspondingly.</p>
 <p>The primary command for evaluating formatted documents is <code>litrepl
 eval-sections</code> which starts the background interactive session (unless
 <code>--foreground</code> is specified), and process the document. Consider a markdown
 document <code>file.md</code>.</p>
+<p>While the actual tags might be configured, the following interpeter families are
+supported: Python interpreters such as <code>python</code> or <code>ipython</code>, the default code
+section label is <code>python</code>; Shell interpreters such as <code>sh</code> or <code>bash</code>, with the
+default code section label <code>sh</code>; an experimental <code>aicli</code> interpeter with the
+<code>ai</code> code section label.</p>
+<p>The interpeter families are mapped to actual interpreter executables using
+command-line arguments such as <code>--python-interpreter=...</code>.</p>
 <!--
 
 <pre><code class="language-python">print(&quot;~~~~ markdown&quot;)
@@ -231,8 +239,16 @@ $ litrepl eval-sections '34:1..$' # Sections starting from line 34 column 1
 $ litrepl eval-sections '34:1,+1' # Section at line 34 column 1 and the next one
 </code></pre>
 <h4 id="managing-interpreter-sessions">Managing Interpreter Sessions</h4>
-<p>Each interpreter session uses an auxiliary directory where Litrepl stores
-filesystem pipes and other runtime data.</p>
+<p>Litrepl maintains interpreter sessions in the background to support REPL
+experience. The components that builds up this functionality are illustrated on
+the Figure \ref{figure}.</p>
+<p><img alt="\label{figure} Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section." src="./docs/pic.png" /></p>
+<p>Resources are stored in an auxiliary directory specified via command-line or
+environment variables. The session is represented by pipe files, one for writing
+input and another for reading outputs, the file storing the interpreter process
+identifier, and a sink file for storing asynchronous output.  Litrepl connects to
+a session by opening pipes. The asynchronous output is received by forking a
+readout process that lives until the interpreter finishes printing.</p>
 <p>By default, the auxiliary directory path is derived from the working directory
 name (for Vim, this defaults to the directory of the current file).</p>
 <p>This behavior can be configured by:
@@ -341,7 +357,7 @@ How can I assist you today?
 
 <p>All Aicli <code>/</code>-commands like the <code>/model</code> command above are passed as-is to the
 interpreter. The <code>/ask</code> command is added automatically at the of each section,
-so make sure that <code>ai</code> secions have self-contained questions.</p>
+so make sure that <code>ai</code> sections have self-contained questions.</p>
 <p>As a pre-processing step, Litrepl can paste text from other sections of the
 document in place of special reference markers. The markers have the following
 format:</p>
