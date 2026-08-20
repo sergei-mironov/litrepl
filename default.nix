@@ -154,8 +154,10 @@ let
         # aicli.python-aicli
         py.pkgs.coverage (coverage-badge py.pkgs)
       ];
-      # We cut off the python PATH to allow users to use litrepl in custom
-      # Python environments
+      # Litrepl is a python program which runs another python interpreters. By
+      # the following we cut off the built-in python PATH so user-defined
+      # `python` command is not overlapped by the main Python interpreter which
+      # is hardcoded by Nix into the litrepl script.
       postFixup = ''
         sed -i '/PATH.*python/d' $out/bin/litrepl
       '';
