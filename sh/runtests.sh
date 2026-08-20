@@ -1108,14 +1108,13 @@ while True:
 EOF
 
 runlitrepl stop
-runlitrepl --verbose status python >status1.txt </dev/null || true
-grep -q '?' status1.txt
-cat source.md | runlitrepl \
-  --filetype=markdown \
-  --timeout=1,1 \
-  eval-sections '1..$' >out.md
-runlitrepl --verbose status python </dev/null >status2.txt
-not grep -q '?' status2.txt
+runlitrepl --verbose status all >status1.txt </dev/null || true
+grep -q 'python interpreter pid: ?' status1.txt
+runlitrepl --filetype=markdown --timeout=1,1 eval-sections '1..$' <source.md >out.md
+runlitrepl --verbose status all </dev/null >status2.txt || true
+grep -q 'python interpreter pid: [0-9]\+' status2.txt
+grep -q 'sh interpreter pid: ?' status2.txt
+grep -q 'ai interpreter pid: ?' status2.txt
 )} #}}}
 
 test_interrupt() {( #{{{
