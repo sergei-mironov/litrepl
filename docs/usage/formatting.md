@@ -28,6 +28,9 @@ Hello, World!
 <!-- noresult -->
 ~~~~
 
+Litrepl resolves `python` tags into call to an actual Python interpreter using
+the `--python-interpreter` command line argument.
+
 
 ### Latex
 
@@ -83,4 +86,8 @@ result section where the value of expression will be placed.
 ``` tex
 \linline{W}{Hello, World!}
 ```
+
+Litrepl resolves `python` tags into call to an actual Python interpreter using
+the `--python-interpreter` command line argument.
+
 
