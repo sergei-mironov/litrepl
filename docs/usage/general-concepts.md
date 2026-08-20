@@ -24,14 +24,24 @@ to work well.
 
 Litrepl searches for verbatim code sections followed by zero or more result
 sections. In Markdown documents, the Python code is any triple-quoted section
-with a pre-configured label such as `python`. The result is any triple-quoted
-`result` section.  In LaTeX documents, sections are marked with
-`\begin{...}\end{...}` environments correspondingly.
+with a pre-configured label such as `python`. Results could be marked in a
+variety of ways, the most common one is a triple-quoted `result` section.  In
+LaTeX documents, sections are marked with `\begin{python}...\end{python}` and
+`\begin{result}...\end{result}` environments correspondingly.
 
 The primary command for evaluating formatted documents is `litrepl
 eval-sections` which starts the background interactive session (unless
 `--foreground` is specified), and process the document. Consider a markdown
 document `file.md`.
+
+While the actual tags might be configured, the following interpeter families are
+supported: Python interpreters such as `python` or `ipython`, the default code
+section label is `python`; Shell interpreters such as `sh` or `bash`, with the
+default code section label `sh`; an experimental `aicli` interpeter with the
+`ai` code section label.
+
+The interpeter families are mapped to actual interpreter executables using
+command-line arguments such as `--python-interpreter=...`.
 
 <!--
 ``` python

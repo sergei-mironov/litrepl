@@ -70,9 +70,6 @@ Hello, World!
 \end{result}
 ```
 
-LitREPL recognizes `result`/`noresult` LaTeX comments as result section markers.
-This way we can use Python to emit LaTeX markup as output.
-
 ``` tex
 %result
 Hello, World!
@@ -86,8 +83,4 @@ result section where the value of expression will be placed.
 ``` tex
 \linline{W}{Hello, World!}
 ```
-
-Litrepl resolves `python` tags into call to an actual Python interpreter using
-the `--python-interpreter` command line argument.
-
 
