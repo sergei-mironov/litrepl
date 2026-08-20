@@ -148,7 +148,7 @@ Litrepl maintains interpreter sessions in the background to support REPL
 experience. The components that builds up this functionality are illustrated on
 the Figure \ref{figure}.
 
-![\label{figure} Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](./docs/pic.png)
+![\label{figure} Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](./static/pic.png)
 
 Resources are stored in an auxiliary directory specified via command-line or
 environment variables. The session is represented by pipe files, one for writing
@@ -220,7 +220,7 @@ for i in tqdm(range(10)):
 
 ``` result
  30%|███       | 3/10 [00:03<00:07,  1.00s/it]
-[BG:/tmp/nix-shell.vijcH0/litrepl_1000_a2732d/python/litrepl_eval_5503542553591491252.txt]
+[LR:/tmp/nix-shell.vijcH0/litrepl_1000_a2732d/python/litrepl_eval_5503542553591491252.txt]
 ```
 ~~~~
 <!--lnoignore-->
@@ -231,6 +231,20 @@ evaluation concludes, it removes the marker from the output section.
 The command `litrepl interrupt` sends an interrupt signal to the interpreter,
 prompting it to return control sooner (with an exception).
 
+#### SIGINT Handling
+
+By default, the SIGINT OS signal is not handled, resulting in `litrepl`
+termination on user Ctrl+C command. The output document will not be produced
+completely. The following command-line arguments change this behavior:
+
+* `--propagate-sigint` will catch SIGINT and re-send it to the currently running
+  interpreter process. If the interpreter supports it, it pauses the current
+  execution with something like `KeyboardInterrupt` exception (for the Python
+  case) and release the code section reader process, causeing litrepl to return
+  quickly.
+* `--detach-on-sigint` will catch SIGINT and emulate the internal timeout event
+  asking Litrepl to print the continuation `[LR:...]` tag and exit quickly. The
+  background interpreter will not be affected.
 
 #### Attaching Interpreter Sessions
 
