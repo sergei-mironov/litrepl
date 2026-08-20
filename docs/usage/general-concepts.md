@@ -148,7 +148,7 @@ Litrepl maintains interpreter sessions in the background to support REPL
 experience. The components that builds up this functionality are illustrated on
 the Figure \ref{figure}.
 
-![\label{figure} Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](./static/pic.png)
+![\label{figure} Litrepl resource allocation diagram. Hash **A** is computed based on the Litrepl working directory and the interpreter class. Hash **B** is computed based on the contents of the code section.](../static/pic.png)
 
 Resources are stored in an auxiliary directory specified via command-line or
 environment variables. The session is represented by pipe files, one for writing

@@ -1108,14 +1108,13 @@ while True:
 EOF
 
 runlitrepl stop
-runlitrepl --verbose status python >status1.txt </dev/null || true
-grep -q '?' status1.txt
-cat source.md | runlitrepl \
-  --filetype=markdown \
-  --timeout=1,1 \
-  eval-sections '1..$' >out.md
-runlitrepl --verbose status python </dev/null >status2.txt
-not grep -q '?' status2.txt
+runlitrepl --verbose status all >status1.txt </dev/null || true
+grep -q 'python interpreter pid: ?' status1.txt
+runlitrepl --filetype=markdown --timeout=1,1 eval-sections '1..$' <source.md >out.md
+runlitrepl --verbose status all </dev/null >status2.txt || true
+grep -q 'python interpreter pid: [0-9]\+' status2.txt
+grep -q 'sh interpreter pid: ?' status2.txt
+grep -q 'ai interpreter pid: ?' status2.txt
 )} #}}}
 
 test_interrupt() {( #{{{
@@ -1142,6 +1141,43 @@ cat out1.md | runlitrepl \
 
 grep -q 'KeyboardInterrupt' out2.md
 )} #}}}
+
+
+test_sigint() {( #{{{
+mktest "_test_sigint"
+runlitrepl start python
+cat >source.md <<"EOF"
+```python
+from time import sleep
+while True:
+  sleep(1)
+```
+```result
+```
+```python
+print(40+2)
+```
+```result
+```
+END-OF-DOCUMENT
+EOF
+# This runlitrepl "unrolling" is required in order for nix-build shell do
+# determine the right PID.
+$LITREPL_TEST_PYTHON $LITREPL --debug="$LITREPL_DEBUG" \
+  --python-interpreter="$LITREPL_TEST_PYTHON_INTERPRETER" \
+  --ai-interpreter="$LITREPL_TEST_AI_INTERPRETER" \
+  --sh-interpreter="$LITREPL_TEST_SH_INTERPRETER" \
+  --propagate-sigint eval-sections <source.md >out.md &
+PID=$!
+sleep 1
+kill -INT $PID || true
+wait $PID
+
+grep -q 'KeyboardInterrupt' out.md
+grep -q 'END-OF-DOCUMENT' out.md
+grep -q '42' out.md
+)} #}}}
+
 
 test_invalid_interpreter() {( #{{{
 # Exact result messages might start a race (exit code X VS broken pipe) That is
@@ -1517,10 +1553,24 @@ add_ipython() {
   done
 }
 
+find_aicli() {
+  AICLI_FOUND=n
+  for aicli in $(which -a aicli 2>/dev/null) ; do
+    if $aicli --version >/dev/null 2>&1 ; then
+      AICLI_FOUND=y
+      echo $aicli
+    else
+      echo "Skipping $aicli as non-runnable" >&2
+    fi
+  done
+  if test "$AICLI_FOUND" = "n" ; then
+    return 1
+  fi
+}
+
 tests() {
   sh=$(which sh)
-  # aicli=$(which aicli 2>/dev/null || echo '-')
-  for aicli in $(which -a aicli || echo '-'); do
+  for aicli in $(find_aicli || echo '-'); do
     for python in $(which -a python | add_ipython ); do
       echo test_parse_print $python - -
       echo test_eval_md $python - $sh
@@ -1540,6 +1590,7 @@ tests() {
       echo test_foreground $python - -
       echo test_status $python - -
       echo test_interrupt $python - -
+      echo test_sigint $python - -
       echo test_invalid_interpreter $python - -
       echo test_vim_eval_code $python - -
       echo test_vim_eval_selection $python - -

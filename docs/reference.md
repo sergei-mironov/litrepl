@@ -64,13 +64,12 @@ usage: litrepl [-h] [-v] [--filetype STR] [--python-markers STR[,STR]]
                [--ai-markers STR[,STR]] [--sh-markers STR[,STR]]
                [--python-interpreter EXE] [--ai-interpreter EXE]
                [--sh-interpreter EXE] [--python-auxdir DIR] [--ai-auxdir DIR]
-               [--sh-auxdir DIR] [--timeout F[,F]] [--propagate-sigint]
-               [-d INT] [-K] [--verbose] [-C DIR] [--pending-exitcode INT]
-               [--irreproducible-exitcode INT] [--exception-exitcode INT]
-               [--foreground] [--map-cursor LINE:COL:FILE]
-               [--result-textwidth NUM]
-               {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir,tangle}
-               ...
+               [--sh-auxdir DIR] [--timeout F[,F]] [--detach-on-sigint]
+               [--propagate-sigint] [-d INT] [-K] [--verbose] [-C DIR]
+               [--pending-exitcode INT] [--irreproducible-exitcode INT]
+               [--exception-exitcode INT] [--foreground]
+               [--map-cursor LINE:COL:FILE] [--result-textwidth NUM]
+               {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir,tangle} ...
 
 positional arguments:
   {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir,tangle}
@@ -131,29 +130,39 @@ options:
                               It defaults to LITREPL_PYTHON_AUXDIR if set;
                               otherwise, it's created in the system's
                               temporary directory, named after the current
-                              working directory.
+                              working directory. A number of magic patterns
+                              are recognised: %FN expands to a filename of the
+                              contents of the LITREPL_FILE variable without
+                              extension; %FE to its extension; %FD expands to
+                              the dirname of the variable; %TD to a temp
+                              directory; %UI to the OS user identifier; %CH to
+                              the working directory hash; %IH to the
+                              interpreter hash.
   --ai-auxdir DIR             This directory stores AI interpreter pipes. It
                               defaults to LITREPL_AI_AUXDIR if set; otherwise,
                               it's created in the system's temporary
                               directory, named after the current working
-                              directory.
+                              directory. The above magic pattern notice
+                              applies.
   --sh-auxdir DIR             This directory stores AI interpreter pipes. It
                               defaults to LITREPL_SH_AUXDIR if set; otherwise,
                               it's created in the system's temporary
                               directory, named after the current working
-                              directory.
+                              directory. The above magic pattern notice
+                              applies.
   --timeout F[,F]             Timeouts for initial evaluation and for pending
                               checks, in seconds. If the latter is omitted, it
                               is considered to be equal to the former one.
+  --detach-on-sigint          If set, litrepl will catch SIGINT signals and
+                              send a SIGALRM signal to itself, effectively
+                              cancelling any wait timeouts.
   --propagate-sigint          If set, litrepl will catch and resend SIGINT
-                              signals to the running interpreter. Otherwise it
-                              will just terminate itself leaving the
-                              interpreter as-is.
-  -d INT, --debug INT         Enable (a lot of) debug messages.
+                              signals to the running interpreter.
+  -d, --debug INT             Enable (a lot of) debug messages.
   -K, --keep-readout          Do not delete temporary readout file
                               (debugging).
   --verbose                   Be more verbose (used in status).
-  -C DIR, --workdir DIR       Set the working directory before execution. By
+  -C, --workdir DIR           Set the working directory before execution. By
                               default, it uses LITREPL_WORKDIR if set,
                               otherwise remains the current directory. This
                               affects the directory of a new interpreter and

@@ -36,7 +36,7 @@ man: $(MAN)
 $(MAN): $(PY) Makefile python/bin/litrepl docs/static/description.md
 	argparse-manpage --module litrepl.main \
 		--author 'Sergei Mironov' \
- 	  --author-email 'sergei.v.mironov@proton.me' \
+		--author-email 'sergei.v.mironov@proton.me' \
 		--url 'https://github.com/sergei-mironov/litrepl' \
 		--project-name 'litrepl' \
 		--description "$$(pandoc --to=plain docs/static/description.md -o -)" \

@@ -6,7 +6,7 @@ updates sections via background interpreters. Interpreters can stay
 active for a read\-eval\-paste\-loop style.
 .SH SYNOPSIS
 .B litrepl
-[-h] [-v] [--filetype STR] [--python-markers STR[,STR]] [--ai-markers STR[,STR]] [--sh-markers STR[,STR]] [--python-interpreter EXE] [--ai-interpreter EXE] [--sh-interpreter EXE] [--python-auxdir DIR] [--ai-auxdir DIR] [--sh-auxdir DIR] [--timeout F[,F]] [--propagate-sigint] [-d INT] [-K] [--verbose] [-C DIR] [--pending-exitcode INT] [--irreproducible-exitcode INT] [--exception-exitcode INT] [--foreground] [--map-cursor LINE:COL:FILE] [--result-textwidth NUM] {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir,tangle} ...
+[-h] [-v] [--filetype STR] [--python-markers STR[,STR]] [--ai-markers STR[,STR]] [--sh-markers STR[,STR]] [--python-interpreter EXE] [--ai-interpreter EXE] [--sh-interpreter EXE] [--python-auxdir DIR] [--ai-auxdir DIR] [--sh-auxdir DIR] [--timeout F[,F]] [--detach-on-sigint] [--propagate-sigint] [-d INT] [-K] [--verbose] [-C DIR] [--pending-exitcode INT] [--irreproducible-exitcode INT] [--exception-exitcode INT] [--foreground] [--map-cursor LINE:COL:FILE] [--result-textwidth NUM] {start,stop,restart,status,parse,parse-print,eval-sections,eval-code,repl,interrupt,print-regexp,print-grammar,print-auxdir,tangle} ...
 
 .SH
 POSITIONAL ARGUMENTS
@@ -239,10 +239,14 @@ Timeouts for initial evaluation and for pending checks, in seconds. If the
 latter is omitted, it is considered to be equal to the former one.
 
 .TP
+\fB\-\-detach\-on\-sigint\fR
+If set, litrepl will catch SIGINT signals and send a SIGALRM signal to itself,
+effectively cancelling any wait timeouts.
+
+.TP
 \fB\-\-propagate\-sigint\fR
 If set, litrepl will catch and resend SIGINT signals to the running
-interpreter. Otherwise it will just terminate itself leaving the interpreter
-as\-is.
+interpreter.
 
 .TP
 \fB\-d\fR \fI\,INT\/\fR, \fB\-\-debug\fR \fI\,INT\/\fR

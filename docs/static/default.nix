@@ -22,7 +22,7 @@ let
       version;
 
     inherit (pkgs) lib stdenv fetchFromGitHub imagemagick makeWrapper cloc
-    gnumake socat latexrun sloc;
+    gnumake socat latexrun sloc codespell;
 
     callPackage = pkgs.lib.callPackageWith collection;
 
@@ -82,7 +82,7 @@ let
         pylsp
         pylsp-mypy
         setuptools
-        setuptools_scm
+        setuptools-scm
         ipython
         hypothesis
         pytest
@@ -94,7 +94,7 @@ let
         tqdm
         matplotlib
         numpy
-        bpython
+        # bpython
         psutil
         coverage
         # (aicli.aicli pp) # FIXME: this does not work for some reason.
@@ -154,8 +154,10 @@ let
         # aicli.python-aicli
         py.pkgs.coverage (coverage-badge py.pkgs)
       ];
-      # We cut off the python PATH to allow users to use litrepl in custom
-      # Python environments
+      # Litrepl is a python program which runs another python interpreters. By
+      # the following we cut off the built-in python PATH so user-defined
+      # `python` command is not overlapped by the main Python interpreter which
+      # is hardcoded by Nix into the litrepl script.
       postFixup = ''
         sed -i '/PATH.*python/d' $out/bin/litrepl
       '';
@@ -165,6 +167,7 @@ let
         ${./sh/runtests.sh}
       '';
 
+      format = "setuptools";
       doCheck = true;
     });
 
@@ -216,6 +219,7 @@ let
         pkgs.pandoc
         pkgs.inkscape
         sloc
+        codespell
         # (aicli.aicli python-release.pkgs) # FIXME: this is required
       ];
       shellHook = with pkgs; ''
