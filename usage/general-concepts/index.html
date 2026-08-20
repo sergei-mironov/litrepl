@@ -59,6 +59,8 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#asynchronous-processing">Asynchronous Processing</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sigint-handling">SIGINT Handling</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#attaching-interpreter-sessions">Attaching Interpreter Sessions</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#experimental-ai-features">Experimental AI Features</a>
@@ -300,7 +302,7 @@ for i in tqdm(range(10)):
 
 ``` result
  30%|███       | 3/10 [00:03&lt;00:07,  1.00s/it]
-[BG:/tmp/nix-shell.vijcH0/litrepl_1000_a2732d/python/litrepl_eval_5503542553591491252.txt]
+[LR:/tmp/nix-shell.vijcH0/litrepl_1000_a2732d/python/litrepl_eval_5503542553591491252.txt]
 ```
 </code></pre>
 <!--lnoignore-->
@@ -309,6 +311,20 @@ for i in tqdm(range(10)):
 evaluation concludes, it removes the marker from the output section.</p>
 <p>The command <code>litrepl interrupt</code> sends an interrupt signal to the interpreter,
 prompting it to return control sooner (with an exception).</p>
+<h4 id="sigint-handling">SIGINT Handling</h4>
+<p>By default, the SIGINT OS signal is not handled, resulting in <code>litrepl</code>
+termination on user Ctrl+C command. The output document will not be produced
+completely. The following command-line arguments change this behavior:</p>
+<ul>
+<li><code>--propagate-sigint</code> will catch SIGINT and re-send it to the currently running
+  interpreter process. If the interpreter supports it, it halts the code
+  execution with something like <code>KeyboardInterrupt</code> exception (in the Python
+  case) and release the section reader process, making litrepl return quickly.</li>
+<li><code>--detach-on-sigint</code> will catch SIGINT and emulate the internal timeout event
+  asking Litrepl to print the continuation <code>[LR:...]</code> tag and exit quickly. The
+  background interpreter will not be affected. This mode is enabled by most of
+  the Vim evaluation commands.</li>
+</ul>
 <h4 id="attaching-interpreter-sessions">Attaching Interpreter Sessions</h4>
 <p>The command <code>litrepl repl CLASS</code> where <code>CLASS</code> specifies interpreter class:
 <code>python</code> <code>ai</code> or <code>sh</code>, attaches to interpreter sessions.  For this command to
