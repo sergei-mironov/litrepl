@@ -205,15 +205,15 @@ fun! LitReplOpenErr(message)
   return LitReplOpenErrS(a:message, "vs")
 endfun
 
-fun! LitReplUpdateCursor(cur)
-  let cur = a:cur
+fun! LitReplUpdateCursor(view)
+  let [view] = [a:view]
   try
     let newrow = str2nr(readfile(LitReplGet('litrepl_map_cursor_output'))[0])
     if newrow != 0
-      let cur[1] = newrow
-      let b:litrepl_lastpos = cur[1].":".cur[2]
+      let view['lnum'] = newrow
+      let b:litrepl_lastpos = view['lnum'].":".view['col']
     endif
-    call setcharpos('.', cur)
+    call winrestview(view)
   catch /E484/
   endtry
 endfun
@@ -279,6 +279,8 @@ endfun
 
 fun! LitReplRunBuffer(command, timeout) range
   " Run the current buffer 'through' the litrepl processor.
+  " [1] - Here we execute a fake command to aid vim undo-redo buffer
+  "       ref. https://vim.fandom.com/wiki/Restore_the_cursor_position_after_undoing_text_change_made_by_a_script
   let errfile = LitReplGet('litrepl_errfile')
   let cmd = LitReplCmdTimeout(a:timeout).' '.a:command.' 2>>'.errfile
   call LitReplLogInput(errfile, cmd, "<vim-buffer>")
@@ -288,6 +290,9 @@ fun! LitReplRunBuffer(command, timeout) range
   call writefile(['<end-of-stderr>'],errfile,'a')
   let errcode = v:shell_error
   if errcode == 0 || errcode == LitReplGet('litrepl_pending')
+    " [1]
+    execute "normal! I "
+    execute "normal! x"
     silent %delete _
     call append(0, result)
     if input_lastline != '' && getline('$') == ''
@@ -300,10 +305,10 @@ endfun
 fun! LitReplRunBufferVC(command, timeout) range
   " Run the current buffer 'through' the litrepl processor. Print the status and
   " update the cursor if needed.
-  let cur = getcharpos('.')
+  let view = winsaveview()
   let errcode = LitReplRunBuffer(a:command, a:timeout)
   call LitReplVisualize(errcode)
-  call LitReplUpdateCursor(cur)
+  call LitReplUpdateCursor(view)
   return errcode
 endfun
 
@@ -335,13 +340,13 @@ function! SaveStringToFile(dump)
 endfunction
 
 fun! LitReplRunBufferMonitor()
-  let cur = getcharpos('.')
+  let view = winsaveview()
   try
     let g:log_count = 0
     while 1
       " let &ul=&ul " [1]
-      let cur = getcharpos('.')
-      let command = "eval-sections ".cur[1].":".cur[2]
+      let view = winsaveview()
+      let command = "eval-sections ".view['lnum'].":".(view['col']+1)
       let errcode = LitReplRunBuffer(command, LitReplGet('litrepl_timeout').',0.0')
 
       if LitReplGet('litrepl_dump_mon') == 1
@@ -351,20 +356,20 @@ fun! LitReplRunBufferMonitor()
       endif
 
       if errcode == 0
-        call LitReplUpdateCursor(cur)
+        call LitReplUpdateCursor(view)
         break
       else
         if errcode == LitReplGet('litrepl_pending')
-          call LitReplUpdateCursor(cur)
+          call LitReplUpdateCursor(view)
           silent execute "redraw"
         else
-          call setcharpos('.', cur)
+          call winrestview(view)
           break
         endif
       endif
     endwhile
   catch /Vim:Interrupt/
-    call setcharpos('.', cur)
+    call winrestview(view)
   endtry
 endfun
 
