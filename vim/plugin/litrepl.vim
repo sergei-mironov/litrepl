@@ -395,10 +395,23 @@ fun! LitReplPos(arg)
   let cursor = getcharpos('.')
   let loc = cursor[1].":".cursor[2]
   let pos = a:arg
-  let pos = substitute(pos,'all','1..$','g')
-  let pos = substitute(pos,'above','1..@','g')
-  let pos = substitute(pos,'below','@..$','g')
-  let pos = substitute(pos,'@',loc,'g')
+  if len(pos)>0 && (pos[0] == '/' || pos[0] == '!')
+    if pos[0] == '!'
+      let filter = "--not-matching"
+    else
+      let filter = "--matching"
+    endif
+    let pos = pos[1:]
+    if len(pos)>0 && (pos[len(pos)-1] == '/' || pos[len(pos)-1] == '!')
+      let pos = pos[:-2]
+    endif
+    let pos = filter." ".pos
+  else
+    let pos = substitute(pos,'all','1..$','g')
+    let pos = substitute(pos,'above','1..@','g')
+    let pos = substitute(pos,'below','@..$','g')
+    let pos = substitute(pos,'@',loc,'g')
+  endif
   if pos == ""
     let pos = loc
   endif

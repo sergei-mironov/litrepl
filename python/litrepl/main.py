@@ -175,6 +175,14 @@ def make_parser():
     default - all available sections), print the resulting file to stdout.'''))
   evalsec.add_argument('locs',type=str,metavar='LOCS',default='0..$',
     help=LOCSHELP,nargs='?')
+  evalsec.add_argument('--not-matching',type=str,metavar='REGEXP',
+    help=dedent('''
+    Regular expression for which no matches must be found in the code
+    section in order to execute it.'''))
+  evalsec.add_argument('--matching',type=str,metavar='REGEXP',
+    help=dedent('''
+    Regular expression for which at least one match must be found in the code
+    section in order to be executed. Has lower preference than --not-matching'''))
   _with_type(sps.add_parser('eval-code', help='Evaluate the code snippet.'))
   _with_type(sps.add_parser('repl',
     help='Connect to the background terminal using GNU socat.'))
@@ -220,6 +228,9 @@ def main(args=None):
       exit(1)
     else:
       a=AP.parse_args(args+['eval-sections'])
+
+  a.matching=getattr(a,"matching",None)
+  a.not_matching=getattr(a,"not_matching",None)
 
   if a.debug>0:
     litrepl.eval.DEBUG=True

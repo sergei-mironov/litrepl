@@ -556,6 +556,15 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       es.ecodes[nsec]=ec
     return ec
 
+  def _mustrun(n:int, code:str)->bool:
+    if n in nsecs:
+      if a.not_matching is not None:
+        if bool(re.compile(a.not_matching).search(code)):
+          return False
+      if a.matching is not None:
+        return bool(re.compile(a.matching).search(code))
+      return True
+
   class C(LarkInterpreter):
     def _print(self, s:str):
       print(s, end='')
@@ -571,7 +580,7 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       self._print(f"{bmarker}{t}{emarker}")
       bm,em=tree.children[0].meta,tree.children[2].meta
       code=unindent(bm.column-1,t)
-      if es.nsec in nsecs:
+      if _mustrun(es.nsec,code):
         ok,sres,ec=False,'',ECODE_RUNNING
         st,fns,ss=_bm2interp(bmarker)
         if isinstance(fns,FileNames):
