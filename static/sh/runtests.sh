@@ -1066,6 +1066,45 @@ grep -q '7' file.md
 )}
 #}}}
 
+test_vim_eval_matching() {( #{{{
+mktest "_test_vim_eval_matching"
+runlitrepl start python
+
+cat >file.md <<"EOF"
+``` python
+print("result-slow")
+```
+
+``` result
+```
+
+``` python
+print("result-fast")
+```
+
+``` result
+```
+EOF
+
+runvim file.md >_vim.log 2>&1 <<EOF
+:LEval /fast/
+:w out1.md
+:qa!
+EOF
+grep -q '^result-fast' out1.md
+not grep -q '^result-slow' out1.md
+
+runvim file.md >_vim.log 2>&1 <<EOF
+:LEval !slow
+:w out2.md
+:qa!
+EOF
+grep -q '^result-fast' out2.md
+not grep -q '^result-slow' out2.md
+
+)}
+#}}}
+
 test_foreground() {( #{{{
 mktest "_test_foreground"
 runlitrepl start python
@@ -1142,7 +1181,6 @@ cat out1.md | runlitrepl \
 grep -q 'KeyboardInterrupt' out2.md
 )} #}}}
 
-
 test_sigint() {( #{{{
 mktest "_test_sigint"
 runlitrepl start python
@@ -1177,7 +1215,6 @@ grep -q 'KeyboardInterrupt' out.md
 grep -q 'END-OF-DOCUMENT' out.md
 grep -q '42' out.md
 )} #}}}
-
 
 test_invalid_interpreter() {( #{{{
 # Exact result messages might start a race (exit code X VS broken pipe) That is
@@ -1587,6 +1624,7 @@ tests() {
       echo test_vim_leval_explicit $python - -
       echo test_vim_lmon $python - -
       echo test_vim_lstatus $python - -
+      echo test_vim_eval_matching $python - -
       echo test_foreground $python - -
       echo test_status $python - -
       echo test_interrupt $python - -

@@ -234,11 +234,16 @@ overall syntax is <code>litrepl eval-sections [RANGE]</code>, where <code>RANGE<
   above.</li>
 <li><code>X,X</code>: List of sections to execute</li>
 </ul>
+<p>Additionally, the <code>--matching</code> and <code>--not-matching</code> arguments may define regular
+expressions that should or should never match the code section in order to
+evaluate it.</p>
 <p>Some examples:</p>
-<pre><code class="language-sh">$ litrepl eval-sections '0'       # First section in a document
-$ litrepl eval-sections '3..$'    # Sections from fourth section (zero based) to the last one
+<pre><code class="language-sh">$ litrepl eval-sections '1'       # First section in a document
+$ litrepl eval-sections '3..$'    # Sections from third to the last one
 $ litrepl eval-sections '34:1..$' # Sections starting from line 34 column 1
 $ litrepl eval-sections '34:1,+1' # Section at line 34 column 1 and the next one
+$ litrepl eval-sections '1..10' --matching 'INIT' # Sections from 1 to 10 containing word 'INIT'
+$ litrepl eval-sections --not-matching 'SLOW' # All sections not containing word 'SLOW'
 </code></pre>
 <h4 id="managing-interpreter-sessions">Managing Interpreter Sessions</h4>
 <p>Litrepl maintains interpreter sessions in the background to support REPL
