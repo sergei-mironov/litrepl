@@ -494,18 +494,21 @@ def parse_(a:LitreplArgs)->ParseResult:
 
 def failmsg(st:SType,fns:FileNames,ss:Union[Interpreter,str],ec:ECode)->str:
   """ Retrieve information about the failed interpreter: attempt to access its
-  last error message, format the syscall diagnostic, print OS exitcode. """
-  msg=''
+  pre-sync message, format the syscall diagnostic, print OS exitcode. """
+  def _tab(l:str)->str:
+    return '\n'.join(['\t'+l for l in l.splitlines()])
+
+  msg=f"The {st2name(st)} interpreter "
+  msg+=f"with state stored in:\n{_tab(fns.wd)}\n"
   try:
     with open(fns.emsgf) as f:
-      msg+=f.read().rstrip()+"\n"
+      msg+=f"and recorded greeting:\n{_tab(f.read().rstrip())}\n"
   except FileNotFoundError:
     pass
   if isinstance(ss,str):
-    msg+=ss.rstrip()+"\n"
+    msg+=f"caused the error:\n{_tab(ss.rstrip())}\n"
   if ec is not ECODE_RUNNING:
-    msg+=f"{st2name(st)} interpreter terminated with OS exitcode: {ec}\n"
-  msg+=f"Note: auxiliary directory is set to \"{fns.wd}\"\n"
+    msg+=f"It was terminated with OS exitcode {ec}.\n"
   return msg
 
 def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)->ECode:
@@ -538,7 +541,7 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
     options) and resolve the interpreter type. """
     st=bmarker2st(a,bmarker)
     if st is None:
-      return (st,None,f"Code marker '{bmarker.strip()}' is not associated with an interpreter.")
+      return (st,None,f"Code marker '{bmarker.strip()}' is not associated with any interpreter.")
     return (st,*_st2interp(st))
 
   def _checkecode(fns,nsec,pending:bool)->ECode:

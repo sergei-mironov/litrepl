@@ -1142,7 +1142,6 @@ cat out1.md | runlitrepl \
 grep -q 'KeyboardInterrupt' out2.md
 )} #}}}
 
-
 test_sigint() {( #{{{
 mktest "_test_sigint"
 runlitrepl start python
@@ -1177,7 +1176,6 @@ grep -q 'KeyboardInterrupt' out.md
 grep -q 'END-OF-DOCUMENT' out.md
 grep -q '42' out.md
 )} #}}}
-
 
 test_invalid_interpreter() {( #{{{
 # Exact result messages might start a race (exit code X VS broken pipe) That is
