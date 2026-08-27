@@ -36,7 +36,7 @@ The environment:
 * `sh` contains various shell scripts and tests for the development.
 * `env.sh` contains development shell definitions. Notably, it adds `python` to
   the `PYTHONPATH`, `sh` to `PATH`, etc.
-* `Makefile` encodes most of the development actions. `make help` will print
+* `Makefile` encodes most of the developmemnt actions. `make help` will print
   the list of them.
 * `flake.nix`, `default.nix`, `shell.nix` Nix expressions describing software
   build targets and dependencies.

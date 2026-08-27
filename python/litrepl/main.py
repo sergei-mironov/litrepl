@@ -177,12 +177,12 @@ def make_parser():
     help=LOCSHELP,nargs='?')
   evalsec.add_argument('--not-matching',type=str,metavar='REGEXP',
     help=dedent('''
-    Regular expression for which no matches must be found in the code
-    section in order to execute it.'''))
+    Regular expression that must not match any part of a code section for it to
+    be executed.'''))
   evalsec.add_argument('--matching',type=str,metavar='REGEXP',
     help=dedent('''
-    Regular expression for which at least one match must be found in the code
-    section in order to be executed. Has lower preference than --not-matching'''))
+    Regular expression that must match a part of a code section for it to be
+    executed. This option has lower priority than --not-matching.'''))
   _with_type(sps.add_parser('eval-code', help='Evaluate the code snippet.'))
   _with_type(sps.add_parser('repl',
     help='Connect to the background terminal using GNU socat.'))

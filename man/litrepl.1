@@ -96,11 +96,23 @@ usage: litrepl parse [\-h]
 usage: litrepl parse\-print [\-h]
 
 .SH COMMAND \fI\,'litrepl eval\-sections'\/\fR
-usage: litrepl eval\-sections [\-h] [LOCS]
+usage: litrepl eval\-sections [\-h] [\-\-not\-matching REGEXP] [\-\-matching REGEXP]
+                             [LOCS]
 
 .TP
 \fBLOCS\fR
 (N|$|N..N)[,(...)] where N is either: [+|\-]number,$,ROW:COL
+
+.SH OPTIONS \fI\,'litrepl eval\-sections'\/\fR
+.TP
+\fB\-\-not\-matching\fR \fI\,REGEXP\/\fR
+Regular expression that must not match any part of a code section for it to be
+executed.
+
+.TP
+\fB\-\-matching\fR \fI\,REGEXP\/\fR
+Regular expression that must match a part of a code section for it to be
+executed. This option has lower priority than \-\-not\-matching.
 
 .SH COMMAND \fI\,'litrepl eval\-code'\/\fR
 usage: litrepl eval\-code [\-h] CLASS

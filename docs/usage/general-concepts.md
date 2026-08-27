@@ -133,13 +133,20 @@ overall syntax is `litrepl eval-sections [RANGE]`, where `RANGE` can be:
   above.
 * `X,X`: List of sections to execute
 
+
+Additionally, the `--matching` and `--not-matching` arguments may define regular
+expressions that should or should never match the code section in order to
+evaluate it.
+
 Some examples:
 
 ``` sh
-$ litrepl eval-sections '0'       # First section in a document
-$ litrepl eval-sections '3..$'    # Sections from fourth section (zero based) to the last one
+$ litrepl eval-sections '1'       # First section in a document
+$ litrepl eval-sections '3..$'    # Sections from third to the last one
 $ litrepl eval-sections '34:1..$' # Sections starting from line 34 column 1
 $ litrepl eval-sections '34:1,+1' # Section at line 34 column 1 and the next one
+$ litrepl eval-sections '1..10' --matching 'INIT' # Sections from 1 to 10 containing word 'INIT'
+$ litrepl eval-sections --not-matching 'SLOW' # All sections not containing word 'SLOW'
 ```
 
 #### Managing Interpreter Sessions
