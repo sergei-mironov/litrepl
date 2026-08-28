@@ -33,7 +33,7 @@ examples: .stamp_examples
 
 .PHONY: man # Build a manpage
 man: $(MAN)
-$(MAN): $(PY) Makefile python/bin/litrepl docs/static/description.md
+$(MAN): $(PY) Makefile python/bin/litrepl docs/static/description.md semver.txt
 	argparse-manpage --module litrepl.main \
 		--author 'Sergei Mironov' \
 		--author-email 'sergei.v.mironov@proton.me' \
@@ -45,7 +45,7 @@ $(MAN): $(PY) Makefile python/bin/litrepl docs/static/description.md
 
 .PHONY: docs # Build the MkDocs documentation
 docs: .stamp_docs_deploy
-.stamp_docs: $(PY) $(DOCS) $(TOP) .stamp_examples python/bin/litrepl
+.stamp_docs: $(PY) $(DOCS) $(TOP) .stamp_examples python/bin/litrepl semver.txt
 	set -e; \
 	for f in $(TOP) ; do \
 		mkdir -p docs/static/`dirname $$f` ; cp $$f docs/static/$$f  ; \
