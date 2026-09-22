@@ -59,6 +59,9 @@ endif
 if ! exists("g:litrepl_shellexec_prefix")
   let g:litrepl_shellexec_prefix = "if test -f $HOME/.bashrc; then . $HOME/.bashrc; fi"
 endif
+if ! exists("g:litrepl_use_textwidth")
+  let g:litrepl_use_textwidth = 1
+endif
 
 fun! LitReplGet(name)
   if exists('b:'.a:name)
@@ -168,14 +171,15 @@ fun! LitReplCmd()
   if ft == ''
     let ft = "auto"
   endif
+  if LitReplGet('litrepl_use_textwidth')
+    let cmd = cmd . ' --result-textwidth=' . string(&textwidth)
+  endif
   let cur = getcharpos('.')
-  let tw = string(&textwidth)
   let cmd = cmd .
         \ ' --pending-exitcode='.LitReplGet('litrepl_pending').
         \ ' --debug='.LitReplGet('litrepl_debug').
         \ ' --filetype='.ft.
         \ ' --map-cursor='.cur[1].':'.cur[2].':'.LitReplGet('litrepl_map_cursor_output').
-        \ ' --result-textwidth='.tw.
         \ ' '
   return cmd
 endfun
@@ -476,9 +480,6 @@ if !exists(":LStop")
 endif
 if !exists(":LRestart")
   command! -bar -nargs=? -complete=customlist,LitReplTypeCompletion LRestart call LitReplRunV('restart '.<q-args>, '')
-endif
-if !exists(":LPP")
-  command! -bar -nargs=0 LPP call LitRepRunV('parse-print', '')
 endif
 if !exists(":LRepl")
   command! -bar -nargs=1 -complete=customlist,LitReplTypeCompletion LRepl call LitReplTerm(<q-args>)
