@@ -110,7 +110,10 @@ fun! LitReplExReplaceFile(action, loc, prompt, selmode, file) range " -> int
     echom ":LPipeFile does not accept selections"
     return 1
   endif
-  return LitReplExReplace(a:action, a:loc, a:prompt, "%", a:selmode, a:file, "")
+  let view = winsaveview()
+  let res = LitReplExReplace(a:action, a:loc, a:prompt, "%", a:selmode, a:file, "")
+  call winrestview(view)
+  return res
 endfun
 
 fun! LitReplExPushSelection(action, prompt, selmode) range
