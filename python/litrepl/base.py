@@ -556,7 +556,7 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       es.ecodes[nsec]=ec
     return ec
 
-  def _mustrun(n:int, code:str)->bool:
+  def _mustrun(n:int,code:str)->bool:
     if n in nsecs:
       if a.not_matching is not None:
         if bool(re.compile(a.not_matching).search(code)):
@@ -564,6 +564,7 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
       if a.matching is not None:
         return bool(re.compile(a.matching).search(code))
       return True
+    return False
 
   class C(LarkInterpreter):
     def _print(self, s:str):
@@ -846,10 +847,24 @@ def status_verbose(a:LitreplArgs, t:Optional[LarkTree], sts:List[SType], version
     ecodes.add(0 if ecode is None else ecode)
   return max(ecodes)
 
-def tangle(a:LitreplArgs, tree:LarkTree)->ECode:
+def tangle(a:LitreplArgs, tree:LarkTree, sr:SecRec)->ECode:
+  """ Format and output code sections using user-defined wrappers. """
+  nsecs=sr.nsecs
+  es=EvalState(sr)
+
+  def _mustrun(n:int,code:str)->bool:
+    if n in nsecs:
+      if a.not_matching is not None:
+        if bool(re.compile(a.not_matching).search(code)):
+          return False
+      if a.matching is not None:
+        return bool(re.compile(a.matching).search(code))
+      return True
+    return False
+
   class C(LarkInterpreter):
     def __init__(self):
-      self.validcode=False
+      pass
     def _print(self, s:str):
       pass
     def text(self,tree):
@@ -857,20 +872,20 @@ def tangle(a:LitreplArgs, tree:LarkTree)->ECode:
     def topleveltext(self,tree):
       return self.text(tree)
     def codesec(self,tree):
+      es.nsec+=1
       t=tree.children[1].children[0].value
       bmarker=tree.children[0].children[0].value
       bm,em=tree.children[0].meta,tree.children[2].meta
       st=bmarker2st(a,bmarker)
       if st is not None:
         code=unindent(bm.column-1,t)
-        print(a.before_code, end='')
-        print(code)
-        print(a.after_code, end='')
-        self.validcode=True
-      else:
-        self.validcode=False
+        if _mustrun(es.nsec,code):
+          print(a.before_code, end='')
+          print(code)
+          print(a.after_code, end='')
+          es.sres[es.nsec]=True
     def resultsec(self,tree):
-      if self.validcode:
+      if es.sres.get(es.nsec):
         t=tree.children[1].children[0].value
         bmarker=tree.children[0].children[0].value
         bm,em=tree.children[0].meta,tree.children[2].meta

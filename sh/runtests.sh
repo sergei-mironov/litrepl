@@ -1474,7 +1474,7 @@ EOF
 # Pipe the selection through the script along with the whole file
 runvim file.md >_vim.log 2>&1 <<EOF
 2GV\
-:LPipeFile dummy input
+:LPipeFile dummy all input
 :w output3.md
 :q!
 EOF
@@ -1520,12 +1520,12 @@ EOF
 
 # Pull something from a script
 runvim file.md >_vim.log 2>&1 <<"EOF"
-:LPipeFile dummy input
+:LPipeFile dummy all input
 :w output6.md
 :q!
 EOF
 diff -u output6.md - <<EOF
-litrepl-dummy.sh --prompt input --output-format markdown --command eval-code `pwd`/file.md
+litrepl-dummy.sh --loc 1..$ --prompt input --output-format markdown --command eval-code `pwd`/file.md
 header
 selection
 footer

@@ -33,6 +33,19 @@ def _with_type(p, default=None, allow_all=False):
   )
   return p
 
+def _with_locs(p):
+  p.add_argument('locs',type=str,metavar='LOCS',default='0..$',
+    help=LOCSHELP,nargs='?')
+  p.add_argument('--not-matching',type=str,metavar='REGEXP',
+    help=dedent('''
+    Regular expression that must not match any part of a code section for it to
+    be executed.'''))
+  p.add_argument('--matching',type=str,metavar='REGEXP',
+    help=dedent('''
+    Regular expression that must match a part of a code section for it to be
+    executed. This option has lower priority than --not-matching.'''))
+  return p
+
 def _ensure_nonepty(var:Optional[str])->Optional[str]:
   return var if (var is not None and len(var)>0) else None
 
@@ -169,20 +182,10 @@ def make_parser():
   sps.add_parser('parse-print',
     help=dedent('''
     Parse and print the input file back (diagnostics).'''))
-  evalsec=sps.add_parser('eval-sections',
+  evalsec=_with_locs(sps.add_parser('eval-sections',
     help=dedent('''
     Do `start` if needed, Parse stdin, evaluate the specified sections (by
-    default - all available sections), print the resulting file to stdout.'''))
-  evalsec.add_argument('locs',type=str,metavar='LOCS',default='0..$',
-    help=LOCSHELP,nargs='?')
-  evalsec.add_argument('--not-matching',type=str,metavar='REGEXP',
-    help=dedent('''
-    Regular expression that must not match any part of a code section for it to
-    be executed.'''))
-  evalsec.add_argument('--matching',type=str,metavar='REGEXP',
-    help=dedent('''
-    Regular expression that must match a part of a code section for it to be
-    executed. This option has lower priority than --not-matching.'''))
+    default - all available sections), print the resulting file to stdout.''')))
   _with_type(sps.add_parser('eval-code', help='Evaluate the code snippet.'))
   _with_type(sps.add_parser('repl',
     help='Connect to the background terminal using GNU socat.'))
@@ -204,9 +207,10 @@ def make_parser():
   _with_type(sps.add_parser('print-auxdir',
     help=dedent('''
     Print the auxdir for the given interpreter type.''')))
-  tangle=sps.add_parser('tangle',
+  tangle=_with_locs(sps.add_parser('tangle',
     help=dedent('''
-    Tangle code and result sections by sending them to files or file handlers.'''))
+    Tangle code and result sections by sending them to files or file
+    handlers.''')))
   tangle.add_argument('--before-code',type=str,metavar='STR',default='',
     help='Line to insert before code sections',nargs='?')
   tangle.add_argument('--after-code',type=str,metavar='STR',default='',
@@ -322,8 +326,8 @@ def main(args=None):
   elif a.command=='eval-sections':
     with with_early_sigalarm(), with_early_sigint():
       t=parse_(a).tree
-      nsecs=solve_sloc(a.locs,t)
-      ecode=eval_section_(a,t,nsecs)
+      task=solve_sloc(a.locs,t)
+      ecode=eval_section_(a,t,task)
     exit(0 if ecode is None else ecode)
   elif a.command=='repl':
     st=name2st(a.type)
@@ -395,7 +399,8 @@ def main(args=None):
     print(fns.wd)
   elif a.command=='tangle':
     t=parse_(a).tree
-    ecode=tangle(a,t)
+    task=solve_sloc(a.locs,t)
+    ecode=tangle(a,t,task)
     exit(0 if ecode is None else ecode)
 
   else:

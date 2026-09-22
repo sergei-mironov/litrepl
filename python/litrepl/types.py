@@ -122,7 +122,7 @@ class EvalState:
   sres:Dict[int,str]                # Section results: sec.num -> result
   ledder:Dict[int,int]              # Facility to restore the cursor: line -> offset
   ecodes:Dict[int,ECode]            # Exit codes: sec.num -> exitcode
-  stypes:Set[SType]                 # Section types we have already run
+  stypes:Set[SType]                 # Section types we have run so far
   nsec:int                          # Current section
 
   def __init__(self,sr:SecRec):

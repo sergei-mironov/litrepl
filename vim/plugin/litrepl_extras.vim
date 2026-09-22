@@ -32,10 +32,10 @@ fun! LitReplActionGlob(action)
   return l:matches[0]
 endfun
 
-fun! LitReplExCmdline(action, prompt, selmode, file, extras, errfile)
+fun! LitReplExCmdline(action, loc, prompt, selmode, file, extras, errfile)
   call LitReplCheckVersions()
-  let [action, prompt, selmode, file, extras, errfile] = [a:action, a:prompt,
-        \ a:selmode, a:file, a:extras, a:errfile]
+  let [action, loc, prompt, selmode, file, extras, errfile] = [a:action,
+        \a:loc, a:prompt, a:selmode, a:file, a:extras, a:errfile]
 
   let command = LitReplActionGlob(action)
   if LitReplGet('litrepl_workdir') != ''
@@ -43,6 +43,9 @@ fun! LitReplExCmdline(action, prompt, selmode, file, extras, errfile)
   endif
   if len(selmode)>0 " 'raw' or 'paste' (or nothing)
     let command = command . ' --selection-'.selmode.' - '
+  endif
+  if len(loc)>0
+    let command = command . ' --loc ' . loc
   endif
   if prompt != '-'
     if len(trim(prompt)) == 0
@@ -90,10 +93,10 @@ fun! LitReplExCmdline(action, prompt, selmode, file, extras, errfile)
   return command
 endfun
 
-fun! LitReplExReplace(action, prompt, source, selmode, file, extras) range " -> int
+fun! LitReplExReplace(action, loc, prompt, source, selmode, file, extras) range " -> int
   let [action, prompt, source] = [a:action, a:prompt, a:source]
   let errfile = LitReplGet('litrepl_errfile')
-  let command = LitReplExCmdline(action, prompt, a:selmode, a:file, a:extras, errfile)
+  let command = LitReplExCmdline(action, a:loc, prompt, a:selmode, a:file, a:extras, errfile)
   call LitReplLogInput(errfile, command, "<".source.">")
   call LitReplExecute("silent! ".source."! ", command)
   call writefile(['<end-of-stderr>'],errfile,'a')
@@ -102,18 +105,18 @@ fun! LitReplExReplace(action, prompt, source, selmode, file, extras) range " -> 
   return errcode
 endfun
 
-fun! LitReplExReplaceFile(action, prompt, selmode, file) range " -> int
+fun! LitReplExReplaceFile(action, loc, prompt, selmode, file) range " -> int
   if len(a:selmode)>0
     echom ":LPipeFile does not accept selections"
     return 1
   endif
-  return LitReplExReplace(a:action, a:prompt, "%", a:selmode, a:file, "")
+  return LitReplExReplace(a:action, a:loc, a:prompt, "%", a:selmode, a:file, "")
 endfun
 
 fun! LitReplExPushSelection(action, prompt, selmode) range
   let [action, prompt] = [a:action, a:prompt]
   let errfile = LitReplGet('litrepl_errfile')
-  let command = LitReplExCmdline(action, prompt, a:selmode, "", "", errfile)
+  let command = LitReplExCmdline(action, '', prompt, a:selmode, "", "", errfile)
   let selection = LitReplGetVisualSelection() . "\n"
   call LitReplLogInput(errfile, command, selection)
   let result = LitReplSystemL(command, selection)
@@ -127,7 +130,7 @@ endfun
 fun! LitReplExPush(action, prompt, selmode) range
   let [action, prompt] = [a:action, a:prompt]
   let errfile = LitReplGet('litrepl_errfile')
-  let command = LitReplExCmdline(action, prompt, a:selmode, "", "", errfile)
+  let command = LitReplExCmdline(action, '', prompt, a:selmode, "", "", errfile)
   call LitReplLogInput(errfile, command, "<empty>")
   let result = LitReplSystemL(command, '')
   call writefile(['<end-of-stderr>'],errfile,'a')
@@ -140,7 +143,7 @@ endfun
 fun! LitReplExPull(action, prompt) range
   let [action, prompt] = [a:action, a:prompt]
   let errfile = LitReplGet('litrepl_errfile')
-  let command = LitReplExCmdline(action, prompt, "", "", "", errfile)
+  let command = LitReplExCmdline(action, '', prompt, "", "", "", errfile)
   let vimcommand = command .'</dev/null'
   call LitReplLogInput(errfile, vimcommand, "</dev/null>")
   call LitReplExecute('r!', vimcommand)
@@ -152,7 +155,7 @@ endfun
 
 fun! LitReplExReplaceSelectionOrPull(action, prompt, selmode) range " -> int
   if len(a:selmode)>0
-    return LitReplExReplace(a:action, a:prompt, "'<,'>", a:selmode, "", "")
+    return LitReplExReplace(a:action, '', a:prompt, "'<,'>", a:selmode, "", "")
   else
     return LitReplExPull(a:action, a:prompt)
   endif
@@ -171,13 +174,24 @@ fun! Arg0(line)
   return split(a:line)[0]
 endfun
 
-fun! ArgStar(line)
-  let first_space_index = match(a:line, '\s')
-  if first_space_index != -1
-    return trim(a:line[first_space_index:])
-  else
-    return ''
-  endif
+fun! Arg1(line)
+  " Split the line into words and return the first word
+  return split(a:line)[1]
+endfun
+
+fun! ArgStar(nskip, line)
+  let [nskip, acc] = [a:nskip, a:line]
+  while nskip > 0
+    let first_space_index = match(acc, '\s')
+    if first_space_index != -1
+      let acc = trim(acc[first_space_index:])
+    else
+      let acc = ''
+      break
+    endif
+    let nskip = nskip-1
+  endwhile
+  return acc
 endfun
 
 fun! ArgSelMode(range, bang)
@@ -211,18 +225,18 @@ endfun
 if exists(":LPipe") != 2
   command! -complete=customlist,LitReplExCompletion -range -bar -nargs=* -bang LPipe
         \ call LitReplExReplaceSelectionOrPull(
-        \        Arg0(<q-args>), ArgStar(<q-args>), ArgSelMode(<range>, "<bang>"))
+        \        Arg0(<q-args>), ArgStar(1, <q-args>), ArgSelMode(<range>, "<bang>"))
 endif
 
 if exists(":LPush") != 2
   command! -complete=customlist,LitReplExCompletion -range -bar -nargs=* -bang LPush
-        \ call LitReplExPushSelectionOrPush(Arg0(<q-args>), ArgStar(<q-args>),
+        \ call LitReplExPushSelectionOrPush(Arg0(<q-args>), ArgStar(1, <q-args>),
         \        ArgSelMode(<range>, "<bang>"))
 endif
 
 if exists(":LPipeFile") != 2
   command! -complete=customlist,LitReplExCompletion -range -bar -nargs=* -bang LPipeFile
-        \ call LitReplExReplaceFile(Arg0(<q-args>), ArgStar(<q-args>),
+        \ call LitReplExReplaceFile(Arg0(<q-args>), LitReplPos(Arg1(<q-args>)), ArgStar(2, <q-args>),
         \        ArgSelMode(<range>, "<bang>"), expand("%:p"))
 endif
 
