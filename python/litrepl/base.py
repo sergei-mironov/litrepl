@@ -9,7 +9,7 @@ from typing import (List, Optional, Tuple, Set, Dict, Callable, Any, Iterable,
                     Union)
 from select import select
 from os import (environ, system, isatty, getpid, unlink, getpgid, setpgid,
-                mkfifo, kill)
+                mkfifo, kill, setsid)
 from lark import Lark, Visitor, Transformer, Token, Tree, LarkError
 from lark.visitors import Interpreter as LarkInterpreter
 from os.path import isfile, join, exists, basename, splitext, dirname
@@ -204,7 +204,8 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
     os.close(sys.stdout.fileno())
     os.close(sys.stderr.fileno())
     os.close(sys.stdin.fileno())
-    setpgid(getpid(),0)
+    # setpgid(getpid(),0)
+    # setsid()
     remove_silent(fns.ecodef)
     open_child_pipes(fns.inp,fns.outp)
     ret=i.run_child(interpreter)
@@ -530,8 +531,8 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
     if interrupt:
       ipid=readipid(fns)
       if ipid is not None:
-        pdebug("Sending SIGINT to the interpreter immediately")
-        os.kill(ipid,SIGINT)
+        pdebug("Sending SIGINT to the interpreter {ipid} immediately")
+        os.killpg(ipid,SIGINT)
       else:
         pdebug(f"Failed to determine {st2name(st)} interpreter pid, not sending SIGINT")
     return fns,ss
