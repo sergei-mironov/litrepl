@@ -16,7 +16,7 @@ class IPythonInterpreter(Interpreter):
     fns=self.fns
     assert_('ipython' in interpreter.lower())
     ret=system(
-      f"exec {interpreter} --colors=NoColor -i "
+      f"exec setsid {interpreter} --colors=NoColor -i "
       f"<'{fns.inp}' >'{fns.outp}' 2>&1"
     )
     return ret

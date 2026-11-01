@@ -21,7 +21,7 @@ class AicliInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
     ret=system(
-      f"exec {interpreter} "
+      f"exec setsid {interpreter} "
       f"<'{fns.inp}' >'{fns.outp}' 2>&1"
     )
     return ret

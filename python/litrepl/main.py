@@ -25,11 +25,12 @@ def make_wide(formatter, w=180, h=28):
     return formatter
 
 def _with_type(p, default=None, allow_all=False):
+  """ Sets up CLASS argument as a mandatory positional argument"""
   defhint=f"Default is \"{default}\"" if default else ''
   p.add_argument(
     'type',metavar='CLASS',default=default,
     help=dedent(f'''Interpreter class: python|ai|sh{'|all' if allow_all else ''}.
-    {defhint}'''),nargs='?' if default is not None else None
+    {defhint}'''),nargs=('?' if default is not None else None)
   )
   return p
 
@@ -346,8 +347,15 @@ def main(args=None):
     with with_early_sigalarm(), with_early_sigint():
       tree=parse_(a).tree
       sr=solve_sloc(a.locs,tree)
-      sr.nsecs|=set(sr.preproc.pending.keys())
-      ecode=eval_section_(a,tree,sr,interrupt=True)
+      if isinstance(sr, SecRec):
+        sr.nsecs|=set(sr.preproc.pending.keys())
+        ecode=eval_section_(a,tree,sr,interrupt=True)
+      elif isinstance(sr, SType):
+        st=sr
+        fns=pipenames(a,st)
+        ecode=send_interrupt(st,fns)
+      else:
+        assert_(False, f"Argument resolved to invalid value: {sr}")
     exit(ecode)
   elif a.command=='eval-code':
     with with_early_sigalarm(), with_early_sigint():

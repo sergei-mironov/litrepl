@@ -9,7 +9,8 @@ from typing import (List, Optional, Tuple, Set, Dict, Callable, Any, Iterable,
                     Union)
 from select import select
 from os import (environ, system, isatty, getpid, unlink, getpgid, setpgid,
-                mkfifo, kill)
+                mkfifo, kill, setsid, killpg)
+from errno import ESRCH
 from lark import Lark, Visitor, Transformer, Token, Tree, LarkError
 from lark.visitors import Interpreter as LarkInterpreter
 from os.path import isfile, join, exists, basename, splitext, dirname
@@ -100,6 +101,10 @@ def name2st(name:str)->SType:
     return SType.SShell
   else:
     raise ValueError(f"Invalid interpreter class name: {name}")
+
+#TODO: use Enum function for that
+ALLSTS = [SType.SPython, SType.SAI, SType.SShell]
+ALLSTNAMES = [st2name(st) for st in ALLSTS]
 
 def bmarker2st(a:LitreplArgs, bmarker:str)->Optional[SType]:
   """ Maps section code marker to section type """
@@ -204,17 +209,18 @@ def start_(a:LitreplArgs, interpreter:str, i:Interpreter, restart:bool)->int:
     os.close(sys.stdout.fileno())
     os.close(sys.stderr.fileno())
     os.close(sys.stdin.fileno())
-    setpgid(getpid(),0)
+    # setpgid(getpid(),0)
+    # setsid()
     remove_silent(fns.ecodef)
     open_child_pipes(fns.inp,fns.outp)
     ret=i.run_child(interpreter)
     ret=ret if ret<256 else WEXITSTATUS(ret)
-    #pdebug(f"Fork records ecode: {ret} into {fns.wd}")
+    # pdebug(f"Fork records ecode: {ret} into {fns.wd}")
     with open(fns.ecodef,'w') as f:
       f.write(str(ret))
     exit(ret)
   else: # Parent
-    pdebug(f"starting in {fns.wd}")
+    pdebug(f"starting pid {npid} in {fns.wd}")
     finp,foutp=open_parent_pipes(fns.inp,fns.outp)
     i.setup_child(a,finp,foutp)
     with with_locked_fd(fns.inp, os.O_WRONLY|os.O_SYNC,
@@ -268,7 +274,7 @@ def running(a:LitreplArgs,st:SType)->bool:
   """ Checks if the background session was run or not. """
   fns = pipenames(a,st)
   res=(isfile(fns.pidf) and exists(fns.inp) and exists(fns.outp))
-  pdebug(f"running? {res}")
+  pdebug(f"expecting {st2name(st)} running? {res}")
   return res
 
 def stop(a:LitreplArgs,st:SType)->None:
@@ -476,7 +482,7 @@ def parse_maybe(a:LitreplArgs)->Optional[ParseResult]:
   if len(prs)==0:
     ers=[r for r in rs if isinstance(r,LarkError)]
     if len(ers)==0:
-      pdebug(f"parsing finish (None)")
+      pdebug(f"parsing finish (No solution)")
       return None
     else:
       raise ers[0]
@@ -502,7 +508,9 @@ def failmsg(st:SType,fns:FileNames,ss:Union[Interpreter,str],ec:ECode)->str:
   msg+=f"with state stored in:\n{_tab(fns.wd)}\n"
   try:
     with open(fns.emsgf) as f:
-      msg+=f"and recorded greeting:\n{_tab(f.read().rstrip())}\n"
+      g=f.read().rstrip()
+      g="<no greeting>" if not g else g
+      msg+=f"and a recorded greeting:\n{_tab(g)}\n"
   except FileNotFoundError:
     pass
   if isinstance(ss,str):
@@ -510,6 +518,20 @@ def failmsg(st:SType,fns:FileNames,ss:Union[Interpreter,str],ec:ECode)->str:
   if ec is not ECODE_RUNNING:
     msg+=f"It was terminated with OS exitcode {ec}.\n"
   return msg
+
+def send_interrupt(st, fns)->ECode:
+  ipid=readipid(fns)
+  if ipid is not None:
+    pdebug("Sending SIGINT to the interpreter immediately")
+    try:
+      return killpg(ipid,SIGINT)
+    except OSError as err:
+      if err.errno == ESRCH:
+        pdebug(f"{st2name(st)} interpreter pid {ipid} not found")
+        return 1
+  else:
+    pdebug(f"Failed to determine {st2name(st)} interpreter pid, not sending SIGINT")
+    return 1
 
 def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)->ECode:
   """ Evaluate code sections of the parsed `tree`, as specified in the `sr`
@@ -528,12 +550,7 @@ def eval_section_(a:LitreplArgs, tree:LarkTree, sr:SecRec, interrupt:bool=False)
     if not isinstance(ss,Interpreter):
       return (fns,ss)
     if interrupt:
-      ipid=readipid(fns)
-      if ipid is not None:
-        pdebug("Sending SIGINT to the interpreter immediately")
-        os.kill(ipid,SIGINT)
-      else:
-        pdebug(f"Failed to determine {st2name(st)} interpreter pid, not sending SIGINT")
+      send_interrupt(st, fns)
     return fns,ss
 
   def _bm2interp(bmarker:str)->Tuple[Optional[FileNames],Union[Interpreter,ErrorMsg]]:
@@ -697,8 +714,9 @@ def solve_cpos(tree, cs:List[CursorPos])->PrepInfo:
   return PrepInfo(c.nsec,cursors,rres2,results)
 
 grammar_sloc = fr"""
-start: addr -> l_const
-     | addr (","|";") start -> l_add
+start: STYPES -> l_stype | addr_list
+addr_list: addr -> l_const
+     | addr (","|";") addr_list -> l_add
 addr : sloc ".." sloc -> a_range
      | sloc -> a_const
 sloc : NUM ":" NUM -> s_cursor
@@ -706,11 +724,12 @@ sloc : NUM ":" NUM -> s_cursor
 const : NUM -> s_const_num
       | "$" -> s_const_last
       | SIGN NUM -> s_const_rel
+STYPES : /ai|python|sh/
 NUM : /[0-9]+/
 SIGN : /[+-]/
 """
 
-def solve_sloc(s:str, tree:LarkTree)->SecRec:
+def solve_sloc(s:str, tree:LarkTree)->Union[SecRec,SType]:
   """ Translate "sloc" string `s` into a `SecRec` processing request on the
   given parsed document `tree`. """
   p=Lark(grammar_sloc)
@@ -727,6 +746,8 @@ def solve_sloc(s:str, tree:LarkTree)->SecRec:
       return [tree[0]]
     def l_add(self,tree):
       return [tree[0]]+tree[1]
+    def l_stype(self,tree):
+      return name2st(tree[0].value)
     def a_range(self,tree):
       return (tree[0],tree[1])
     def a_const(self,tree):
@@ -755,6 +776,14 @@ def solve_sloc(s:str, tree:LarkTree)->SecRec:
       nqueries[self.q]=last_cursor
       return int(self.q)
   qs=T().transform(t)
+  if isinstance(qs, SType):
+    return qs
+  # if len(tree.children)==0:
+  #   if not(isinstance(qs, SType)):
+  #     raise ValueError("Either document must be passed to stdin or interpter class specification given")
+  #   return qs
+  else:
+    qs=qs.children[0]
   ppi=solve_cpos(tree,list(nqueries.values()))
   nsec,nsol=ppi.nsec,ppi.cursors
   nref:Optional[NSec]=nsol.get(last_cursor)

@@ -10,7 +10,7 @@ class PythonInterpreter(Interpreter):
   def run_child(self,interpreter)->int:
     fns=self.fns
     ret=system(
-      f"exec {interpreter} -ui"
+      f"exec setsid {interpreter} -ui"
       f"<'{fns.inp}' >'{fns.outp}' 2>&1"
     )
     return ret
