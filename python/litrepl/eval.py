@@ -222,14 +222,15 @@ def merge_rn2(buf_,r,i_n=-1)->Tuple[bytes,int]:
 
 def readout(fdr,
             prompt,
-            merge)->str:
+            merge,
+            timeout_sec=None)->str:
   """ Read the `fdr` until the prompt regexp is found. The prompt must define
   exactly one group to query after the match is detected. See `mkre`.
   """
   # [1] - Here we query the single matched group, see `mkre`
   acc:bytes=b''
   i_n=-1
-  while select([fdr],[],[],None)[0] != []:
+  while select([fdr],[],[],timeout_sec)[0] != []:
     r=os.read(fdr, 1024)
     if r!=b'':
       acc,i_n=merge(acc,r,i_n)
@@ -283,7 +284,7 @@ def mkre(prompt:str):
 def isync(fdr, fdw, ss:Interpreter):
   p1,p2=ss.patterns()
   err=os.write(fdw,p1[0].encode())
-  x=readout(fdr,prompt=mkre(p1[1]),merge=merge_rn2)
+  x=readout(fdr,prompt=mkre(p1[1]),merge=merge_rn2,timeout_sec=2.0)
   pdebug(f"sync returned '{x}'")
   return x
 

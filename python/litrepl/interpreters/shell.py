@@ -19,7 +19,7 @@ class ShellInterpreter(Interpreter):
     ret=system(cmd)
     return ret
   def setup_child(self, a, finp, foutp)->None:
-    finp.write('\n')
+    finp.write('trap "echo ^C" INT\n')
     pass
   def patterns(self):
     return PATTERN_1,PATTERN_2

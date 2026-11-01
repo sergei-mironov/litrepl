@@ -1156,29 +1156,59 @@ grep -q 'sh interpreter pid: ?' status2.txt
 grep -q 'ai interpreter pid: ?' status2.txt
 )} #}}}
 
-test_interrupt() {( #{{{
-mktest "_test_interrupt"
+test_interrupt_python() {( #{{{
+mktest "_test_interrupt_python"
 runlitrepl start python
 cat >source.md <<"EOF"
 ```python
 from time import sleep
+A=3+2
 while True:
   sleep(1)
 ```
 ```result
 ```
+```python
+print(A)
+```
+```result
+```
 EOF
-cat source.md | runlitrepl \
-  --filetype=markdown \
-  --timeout=0,inf \
-  eval-sections '1..$' >out1.md
+# Run infinite program
+cat source.md | runlitrepl --filetype=markdown --timeout=0,inf eval-sections '1' >out1.md
 grep -q 'LR' out1.md
-sleep 1 # IPython seems to die without this delay
-cat out1.md | runlitrepl \
-  --filetype=markdown \
-  interrupt '0..$' >out2.md
-
+# Interrupt it with a signal
+cat out1.md | runlitrepl --filetype=markdown interrupt '1' >out2.md
 grep -q 'KeyboardInterrupt' out2.md
+# Make sure session is still running
+cat out2.md | runlitrepl --filetype=markdown interrupt '2' >out3.md
+grep -q '5' out3.md
+)} #}}}
+
+test_interrupt_sh() {( #{{{
+mktest "_test_interrupt_sh"
+runlitrepl start sh
+cat >source.md <<"EOF"
+```sh
+A=`expr 3 + 2`
+sleep 1000
+```
+```result
+```
+```sh
+echo $A
+```
+```result
+```
+EOF
+# Run infinite program
+cat source.md | runlitrepl --filetype=markdown --timeout=0,inf eval-sections '1' >out1.md
+grep -q 'LR' out1.md
+# Interrupt it with a signal
+cat out1.md | runlitrepl --filetype=markdown interrupt '1' >out2.md
+# Make sure session is still running
+cat out2.md | runlitrepl --filetype=markdown interrupt '2' >out3.md
+grep -q '5' out3.md
 )} #}}}
 
 test_sigint() {( #{{{
@@ -1234,8 +1264,8 @@ cat >source.md <<"EOF"
 EOF
 cat source.md | runlitrepl --python-interpreter=non-existent-ipython \
   eval-sections >out1.md 2>err.txt || true
-grep -q 'non-existent-ipython: not found' out1.md
-grep -q 'non-existent-ipython: not found' err.txt
+grep -q 'failed to execute non-existent-ipython' out1.md
+grep -q 'failed to execute non-existent-ipython' err.txt
 )} #}}}
 
 test_failing_interpreter() {( #{{{
@@ -1627,7 +1657,7 @@ tests() {
       echo test_vim_eval_matching $python - -
       echo test_foreground $python - -
       echo test_status $python - -
-      echo test_interrupt $python - -
+      echo test_interrupt_python $python - -
       echo test_sigint $python - -
       echo test_invalid_interpreter $python - -
       echo test_vim_eval_code $python - -
@@ -1644,6 +1674,7 @@ tests() {
       fi
     done
   done
+  echo test_interrupt_sh - - $(which bash)
   echo test_bash - - $(which bash)
   echo test_doublestart - - $(which bash)
   echo test_vim_extras - - -
