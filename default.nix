@@ -150,7 +150,7 @@ let
       LITREPL_ROOT = src;
       propagatedBuildInputs = [(lark-current py.pkgs) py.pkgs.psutil pkgs.socat];
       nativeCheckInputs = with pkgs; [
-        socat py.pkgs.ipython py.pkgs.tqdm which git vim
+        socat py.pkgs.ipython py.pkgs.tqdm which git vim util-linux
         # aicli.python-aicli
         py.pkgs.coverage (coverage-badge py.pkgs)
       ];
